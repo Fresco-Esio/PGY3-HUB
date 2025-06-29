@@ -203,6 +203,55 @@ const nodeTypes = {
   literature: LiteratureNode,
 };
 
+// Node Selector Modal Component
+const NodeSelector = ({ isOpen, onClose, onSelect }) => {
+  if (!isOpen) return null;
+
+  const nodeTypes = [
+    { type: 'topic', label: 'Psychiatric Topic', icon: Brain, color: 'bg-blue-600', description: 'Add a new psychiatric topic or disorder' },
+    { type: 'literature', label: 'Literature', icon: BookOpen, color: 'bg-purple-600', description: 'Add research papers, articles, or references' },
+    { type: 'case', label: 'Patient Case', icon: Users, color: 'bg-indigo-600', description: 'Add a new patient case study' },
+    { type: 'task', label: 'Task', icon: CheckSquare, color: 'bg-amber-600', description: 'Add a task or to-do item' }
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-gray-800">Add New Node</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 p-1"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="space-y-3">
+          {nodeTypes.map(({ type, label, icon: Icon, color, description }) => (
+            <button
+              key={type}
+              onClick={() => {
+                onSelect(type);
+                onClose();
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+            >
+              <div className={`${color} p-2 rounded-lg text-white`}>
+                <Icon size={20} />
+              </div>
+              <div className="text-left">
+                <div className="font-medium text-gray-800">{label}</div>
+                <div className="text-sm text-gray-500">{description}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Main Dashboard Component
 const Dashboard = () => {
   const navigate = useNavigate();
