@@ -1114,9 +1114,11 @@ const Dashboard = () => {
 // Main App Component
 function App() {
   return (
-    <ReactFlowProvider>
-      <Dashboard />
-    </ReactFlowProvider>
+    <Router>
+      <ReactFlowProvider>
+        <Dashboard />
+      </ReactFlowProvider>
+    </Router>
   );
 }
 
