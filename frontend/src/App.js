@@ -1023,7 +1023,8 @@ const Dashboard = () => {
             </p>
             <button
               onClick={() => {
-                const [nodeType, nodeId] = selectedNode.id.split('-');
+                const [nodeType, nodeId] = selectedNode.id.split('-', 2);
+                console.log('Opening subpage from sidebar for:', nodeType, nodeId);
                 setOpenSubpage({ type: nodeType, id: nodeId });
                 loadSubpageData(nodeType, nodeId);
               }}
