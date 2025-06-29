@@ -15,6 +15,7 @@ import {
   Panel,
   Handle,
   Position,
+  useReactFlow,
 } from '@xyflow/react';
 import { 
   Plus, 
