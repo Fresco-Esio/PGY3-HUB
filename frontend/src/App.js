@@ -207,8 +207,12 @@ const nodeTypes = {
 const SubpageWindow = ({ type, data, onClose }) => {
   if (!data) {
     return (
-      <div className="fixed inset-y-0 right-0 w-2/3 bg-white shadow-2xl z-40 flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+        <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-500">Loading...</div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -233,30 +237,32 @@ const SubpageWindow = ({ type, data, onClose }) => {
               </p>
             </div>
 
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">Category</h2>
-              <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                {data.category}
-              </span>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Category</h2>
+                <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  {data.category}
+                </span>
+              </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Target size={16} />
-                Flashcard Progress
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Completed</span>
-                  <span>{data.completed_flashcards}/{data.flashcard_count}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full"
-                    style={{ 
-                      width: `${data.flashcard_count > 0 ? (data.completed_flashcards / data.flashcard_count) * 100 : 0}%` 
-                    }}
-                  ></div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <Target size={16} />
+                  Flashcard Progress
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Completed</span>
+                    <span>{data.completed_flashcards}/{data.flashcard_count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-500 h-2 rounded-full"
+                      style={{ 
+                        width: `${data.flashcard_count > 0 ? (data.completed_flashcards / data.flashcard_count) * 100 : 0}%` 
+                      }}
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -271,9 +277,20 @@ const SubpageWindow = ({ type, data, onClose }) => {
               <h1 className="text-3xl font-bold text-gray-800">{data.title}</h1>
             </div>
 
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">Authors</h2>
-              <p className="text-gray-600">{data.authors || 'No authors listed'}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Authors</h2>
+                <p className="text-gray-600">{data.authors || 'No authors listed'}</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3">Publication Details</h3>
+                <div className="space-y-2 text-sm">
+                  <div><span className="font-medium">Publication:</span> {data.publication || 'N/A'}</div>
+                  <div><span className="font-medium">Year:</span> {data.year || 'N/A'}</div>
+                  {data.doi && <div><span className="font-medium">DOI:</span> {data.doi}</div>}
+                </div>
+              </div>
             </div>
 
             <div>
@@ -281,15 +298,6 @@ const SubpageWindow = ({ type, data, onClose }) => {
               <p className="text-gray-600 leading-relaxed">
                 {data.abstract || 'No abstract available.'}
               </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-800 mb-3">Publication Details</h3>
-              <div className="space-y-2 text-sm">
-                <div><span className="font-medium">Publication:</span> {data.publication || 'N/A'}</div>
-                <div><span className="font-medium">Year:</span> {data.year || 'N/A'}</div>
-                {data.doi && <div><span className="font-medium">DOI:</span> {data.doi}</div>}
-              </div>
             </div>
           </div>
         );
@@ -302,7 +310,7 @@ const SubpageWindow = ({ type, data, onClose }) => {
               <h1 className="text-3xl font-bold text-gray-800">{data.case_id}</h1>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-3">Primary Diagnosis</h2>
                 <p className="text-gray-600">{data.primary_diagnosis}</p>
@@ -389,19 +397,21 @@ const SubpageWindow = ({ type, data, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-2/3 bg-white shadow-2xl z-40 overflow-y-auto">
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 capitalize">{type} Details</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100"
-        >
-          <X size={20} />
-        </button>
-      </div>
-      
-      <div className="p-6">
-        {renderContent()}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-800 capitalize">{type} Details</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
