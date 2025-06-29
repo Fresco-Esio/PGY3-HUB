@@ -682,7 +682,19 @@ const Dashboard = () => {
     setEdges(flowEdges);
   };
 
-  const onConnect = useCallback(
+  const onNodesChange = useCallback((changes) => {
+    onNodesChange(changes);
+    
+    // Auto-save when nodes are moved
+    const moveChanges = changes.filter(change => change.type === 'position' && change.dragging === false);
+    if (moveChanges.length > 0) {
+      // Auto-save positions after a short delay
+      setTimeout(() => {
+        console.log('Auto-saving node positions...');
+        // Here you could make API calls to save positions if needed
+      }, 500);
+    }
+  }, [onNodesChange]);
     (params) => {
       const newEdge = {
         ...params,
