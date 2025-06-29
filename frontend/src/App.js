@@ -989,14 +989,6 @@ const Dashboard = () => {
           {isEditing && (
             <>
               <button
-                onClick={saveLayout}
-                className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-green-600 hover:bg-green-700 transition-colors"
-              >
-                <Save size={16} />
-                Save Layout
-              </button>
-
-              <button
                 onClick={() => setShowNodeSelector(true)}
                 className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-blue-600 hover:bg-blue-700 transition-colors"
               >
@@ -1010,6 +1002,9 @@ const Dashboard = () => {
                   <div>• Topics → Literature</div>
                   <div>• Topics → Cases</div>
                   <div>• Cases → Tasks</div>
+                </div>
+                <div className="mt-3 text-xs text-slate-300">
+                  💡 Node positions auto-save when moved
                 </div>
               </div>
             </>
