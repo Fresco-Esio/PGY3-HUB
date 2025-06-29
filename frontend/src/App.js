@@ -257,7 +257,7 @@ const Dashboard = () => {
           flashcard_count: topic.flashcard_count,
           completed_flashcards: topic.completed_flashcards,
           originalData: topic,
-          onDelete: isEditing ? () => deleteNode(topic.id, 'topic') : null
+          onDelete: isEditing ? () => deleteNode(topic.id, 'topic') : undefined
         }
       });
     });
@@ -273,7 +273,7 @@ const Dashboard = () => {
           authors: lit.authors,
           year: lit.year,
           originalData: lit,
-          onDelete: isEditing ? () => deleteNode(lit.id, 'literature') : null
+          onDelete: isEditing ? () => deleteNode(lit.id, 'literature') : undefined
         }
       });
 
@@ -300,7 +300,7 @@ const Dashboard = () => {
           diagnosis: caseItem.primary_diagnosis,
           age: caseItem.age,
           originalData: caseItem,
-          onDelete: isEditing ? () => deleteNode(caseItem.id, 'case') : null
+          onDelete: isEditing ? () => deleteNode(caseItem.id, 'case') : undefined
         }
       });
 
@@ -328,7 +328,7 @@ const Dashboard = () => {
           status: task.status,
           due_date: task.due_date,
           originalData: task,
-          onDelete: isEditing ? () => deleteNode(task.id, 'task') : null
+          onDelete: isEditing ? () => deleteNode(task.id, 'task') : undefined
         }
       });
 
