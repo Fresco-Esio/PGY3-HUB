@@ -782,11 +782,19 @@ const Dashboard = () => {
           fitView
           nodesDraggable={isEditing}
           nodesConnectable={isEditing}
+          edgesReconnectable={isEditing}
+          edgesFocusable={isEditing}
           elementsSelectable={true}
           className="bg-gradient-to-br from-slate-50 to-slate-100"
           defaultEdgeOptions={{
             type: 'smoothstep',
-            style: { strokeWidth: 2, stroke: '#6B7280' }
+            style: { strokeWidth: 2, stroke: '#6B7280' },
+            markerEnd: {
+              type: 'arrowclosed',
+              width: 15,
+              height: 15,
+              color: '#6B7280',
+            }
           }}
         >
           <Background color="#aaa" gap={16} />
