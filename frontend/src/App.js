@@ -701,7 +701,8 @@ const Dashboard = () => {
 
   const onNodeDoubleClick = (event, node) => {
     console.log('Double-clicking node:', node);
-    const [nodeType, nodeId] = node.id.split('-');
+    const [nodeType, nodeId] = node.id.split('-', 2); // Only split on first hyphen
+    console.log('Extracted nodeType:', nodeType, 'nodeId:', nodeId);
     
     // Open subpage instead of navigating
     setOpenSubpage({ type: nodeType, id: nodeId });
@@ -710,7 +711,9 @@ const Dashboard = () => {
 
   const loadSubpageData = async (nodeType, nodeId) => {
     try {
+      console.log('Loading subpage data for:', nodeType, nodeId);
       const endpoint = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
+      console.log('API endpoint:', `${API}/${endpoint}/${nodeId}`);
       const response = await axios.get(`${API}/${endpoint}/${nodeId}`);
       setSubpageData(response.data);
     } catch (error) {
