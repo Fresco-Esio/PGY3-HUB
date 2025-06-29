@@ -3,7 +3,10 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from '
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
-import {
+import ReactFlow, {
+  Node,
+  Edge,
+  addEdge,
   Background,
   Controls,
   MiniMap,
@@ -13,8 +16,6 @@ import {
   Panel,
   Handle,
   Position,
-  ReactFlow,
-  addEdge
 } from '@xyflow/react';
 import { 
   Plus, 
