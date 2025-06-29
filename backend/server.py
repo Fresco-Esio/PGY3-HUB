@@ -327,6 +327,7 @@ async def init_sample_data():
     await db.psychiatric_topics.delete_many({})
     await db.patient_cases.delete_many({})
     await db.tasks.delete_many({})
+    await db.literature.delete_many({})
     
     # Sample topics
     sample_topics = [
