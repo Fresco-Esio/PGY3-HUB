@@ -1012,7 +1012,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {selectedNode && (
+        {selectedNode && !openSubpage && (
           <div className="mt-8 p-4 bg-slate-700 bg-opacity-50 rounded-lg border border-teal-500">
             <h3 className="font-semibold mb-2 text-teal-300">Selected Node</h3>
             <p className="text-sm text-slate-300 capitalize">
@@ -1021,8 +1021,8 @@ const Dashboard = () => {
             <button
               onClick={() => {
                 const [nodeType, nodeId] = selectedNode.id.split('-');
-                console.log('Navigating from sidebar to:', `/${nodeType}/${nodeId}`);
-                navigate(`/${nodeType}/${nodeId}`);
+                setOpenSubpage({ type: nodeType, id: nodeId });
+                loadSubpageData(nodeType, nodeId);
               }}
               className="mt-3 text-xs text-teal-400 hover:text-teal-300 underline"
             >
