@@ -206,12 +206,14 @@ const nodeTypes = {
 // Main Dashboard Component
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { fitView, setCenter, zoomTo } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [mindMapData, setMindMapData] = useState({ topics: [], cases: [], tasks: [], literature: [] });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [focusedCategory, setFocusedCategory] = useState(null);
 
   useEffect(() => {
     loadMindMapData();
