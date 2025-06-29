@@ -701,7 +701,9 @@ const Dashboard = () => {
 
   const onNodeDoubleClick = (event, node) => {
     console.log('Double-clicking node:', node);
-    const [nodeType, nodeId] = node.id.split('-', 2); // Only split on first hyphen
+    // Extract the node type and full ID
+    const nodeType = node.id.split('-')[0];
+    const nodeId = node.id.substring(nodeType.length + 1); // Get everything after the first hyphen
     console.log('Extracted nodeType:', nodeType, 'nodeId:', nodeId);
     
     // Open subpage instead of navigating
