@@ -1077,7 +1077,7 @@ const Dashboard = () => {
           onNodeDoubleClick={onNodeDoubleClick}
           nodeTypes={nodeTypes}
           fitView
-          nodesDraggable={isEditing}
+          nodesDraggable={true}
           nodesConnectable={isEditing}
           edgesReconnectable={isEditing}
           edgesFocusable={isEditing}
