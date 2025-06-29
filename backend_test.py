@@ -108,13 +108,15 @@ class PsychiatryDashboardTester:
         self.literature_id = data["literature"][0]["id"] if data["literature"] else None
         
         # Print some details about the data
-        print(f"  Found {len(data['topics'])} topics, {len(data['cases'])} cases, {len(data['tasks'])} tasks")
+        print(f"  Found {len(data['topics'])} topics, {len(data['cases'])} cases, {len(data['tasks'])} tasks, {len(data['literature'])} literature items")
         if data["topics"]:
             print(f"  Sample topic: {data['topics'][0]['title']}")
         if data["cases"]:
             print(f"  Sample case: {data['cases'][0]['case_id']}")
         if data["tasks"]:
             print(f"  Sample task: {data['tasks'][0]['title']}")
+        if data["literature"]:
+            print(f"  Sample literature: {data['literature'][0]['title']}")
             
         return True
     
