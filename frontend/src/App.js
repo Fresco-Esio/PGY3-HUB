@@ -401,8 +401,11 @@ const Dashboard = () => {
 
       console.log('Saving layout:', updates);
       setIsEditing(false);
-      // Refresh data to remove delete buttons
-      convertDataToReactFlow(mindMapData);
+      
+      // Refresh data after a small delay to ensure state is updated
+      setTimeout(() => {
+        convertDataToReactFlow(mindMapData);
+      }, 100);
     } catch (error) {
       console.error('Error saving layout:', error);
     }
