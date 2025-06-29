@@ -311,11 +311,13 @@ async def get_mindmap_data():
     topics = await db.psychiatric_topics.find().to_list(1000)
     cases = await db.patient_cases.find().to_list(1000)
     tasks = await db.tasks.find().to_list(1000)
+    literature = await db.literature.find().to_list(1000)
     
     return {
         "topics": [PsychiatricTopic(**topic) for topic in topics],
         "cases": [PatientCase(**case) for case in cases],
-        "tasks": [Task(**task) for task in tasks]
+        "tasks": [Task(**task) for task in tasks],
+        "literature": [Literature(**lit) for lit in literature]
     }
 
 # Initialize sample data
