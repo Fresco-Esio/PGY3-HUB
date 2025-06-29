@@ -383,8 +383,23 @@ const Dashboard = () => {
   };
 
   const onNodeDoubleClick = (event, node) => {
+    console.log('Double-clicking node:', node);
     const [nodeType, nodeId] = node.id.split('-');
-    navigate(`/${nodeType}/${nodeId}`);
+    console.log('Navigating to:', `/${nodeType}/${nodeId}`);
+    
+    // Handle different node types for routing
+    let routePath = `/${nodeType}/${nodeId}`;
+    if (nodeType === 'literature') {
+      routePath = `/literature/${nodeId}`;
+    } else if (nodeType === 'topic') {
+      routePath = `/topic/${nodeId}`;
+    } else if (nodeType === 'case') {
+      routePath = `/case/${nodeId}`;
+    } else if (nodeType === 'task') {
+      routePath = `/task/${nodeId}`;
+    }
+    
+    navigate(routePath);
   };
 
   const initSampleData = async () => {
