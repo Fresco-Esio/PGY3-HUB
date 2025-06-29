@@ -216,6 +216,13 @@ const Dashboard = () => {
     loadMindMapData();
   }, []);
 
+  useEffect(() => {
+    // Refresh nodes when edit mode changes
+    if (mindMapData.topics.length > 0) {
+      convertDataToReactFlow(mindMapData);
+    }
+  }, [isEditing]);
+
   const loadMindMapData = async () => {
     try {
       const response = await axios.get(`${API}/mindmap-data`);
