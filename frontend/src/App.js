@@ -696,7 +696,7 @@ const Dashboard = () => {
     setEdges(flowEdges);
   };
 
-    (params) => {
+  const onConnect = useCallback((params) => {
       const newEdge = {
         ...params,
         type: 'smoothstep',
