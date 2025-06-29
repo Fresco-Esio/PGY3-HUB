@@ -236,72 +236,16 @@ const Dashboard = () => {
       console.error('Error loading mind map data:', error);
       setLoading(false);
     }
-  };
-
-  const arrangeNodesInCategory = (category) => {
-    const categoryNodeSpacing = 280; // Horizontal spacing between nodes
-    const categoryYPosition = {
-      'topics': 0,
-      'literature': 200,
-      'cases': 400,
-      'tasks': 600
-    };
-
-    let arrangedNodes = [...nodes];
-    let categoryNodes = [];
-    
-    // Filter nodes by category
-    switch(category) {
-      case 'topics':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'topic');
-        break;
-      case 'literature':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'literature');
-        break;
-      case 'cases':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'case');
-        break;
-      case 'tasks':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'task');
-        break;
+  const deleteNode = async (nodeId, nodeType) => {
+    try {
+      await axios.delete(`${API}/${nodeType}s/${nodeId}`);
+      setNodes((nds) => nds.filter(n => n.id !== `${nodeType}-${nodeId}`));
+      setEdges((eds) => eds.filter(e => 
+        !e.id.includes(`${nodeType}-${nodeId}`)
+      ));
+    } catch (error) {
+      console.error('Error deleting node:', error);
     }
-
-    // Arrange selected category nodes horizontally
-    categoryNodes.forEach((node, index) => {
-      const nodeIndex = arrangedNodes.findIndex(n => n.id === node.id);
-      if (nodeIndex !== -1) {
-        arrangedNodes[nodeIndex] = {
-          ...arrangedNodes[nodeIndex],
-          position: {
-            x: index * categoryNodeSpacing,
-            y: categoryYPosition[category]
-          }
-        };
-      }
-    });
-
-    setNodes(arrangedNodes);
-    setFocusedCategory(category);
-
-    // Zoom and center on the category
-    setTimeout(() => {
-      const categoryY = categoryYPosition[category];
-      const categoryWidth = Math.max(categoryNodes.length * categoryNodeSpacing, 600);
-      
-      // Set center to the middle of the category row
-      setCenter(categoryWidth / 2, categoryY + 50, { zoom: 0.8, duration: 800 });
-    }, 100);
-  };
-
-  const resetToMindMapView = () => {
-    // Restore original positions
-    convertDataToReactFlow(mindMapData);
-    setFocusedCategory(null);
-    
-    // Fit all nodes in view
-    setTimeout(() => {
-      fitView({ duration: 800, padding: 0.1 });
-    }, 100);
   };
 
   const arrangeNodesInCategory = (category) => {
