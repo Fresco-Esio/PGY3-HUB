@@ -574,9 +574,51 @@ const Dashboard = () => {
       newData.position = newPosition;
 
       const response = await axios.post(`${API}/${nodeType === 'literature' ? 'literature' : nodeType + 's'}`, newData);
+      const newNodeData = response.data;
       
-      // Reload data to refresh the mind map
-      loadMindMapData();
+      // Add the new node to existing nodes without resetting positions
+      const newNode = {
+        id: `${nodeType}-${newNodeData.id}`,
+        type: nodeType,
+        position: newPosition,
+        data: {
+          label: nodeType === 'case' ? newNodeData.case_id : newNodeData.title,
+          ...(nodeType === 'topic' && { 
+            category: newNodeData.category, 
+            color: newNodeData.color,
+            flashcard_count: newNodeData.flashcard_count || 0,
+            completed_flashcards: newNodeData.completed_flashcards || 0
+          }),
+          ...(nodeType === 'case' && { 
+            diagnosis: newNodeData.primary_diagnosis,
+            age: newNodeData.age
+          }),
+          ...(nodeType === 'task' && { 
+            priority: newNodeData.priority,
+            status: newNodeData.status,
+            due_date: newNodeData.due_date
+          }),
+          ...(nodeType === 'literature' && { 
+            authors: newNodeData.authors,
+            year: newNodeData.year
+          }),
+          originalData: newNodeData,
+          onDelete: isEditing ? () => deleteNode(newNodeData.id, nodeType) : undefined
+        }
+      };
+
+      // Add to existing nodes array instead of reloading all data
+      setNodes((nds) => [...nds, newNode]);
+      
+      // Update mindMapData state to include the new node
+      setMindMapData(prevData => ({
+        ...prevData,
+        [nodeType === 'literature' ? 'literature' : nodeType + 's']: [
+          ...prevData[nodeType === 'literature' ? 'literature' : nodeType + 's'],
+          newNodeData
+        ]
+      }));
+      
     } catch (error) {
       console.error('Error adding new node:', error);
     }
