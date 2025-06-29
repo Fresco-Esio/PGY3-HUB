@@ -682,7 +682,7 @@ const Dashboard = () => {
     setEdges(flowEdges);
   };
 
-  const onNodesChange = useCallback((changes) => {
+  const handleNodesChange = useCallback((changes) => {
     onNodesChange(changes);
     
     // Auto-save when nodes are moved
