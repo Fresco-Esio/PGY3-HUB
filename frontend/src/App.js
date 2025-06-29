@@ -203,6 +203,210 @@ const nodeTypes = {
   literature: LiteratureNode,
 };
 
+// Subpage Window Component
+const SubpageWindow = ({ type, data, onClose }) => {
+  if (!data) {
+    return (
+      <div className="fixed inset-y-0 right-0 w-2/3 bg-white shadow-2xl z-40 flex items-center justify-center">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    );
+  }
+
+  const renderContent = () => {
+    switch (type) {
+      case 'topic':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div 
+                className="w-4 h-4 rounded-full"
+                style={{ backgroundColor: data.color }}
+              ></div>
+              <h1 className="text-3xl font-bold text-gray-800">{data.title}</h1>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Description</h2>
+              <p className="text-gray-600 leading-relaxed">
+                {data.description || 'No description available.'}
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Category</h2>
+              <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                {data.category}
+              </span>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Target size={16} />
+                Flashcard Progress
+              </h3>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Completed</span>
+                  <span>{data.completed_flashcards}/{data.flashcard_count}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full"
+                    style={{ 
+                      width: `${data.flashcard_count > 0 ? (data.completed_flashcards / data.flashcard_count) * 100 : 0}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'literature':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <BookOpen className="text-purple-600" size={24} />
+              <h1 className="text-3xl font-bold text-gray-800">{data.title}</h1>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Authors</h2>
+              <p className="text-gray-600">{data.authors || 'No authors listed'}</p>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Abstract</h2>
+              <p className="text-gray-600 leading-relaxed">
+                {data.abstract || 'No abstract available.'}
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3">Publication Details</h3>
+              <div className="space-y-2 text-sm">
+                <div><span className="font-medium">Publication:</span> {data.publication || 'N/A'}</div>
+                <div><span className="font-medium">Year:</span> {data.year || 'N/A'}</div>
+                {data.doi && <div><span className="font-medium">DOI:</span> {data.doi}</div>}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'case':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <Users className="text-blue-600" size={24} />
+              <h1 className="text-3xl font-bold text-gray-800">{data.case_id}</h1>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Primary Diagnosis</h2>
+                <p className="text-gray-600">{data.primary_diagnosis}</p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Demographics</h2>
+                <div className="text-gray-600 space-y-1">
+                  {data.age && <div>Age: {data.age}</div>}
+                  {data.gender && <div>Gender: {data.gender}</div>}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Chief Complaint</h2>
+              <p className="text-gray-600">{data.chief_complaint}</p>
+            </div>
+
+            {data.medications && data.medications.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Medications</h2>
+                <ul className="text-gray-600 space-y-1">
+                  {data.medications.map((med, index) => (
+                    <li key={index}>• {med}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'task':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <CheckSquare className="text-amber-600" size={24} />
+              <h1 className="text-3xl font-bold text-gray-800">{data.title}</h1>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Description</h2>
+              <p className="text-gray-600">{data.description || 'No description available.'}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-2">Status</h3>
+                <span className={`inline-block px-3 py-1 rounded-full text-sm ${
+                  data.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  data.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                  'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {data.status.replace('_', ' ').toUpperCase()}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-2">Priority</h3>
+                <span className={`inline-block px-3 py-1 rounded-full text-sm ${
+                  data.priority === 'high' ? 'bg-red-100 text-red-800' :
+                  data.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {data.priority.toUpperCase()}
+                </span>
+              </div>
+
+              {data.due_date && (
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Due Date</h3>
+                  <p className="text-gray-600">
+                    {new Date(data.due_date).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Unknown node type</div>;
+    }
+  };
+
+  return (
+    <div className="fixed inset-y-0 right-0 w-2/3 bg-white shadow-2xl z-40 overflow-y-auto">
+      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 capitalize">{type} Details</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100"
+        >
+          <X size={20} />
+        </button>
+      </div>
+      
+      <div className="p-6">
+        {renderContent()}
+      </div>
+    </div>
+  );
+};
+
 // Node Selector Modal Component
 const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   if (!isOpen) return null;
