@@ -1025,7 +1025,8 @@ const Dashboard = () => {
             </p>
             <button
               onClick={() => {
-                const [nodeType, nodeId] = selectedNode.id.split('-', 2);
+                const nodeType = selectedNode.id.split('-')[0];
+                const nodeId = selectedNode.id.substring(nodeType.length + 1); // Get everything after the first hyphen
                 console.log('Opening subpage from sidebar for:', nodeType, nodeId);
                 setOpenSubpage({ type: nodeType, id: nodeId });
                 loadSubpageData(nodeType, nodeId);
