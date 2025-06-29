@@ -696,43 +696,43 @@ const Dashboard = () => {
 
         <div className="space-y-4">
           <div 
-            onClick={() => arrangeNodesInCategory('topics')}
+            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('topics')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'topics' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
           >
             <Brain size={16} />
-            Topics ({mindMapData.topics.length})
+            {openSubpage ? 'Close Window' : `Topics (${mindMapData.topics.length})`}
           </div>
           <div 
-            onClick={() => arrangeNodesInCategory('literature')}
+            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('literature')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'literature' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
           >
             <BookOpen size={16} />
-            Literature ({mindMapData.literature?.length || 0})
+            {openSubpage ? 'Close Window' : `Literature (${mindMapData.literature?.length || 0})`}
           </div>
           <div 
-            onClick={() => arrangeNodesInCategory('cases')}
+            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('cases')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'cases' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
           >
             <Users size={16} />
-            Cases ({mindMapData.cases.length})
+            {openSubpage ? 'Close Window' : `Cases (${mindMapData.cases.length})`}
           </div>
           <div 
-            onClick={() => arrangeNodesInCategory('tasks')}
+            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('tasks')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'tasks' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
           >
             <CheckSquare size={16} />
-            Tasks ({mindMapData.tasks.length})
+            {openSubpage ? 'Close Window' : `Tasks (${mindMapData.tasks.length})`}
           </div>
           
-          {focusedCategory && (
+          {focusedCategory && !openSubpage && (
             <button
               onClick={resetToMindMapView}
               className="w-full bg-teal-600 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-teal-700 transition-colors cursor-pointer flex items-center gap-2 justify-center"
