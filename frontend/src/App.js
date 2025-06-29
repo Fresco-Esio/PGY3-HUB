@@ -774,37 +774,13 @@ const Dashboard = () => {
                 Save Layout
               </button>
 
-              <div className="space-y-2">
-                <div className="text-xs text-slate-400">Add New Node:</div>
-                <button
-                  onClick={() => addNewNode('topic')}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs bg-blue-600 hover:bg-blue-700 transition-colors"
-                >
-                  <Plus size={14} />
-                  Topic
-                </button>
-                <button
-                  onClick={() => addNewNode('literature')}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs bg-purple-600 hover:bg-purple-700 transition-colors"
-                >
-                  <Plus size={14} />
-                  Literature
-                </button>
-                <button
-                  onClick={() => addNewNode('case')}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs bg-indigo-600 hover:bg-indigo-700 transition-colors"
-                >
-                  <Plus size={14} />
-                  Case
-                </button>
-                <button
-                  onClick={() => addNewNode('task')}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs bg-amber-600 hover:bg-amber-700 transition-colors"
-                >
-                  <Plus size={14} />
-                  Task
-                </button>
-              </div>
+              <button
+                onClick={() => setShowNodeSelector(true)}
+                className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-blue-600 hover:bg-blue-700 transition-colors"
+              >
+                <Plus size={16} />
+                Add New Node
+              </button>
 
               <div className="text-xs text-slate-400 mt-4">
                 <div className="mb-2">Hierarchy:</div>
