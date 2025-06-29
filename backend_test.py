@@ -527,6 +527,11 @@ class PsychiatryDashboardTester:
         self.run_test("Get Task by ID", self.test_get_task_by_id)
         self.run_test("Create, Update, Delete Task", self.test_create_update_delete_task)
         
+        # Literature CRUD tests
+        self.run_test("Get All Literature", self.test_get_literature)
+        self.run_test("Get Literature by ID", self.test_get_literature_by_id)
+        self.run_test("Create, Update, Delete Literature", self.test_create_update_delete_literature)
+        
         # Print summary
         print("\n📊 Test Summary:")
         print(f"  Total Tests: {self.test_results['total']}")
