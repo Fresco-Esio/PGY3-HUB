@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from '
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
-import ReactFlow, {
+import { 
+  ReactFlow,
   Node,
   Edge,
   addEdge,
