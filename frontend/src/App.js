@@ -1033,7 +1033,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Mind Map Workspace */}
-      <div className="flex-1 relative">
+      <div className={`flex-1 relative transition-all duration-300 ${openSubpage ? 'mr-0' : ''}`}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -1087,6 +1087,22 @@ const Dashboard = () => {
           </Panel>
         </ReactFlow>
       </div>
+
+      {/* Subpage Window */}
+      {openSubpage && (
+        <SubpageWindow 
+          type={openSubpage.type}
+          data={subpageData}
+          onClose={closeSubpage}
+        />
+      )}
+
+      {/* Node Selector Modal */}
+      <NodeSelector
+        isOpen={showNodeSelector}
+        onClose={() => setShowNodeSelector(false)}
+        onSelect={addNewNode}
+      />
     </div>
   );
 };
