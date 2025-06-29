@@ -578,7 +578,34 @@ const Dashboard = () => {
 
   const addNewNode = async (nodeType) => {
     try {
-      const newPosition = { x: Math.random() * 400, y: Math.random() * 400 };
+      // Find a free position that doesn't overlap with existing nodes
+      const findFreePosition = () => {
+        const existingPositions = nodes.map(node => node.position);
+        const gridSize = 300; // Spacing between potential positions
+        
+        // Try positions in a grid pattern
+        for (let y = -200; y < 800; y += gridSize) {
+          for (let x = -400; x < 1200; x += gridSize) {
+            const testPosition = { x, y };
+            const tooClose = existingPositions.some(pos => 
+              Math.abs(pos.x - testPosition.x) < 250 && 
+              Math.abs(pos.y - testPosition.y) < 150
+            );
+            
+            if (!tooClose) {
+              return testPosition;
+            }
+          }
+        }
+        
+        // Fallback to a random position if no free grid position found
+        return { 
+          x: Math.random() * 600 - 300, 
+          y: Math.random() * 400 - 200 
+        };
+      };
+
+      const newPosition = findFreePosition();
       
       let newData = {};
       switch(nodeType) {
