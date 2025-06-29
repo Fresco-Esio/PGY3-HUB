@@ -80,7 +80,7 @@ class PsychiatryDashboardTester:
         
         data = response.json()
         # Check that the response has the expected structure
-        if not all(key in data for key in ["topics", "cases", "tasks"]):
+        if not all(key in data for key in ["topics", "cases", "tasks", "literature"]):
             print(f"  Missing expected keys in response: {data.keys()}")
             return False
         
@@ -96,11 +96,16 @@ class PsychiatryDashboardTester:
         if len(data["tasks"]) < 3:
             print(f"  Expected at least 3 tasks, got {len(data['tasks'])}")
             return False
+            
+        if len(data["literature"]) < 2:
+            print(f"  Expected at least 2 literature items, got {len(data['literature'])}")
+            return False
         
         # Store some IDs for later tests
         self.topic_id = data["topics"][0]["id"] if data["topics"] else None
         self.case_id = data["cases"][0]["id"] if data["cases"] else None
         self.task_id = data["tasks"][0]["id"] if data["tasks"] else None
+        self.literature_id = data["literature"][0]["id"] if data["literature"] else None
         
         # Print some details about the data
         print(f"  Found {len(data['topics'])} topics, {len(data['cases'])} cases, {len(data['tasks'])} tasks")
