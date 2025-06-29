@@ -214,6 +214,9 @@ const Dashboard = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(true);
   const [focusedCategory, setFocusedCategory] = useState(null);
+  const [showNodeSelector, setShowNodeSelector] = useState(false);
+  const [openSubpage, setOpenSubpage] = useState(null); // { type, data }
+  const [subpageData, setSubpageData] = useState(null);
 
   useEffect(() => {
     loadMindMapData();
