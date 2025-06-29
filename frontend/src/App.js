@@ -251,13 +251,8 @@ const Dashboard = () => {
 
   const arrangeNodesInCategory = (category) => {
     const categoryNodeSpacing = 280; // Horizontal spacing between nodes
-    const categoryYPosition = {
-      'topics': 0,
-      'literature': 200,
-      'cases': 400,
-      'tasks': 600
-    };
-
+    const baseY = 200; // Fixed Y position for horizontal arrangement
+    
     let arrangedNodes = [...nodes];
     let categoryNodes = [];
     
@@ -277,15 +272,15 @@ const Dashboard = () => {
         break;
     }
 
-    // Arrange selected category nodes horizontally
+    // Arrange selected category nodes horizontally (left to right)
     categoryNodes.forEach((node, index) => {
       const nodeIndex = arrangedNodes.findIndex(n => n.id === node.id);
       if (nodeIndex !== -1) {
         arrangedNodes[nodeIndex] = {
           ...arrangedNodes[nodeIndex],
           position: {
-            x: index * categoryNodeSpacing,
-            y: categoryYPosition[category]
+            x: index * categoryNodeSpacing - (categoryNodes.length * categoryNodeSpacing) / 2, // Center the row
+            y: baseY
           }
         };
       }
@@ -294,13 +289,13 @@ const Dashboard = () => {
     setNodes(arrangedNodes);
     setFocusedCategory(category);
 
-    // Zoom and center on the category
+    // Zoom and center on the category row
     setTimeout(() => {
-      const categoryY = categoryYPosition[category];
-      const categoryWidth = Math.max(categoryNodes.length * categoryNodeSpacing, 600);
+      const categoryWidth = categoryNodes.length * categoryNodeSpacing;
+      const centerX = 0; // Center horizontally
       
-      // Set center to the middle of the category row
-      setCenter(categoryWidth / 2, categoryY + 50, { zoom: 0.8, duration: 800 });
+      // Set center to the middle of the horizontal category row
+      setCenter(centerX, baseY, { zoom: 0.8, duration: 800 });
     }, 100);
   };
 
