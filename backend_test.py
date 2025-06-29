@@ -308,101 +308,104 @@ class PsychiatryDashboardTester:
         print(f"  Successfully deleted case")
         return True
     
-    # Task CRUD tests
-    def test_get_tasks(self):
-        """Test getting all tasks"""
-        response = requests.get(f"{self.base_url}/tasks")
+    # Literature CRUD tests
+    def test_get_literature(self):
+        """Test getting all literature items"""
+        response = requests.get(f"{self.base_url}/literature")
         if response.status_code != 200:
             print(f"  Expected status code 200, got {response.status_code}")
             return False
         
-        tasks = response.json()
-        if not isinstance(tasks, list):
-            print(f"  Expected a list of tasks, got {type(tasks)}")
+        literature = response.json()
+        if not isinstance(literature, list):
+            print(f"  Expected a list of literature items, got {type(literature)}")
             return False
             
-        if len(tasks) < 3:  # We should have at least 3 sample tasks
-            print(f"  Expected at least 3 tasks, got {len(tasks)}")
+        if len(literature) < 2:  # We should have at least 2 sample literature items
+            print(f"  Expected at least 2 literature items, got {len(literature)}")
             return False
             
-        print(f"  Found {len(tasks)} tasks")
+        print(f"  Found {len(literature)} literature items")
         return True
     
-    def test_get_task_by_id(self):
-        """Test getting a task by ID"""
-        if not hasattr(self, 'task_id') or not self.task_id:
-            print("  No task ID available for testing")
+    def test_get_literature_by_id(self):
+        """Test getting a literature item by ID"""
+        if not hasattr(self, 'literature_id') or not self.literature_id:
+            print("  No literature ID available for testing")
             return False
             
-        response = requests.get(f"{self.base_url}/tasks/{self.task_id}")
+        response = requests.get(f"{self.base_url}/literature/{self.literature_id}")
         if response.status_code != 200:
             print(f"  Expected status code 200, got {response.status_code}")
             return False
         
-        task = response.json()
-        if not isinstance(task, dict) or "id" not in task or task["id"] != self.task_id:
-            print(f"  Invalid task response: {task}")
+        literature = response.json()
+        if not isinstance(literature, dict) or "id" not in literature or literature["id"] != self.literature_id:
+            print(f"  Invalid literature response: {literature}")
             return False
             
-        print(f"  Successfully retrieved task: {task['title']}")
+        print(f"  Successfully retrieved literature: {literature['title']}")
         return True
     
-    def test_create_update_delete_task(self):
-        """Test creating, updating, and deleting a task"""
+    def test_create_update_delete_literature(self):
+        """Test creating, updating, and deleting a literature item"""
         # We need a topic ID for linking
         if not hasattr(self, 'topic_id') or not self.topic_id:
             print("  No topic ID available for testing")
             return False
         
-        # Create a new task
-        new_task = {
-            "title": f"Test Task {uuid.uuid4().hex[:6]}",
-            "description": "A test task created by the test script",
-            "priority": "high",
-            "linked_topic_id": self.topic_id
+        # Create a new literature item
+        new_literature = {
+            "title": f"Test Literature {uuid.uuid4().hex[:6]}",
+            "authors": "Test Author",
+            "publication": "Test Journal",
+            "year": 2025,
+            "abstract": "This is a test abstract for the literature item",
+            "linked_topics": [self.topic_id]
         }
         
-        create_response = requests.post(f"{self.base_url}/tasks", json=new_task)
+        create_response = requests.post(f"{self.base_url}/literature", json=new_literature)
         if create_response.status_code != 200:
-            print(f"  Create task failed with status code {create_response.status_code}")
+            print(f"  Create literature failed with status code {create_response.status_code}")
             return False
         
-        created_task = create_response.json()
-        task_id = created_task["id"]
-        print(f"  Created task with ID: {task_id}")
+        created_literature = create_response.json()
+        literature_id = created_literature["id"]
+        print(f"  Created literature with ID: {literature_id}")
         
-        # Update the task
+        # Update the literature
         update_data = {
-            "description": "Updated task description",
-            "status": "in_progress"
+            "abstract": "Updated abstract for testing",
+            "notes": "Added test notes"
         }
         
-        update_response = requests.put(f"{self.base_url}/tasks/{task_id}", json=update_data)
+        update_response = requests.put(f"{self.base_url}/literature/{literature_id}", json=update_data)
         if update_response.status_code != 200:
-            print(f"  Update task failed with status code {update_response.status_code}")
+            print(f"  Update literature failed with status code {update_response.status_code}")
             return False
         
-        updated_task = update_response.json()
-        if updated_task["description"] != "Updated task description" or updated_task["status"] != "in_progress":
-            print(f"  Task was not updated correctly: {updated_task}")
+        updated_literature = update_response.json()
+        if updated_literature["abstract"] != "Updated abstract for testing" or updated_literature["notes"] != "Added test notes":
+            print(f"  Literature was not updated correctly: {updated_literature}")
             return False
             
-        print(f"  Successfully updated task")
+        print(f"  Successfully updated literature")
         
-        # Delete the task
-        delete_response = requests.delete(f"{self.base_url}/tasks/{task_id}")
+        # Delete the literature
+        delete_response = requests.delete(f"{self.base_url}/literature/{literature_id}")
         if delete_response.status_code != 200:
-            print(f"  Delete task failed with status code {delete_response.status_code}")
+            print(f"  Delete literature failed with status code {delete_response.status_code}")
             return False
         
-        # Verify the task is deleted
-        get_response = requests.get(f"{self.base_url}/tasks/{task_id}")
+        # Verify the literature is deleted
+        get_response = requests.get(f"{self.base_url}/literature/{literature_id}")
         if get_response.status_code != 404:
             print(f"  Expected 404 after deletion, got {get_response.status_code}")
             return False
             
-        print(f"  Successfully deleted task")
+        print(f"  Successfully deleted literature")
         return True
+    
     
     def run_all_tests(self):
         """Run all tests and print a summary"""
