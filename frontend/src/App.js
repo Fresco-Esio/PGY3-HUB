@@ -270,11 +270,23 @@ const Dashboard = () => {
         )}
 
         {selectedNode && (
-          <div className="mt-8 p-4 bg-slate-700 bg-opacity-50 rounded-lg">
-            <h3 className="font-semibold mb-2">Selected Node</h3>
-            <p className="text-sm text-slate-300">
-              {selectedNodeType}: {selectedNode.title || selectedNode.case_id}
+          <div className="mt-8 p-4 bg-slate-700 bg-opacity-50 rounded-lg border border-teal-500">
+            <h3 className="font-semibold mb-2 text-teal-300">Selected Node</h3>
+            <p className="text-sm text-slate-300 capitalize">
+              <span className="font-medium">{selectedNodeType}</span>: {selectedNode.title || selectedNode.case_id}
             </p>
+            {selectedNodeType === 'topic' && selectedNode.description && (
+              <p className="text-xs text-slate-400 mt-2">{selectedNode.description}</p>
+            )}
+            {selectedNodeType === 'case' && selectedNode.primary_diagnosis && (
+              <p className="text-xs text-slate-400 mt-2">Primary Diagnosis: {selectedNode.primary_diagnosis}</p>
+            )}
+            {selectedNodeType === 'task' && selectedNode.description && (
+              <p className="text-xs text-slate-400 mt-2">{selectedNode.description}</p>
+            )}
+            <div className="mt-2 text-xs text-teal-400">
+              Click to view details
+            </div>
           </div>
         )}
       </div>
