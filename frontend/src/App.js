@@ -158,6 +158,7 @@ const Dashboard = () => {
   };
 
   const handleNodeClick = (node, nodeType) => {
+    console.log('Node clicked:', nodeType, node);
     setSelectedNode(node);
     setSelectedNodeType(nodeType);
   };
