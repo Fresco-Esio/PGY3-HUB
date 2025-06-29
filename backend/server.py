@@ -225,6 +225,46 @@ async def delete_case(case_id: str):
         raise HTTPException(status_code=404, detail="Case not found")
     return {"message": "Case deleted successfully"}
 
+# Literature routes
+@api_router.post("/literature", response_model=Literature)
+async def create_literature(literature: LiteratureCreate):
+    literature_dict = literature.dict()
+    literature_obj = Literature(**literature_dict)
+    await db.literature.insert_one(literature_obj.dict())
+    return literature_obj
+
+@api_router.get("/literature", response_model=List[Literature])
+async def get_literature():
+    literature = await db.literature.find().to_list(1000)
+    return [Literature(**lit) for lit in literature]
+
+@api_router.get("/literature/{literature_id}", response_model=Literature)
+async def get_literature_item(literature_id: str):
+    literature = await db.literature.find_one({"id": literature_id})
+    if not literature:
+        raise HTTPException(status_code=404, detail="Literature not found")
+    return Literature(**literature)
+
+@api_router.put("/literature/{literature_id}", response_model=Literature)
+async def update_literature(literature_id: str, literature_update: dict):
+    literature_update["updated_at"] = datetime.utcnow()
+    result = await db.literature.update_one(
+        {"id": literature_id}, 
+        {"$set": literature_update}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Literature not found")
+    
+    updated_literature = await db.literature.find_one({"id": literature_id})
+    return Literature(**updated_literature)
+
+@api_router.delete("/literature/{literature_id}")
+async def delete_literature(literature_id: str):
+    result = await db.literature.delete_one({"id": literature_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Literature not found")
+    return {"message": "Literature deleted successfully"}
+
 # Tasks routes
 @api_router.post("/tasks", response_model=Task)
 async def create_task(task: TaskCreate):
