@@ -37,6 +37,20 @@ class CaseStatus(str, Enum):
     FOLLOW_UP = "follow_up"
 
 # Models
+class Literature(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    authors: Optional[str] = None
+    publication: Optional[str] = None
+    year: Optional[int] = None
+    doi: Optional[str] = None
+    abstract: Optional[str] = None
+    notes: Optional[str] = None
+    linked_topics: List[str] = Field(default_factory=list)  # Topic IDs
+    position: Dict[str, float] = Field(default_factory=lambda: {"x": 0, "y": 0})
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
 class PsychiatricTopic(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
