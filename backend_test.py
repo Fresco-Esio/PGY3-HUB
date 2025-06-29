@@ -308,6 +308,102 @@ class PsychiatryDashboardTester:
         print(f"  Successfully deleted case")
         return True
     
+    # Task CRUD tests
+    def test_get_tasks(self):
+        """Test getting all tasks"""
+        response = requests.get(f"{self.base_url}/tasks")
+        if response.status_code != 200:
+            print(f"  Expected status code 200, got {response.status_code}")
+            return False
+        
+        tasks = response.json()
+        if not isinstance(tasks, list):
+            print(f"  Expected a list of tasks, got {type(tasks)}")
+            return False
+            
+        if len(tasks) < 3:  # We should have at least 3 sample tasks
+            print(f"  Expected at least 3 tasks, got {len(tasks)}")
+            return False
+            
+        print(f"  Found {len(tasks)} tasks")
+        return True
+    
+    def test_get_task_by_id(self):
+        """Test getting a task by ID"""
+        if not hasattr(self, 'task_id') or not self.task_id:
+            print("  No task ID available for testing")
+            return False
+            
+        response = requests.get(f"{self.base_url}/tasks/{self.task_id}")
+        if response.status_code != 200:
+            print(f"  Expected status code 200, got {response.status_code}")
+            return False
+        
+        task = response.json()
+        if not isinstance(task, dict) or "id" not in task or task["id"] != self.task_id:
+            print(f"  Invalid task response: {task}")
+            return False
+            
+        print(f"  Successfully retrieved task: {task['title']}")
+        return True
+    
+    def test_create_update_delete_task(self):
+        """Test creating, updating, and deleting a task"""
+        # We need a topic ID for linking
+        if not hasattr(self, 'topic_id') or not self.topic_id:
+            print("  No topic ID available for testing")
+            return False
+        
+        # Create a new task
+        new_task = {
+            "title": f"Test Task {uuid.uuid4().hex[:6]}",
+            "description": "A test task created by the test script",
+            "priority": "high",
+            "linked_topic_id": self.topic_id
+        }
+        
+        create_response = requests.post(f"{self.base_url}/tasks", json=new_task)
+        if create_response.status_code != 200:
+            print(f"  Create task failed with status code {create_response.status_code}")
+            return False
+        
+        created_task = create_response.json()
+        task_id = created_task["id"]
+        print(f"  Created task with ID: {task_id}")
+        
+        # Update the task
+        update_data = {
+            "description": "Updated task description",
+            "status": "in_progress"
+        }
+        
+        update_response = requests.put(f"{self.base_url}/tasks/{task_id}", json=update_data)
+        if update_response.status_code != 200:
+            print(f"  Update task failed with status code {update_response.status_code}")
+            return False
+        
+        updated_task = update_response.json()
+        if updated_task["description"] != "Updated task description" or updated_task["status"] != "in_progress":
+            print(f"  Task was not updated correctly: {updated_task}")
+            return False
+            
+        print(f"  Successfully updated task")
+        
+        # Delete the task
+        delete_response = requests.delete(f"{self.base_url}/tasks/{task_id}")
+        if delete_response.status_code != 200:
+            print(f"  Delete task failed with status code {delete_response.status_code}")
+            return False
+        
+        # Verify the task is deleted
+        get_response = requests.get(f"{self.base_url}/tasks/{task_id}")
+        if get_response.status_code != 404:
+            print(f"  Expected 404 after deletion, got {get_response.status_code}")
+            return False
+            
+        print(f"  Successfully deleted task")
+        return True
+    
     # Literature CRUD tests
     def test_get_literature(self):
         """Test getting all literature items"""
