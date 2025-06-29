@@ -446,6 +446,34 @@ async def init_sample_data():
         task_obj = Task(**task_data)
         await db.tasks.insert_one(task_obj.dict())
     
+    # Sample literature
+    sample_literature = [
+        {
+            "title": "Efficacy of CBT in Major Depression",
+            "authors": "Beck, A.T., Rush, A.J.",
+            "publication": "Archives of General Psychiatry",
+            "year": 2021,
+            "abstract": "Comprehensive review of cognitive behavioral therapy effectiveness",
+            "notes": "Key study for MDD treatment protocols",
+            "linked_topics": [topic_ids[0]],
+            "position": {"x": 100, "y": -100}
+        },
+        {
+            "title": "Antipsychotic Treatment Guidelines",
+            "authors": "American Psychiatric Association",
+            "publication": "APA Guidelines",
+            "year": 2022,
+            "abstract": "Updated guidelines for antipsychotic medication management",
+            "notes": "Essential reference for schizophrenia treatment",
+            "linked_topics": [topic_ids[1]],
+            "position": {"x": -100, "y": -50}
+        }
+    ]
+    
+    for lit_data in sample_literature:
+        lit_obj = Literature(**lit_data)
+        await db.literature.insert_one(lit_obj.dict())
+    
     return {"message": "Sample data initialized successfully"}
 
 # Include the router in the main app
