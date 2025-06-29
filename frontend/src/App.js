@@ -505,14 +505,10 @@ const Dashboard = () => {
           
           <button
             onClick={() => {
-              setIsEditing(!isEditing);
-              if (!isEditing) {
-                // Refresh to show delete buttons
-                convertDataToReactFlow(mindMapData);
-              } else {
-                // Refresh to hide delete buttons
-                convertDataToReactFlow(mindMapData);
-              }
+              const newEditMode = !isEditing;
+              setIsEditing(newEditMode);
+              // Refresh data to show/hide delete buttons
+              convertDataToReactFlow(mindMapData);
             }}
             className={`w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-colors ${
               isEditing 
