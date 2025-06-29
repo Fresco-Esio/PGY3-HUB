@@ -649,22 +649,52 @@ const Dashboard = () => {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2">
+          <div 
+            onClick={() => arrangeNodesInCategory('topics')}
+            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
+              focusedCategory === 'topics' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
+            }`}
+          >
             <Brain size={16} />
             Topics ({mindMapData.topics.length})
           </div>
-          <div className="bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2">
+          <div 
+            onClick={() => arrangeNodesInCategory('literature')}
+            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
+              focusedCategory === 'literature' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
+            }`}
+          >
             <BookOpen size={16} />
             Literature ({mindMapData.literature?.length || 0})
           </div>
-          <div className="bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2">
+          <div 
+            onClick={() => arrangeNodesInCategory('cases')}
+            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
+              focusedCategory === 'cases' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
+            }`}
+          >
             <Users size={16} />
             Cases ({mindMapData.cases.length})
           </div>
-          <div className="bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2">
+          <div 
+            onClick={() => arrangeNodesInCategory('tasks')}
+            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
+              focusedCategory === 'tasks' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
+            }`}
+          >
             <CheckSquare size={16} />
             Tasks ({mindMapData.tasks.length})
           </div>
+          
+          {focusedCategory && (
+            <button
+              onClick={resetToMindMapView}
+              className="w-full bg-teal-600 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-teal-700 transition-colors cursor-pointer flex items-center gap-2 justify-center"
+            >
+              <Target size={16} />
+              Reset View
+            </button>
+          )}
         </div>
 
         {/* Mind Map Controls */}
