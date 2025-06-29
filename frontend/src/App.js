@@ -620,7 +620,11 @@ const Dashboard = () => {
               <span className="font-medium">{selectedNode.type}</span>: {selectedNode.data.label}
             </p>
             <button
-              onClick={() => onNodeDoubleClick(null, selectedNode)}
+              onClick={() => {
+                const [nodeType, nodeId] = selectedNode.id.split('-');
+                console.log('Navigating from sidebar to:', `/${nodeType}/${nodeId}`);
+                navigate(`/${nodeType}/${nodeId}`);
+              }}
               className="mt-3 text-xs text-teal-400 hover:text-teal-300 underline"
             >
               View Details →
