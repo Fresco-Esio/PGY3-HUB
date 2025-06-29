@@ -1058,7 +1058,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Mind Map Workspace */}
-      <div className={`flex-1 relative transition-all duration-300 ${openSubpage ? 'mr-0' : ''}`}>
+      <div className="flex-1 relative">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -1105,7 +1105,7 @@ const Dashboard = () => {
             <div className="text-xs text-gray-500 space-y-1">
               <div>• Click to select nodes</div>
               <div>• Double-click to view details</div>
-              <div>• {isEditing ? 'Drag to reposition' : 'Enable edit mode to drag'}</div>
+              <div>• Hover and drag to reposition</div>
               <div>• {isEditing ? 'Connect nodes by dragging handles' : 'Edit mode: create connections'}</div>
               <div>• Zoom with mouse wheel</div>
             </div>
