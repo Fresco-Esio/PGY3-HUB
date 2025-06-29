@@ -924,7 +924,7 @@ const Dashboard = () => {
             }`}
           >
             <Brain size={16} />
-            {openSubpage ? 'Close Window' : `Topics (${mindMapData.topics.length})`}
+            Topics ({mindMapData.topics.length})
           </div>
           <div 
             onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('literature')}
@@ -933,7 +933,7 @@ const Dashboard = () => {
             }`}
           >
             <BookOpen size={16} />
-            {openSubpage ? 'Close Window' : `Literature (${mindMapData.literature?.length || 0})`}
+            Literature ({mindMapData.literature?.length || 0})
           </div>
           <div 
             onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('cases')}
@@ -942,7 +942,7 @@ const Dashboard = () => {
             }`}
           >
             <Users size={16} />
-            {openSubpage ? 'Close Window' : `Cases (${mindMapData.cases.length})`}
+            Cases ({mindMapData.cases.length})
           </div>
           <div 
             onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('tasks')}
@@ -951,7 +951,7 @@ const Dashboard = () => {
             }`}
           >
             <CheckSquare size={16} />
-            {openSubpage ? 'Close Window' : `Tasks (${mindMapData.tasks.length})`}
+            Tasks ({mindMapData.tasks.length})
           </div>
           
           {focusedCategory && !openSubpage && (
