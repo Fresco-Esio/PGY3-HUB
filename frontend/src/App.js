@@ -61,7 +61,12 @@ const MindMapNode = ({ node, nodeType, onClick, position = { x: 0, y: 0 } }) => 
   return (
     <div
       style={getNodeStyle()}
-      onClick={() => onClick(node, nodeType)}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Node div clicked:', nodeType, node.id);
+        onClick(node, nodeType);
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
