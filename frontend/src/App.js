@@ -20,6 +20,7 @@ const MindMapNode = ({ node, nodeType, onClick, position = { x: 0, y: 0 } }) => 
       border: '2px solid transparent',
       transition: 'all 0.3s ease',
       transform: 'scale(1)',
+      zIndex: 10, // Ensure nodes are above connection lines
     };
 
     switch (nodeType) {
