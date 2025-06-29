@@ -236,6 +236,7 @@ const Dashboard = () => {
       console.error('Error loading mind map data:', error);
       setLoading(false);
     }
+  };
   const deleteNode = async (nodeId, nodeType) => {
     try {
       await axios.delete(`${API}/${nodeType}s/${nodeId}`);
