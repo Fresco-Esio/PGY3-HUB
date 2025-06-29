@@ -99,6 +99,16 @@ class Task(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 # Create models
+class LiteratureCreate(BaseModel):
+    title: str
+    authors: Optional[str] = None
+    publication: Optional[str] = None
+    year: Optional[int] = None
+    doi: Optional[str] = None
+    abstract: Optional[str] = None
+    notes: Optional[str] = None
+    linked_topics: List[str] = Field(default_factory=list)
+
 class PsychiatricTopicCreate(BaseModel):
     title: str
     description: Optional[str] = None
