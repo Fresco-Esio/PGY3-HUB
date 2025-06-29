@@ -449,21 +449,26 @@ const Dashboard = () => {
   const onNodeDoubleClick = (event, node) => {
     console.log('Double-clicking node:', node);
     const [nodeType, nodeId] = node.id.split('-');
-    console.log('Navigating to:', `/${nodeType}/${nodeId}`);
     
-    // Handle different node types for routing
-    let routePath = `/${nodeType}/${nodeId}`;
-    if (nodeType === 'literature') {
-      routePath = `/literature/${nodeId}`;
-    } else if (nodeType === 'topic') {
-      routePath = `/topic/${nodeId}`;
-    } else if (nodeType === 'case') {
-      routePath = `/case/${nodeId}`;
-    } else if (nodeType === 'task') {
-      routePath = `/task/${nodeId}`;
+    // Open subpage instead of navigating
+    setOpenSubpage({ type: nodeType, id: nodeId });
+    loadSubpageData(nodeType, nodeId);
+  };
+
+  const loadSubpageData = async (nodeType, nodeId) => {
+    try {
+      const endpoint = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
+      const response = await axios.get(`${API}/${endpoint}/${nodeId}`);
+      setSubpageData(response.data);
+    } catch (error) {
+      console.error('Error loading subpage data:', error);
+      setSubpageData(null);
     }
-    
-    navigate(routePath);
+  };
+
+  const closeSubpage = () => {
+    setOpenSubpage(null);
+    setSubpageData(null);
   };
 
   const initSampleData = async () => {
