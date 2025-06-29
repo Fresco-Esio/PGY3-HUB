@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from '
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
-import { 
-  ReactFlow,
+import ReactFlow, {
   Node,
   Edge,
   addEdge,
@@ -15,6 +14,8 @@ import {
   useEdgesState,
   ReactFlowProvider,
   Panel,
+  Handle,
+  Position,
 } from '@xyflow/react';
 import { 
   Plus, 
@@ -26,29 +27,49 @@ import {
   ArrowLeft,
   FileText,
   Calendar,
-  Target
+  Target,
+  BookOpen,
+  Trash2,
+  X
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Custom Node Components
+// Custom Node Components with Connection Handles and Enhanced Hover
 const TopicNode = ({ data, selected }) => {
   return (
     <div 
-      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] ${
+      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] relative hover:shadow-2xl hover:scale-105 ${
         selected 
-          ? 'border-teal-400 shadow-xl scale-105' 
-          : 'border-transparent hover:border-teal-300'
+          ? 'border-teal-400 shadow-xl scale-105 ring-4 ring-teal-200' 
+          : 'border-transparent hover:border-teal-300 hover:ring-2 hover:ring-teal-100'
       }`}
       style={{ 
         backgroundColor: data.color || '#3B82F6',
         color: 'white'
       }}
     >
+      {/* Connection Handles */}
+      <Handle type="target" position={Position.Top} className="w-3 h-3 !bg-white border-2 border-current" />
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 !bg-white border-2 border-current" />
+      <Handle type="source" position={Position.Left} className="w-3 h-3 !bg-white border-2 border-current" />
+      <Handle type="source" position={Position.Right} className="w-3 h-3 !bg-white border-2 border-current" />
+      
       <div className="flex items-center gap-2 mb-1">
         <Brain size={16} />
         <div className="font-semibold text-sm">{data.label}</div>
+        {data.onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              data.onDelete();
+            }}
+            className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded"
+          >
+            <X size={12} />
+          </button>
+        )}
       </div>
       <div className="text-xs opacity-90">{data.category}</div>
       {data.flashcard_count > 0 && (
@@ -63,15 +84,32 @@ const TopicNode = ({ data, selected }) => {
 const CaseNode = ({ data, selected }) => {
   return (
     <div 
-      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] bg-white ${
+      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] bg-white relative hover:shadow-2xl hover:scale-105 ${
         selected 
-          ? 'border-blue-400 shadow-xl scale-105' 
-          : 'border-gray-200 hover:border-blue-300'
+          ? 'border-blue-400 shadow-xl scale-105 ring-4 ring-blue-200' 
+          : 'border-gray-200 hover:border-blue-300 hover:ring-2 hover:ring-blue-100'
       }`}
     >
+      {/* Connection Handles */}
+      <Handle type="target" position={Position.Top} className="w-3 h-3 !bg-blue-500" />
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 !bg-blue-500" />
+      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-blue-500" />
+      <Handle type="target" position={Position.Right} className="w-3 h-3 !bg-blue-500" />
+      
       <div className="flex items-center gap-2 mb-1">
         <Users size={16} className="text-blue-600" />
         <div className="font-semibold text-sm text-gray-800">{data.label}</div>
+        {data.onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              data.onDelete();
+            }}
+            className="ml-auto p-1 hover:bg-gray-200 rounded"
+          >
+            <X size={12} />
+          </button>
+        )}
       </div>
       <div className="text-xs text-gray-600">{data.diagnosis}</div>
       <div className="text-xs text-blue-600 mt-1">{data.age && `Age: ${data.age}`}</div>
@@ -88,15 +126,31 @@ const TaskNode = ({ data, selected }) => {
 
   return (
     <div 
-      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] text-white ${
+      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] text-white relative hover:shadow-2xl hover:scale-105 ${
         selected 
-          ? 'border-yellow-400 shadow-xl scale-105' 
-          : 'border-transparent hover:border-yellow-300'
+          ? 'border-yellow-400 shadow-xl scale-105 ring-4 ring-yellow-200' 
+          : 'border-transparent hover:border-yellow-300 hover:ring-2 hover:ring-yellow-100'
       } ${statusColors[data.status] || 'bg-gray-500'}`}
     >
+      {/* Connection Handles */}
+      <Handle type="target" position={Position.Top} className="w-3 h-3 !bg-white" />
+      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-white" />
+      <Handle type="target" position={Position.Right} className="w-3 h-3 !bg-white" />
+      
       <div className="flex items-center gap-2 mb-1">
         <CheckSquare size={16} />
         <div className="font-semibold text-sm">{data.label}</div>
+        {data.onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              data.onDelete();
+            }}
+            className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded"
+          >
+            <X size={12} />
+          </button>
+        )}
       </div>
       <div className="text-xs opacity-90">Priority: {data.priority}</div>
       {data.due_date && (
@@ -106,10 +160,47 @@ const TaskNode = ({ data, selected }) => {
   );
 };
 
+const LiteratureNode = ({ data, selected }) => {
+  return (
+    <div 
+      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] bg-purple-50 relative hover:shadow-2xl hover:scale-105 ${
+        selected 
+          ? 'border-purple-400 shadow-xl scale-105 ring-4 ring-purple-200' 
+          : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
+      }`}
+    >
+      {/* Connection Handles */}
+      <Handle type="target" position={Position.Top} className="w-3 h-3 !bg-purple-500" />
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 !bg-purple-500" />
+      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-purple-500" />
+      <Handle type="target" position={Position.Right} className="w-3 h-3 !bg-purple-500" />
+      
+      <div className="flex items-center gap-2 mb-1">
+        <BookOpen size={16} className="text-purple-600" />
+        <div className="font-semibold text-sm text-gray-800">{data.label}</div>
+        {data.onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              data.onDelete();
+            }}
+            className="ml-auto p-1 hover:bg-purple-200 rounded"
+          >
+            <X size={12} />
+          </button>
+        )}
+      </div>
+      <div className="text-xs text-gray-600">{data.authors}</div>
+      <div className="text-xs text-purple-600 mt-1">{data.year}</div>
+    </div>
+  );
+};
+
 const nodeTypes = {
   topic: TopicNode,
   case: CaseNode,
   task: TaskNode,
+  literature: LiteratureNode,
 };
 
 // Main Dashboard Component
@@ -117,7 +208,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [mindMapData, setMindMapData] = useState({ topics: [], cases: [], tasks: [] });
+  const [mindMapData, setMindMapData] = useState({ topics: [], cases: [], tasks: [], literature: [] });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -138,6 +229,18 @@ const Dashboard = () => {
     }
   };
 
+  const deleteNode = async (nodeId, nodeType) => {
+    try {
+      await axios.delete(`${API}/${nodeType}s/${nodeId}`);
+      setNodes((nds) => nds.filter(n => n.id !== `${nodeType}-${nodeId}`));
+      setEdges((eds) => eds.filter(e => 
+        !e.id.includes(`${nodeType}-${nodeId}`)
+      ));
+    } catch (error) {
+      console.error('Error deleting node:', error);
+    }
+  };
+
   const convertDataToReactFlow = (data) => {
     const flowNodes = [];
     const flowEdges = [];
@@ -154,8 +257,36 @@ const Dashboard = () => {
           color: topic.color,
           flashcard_count: topic.flashcard_count,
           completed_flashcards: topic.completed_flashcards,
-          originalData: topic
+          originalData: topic,
+          onDelete: isEditing ? () => deleteNode(topic.id, 'topic') : null
         }
+      });
+    });
+
+    // Convert literature to nodes
+    data.literature && data.literature.forEach(lit => {
+      flowNodes.push({
+        id: `literature-${lit.id}`,
+        type: 'literature',
+        position: lit.position,
+        data: {
+          label: lit.title,
+          authors: lit.authors,
+          year: lit.year,
+          originalData: lit,
+          onDelete: isEditing ? () => deleteNode(lit.id, 'literature') : null
+        }
+      });
+
+      // Create edges from literature to linked topics
+      lit.linked_topics.forEach(topicId => {
+        flowEdges.push({
+          id: `literature-${lit.id}-topic-${topicId}`,
+          source: `topic-${topicId}`,
+          target: `literature-${lit.id}`,
+          type: 'smoothstep',
+          style: { stroke: '#8B5CF6', strokeWidth: 2, strokeDasharray: '4,4' }
+        });
       });
     });
 
@@ -169,18 +300,19 @@ const Dashboard = () => {
           label: caseItem.case_id,
           diagnosis: caseItem.primary_diagnosis,
           age: caseItem.age,
-          originalData: caseItem
+          originalData: caseItem,
+          onDelete: isEditing ? () => deleteNode(caseItem.id, 'case') : null
         }
       });
 
-      // Create edges from cases to linked topics
+      // Create edges from topics to cases (hierarchy: Topic → Case)
       caseItem.linked_topics.forEach(topicId => {
         flowEdges.push({
-          id: `case-${caseItem.id}-topic-${topicId}`,
-          source: `case-${caseItem.id}`,
-          target: `topic-${topicId}`,
+          id: `topic-${topicId}-case-${caseItem.id}`,
+          source: `topic-${topicId}`,
+          target: `case-${caseItem.id}`,
           type: 'smoothstep',
-          style: { stroke: '#94A3B8', strokeWidth: 2, strokeDasharray: '5,5' }
+          style: { stroke: '#3B82F6', strokeWidth: 3 }
         });
       });
     });
@@ -196,28 +328,27 @@ const Dashboard = () => {
           priority: task.priority,
           status: task.status,
           due_date: task.due_date,
-          originalData: task
+          originalData: task,
+          onDelete: isEditing ? () => deleteNode(task.id, 'task') : null
         }
       });
 
-      // Create edges from tasks to linked entities
-      if (task.linked_topic_id) {
-        flowEdges.push({
-          id: `task-${task.id}-topic-${task.linked_topic_id}`,
-          source: `task-${task.id}`,
-          target: `topic-${task.linked_topic_id}`,
-          type: 'smoothstep',
-          style: { stroke: '#F59E0B', strokeWidth: 2, strokeDasharray: '3,3' }
-        });
-      }
-
+      // Create edges following hierarchy: Case → Task or Topic → Task
       if (task.linked_case_id) {
         flowEdges.push({
-          id: `task-${task.id}-case-${task.linked_case_id}`,
-          source: `task-${task.id}`,
-          target: `case-${task.linked_case_id}`,
+          id: `case-${task.linked_case_id}-task-${task.id}`,
+          source: `case-${task.linked_case_id}`,
+          target: `task-${task.id}`,
           type: 'smoothstep',
-          style: { stroke: '#8B5CF6', strokeWidth: 2, strokeDasharray: '3,3' }
+          style: { stroke: '#F59E0B', strokeWidth: 2 }
+        });
+      } else if (task.linked_topic_id) {
+        flowEdges.push({
+          id: `topic-${task.linked_topic_id}-task-${task.id}`,
+          source: `topic-${task.linked_topic_id}`,
+          target: `task-${task.id}`,
+          type: 'smoothstep',
+          style: { stroke: '#F59E0B', strokeWidth: 2 }
         });
       }
     });
@@ -227,7 +358,14 @@ const Dashboard = () => {
   };
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
+    (params) => {
+      const newEdge = {
+        ...params,
+        type: 'smoothstep',
+        style: { stroke: '#6B7280', strokeWidth: 2 }
+      };
+      setEdges((eds) => addEdge(newEdge, eds));
+    },
     [setEdges]
   );
 
@@ -262,31 +400,67 @@ const Dashboard = () => {
         };
       });
 
-      // Here you would batch update the positions
       console.log('Saving layout:', updates);
       setIsEditing(false);
+      // Refresh data to remove delete buttons
+      convertDataToReactFlow(mindMapData);
     } catch (error) {
       console.error('Error saving layout:', error);
     }
   };
 
-  const addNewNode = (nodeType) => {
-    const newPosition = { x: Math.random() * 400, y: Math.random() * 400 };
-    const newId = `${nodeType}-${Date.now()}`;
-    
-    const newNode = {
-      id: newId,
-      type: nodeType,
-      position: newPosition,
-      data: {
-        label: `New ${nodeType}`,
-        ...(nodeType === 'topic' && { category: 'New Category', color: '#3B82F6' }),
-        ...(nodeType === 'case' && { diagnosis: 'New Diagnosis' }),
-        ...(nodeType === 'task' && { priority: 'medium', status: 'pending' })
+  const addNewNode = async (nodeType) => {
+    try {
+      const newPosition = { x: Math.random() * 400, y: Math.random() * 400 };
+      
+      let newData = {};
+      switch(nodeType) {
+        case 'topic':
+          newData = {
+            title: 'New Topic',
+            description: 'New topic description',
+            category: 'New Category',
+            color: '#3B82F6'
+          };
+          break;
+        case 'case':
+          newData = {
+            case_id: `CASE-${Date.now()}`,
+            encounter_date: new Date().toISOString(),
+            primary_diagnosis: 'New Diagnosis',
+            chief_complaint: 'New complaint',
+            linked_topics: []
+          };
+          break;
+        case 'task':
+          newData = {
+            title: 'New Task',
+            description: 'New task description',
+            priority: 'medium',
+            status: 'pending'
+          };
+          break;
+        case 'literature':
+          newData = {
+            title: 'New Literature',
+            authors: 'New Author',
+            publication: 'New Publication',
+            year: new Date().getFullYear(),
+            linked_topics: []
+          };
+          break;
       }
-    };
 
-    setNodes((nds) => nds.concat(newNode));
+      // Set position
+      newData.position = newPosition;
+
+      const response = await axios.post(`${API}/${nodeType === 'literature' ? 'literature' : nodeType + 's'}`, newData);
+      
+      // Reload data to refresh the mind map
+      loadMindMapData();
+    } catch (error) {
+      console.error('Error adding new node:', error);
+    }
   };
 
   if (loading) {
@@ -313,6 +487,10 @@ const Dashboard = () => {
             Topics ({mindMapData.topics.length})
           </div>
           <div className="bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2">
+            <BookOpen size={16} />
+            Literature ({mindMapData.literature?.length || 0})
+          </div>
+          <div className="bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2">
             <Users size={16} />
             Cases ({mindMapData.cases.length})
           </div>
@@ -327,7 +505,16 @@ const Dashboard = () => {
           <div className="text-sm font-semibold text-slate-300 mb-3">Mind Map Controls</div>
           
           <button
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              setIsEditing(!isEditing);
+              if (!isEditing) {
+                // Refresh to show delete buttons
+                convertDataToReactFlow(mindMapData);
+              } else {
+                // Refresh to hide delete buttons
+                convertDataToReactFlow(mindMapData);
+              }
+            }}
             className={`w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-colors ${
               isEditing 
                 ? 'bg-teal-600 hover:bg-teal-700' 
@@ -358,6 +545,13 @@ const Dashboard = () => {
                   Topic
                 </button>
                 <button
+                  onClick={() => addNewNode('literature')}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs bg-purple-600 hover:bg-purple-700 transition-colors"
+                >
+                  <Plus size={14} />
+                  Literature
+                </button>
+                <button
                   onClick={() => addNewNode('case')}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs bg-indigo-600 hover:bg-indigo-700 transition-colors"
                 >
@@ -371,6 +565,15 @@ const Dashboard = () => {
                   <Plus size={14} />
                   Task
                 </button>
+              </div>
+
+              <div className="text-xs text-slate-400 mt-4">
+                <div className="mb-2">Hierarchy:</div>
+                <div className="space-y-1">
+                  <div>• Topics → Literature</div>
+                  <div>• Topics → Cases</div>
+                  <div>• Cases → Tasks</div>
+                </div>
               </div>
             </>
           )}
@@ -422,6 +625,10 @@ const Dashboard = () => {
           nodesConnectable={isEditing}
           elementsSelectable={true}
           className="bg-gradient-to-br from-slate-50 to-slate-100"
+          defaultEdgeOptions={{
+            type: 'smoothstep',
+            style: { strokeWidth: 2, stroke: '#6B7280' }
+          }}
         >
           <Background color="#aaa" gap={16} />
           <Controls />
@@ -431,6 +638,7 @@ const Dashboard = () => {
                 case 'topic': return node.data.color || '#3B82F6';
                 case 'case': return '#6B7280';
                 case 'task': return '#F59E0B';
+                case 'literature': return '#8B5CF6';
                 default: return '#9CA3AF';
               }
             }}
@@ -442,6 +650,7 @@ const Dashboard = () => {
               <div>• Click to select nodes</div>
               <div>• Double-click to view details</div>
               <div>• {isEditing ? 'Drag to reposition' : 'Enable edit mode to drag'}</div>
+              <div>• {isEditing ? 'Connect nodes by dragging handles' : 'Edit mode: create connections'}</div>
               <div>• Zoom with mouse wheel</div>
             </div>
           </Panel>
@@ -451,12 +660,99 @@ const Dashboard = () => {
   );
 };
 
-// Topic Detail Page
+// Literature Detail Page
+const LiteratureDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [literature, setLiterature] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadLiteratureData();
+  }, [id]);
+
+  const loadLiteratureData = async () => {
+    try {
+      const response = await axios.get(`${API}/literature/${id}`);
+      setLiterature(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading literature data:', error);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!literature) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Literature not found</div>;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto p-6">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6"
+        >
+          <ArrowLeft size={20} />
+          Back to Mind Map
+        </button>
+
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex items-center gap-4 mb-6">
+            <BookOpen className="text-purple-600" size={24} />
+            <h1 className="text-3xl font-bold text-gray-800">{literature.title}</h1>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Authors</h2>
+                <p className="text-gray-600">{literature.authors || 'No authors listed'}</p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Abstract</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {literature.abstract || 'No abstract available.'}
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Notes</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {literature.notes || 'No notes available.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3">Publication Details</h3>
+                <div className="space-y-2 text-sm">
+                  <div><span className="font-medium">Publication:</span> {literature.publication || 'N/A'}</div>
+                  <div><span className="font-medium">Year:</span> {literature.year || 'N/A'}</div>
+                  {literature.doi && <div><span className="font-medium">DOI:</span> {literature.doi}</div>}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Topic Detail Page (Enhanced)
 const TopicDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [topic, setTopic] = useState(null);
   const [relatedCases, setRelatedCases] = useState([]);
+  const [relatedLiterature, setRelatedLiterature] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -472,11 +768,16 @@ const TopicDetail = () => {
       
       setTopic(topicResponse.data);
       
-      // Find related cases
-      const related = mindMapResponse.data.cases.filter(
+      // Find related cases and literature
+      const relatedCases = mindMapResponse.data.cases.filter(
         case_item => case_item.linked_topics.includes(id)
       );
-      setRelatedCases(related);
+      const relatedLit = mindMapResponse.data.literature?.filter(
+        lit => lit.linked_topics.includes(id)
+      ) || [];
+      
+      setRelatedCases(relatedCases);
+      setRelatedLiterature(relatedLit);
       setLoading(false);
     } catch (error) {
       console.error('Error loading topic data:', error);
@@ -527,6 +828,31 @@ const TopicDetail = () => {
                 <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
                   {topic.category}
                 </span>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Related Literature</h2>
+                <div className="space-y-3">
+                  {relatedLiterature.map(lit => (
+                    <div key={lit.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-medium text-gray-800">{lit.title}</h3>
+                          <p className="text-sm text-gray-600">{lit.authors} ({lit.year})</p>
+                        </div>
+                        <button
+                          onClick={() => navigate(`/literature/${lit.id}`)}
+                          className="text-purple-600 hover:text-purple-800 text-sm"
+                        >
+                          View Details →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {relatedLiterature.length === 0 && (
+                    <p className="text-gray-500 text-sm">No related literature found.</p>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -614,7 +940,7 @@ const TopicDetail = () => {
   );
 };
 
-// Case Detail Page (similar structure)
+// Case Detail Page (same as before)
 const CaseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -719,7 +1045,7 @@ const CaseDetail = () => {
   );
 };
 
-// Task Detail Page (similar structure)
+// Task Detail Page (same as before)
 const TaskDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -821,6 +1147,7 @@ function App() {
           <Route path="/topic/:id" element={<TopicDetail />} />
           <Route path="/case/:id" element={<CaseDetail />} />
           <Route path="/task/:id" element={<TaskDetail />} />
+          <Route path="/literature/:id" element={<LiteratureDetail />} />
         </Routes>
       </Router>
     </ReactFlowProvider>
