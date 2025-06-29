@@ -247,16 +247,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error deleting node:', error);
     }
-  const deleteNode = async (nodeId, nodeType) => {
-    try {
-      await axios.delete(`${API}/${nodeType}s/${nodeId}`);
-      setNodes((nds) => nds.filter(n => n.id !== `${nodeType}-${nodeId}`));
-      setEdges((eds) => eds.filter(e => 
-        !e.id.includes(`${nodeType}-${nodeId}`)
-      ));
-    } catch (error) {
-      console.error('Error deleting node:', error);
-    }
   };
 
   const arrangeNodesInCategory = (category) => {
