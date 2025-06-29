@@ -5,8 +5,6 @@ import './App.css';
 import axios from 'axios';
 import {
   ReactFlow,
-  Node,
-  Edge,
   addEdge,
   Background,
   Controls,
