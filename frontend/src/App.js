@@ -1339,6 +1339,7 @@ const Dashboard = () => {
               <div>• Double-click to view details</div>
               <div>• Hover and drag to reposition</div>
               <div>• {isEditing ? 'Connect nodes by dragging handles' : 'Edit mode: create connections'}</div>
+              <div>• Use "Realign Nodes" for auto layout</div>
               <div>• Zoom with mouse wheel</div>
             </div>
           </Panel>
