@@ -927,6 +927,22 @@ const Dashboard = () => {
       setEdges((eds) => eds.filter(e => 
         !e.id.includes(`${nodeType}-${nodeId}`)
       ));
+      
+      // Update mindMapData and trigger auto-save
+      setMindMapData(prevData => {
+        const updatedData = { ...prevData };
+        const collection = nodeType === 'literature' ? 'literature' : nodeType + 's';
+        
+        if (updatedData[collection]) {
+          updatedData[collection] = updatedData[collection].filter(item => item.id !== nodeId);
+        }
+        
+        // Trigger auto-save
+        autoSaveMindMapData(updatedData);
+        
+        return updatedData;
+      });
+      
     } catch (error) {
       console.error('Error deleting node:', error);
     }
