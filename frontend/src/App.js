@@ -604,17 +604,35 @@ const Dashboard = () => {
   };
 
   const arrangeNodesInCategory = (category) => {
-    // Calculate visible area
+    // Get current viewport information
+    const viewport = getViewport();
+    const { x, y, zoom } = viewport;
+    
+    // Calculate visible area based on current zoom and pan
     const viewportWidth = window.innerWidth - 320; // Subtract sidebar width
     const viewportHeight = window.innerHeight;
     
-    // Calculate arrangement area
-    const padding = 50; // Padding from edges
-    const arrangeWidth = viewportWidth - (padding * 2);
-    const arrangeHeight = Math.min(viewportHeight - (padding * 2), 200); // Limit height for horizontal arrangement
+    // Convert screen coordinates to flow coordinates
+    const visibleWidth = viewportWidth / zoom;
+    const visibleHeight = viewportHeight / zoom;
+    const centerX = -x / zoom;
+    const centerY = -y / zoom;
     
-    const categoryNodeSpacing = Math.min(280, arrangeWidth / 5); // Adaptive spacing
-    const baseY = 200; // Fixed Y position for horizontal arrangement
+    // Calculate arrangement area within visible bounds
+    const padding = 50 / zoom; // Scale padding with zoom
+    const arrangeWidth = visibleWidth - (padding * 2);
+    
+    const categoryNodeSpacing = Math.min(280, arrangeWidth / Math.max(1, nodes.filter(n => {
+      switch(category) {
+        case 'topics': return n.type === 'topic';
+        case 'literature': return n.type === 'literature';
+        case 'cases': return n.type === 'case';
+        case 'tasks': return n.type === 'task';
+        default: return false;
+      }
+    }).length));
+    
+    const baseY = centerY; // Use center of current view
     
     let arrangedNodes = [...nodes];
     let categoryNodes = [];
@@ -635,12 +653,12 @@ const Dashboard = () => {
         break;
     }
 
-    // Arrange selected category nodes horizontally
+    // Arrange selected category nodes horizontally within current view
     categoryNodes.forEach((node, index) => {
       const nodeIndex = arrangedNodes.findIndex(n => n.id === node.id);
       if (nodeIndex !== -1) {
-        const totalWidth = (categoryNodes.length - 1) * categoryNodeSpacing;
-        const startX = -totalWidth / 2; // Center horizontally
+        const totalWidth = Math.max(0, (categoryNodes.length - 1) * categoryNodeSpacing);
+        const startX = centerX - totalWidth / 2;
         
         arrangedNodes[nodeIndex] = {
           ...arrangedNodes[nodeIndex],
@@ -655,14 +673,29 @@ const Dashboard = () => {
     setNodes(arrangedNodes);
     setFocusedCategory(category);
 
-    // Center view on the arranged nodes
+    // Gently adjust view to ensure all nodes are visible
     if (categoryNodes.length > 0) {
       setTimeout(() => {
-        fitView({ 
-          padding: 0.1, 
-          duration: 800,
-          nodes: categoryNodes.map(node => ({ id: node.id }))
-        });
+        const totalWidth = Math.max(0, (categoryNodes.length - 1) * categoryNodeSpacing);
+        const bounds = {
+          x: centerX - totalWidth / 2 - 100,
+          y: baseY - 100,
+          width: totalWidth + 200,
+          height: 200
+        };
+        
+        // Only adjust view if nodes would be outside current viewport
+        const nodesFitInView = bounds.width <= visibleWidth && 
+                              bounds.x >= centerX - visibleWidth/2 && 
+                              bounds.x + bounds.width <= centerX + visibleWidth/2;
+        
+        if (!nodesFitInView) {
+          fitView({ 
+            padding: 0.1, 
+            duration: 800,
+            nodes: categoryNodes.map(node => ({ id: node.id }))
+          });
+        }
       }, 100);
     }
   };
