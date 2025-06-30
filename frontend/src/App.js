@@ -488,37 +488,124 @@ const TopicNode = ({ data, selected }) => {
 };
 
 const CaseNode = ({ data, selected }) => {
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'active': return 'bg-green-100 text-green-800 border-green-200';
+      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'follow_up': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default: return 'bg-blue-100 text-blue-800 border-blue-200';
+    }
+  };
+
+  const getUrgencyLevel = (data) => {
+    // Simple urgency calculation based on keywords
+    const urgentKeywords = ['emergency', 'urgent', 'crisis', 'acute', 'severe'];
+    const complaint = data.chief_complaint?.toLowerCase() || '';
+    const diagnosis = data.diagnosis?.toLowerCase() || '';
+    
+    if (urgentKeywords.some(keyword => complaint.includes(keyword) || diagnosis.includes(keyword))) {
+      return 'high';
+    }
+    return 'normal';
+  };
+
+  const urgency = getUrgencyLevel(data);
+
   return (
     <div 
-      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] bg-white relative hover:shadow-2xl hover:scale-105 ${
+      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[220px] bg-white relative hover:shadow-2xl transform hover:scale-105 ${
         selected 
           ? 'border-blue-400 shadow-xl scale-105 ring-4 ring-blue-200' 
           : 'border-gray-200 hover:border-blue-300 hover:ring-2 hover:ring-blue-100'
-      }`}
+      } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''}`}
     >
-      {/* Connection Handles */}
-      <Handle type="target" position={Position.Top} className="w-3 h-3 !bg-blue-500" />
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 !bg-blue-500" />
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-blue-500" />
-      <Handle type="target" position={Position.Right} className="w-3 h-3 !bg-blue-500" />
+      {/* Connection Handles with enhanced styling */}
+      <Handle 
+        type="target" 
+        position={Position.Top} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150" 
+      />
+      <Handle 
+        type="source" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150" 
+      />
+      <Handle 
+        type="target" 
+        position={Position.Left} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150" 
+      />
+      <Handle 
+        type="target" 
+        position={Position.Right} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150" 
+      />
       
-      <div className="flex items-center gap-2 mb-1">
-        <Users size={16} className="text-blue-600" />
-        <div className="font-semibold text-sm text-gray-800">{data.label}</div>
+      {/* Urgency indicator */}
+      {urgency === 'high' && (
+        <div className="absolute -top-2 -right-2">
+          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+            <AlertCircle size={14} className="text-white" />
+          </div>
+        </div>
+      )}
+      
+      <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-1">
+          <Users size={16} className="text-blue-600" />
+          {data.linked_topics && data.linked_topics.length > 0 && (
+            <div className="text-xs bg-blue-100 text-blue-600 px-1 rounded">
+              {data.linked_topics.length}
+            </div>
+          )}
+        </div>
+        <div className="font-semibold text-sm text-gray-800 truncate flex-1">{data.label}</div>
         {data.onDelete && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               data.onDelete();
             }}
-            className="ml-auto p-1 hover:bg-gray-200 rounded"
+            className="ml-auto p-1 hover:bg-gray-200 rounded transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
           >
             <X size={12} />
           </button>
         )}
       </div>
-      <div className="text-xs text-gray-600">{data.diagnosis}</div>
-      <div className="text-xs text-blue-600 mt-1">{data.age && `Age: ${data.age}`}</div>
+      
+      <div className="text-xs text-gray-600 mb-2 truncate">{data.diagnosis}</div>
+      
+      {/* Enhanced patient info */}
+      <div className="space-y-1">
+        {data.age && (
+          <div className="text-xs text-blue-600 flex items-center gap-1">
+            <Calendar size={10} />
+            Age: {data.age}
+          </div>
+        )}
+        
+        {/* Status badge */}
+        {data.status && (
+          <span className={`inline-block px-2 py-1 rounded-full text-xs border ${getStatusColor(data.status)}`}>
+            {data.status}
+          </span>
+        )}
+      </div>
+      
+      {/* Progress indicators */}
+      {data.tasks_count && data.tasks_count > 0 && (
+        <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+          <CheckSquare size={10} />
+          {data.completed_tasks || 0}/{data.tasks_count} tasks
+        </div>
+      )}
+      
+      {/* Last updated indicator */}
+      {data.updated_at && (
+        <div className="absolute bottom-1 right-1 opacity-30">
+          <Clock size={10} />
+        </div>
+      )}
     </div>
   );
 };
