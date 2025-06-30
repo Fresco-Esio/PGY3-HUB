@@ -749,7 +749,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
 const Dashboard = () => {
   const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesState] = useEdgesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [mindMapData, setMindMapData] = useState({ topics: [], cases: [], tasks: [], literature: [] });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
