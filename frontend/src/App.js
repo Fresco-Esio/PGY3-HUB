@@ -1877,45 +1877,65 @@ const Dashboard = () => {
     }
   };
 
-  // CSV Export functionality
+  // Enhanced CSV Export functionality with progress tracking
   const handleExportPatientCases = async () => {
     try {
       setIsExportingCSV(true);
+      setExportProgress({ show: true, progress: 0, message: 'Initializing export...' });
       
       if (!mindMapData.cases || mindMapData.cases.length === 0) {
-        alert('No patient cases found to export.');
+        addToast('No patient cases found to export.', 'error');
         return;
       }
       
       console.log('Exporting', mindMapData.cases.length, 'patient cases...');
+      addToast('Starting export...', 'info', 2000);
       
-      // Generate CSV content
-      const csvContent = csvUtils.generatePatientCasesCSV(mindMapData.cases);
+      // Generate CSV content with progress tracking
+      const csvContent = csvUtils.generatePatientCasesCSV(mindMapData.cases, (progress, message) => {
+        setExportProgress({ show: true, progress, message });
+      });
       
       if (!csvContent) {
-        alert('Error generating CSV content.');
+        addToast('Error generating CSV content.', 'error');
         return;
       }
       
-      // Generate filename with current date
+      // Generate filename with current date and time
       const currentDate = new Date().toISOString().split('T')[0];
-      const filename = `patient_cases_${currentDate}.csv`;
+      const currentTime = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
+      const filename = `patient_cases_${currentDate}_${currentTime}.csv`;
+      
+      setExportProgress({ show: true, progress: 95, message: 'Downloading file...' });
       
       // Download the CSV file
       csvUtils.downloadCSV(csvContent, filename);
       
       console.log(`Successfully exported ${mindMapData.cases.length} patient cases to ${filename}`);
       
-      // Show success feedback
+      // Show enhanced success feedback with statistics
+      const summary = csvUtils.generateCasesSummary(mindMapData.cases);
+      const successMessage = `Successfully exported ${mindMapData.cases.length} patient cases! 
+        Primary diagnoses: ${Object.keys(summary.diagnoses).length}`;
+      
       setTimeout(() => {
-        alert(`Successfully exported ${mindMapData.cases.length} patient cases!`);
-      }, 100);
+        addToast(successMessage, 'success', 5000);
+        setExportProgress({ show: true, progress: 100, message: 'Export complete!' });
+        
+        // Hide progress after delay
+        setTimeout(() => {
+          setExportProgress({ show: false, progress: 0, message: '' });
+        }, 2000);
+      }, 500);
       
     } catch (error) {
       console.error('Error exporting patient cases:', error);
-      alert('Error exporting patient cases. Please try again.');
+      addToast('Error exporting patient cases. Please try again.', 'error');
+      setExportProgress({ show: false, progress: 0, message: '' });
     } finally {
-      setIsExportingCSV(false);
+      setTimeout(() => {
+        setIsExportingCSV(false);
+      }, 2000);
     }
   };
 
