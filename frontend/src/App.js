@@ -1690,6 +1690,19 @@ const Dashboard = () => {
               </div>
             </>
           )}
+
+          {/* Auto-save status indicator */}
+          {lastSaved && (
+            <div className="mt-4 p-3 bg-slate-700 bg-opacity-30 rounded-lg">
+              <div className="flex items-center gap-2 text-xs text-slate-300">
+                <Cloud size={12} />
+                <span>Auto-saved</span>
+              </div>
+              <div className="text-xs text-slate-400 mt-1">
+                {lastSaved.toLocaleTimeString()}
+              </div>
+            </div>
+          )}
         </div>
 
         {mindMapData.topics.length === 0 && (
