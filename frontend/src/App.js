@@ -217,10 +217,32 @@ const SubpageWindow = ({ type, data, onClose }) => {
   const handleSave = async () => {
     try {
       const endpoint = type === 'literature' ? 'literature' : `${type}s`;
-      await axios.put(`${API}/${endpoint}/${data.id}`, editData);
+      const response = await axios.put(`${API}/${endpoint}/${data.id}`, editData);
       setIsEditing(false);
       setOriginalData(editData);
-      // Optionally refresh the data or show success message
+      
+      // Update the mind map data and refresh nodes
+      const updatedData = response.data;
+      setMindMapData(prevData => {
+        const newData = { ...prevData };
+        if (type === 'literature') {
+          newData.literature = newData.literature.map(item => 
+            item.id === data.id ? updatedData : item
+          );
+        } else {
+          const key = type + 's';
+          newData[key] = newData[key].map(item => 
+            item.id === data.id ? updatedData : item
+          );
+        }
+        return newData;
+      });
+      
+      // Refresh the visual nodes to reflect changes
+      setTimeout(() => {
+        loadMindMapData();
+      }, 100);
+      
     } catch (error) {
       console.error('Error saving data:', error);
     }
