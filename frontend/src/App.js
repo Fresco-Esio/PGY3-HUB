@@ -1193,6 +1193,8 @@ const Dashboard = () => {
           type={openSubpage.type}
           data={subpageData}
           onClose={closeSubpage}
+          setMindMapData={setMindMapData}
+          loadMindMapData={loadMindMapData}
         />
       )}
 
