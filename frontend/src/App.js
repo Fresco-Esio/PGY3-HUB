@@ -597,6 +597,8 @@ const Dashboard = () => {
   const [showNodeSelector, setShowNodeSelector] = useState(false);
   const [openSubpage, setOpenSubpage] = useState(null); // { type, data }
   const [subpageData, setSubpageData] = useState(null);
+  const [isReactFlowReady, setIsReactFlowReady] = useState(false);
+  const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
 
   const handleNodesChange = useCallback((changes) => {
     onNodesChange(changes);
