@@ -517,7 +517,6 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
 
 // Main Dashboard Component
 const Dashboard = () => {
-  const navigate = useNavigate();
   const { fitView, setCenter, zoomTo } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
