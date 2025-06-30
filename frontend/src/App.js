@@ -1088,7 +1088,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   );
 };
 
-// Main Dashboard Component
+// Enhanced Main Dashboard Component with improved visual effects
 const Dashboard = () => {
   const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -1105,12 +1105,42 @@ const Dashboard = () => {
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
   const [isExportingCSV, setIsExportingCSV] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [exportProgress, setExportProgress] = useState({ show: false, progress: 0, message: '' });
+  
+  // Toast notifications state
+  const [toasts, setToasts] = useState([]);
 
-  // Auto-save function with debouncing
-  const autoSaveMindMapData = useCallback((data) => {
-    localStorageUtils.save(data);
-    setLastSaved(new Date());
+  // Helper function to add toast notifications
+  const addToast = useCallback((message, type = 'success', duration = 3000) => {
+    const id = Date.now();
+    const newToast = { id, message, type, duration };
+    setToasts(prev => [...prev, newToast]);
   }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
+  // Enhanced auto-save function with visual feedback
+  const autoSaveMindMapData = useCallback((data) => {
+    const onSaveStart = () => {
+      setIsSaving(true);
+    };
+    
+    const onSaveComplete = (success, error) => {
+      setIsSaving(false);
+      if (success) {
+        setLastSaved(new Date());
+        addToast('Data auto-saved', 'saving', 2000);
+      } else {
+        addToast('Auto-save failed', 'error', 4000);
+        console.error('Auto-save error:', error);
+      }
+    };
+
+    localStorageUtils.save(data, onSaveStart, onSaveComplete);
+  }, [addToast]);
 
   // Modified handleNodesChange to trigger auto-save
   const handleNodesChange = useCallback((changes) => {
