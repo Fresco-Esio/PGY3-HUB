@@ -2073,18 +2073,42 @@ const Dashboard = () => {
             </>
           )}
 
-          {/* Auto-save status indicator */}
-          {lastSaved && (
-            <div className="mt-4 p-3 bg-slate-700 bg-opacity-30 rounded-lg">
+          {/* Enhanced Auto-save status indicator */}
+          <div className="mt-4 p-3 bg-slate-700 bg-opacity-30 rounded-lg border border-slate-600">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-slate-300">
-                <Cloud size={12} />
-                <span>Auto-saved</span>
+                {isSaving ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin text-purple-400" />
+                    <span className="text-purple-400">Saving...</span>
+                  </>
+                ) : lastSaved ? (
+                  <>
+                    <CheckCircle2 size={12} className="text-green-400" />
+                    <span className="text-green-400">Auto-saved</span>
+                  </>
+                ) : (
+                  <>
+                    <Cloud size={12} className="text-slate-400" />
+                    <span>Ready</span>
+                  </>
+                )}
               </div>
-              <div className="text-xs text-slate-400 mt-1">
-                {lastSaved.toLocaleTimeString()}
+              {lastSaved && (
+                <div className="text-xs text-slate-400">
+                  {lastSaved.toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+            
+            {/* Storage info */}
+            <div className="mt-2 text-xs text-slate-500">
+              <div className="flex items-center gap-1">
+                <Eye size={10} />
+                <span>Local storage active</span>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {mindMapData.topics.length === 0 && (
