@@ -916,64 +916,111 @@ const Dashboard = () => {
   };
 
   // Dagre layout configuration
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-  const nodeWidth = 220;
-  const nodeHeight = 100;
-
   const getLayoutedElements = (nodes, edges, direction = 'TB') => {
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+    
     const isHorizontal = direction === 'LR';
-    dagreGraph.setGraph({ rankdir: direction, nodesep: 70, ranksep: 100 });
-
-    nodes.forEach((node) => {
-      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    
+    // Configure layout with better spacing for mind map
+    dagreGraph.setGraph({ 
+      rankdir: direction, 
+      nodesep: 80,      // Horizontal spacing between nodes
+      ranksep: 120,     // Vertical spacing between ranks
+      edgesep: 20,      // Spacing between edges
+      marginx: 50,      // Margin around the graph
+      marginy: 50
     });
 
+    // Define node dimensions based on type
+    const getNodeDimensions = (node) => {
+      switch (node.type) {
+        case 'topic':
+          return { width: 240, height: 120 };
+        case 'literature':
+          return { width: 220, height: 110 };
+        case 'case':
+          return { width: 220, height: 110 };
+        case 'task':
+          return { width: 200, height: 100 };
+        default:
+          return { width: 220, height: 100 };
+      }
+    };
+
+    // Add nodes to dagre graph
+    nodes.forEach((node) => {
+      const dimensions = getNodeDimensions(node);
+      dagreGraph.setNode(node.id, dimensions);
+    });
+
+    // Add edges to dagre graph
     edges.forEach((edge) => {
       dagreGraph.setEdge(edge.source, edge.target);
     });
 
+    // Apply layout
     dagre.layout(dagreGraph);
 
-    nodes.forEach((node) => {
+    // Update node positions
+    const layoutedNodes = nodes.map((node) => {
       const nodeWithPosition = dagreGraph.node(node.id);
-      node.targetPosition = isHorizontal ? 'left' : 'top';
-      node.sourcePosition = isHorizontal ? 'right' : 'bottom';
-
-      // Shift to center the node based on its dimensions
-      node.position = {
-        x: nodeWithPosition.x - nodeWidth / 2,
-        y: nodeWithPosition.y - nodeHeight / 2,
+      const dimensions = getNodeDimensions(node);
+      
+      return {
+        ...node,
+        targetPosition: isHorizontal ? 'left' : 'top',
+        sourcePosition: isHorizontal ? 'right' : 'bottom',
+        position: {
+          x: nodeWithPosition.x - dimensions.width / 2,
+          y: nodeWithPosition.y - dimensions.height / 2,
+        },
       };
-
-      return node;
     });
 
-    return { nodes, edges };
+    return { nodes: layoutedNodes, edges };
   };
 
   const applyLayout = () => {
-    if (nodes.length === 0) {
+    // Edge case: No nodes to layout
+    if (!nodes || nodes.length === 0) {
       console.log('No nodes to realign');
       return;
     }
 
-    console.log('Applying layout to', nodes.length, 'nodes and', edges.length, 'edges');
-    
-    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-      nodes,
-      edges,
-      'TB' // Top to Bottom layout
-    );
+    try {
+      console.log(`Applying hierarchical layout to ${nodes.length} nodes and ${edges.length} edges`);
+      
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+        nodes,
+        edges,
+        'TB' // Top to Bottom hierarchical layout
+      );
 
-    setNodes([...layoutedNodes]);
-    setEdges([...layoutedEdges]);
+      // Update node positions with smooth transition
+      setNodes([...layoutedNodes]);
+      setEdges([...layoutedEdges]);
 
-    // Fit view to show all realigned nodes
-    setTimeout(() => {
-      fitView({ duration: 800, padding: 0.1 });
-    }, 100);
+      // Auto-save positions to backend
+      setTimeout(() => {
+        console.log('Auto-saving realigned positions...');
+        // The handleNodesChange will trigger auto-save
+      }, 200);
+
+      // Adjust viewport to show all realigned nodes
+      setTimeout(() => {
+        fitView({ 
+          duration: 1000, 
+          padding: 0.15,
+          includeHiddenNodes: false
+        });
+      }, 300);
+
+      console.log('Layout applied successfully');
+      
+    } catch (error) {
+      console.error('Error applying layout:', error);
+    }
   };
 
   const initSampleData = async () => {
