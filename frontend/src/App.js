@@ -248,9 +248,36 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData })
     }
   };
 
-  const handleCancel = () => {
-    setEditData(originalData);
-    setIsEditing(false);
+  const handleDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+      try {
+        const endpoint = type === 'literature' ? 'literature' : `${type}s`;
+        await axios.delete(`${API}/${endpoint}/${data.id}`);
+        
+        // Update mind map data
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          if (type === 'literature') {
+            newData.literature = newData.literature.filter(item => item.id !== data.id);
+          } else {
+            const key = type + 's';
+            newData[key] = newData[key].filter(item => item.id !== data.id);
+          }
+          return newData;
+        });
+        
+        // Refresh the visual nodes
+        setTimeout(() => {
+          loadMindMapData();
+        }, 100);
+        
+        // Close the subpage
+        onClose();
+        
+      } catch (error) {
+        console.error('Error deleting data:', error);
+      }
+    }
   };
 
   if (!data) {
