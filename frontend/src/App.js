@@ -55,6 +55,73 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Toast Notification System
+const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, duration);
+    return () => clearTimeout(timer);
+  }, [onClose, duration]);
+
+  const getToastStyles = () => {
+    const baseStyles = "fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-500 transform";
+    const typeStyles = {
+      success: "bg-green-600 text-white border-l-4 border-green-400",
+      error: "bg-red-600 text-white border-l-4 border-red-400",
+      info: "bg-blue-600 text-white border-l-4 border-blue-400",
+      saving: "bg-purple-600 text-white border-l-4 border-purple-400"
+    };
+    return `${baseStyles} ${typeStyles[type]}`;
+  };
+
+  const getIcon = () => {
+    switch(type) {
+      case 'success': return <CheckCircle2 size={16} className="mr-2" />;
+      case 'error': return <AlertCircle size={16} className="mr-2" />;
+      case 'info': return <Info size={16} className="mr-2" />;
+      case 'saving': return <Loader2 size={16} className="mr-2 animate-spin" />;
+      default: return <CheckCircle2 size={16} className="mr-2" />;
+    }
+  };
+
+  return (
+    <div className={getToastStyles()}>
+      <div className="flex items-center">
+        {getIcon()}
+        <span className="text-sm font-medium">{message}</span>
+        <button
+          onClick={onClose}
+          className="ml-4 text-white hover:text-gray-200 transition-colors"
+        >
+          <X size={14} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Loading Button Component
+const LoadingButton = ({ onClick, loading, disabled, children, className, icon: Icon, ...props }) => {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`${className} transform transition-all duration-200 hover:scale-105 active:scale-95 ${
+        disabled || loading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
+      }`}
+      {...props}
+    >
+      <div className="flex items-center gap-2">
+        {loading ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : Icon ? (
+          <Icon size={16} />
+        ) : null}
+        {children}
+      </div>
+    </button>
+  );
+};
+
 // localStorage utilities
 const STORAGE_KEY = 'pgy3_mindmap_data';
 const STORAGE_VERSION = '1.0';
