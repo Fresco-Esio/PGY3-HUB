@@ -749,7 +749,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
 const Dashboard = () => {
   const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [edges, setEdges, onEdgesState] = useEdgesState([]);
   const [mindMapData, setMindMapData] = useState({ topics: [], cases: [], tasks: [], literature: [] });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -760,20 +760,45 @@ const Dashboard = () => {
   const [subpageData, setSubpageData] = useState(null);
   const [isReactFlowReady, setIsReactFlowReady] = useState(false);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
+  const [isExportingCSV, setIsExportingCSV] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
 
+  // Auto-save function with debouncing
+  const autoSaveMindMapData = useCallback((data) => {
+    localStorageUtils.save(data);
+    setLastSaved(new Date());
+  }, []);
+
+  // Modified handleNodesChange to trigger auto-save
   const handleNodesChange = useCallback((changes) => {
     onNodesChange(changes);
     
     // Auto-save when nodes are moved
     const moveChanges = changes.filter(change => change.type === 'position' && change.dragging === false);
     if (moveChanges.length > 0) {
-      // Auto-save positions after a short delay
+      // Update mindMapData with new positions and trigger auto-save
       setTimeout(() => {
-        console.log('Auto-saving node positions...');
-        // Here you could make API calls to save positions if needed
-      }, 500);
+        const updatedData = { ...mindMapData };
+        
+        // Update positions in mindMapData
+        nodes.forEach(node => {
+          const [nodeType, nodeId] = node.id.split('-');
+          const collection = nodeType === 'literature' ? 'literature' : nodeType + 's';
+          
+          if (updatedData[collection]) {
+            const item = updatedData[collection].find(item => item.id === nodeId);
+            if (item) {
+              item.position = node.position;
+            }
+          }
+        });
+        
+        setMindMapData(updatedData);
+        autoSaveMindMapData(updatedData);
+        console.log('Node positions auto-saved to localStorage');
+      }, 100);
     }
-  }, [onNodesChange]);
+  }, [onNodesChange, mindMapData, nodes, autoSaveMindMapData]);
 
   useEffect(() => {
     loadMindMapData();
