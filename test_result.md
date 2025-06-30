@@ -101,3 +101,101 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Implement two key features for the psychiatry resident dashboard:
+  1. Robust Local Data Persistence: Use localStorage to store all mind map data (topics, literature, cases, tasks, connections, node positions) with debounced auto-saving (500-1000ms delay) and auto-loading on app start with fallback to backend API
+  2. Patient Case CSV Export: Add 'Export Patient Cases' button in sidebar to export all case data as downloadable CSV file with visual feedback
+
+backend:
+  - task: "Verify existing mind map API endpoints work correctly"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "All CRUD endpoints for topics, cases, tasks, literature are implemented. /api/mindmap-data endpoint returns all data. Position fields exist in models."
+
+frontend:
+  - task: "Implement localStorage utilities with debounced auto-saving"
+    implemented: false
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to implement localStorage save/load utilities with debounced saving mechanism"
+
+  - task: "Auto-load mind map data from localStorage on startup"
+    implemented: false
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to modify loadMindMapData to check localStorage first, fallback to API"
+
+  - task: "Auto-save mind map data on changes"
+    implemented: false
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to hook into existing state changes and trigger debounced localStorage saves"
+
+  - task: "Add CSV export button to sidebar"
+    implemented: false
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to add Export Patient Cases button in sidebar with proper styling"
+
+  - task: "Implement CSV export functionality"
+    implemented: false
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need CSV generation, data transformation, and download trigger functionality"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Implement localStorage utilities with debounced auto-saving"
+    - "Auto-load mind map data from localStorage on startup"
+    - "Auto-save mind map data on changes"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "main"
+      message: "Starting implementation of localStorage persistence and CSV export features. Backend APIs are already functional. Focus will be on frontend localStorage integration first, then CSV export functionality."
