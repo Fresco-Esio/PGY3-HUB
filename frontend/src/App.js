@@ -1493,6 +1493,48 @@ const Dashboard = () => {
     }
   };
 
+  // CSV Export functionality
+  const handleExportPatientCases = async () => {
+    try {
+      setIsExportingCSV(true);
+      
+      if (!mindMapData.cases || mindMapData.cases.length === 0) {
+        alert('No patient cases found to export.');
+        return;
+      }
+      
+      console.log('Exporting', mindMapData.cases.length, 'patient cases...');
+      
+      // Generate CSV content
+      const csvContent = csvUtils.generatePatientCasesCSV(mindMapData.cases);
+      
+      if (!csvContent) {
+        alert('Error generating CSV content.');
+        return;
+      }
+      
+      // Generate filename with current date
+      const currentDate = new Date().toISOString().split('T')[0];
+      const filename = `patient_cases_${currentDate}.csv`;
+      
+      // Download the CSV file
+      csvUtils.downloadCSV(csvContent, filename);
+      
+      console.log(`Successfully exported ${mindMapData.cases.length} patient cases to ${filename}`);
+      
+      // Show success feedback
+      setTimeout(() => {
+        alert(`Successfully exported ${mindMapData.cases.length} patient cases!`);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error exporting patient cases:', error);
+      alert('Error exporting patient cases. Please try again.');
+    } finally {
+      setIsExportingCSV(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
