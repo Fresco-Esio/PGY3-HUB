@@ -2198,6 +2198,54 @@ const Dashboard = () => {
         onClose={() => setShowNodeSelector(false)}
         onSelect={addNewNode}
       />
+
+      {/* Toast Notifications */}
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => removeToast(toast.id)}
+          duration={toast.duration}
+        />
+      ))}
+
+      {/* Export Progress Modal */}
+      {exportProgress.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="mb-4">
+                <Loader2 size={40} className="mx-auto text-blue-600 animate-spin" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Exporting Patient Cases</h3>
+              <p className="text-sm text-gray-600 mb-4">{exportProgress.message}</p>
+              
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                <div 
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${exportProgress.progress}%` }}
+                />
+              </div>
+              
+              <div className="text-sm font-medium text-blue-600">
+                {Math.round(exportProgress.progress)}% Complete
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Auto-save Indicator */}
+      {isSaving && (
+        <div className="fixed bottom-4 left-4 z-40">
+          <div className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-pulse">
+            <Loader2 size={16} className="animate-spin" />
+            <span className="text-sm font-medium">Saving...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
