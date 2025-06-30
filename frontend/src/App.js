@@ -1039,7 +1039,270 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
   );
 };
 
-// Node Selector Modal Component
+// Enhanced Dedicated Editing Form Component
+const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
+  const [formData, setFormData] = useState(data);
+  const [activeTab, setActiveTab] = useState('basic');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const tabs = {
+    basic: 'Basic Info',
+    details: 'Details',
+    notes: 'Notes & Tags',
+    history: 'History'
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    switch(type) {
+      case 'topic':
+        if (!formData.title?.trim()) newErrors.title = 'Title is required';
+        if (!formData.category?.trim()) newErrors.category = 'Category is required';
+        break;
+      case 'case':
+        if (!formData.case_id?.trim()) newErrors.case_id = 'Case ID is required';
+        if (!formData.primary_diagnosis?.trim()) newErrors.primary_diagnosis = 'Primary diagnosis is required';
+        break;
+      case 'task':
+        if (!formData.title?.trim()) newErrors.title = 'Title is required';
+        break;
+      case 'literature':
+        if (!formData.title?.trim()) newErrors.title = 'Title is required';
+        if (!formData.authors?.trim()) newErrors.authors = 'Authors are required';
+        break;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+    
+    setIsSubmitting(true);
+    try {
+      await onSave(formData);
+    } catch (error) {
+      console.error('Error saving:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const updateFormData = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: null }));
+    }
+  };
+
+  const renderBasicTab = () => {
+    switch(type) {
+      case 'topic':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+              <input
+                type="text"
+                value={formData.title || ''}
+                onChange={(e) => updateFormData('title', e.target.value)}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  errors.title ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Enter topic title"
+              />
+              {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+              <select
+                value={formData.category || ''}
+                onChange={(e) => updateFormData('category', e.target.value)}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  errors.category ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select category</option>
+                <option value="Mood Disorders">Mood Disorders</option>
+                <option value="Anxiety Disorders">Anxiety Disorders</option>
+                <option value="Psychotic Disorders">Psychotic Disorders</option>
+                <option value="Personality Disorders">Personality Disorders</option>
+                <option value="Substance Use Disorders">Substance Use Disorders</option>
+                <option value="Other">Other</option>
+              </select>
+              {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Color Theme</label>
+              <div className="flex gap-2">
+                {['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'].map(color => (
+                  <button
+                    key={color}
+                    onClick={() => updateFormData('color', color)}
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      formData.color === color ? 'border-gray-800' : 'border-gray-300'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'case':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Case ID *</label>
+                <input
+                  type="text"
+                  value={formData.case_id || ''}
+                  onChange={(e) => updateFormData('case_id', e.target.value)}
+                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                    errors.case_id ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  placeholder="CASE-001"
+                />
+                {errors.case_id && <p className="text-red-500 text-xs mt-1">{errors.case_id}</p>}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                <input
+                  type="number"
+                  value={formData.age || ''}
+                  onChange={(e) => updateFormData('age', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  min="0"
+                  max="120"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Primary Diagnosis *</label>
+              <input
+                type="text"
+                value={formData.primary_diagnosis || ''}
+                onChange={(e) => updateFormData('primary_diagnosis', e.target.value)}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  errors.primary_diagnosis ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Enter primary diagnosis"
+              />
+              {errors.primary_diagnosis && <p className="text-red-500 text-xs mt-1">{errors.primary_diagnosis}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <select
+                value={formData.gender || ''}
+                onChange={(e) => updateFormData('gender', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Non-binary">Non-binary</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        );
+      
+      default:
+        return <div>Basic form for {type}</div>;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold capitalize flex items-center gap-2">
+              <Sparkles size={20} />
+              Enhanced {type} Editor
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <div className="flex">
+            {Object.entries(tabs).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`px-6 py-3 text-sm font-medium transition-colors ${
+                  activeTab === key
+                    ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          {activeTab === 'basic' && renderBasicTab()}
+          {activeTab === 'details' && <div>Details content for {type}</div>}
+          {activeTab === 'notes' && <div>Notes and tags content</div>}
+          {activeTab === 'history' && <div>History content</div>}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
+          <div className="flex gap-2">
+            {onDelete && (
+              <LoadingButton
+                onClick={onDelete}
+                icon={Trash2}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+              >
+                Delete
+              </LoadingButton>
+            )}
+          </div>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <LoadingButton
+              onClick={handleSubmit}
+              loading={isSubmitting}
+              icon={isSubmitting ? Loader2 : Save}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </LoadingButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   if (!isOpen) return null;
 
