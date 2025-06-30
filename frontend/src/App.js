@@ -364,45 +364,123 @@ const csvUtils = {
   }
 };
 
-// Custom Node Components with Connection Handles and Enhanced Hover
+// Enhanced Custom Node Components with better visual effects and data
 const TopicNode = ({ data, selected }) => {
+  const completionPercentage = data.flashcard_count > 0 
+    ? ((data.completed_flashcards || 0) / data.flashcard_count) * 100 
+    : 0;
+
   return (
     <div 
-      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] relative hover:shadow-2xl hover:scale-105 ${
+      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[220px] relative hover:shadow-2xl transform hover:scale-105 backdrop-blur-sm ${
         selected 
-          ? 'border-teal-400 shadow-xl scale-105 ring-4 ring-teal-200' 
+          ? 'border-teal-400 shadow-xl scale-105 ring-4 ring-teal-200 animate-pulse' 
           : 'border-transparent hover:border-teal-300 hover:ring-2 hover:ring-teal-100'
       }`}
       style={{ 
         backgroundColor: data.color || '#3B82F6',
-        color: 'white'
+        color: 'white',
+        boxShadow: selected 
+          ? `0 0 20px ${data.color || '#3B82F6'}40` 
+          : `0 4px 20px ${data.color || '#3B82F6'}20`
       }}
     >
-      {/* Connection Handles */}
-      <Handle type="target" position={Position.Top} className="w-3 h-3 !bg-white border-2 border-current" />
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 !bg-white border-2 border-current" />
-      <Handle type="source" position={Position.Left} className="w-3 h-3 !bg-white border-2 border-current" />
-      <Handle type="source" position={Position.Right} className="w-3 h-3 !bg-white border-2 border-current" />
+      {/* Connection Handles with enhanced styling */}
+      <Handle 
+        type="target" 
+        position={Position.Top} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+      />
+      <Handle 
+        type="source" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+      />
+      <Handle 
+        type="source" 
+        position={Position.Left} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+      />
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+      />
       
-      <div className="flex items-center gap-2 mb-1">
-        <Brain size={16} />
-        <div className="font-semibold text-sm">{data.label}</div>
+      {/* Priority indicator */}
+      {data.priority && (
+        <div className="absolute -top-2 -right-2">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white ${
+            data.priority === 'high' ? 'bg-red-500' :
+            data.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+          }`}>
+            {data.priority === 'high' ? '!' : data.priority === 'medium' ? '•' : '✓'}
+          </div>
+        </div>
+      )}
+      
+      <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-1">
+          <Brain size={16} className="drop-shadow-sm" />
+          {data.tags && data.tags.length > 0 && (
+            <Tag size={12} className="opacity-75" />
+          )}
+        </div>
+        <div className="font-semibold text-sm truncate flex-1">{data.label}</div>
         {data.onDelete && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               data.onDelete();
             }}
-            className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded"
+            className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
           >
             <X size={12} />
           </button>
         )}
       </div>
-      <div className="text-xs opacity-90">{data.category}</div>
+      
+      <div className="text-xs opacity-90 mb-2">{data.category}</div>
+      
+      {/* Enhanced progress display */}
       {data.flashcard_count > 0 && (
-        <div className="text-xs mt-2 bg-white bg-opacity-20 rounded px-2 py-1">
-          {data.completed_flashcards}/{data.flashcard_count} flashcards
+        <div className="text-xs mt-2 space-y-1">
+          <div className="flex justify-between items-center">
+            <span className="opacity-90">{data.completed_flashcards}/{data.flashcard_count} flashcards</span>
+            <span className="font-semibold">{Math.round(completionPercentage)}%</span>
+          </div>
+          <div className="w-full bg-white bg-opacity-20 rounded-full h-2 overflow-hidden">
+            <div 
+              className="h-full bg-white rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Tags display */}
+      {data.tags && data.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {data.tags.slice(0, 3).map((tag, index) => (
+            <span 
+              key={index} 
+              className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs"
+            >
+              {tag}
+            </span>
+          ))}
+          {data.tags.length > 3 && (
+            <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
+              +{data.tags.length - 3}
+            </span>
+          )}
+        </div>
+      )}
+      
+      {/* Last updated indicator */}
+      {data.updated_at && (
+        <div className="absolute bottom-1 right-1 opacity-50">
+          <Clock size={10} />
         </div>
       )}
     </div>
