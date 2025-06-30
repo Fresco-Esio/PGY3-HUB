@@ -631,11 +631,36 @@ const Dashboard = () => {
       setMindMapData(response.data);
       convertDataToReactFlow(response.data);
       setLoading(false);
+      
+      // Apply initial layout if React Flow is ready and data has nodes
+      if (isReactFlowReady && !hasAppliedInitialLayout && 
+          (response.data.topics.length > 0 || response.data.cases.length > 0 || 
+           response.data.tasks.length > 0 || response.data.literature?.length > 0)) {
+        setTimeout(() => {
+          console.log('Applying initial hierarchical layout...');
+          applyLayout();
+          setHasAppliedInitialLayout(true);
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error loading mind map data:', error);
       setLoading(false);
     }
   };
+
+  const onReactFlowInit = useCallback(() => {
+    console.log('React Flow initialized');
+    setIsReactFlowReady(true);
+    
+    // Apply initial layout if data is already loaded
+    if (mindMapData.topics.length > 0 && !hasAppliedInitialLayout) {
+      setTimeout(() => {
+        console.log('Applying initial hierarchical layout after React Flow init...');
+        applyLayout();
+        setHasAppliedInitialLayout(true);
+      }, 1000);
+    }
+  }, [mindMapData, hasAppliedInitialLayout]);
   const deleteNode = async (nodeId, nodeType) => {
     try {
       await axios.delete(`${API}/${nodeType}s/${nodeId}`);
