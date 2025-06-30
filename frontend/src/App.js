@@ -366,7 +366,7 @@ const nodeTypes = {
 };
 
 // Subpage Window Component
-const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData }) => {
+const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, onAutoSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
@@ -397,6 +397,12 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData })
             item.id === data.id ? updatedData : item
           );
         }
+        
+        // Trigger auto-save
+        if (onAutoSave) {
+          onAutoSave(newData);
+        }
+        
         return newData;
       });
       
@@ -428,6 +434,30 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData })
             newData.literature = newData.literature.filter(item => item.id !== data.id);
           } else {
             const key = type + 's';
+            newData[key] = newData[key].filter(item => item.id !== data.id);
+          }
+          
+          // Trigger auto-save
+          if (onAutoSave) {
+            onAutoSave(newData);
+          }
+          
+          return newData;
+        });
+        
+        // Refresh the visual nodes
+        setTimeout(() => {
+          loadMindMapData();
+        }, 100);
+        
+        // Close the subpage
+        onClose();
+        
+      } catch (error) {
+        console.error('Error deleting data:', error);
+      }
+    }
+  };
             newData[key] = newData[key].filter(item => item.id !== data.id);
           }
           return newData;
