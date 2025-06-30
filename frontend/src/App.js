@@ -204,7 +204,7 @@ const nodeTypes = {
 };
 
 // Subpage Window Component
-const SubpageWindow = ({ type, data, onClose }) => {
+const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
