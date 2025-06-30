@@ -1012,8 +1012,10 @@ const Dashboard = () => {
       setTimeout(() => {
         fitView({ 
           duration: 1000, 
-          padding: 0.15,
-          includeHiddenNodes: false
+          padding: 0.25,
+          includeHiddenNodes: false,
+          minZoom: 0.5,
+          maxZoom: 1.5
         });
       }, 300);
 
