@@ -824,17 +824,50 @@ const Dashboard = () => {
 
   const loadMindMapData = async () => {
     try {
+      // First try to load from localStorage
+      const localData = localStorageUtils.load();
+      
+      if (localData) {
+        console.log('Loading data from localStorage');
+        setMindMapData(localData);
+        convertDataToReactFlow(localData);
+        setLoading(false);
+        
+        // Apply initial layout if React Flow is ready and data has nodes
+        if (isReactFlowReady && !hasAppliedInitialLayout && 
+            (localData.topics.length > 0 || localData.cases.length > 0 || 
+             localData.tasks.length > 0 || localData.literature?.length > 0)) {
+          setTimeout(() => {
+            console.log('Applying initial hierarchical layout from localStorage...');
+            applyLayout();
+            setHasAppliedInitialLayout(true);
+          }, 1000);
+        }
+        
+        // Optionally sync with backend in the background
+        setTimeout(() => {
+          syncWithBackend();
+        }, 2000);
+        
+        return;
+      }
+      
+      // Fallback to API if no localStorage data
+      console.log('No localStorage data found, loading from API');
       const response = await axios.get(`${API}/mindmap-data`);
       setMindMapData(response.data);
       convertDataToReactFlow(response.data);
       setLoading(false);
+      
+      // Save initial data to localStorage
+      autoSaveMindMapData(response.data);
       
       // Apply initial layout if React Flow is ready and data has nodes
       if (isReactFlowReady && !hasAppliedInitialLayout && 
           (response.data.topics.length > 0 || response.data.cases.length > 0 || 
            response.data.tasks.length > 0 || response.data.literature?.length > 0)) {
         setTimeout(() => {
-          console.log('Applying initial hierarchical layout...');
+          console.log('Applying initial hierarchical layout from API...');
           applyLayout();
           setHasAppliedInitialLayout(true);
         }, 1000);
@@ -842,6 +875,23 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error loading mind map data:', error);
       setLoading(false);
+    }
+  };
+
+  // Background sync with backend (optional)
+  const syncWithBackend = async () => {
+    try {
+      const response = await axios.get(`${API}/mindmap-data`);
+      const backendData = response.data;
+      
+      // Simple comparison - in a real app you might want more sophisticated sync logic
+      const localData = localStorageUtils.load();
+      if (localData && JSON.stringify(localData) !== JSON.stringify(backendData)) {
+        console.log('Backend data differs from localStorage, keeping localStorage version');
+        // Optionally show a notification to user about data differences
+      }
+    } catch (error) {
+      console.warn('Background sync with backend failed:', error);
     }
   };
 
