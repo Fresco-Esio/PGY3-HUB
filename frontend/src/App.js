@@ -621,9 +621,20 @@ const Dashboard = () => {
   useEffect(() => {
     // Refresh nodes when edit mode changes
     if (mindMapData.topics.length > 0) {
-      convertDataToReactFlow(mindMapData);
+      convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
     }
   }, [isEditing]);
+
+  // Effect to apply initial layout when both React Flow and data are ready
+  useEffect(() => {
+    if (isReactFlowReady && mindMapData.topics.length > 0 && !hasAppliedInitialLayout && !loading) {
+      setTimeout(() => {
+        console.log('Applying initial hierarchical layout from useEffect...');
+        applyLayout();
+        setHasAppliedInitialLayout(true);
+      }, 1000);
+    }
+  }, [isReactFlowReady, mindMapData, hasAppliedInitialLayout, loading]);
 
   const loadMindMapData = async () => {
     try {
