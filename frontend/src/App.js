@@ -1716,6 +1716,7 @@ const Dashboard = () => {
           onClose={closeSubpage}
           setMindMapData={setMindMapData}
           loadMindMapData={loadMindMapData}
+          onAutoSave={autoSaveMindMapData}
         />
       )}
 
