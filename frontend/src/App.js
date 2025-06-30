@@ -40,6 +40,164 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// localStorage utilities
+const STORAGE_KEY = 'pgy3_mindmap_data';
+const STORAGE_VERSION = '1.0';
+
+const localStorageUtils = {
+  // Save data to localStorage with debouncing
+  save: (() => {
+    let timeoutId;
+    return (data) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        try {
+          const storageData = {
+            version: STORAGE_VERSION,
+            timestamp: new Date().toISOString(),
+            data: data
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+          console.log('Mind map data auto-saved to localStorage');
+        } catch (error) {
+          console.error('Error saving to localStorage:', error);
+          if (error.name === 'QuotaExceededError') {
+            console.warn('localStorage quota exceeded, clearing old data...');
+            try {
+              localStorage.removeItem(STORAGE_KEY);
+            } catch (clearError) {
+              console.error('Error clearing localStorage:', clearError);
+            }
+          }
+        }
+      }, 800); // 800ms debounce delay
+    };
+  })(),
+
+  // Load data from localStorage
+  load: () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) {
+        console.log('No localStorage data found');
+        return null;
+      }
+
+      const storageData = JSON.parse(stored);
+      
+      // Version check
+      if (storageData.version !== STORAGE_VERSION) {
+        console.log('localStorage version mismatch, clearing old data');
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+
+      console.log('Mind map data loaded from localStorage', storageData.timestamp);
+      return storageData.data;
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+      // Clear corrupted data
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (clearError) {
+        console.error('Error clearing corrupted localStorage:', clearError);
+      }
+      return null;
+    }
+  },
+
+  // Clear stored data
+  clear: () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      console.log('localStorage data cleared');
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+    }
+  }
+};
+
+// CSV export utilities
+const csvUtils = {
+  generatePatientCasesCSV: (cases) => {
+    if (!cases || cases.length === 0) {
+      return '';
+    }
+
+    // Define CSV headers
+    const headers = [
+      'Case ID',
+      'Encounter Date',
+      'Primary Diagnosis',
+      'Secondary Diagnoses',
+      'Age',
+      'Gender',
+      'Chief Complaint',
+      'History of Present Illness',
+      'Medical History',
+      'Medications',
+      'Mental Status Exam',
+      'Assessment & Plan',
+      'Status',
+      'Notes',
+      'Created Date',
+      'Updated Date'
+    ];
+
+    // Convert cases to CSV rows
+    const rows = cases.map(caseItem => [
+      caseItem.case_id || '',
+      caseItem.encounter_date ? new Date(caseItem.encounter_date).toLocaleDateString() : '',
+      caseItem.primary_diagnosis || '',
+      Array.isArray(caseItem.secondary_diagnoses) ? caseItem.secondary_diagnoses.join('; ') : '',
+      caseItem.age || '',
+      caseItem.gender || '',
+      caseItem.chief_complaint || '',
+      caseItem.history_present_illness || '',
+      caseItem.medical_history || '',
+      Array.isArray(caseItem.medications) ? caseItem.medications.join('; ') : '',
+      caseItem.mental_status_exam || '',
+      caseItem.assessment_plan || '',
+      caseItem.status || '',
+      caseItem.notes || '',
+      caseItem.created_at ? new Date(caseItem.created_at).toLocaleDateString() : '',
+      caseItem.updated_at ? new Date(caseItem.updated_at).toLocaleDateString() : ''
+    ]);
+
+    // Escape CSV values and join
+    const escapeCsvValue = (value) => {
+      const stringValue = String(value);
+      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
+    };
+
+    const csvContent = [
+      headers.map(escapeCsvValue).join(','),
+      ...rows.map(row => row.map(escapeCsvValue).join(','))
+    ].join('\n');
+
+    return csvContent;
+  },
+
+  downloadCSV: (csvContent, filename = 'patient_cases.csv') => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    URL.revokeObjectURL(url);
+  }
+};
+
 // Custom Node Components with Connection Handles and Enhanced Hover
 const TopicNode = ({ data, selected }) => {
   return (
