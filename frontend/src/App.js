@@ -222,14 +222,16 @@ const localStorageUtils = {
   }
 };
 
-// CSV export utilities
+// Enhanced CSV export utilities
 const csvUtils = {
-  generatePatientCasesCSV: (cases) => {
+  generatePatientCasesCSV: (cases, onProgress) => {
     if (!cases || cases.length === 0) {
       return '';
     }
 
-    // Define CSV headers
+    if (onProgress) onProgress(10, 'Preparing headers...');
+
+    // Enhanced CSV headers with more detailed information
     const headers = [
       'Case ID',
       'Encounter Date',
@@ -246,28 +248,40 @@ const csvUtils = {
       'Status',
       'Notes',
       'Created Date',
-      'Updated Date'
+      'Updated Date',
+      'Linked Topics Count',
+      'Last Modified By'
     ];
 
-    // Convert cases to CSV rows
-    const rows = cases.map(caseItem => [
-      caseItem.case_id || '',
-      caseItem.encounter_date ? new Date(caseItem.encounter_date).toLocaleDateString() : '',
-      caseItem.primary_diagnosis || '',
-      Array.isArray(caseItem.secondary_diagnoses) ? caseItem.secondary_diagnoses.join('; ') : '',
-      caseItem.age || '',
-      caseItem.gender || '',
-      caseItem.chief_complaint || '',
-      caseItem.history_present_illness || '',
-      caseItem.medical_history || '',
-      Array.isArray(caseItem.medications) ? caseItem.medications.join('; ') : '',
-      caseItem.mental_status_exam || '',
-      caseItem.assessment_plan || '',
-      caseItem.status || '',
-      caseItem.notes || '',
-      caseItem.created_at ? new Date(caseItem.created_at).toLocaleDateString() : '',
-      caseItem.updated_at ? new Date(caseItem.updated_at).toLocaleDateString() : ''
-    ]);
+    if (onProgress) onProgress(30, 'Processing case data...');
+
+    // Convert cases to CSV rows with enhanced data
+    const rows = cases.map((caseItem, index) => {
+      if (onProgress) onProgress(30 + (index / cases.length) * 50, `Processing case ${index + 1}/${cases.length}...`);
+      
+      return [
+        caseItem.case_id || '',
+        caseItem.encounter_date ? new Date(caseItem.encounter_date).toLocaleDateString() : '',
+        caseItem.primary_diagnosis || '',
+        Array.isArray(caseItem.secondary_diagnoses) ? caseItem.secondary_diagnoses.join('; ') : '',
+        caseItem.age || '',
+        caseItem.gender || '',
+        caseItem.chief_complaint || '',
+        caseItem.history_present_illness || '',
+        caseItem.medical_history || '',
+        Array.isArray(caseItem.medications) ? caseItem.medications.join('; ') : '',
+        caseItem.mental_status_exam || '',
+        caseItem.assessment_plan || '',
+        caseItem.status || '',
+        caseItem.notes || '',
+        caseItem.created_at ? new Date(caseItem.created_at).toLocaleDateString() : '',
+        caseItem.updated_at ? new Date(caseItem.updated_at).toLocaleDateString() : '',
+        Array.isArray(caseItem.linked_topics) ? caseItem.linked_topics.length : '0',
+        'PGY-3 System'
+      ];
+    });
+
+    if (onProgress) onProgress(85, 'Formatting CSV content...');
 
     // Escape CSV values and join
     const escapeCsvValue = (value) => {
@@ -282,6 +296,8 @@ const csvUtils = {
       headers.map(escapeCsvValue).join(','),
       ...rows.map(row => row.map(escapeCsvValue).join(','))
     ].join('\n');
+
+    if (onProgress) onProgress(100, 'CSV generation complete!');
 
     return csvContent;
   },
@@ -300,6 +316,51 @@ const csvUtils = {
     document.body.removeChild(link);
     
     URL.revokeObjectURL(url);
+  },
+
+  // Generate summary statistics
+  generateCasesSummary: (cases) => {
+    if (!cases || cases.length === 0) return null;
+
+    const diagnoses = {};
+    const statuses = {};
+    const ageGroups = { '18-30': 0, '31-50': 0, '51-70': 0, '70+': 0, 'Unknown': 0 };
+    const genders = {};
+
+    cases.forEach(caseItem => {
+      // Diagnoses
+      if (caseItem.primary_diagnosis) {
+        diagnoses[caseItem.primary_diagnosis] = (diagnoses[caseItem.primary_diagnosis] || 0) + 1;
+      }
+
+      // Status
+      if (caseItem.status) {
+        statuses[caseItem.status] = (statuses[caseItem.status] || 0) + 1;
+      }
+
+      // Age groups
+      if (caseItem.age) {
+        if (caseItem.age <= 30) ageGroups['18-30']++;
+        else if (caseItem.age <= 50) ageGroups['31-50']++;
+        else if (caseItem.age <= 70) ageGroups['51-70']++;
+        else ageGroups['70+']++;
+      } else {
+        ageGroups['Unknown']++;
+      }
+
+      // Gender
+      if (caseItem.gender) {
+        genders[caseItem.gender] = (genders[caseItem.gender] || 0) + 1;
+      }
+    });
+
+    return {
+      totalCases: cases.length,
+      diagnoses,
+      statuses,
+      ageGroups,
+      genders
+    };
   }
 };
 
