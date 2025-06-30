@@ -8,7 +8,7 @@ This report summarizes the testing of the React Flow mind map functionality in t
 3. Apply Hierarchical Layout Automatically on Initial Load
 
 ## Test Environment
-- **URL**: https://4eba0627-7f4e-4c60-9e05-9f3c45a7fb61.preview.emergentagent.com
+- **URL**: https://12b7abb5-0d4a-489b-b450-4ea2a16e984e.preview.emergentagent.com
 - **Testing Tools**: Python Playwright
 - **Browser**: Chromium
 - **Viewport Size**: 1920x1080
