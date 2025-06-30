@@ -2010,43 +2010,44 @@ const Dashboard = () => {
         <div className="mt-8 space-y-3">
           <div className="text-sm font-semibold text-slate-300 mb-3">Mind Map Controls</div>
           
-          <button
+          <LoadingButton
             onClick={applyLayout}
-            className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-purple-600 hover:bg-purple-700 transition-colors text-white"
+            icon={Shuffle}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm"
           >
-            <Shuffle size={16} />
             Realign Nodes
-          </button>
+          </LoadingButton>
 
-          <button
+          <LoadingButton
             onClick={handleExportPatientCases}
-            disabled={isExportingCSV || mindMapData.cases.length === 0}
-            className={`w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-colors text-white ${
-              isExportingCSV || mindMapData.cases.length === 0
+            loading={isExportingCSV}
+            disabled={mindMapData.cases.length === 0}
+            icon={isExportingCSV ? Loader2 : Download}
+            className={`w-full text-white px-4 py-2 rounded-md text-sm ${
+              mindMapData.cases.length === 0
                 ? 'bg-gray-500 cursor-not-allowed'
                 : 'bg-green-600 hover:bg-green-700'
             }`}
           >
-            <Download size={16} />
             {isExportingCSV ? 'Exporting...' : `Export Patient Cases (${mindMapData.cases.length})`}
-          </button>
+          </LoadingButton>
           
-          <button
+          <LoadingButton
             onClick={() => {
               const newEditMode = !isEditing;
               setIsEditing(newEditMode);
-              // Refresh data to show/hide delete buttons while preserving positions
               convertDataToReactFlow(mindMapData, true);
+              addToast(newEditMode ? 'Edit mode enabled' : 'Edit mode disabled', 'info', 2000);
             }}
-            className={`w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-colors ${
+            icon={isEditing ? Save : Edit3}
+            className={`w-full px-4 py-2 rounded-md text-sm ${
               isEditing 
-                ? 'bg-teal-600 hover:bg-teal-700' 
-                : 'bg-slate-600 hover:bg-slate-500'
+                ? 'bg-teal-600 hover:bg-teal-700 text-white' 
+                : 'bg-slate-600 hover:bg-slate-500 text-white'
             }`}
           >
-            <Edit3 size={16} />
             {isEditing ? 'Exit Edit Mode' : 'Edit Mind Map'}
-          </button>
+          </LoadingButton>
 
           {isEditing && (
             <>
