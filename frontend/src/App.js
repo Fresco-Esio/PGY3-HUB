@@ -122,16 +122,19 @@ const LoadingButton = ({ onClick, loading, disabled, children, className, icon: 
   );
 };
 
-// localStorage utilities
+// localStorage utilities with enhanced feedback
 const STORAGE_KEY = 'pgy3_mindmap_data';
-const STORAGE_VERSION = '1.0';
+const STORAGE_VERSION = '1.1';
 
 const localStorageUtils = {
-  // Save data to localStorage with debouncing
+  // Save data to localStorage with debouncing and callback for UI feedback
   save: (() => {
     let timeoutId;
-    return (data) => {
+    return (data, onSaveStart, onSaveComplete) => {
       clearTimeout(timeoutId);
+      
+      if (onSaveStart) onSaveStart();
+      
       timeoutId = setTimeout(() => {
         try {
           const storageData = {
@@ -141,8 +144,11 @@ const localStorageUtils = {
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
           console.log('Mind map data auto-saved to localStorage');
+          if (onSaveComplete) onSaveComplete(true);
         } catch (error) {
           console.error('Error saving to localStorage:', error);
+          if (onSaveComplete) onSaveComplete(false, error);
+          
           if (error.name === 'QuotaExceededError') {
             console.warn('localStorage quota exceeded, clearing old data...');
             try {
@@ -195,6 +201,23 @@ const localStorageUtils = {
       console.log('localStorage data cleared');
     } catch (error) {
       console.error('Error clearing localStorage:', error);
+    }
+  },
+
+  // Get storage info
+  getStorageInfo: () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return null;
+      
+      const data = JSON.parse(stored);
+      return {
+        version: data.version,
+        timestamp: data.timestamp,
+        size: new Blob([stored]).size
+      };
+    } catch (error) {
+      return null;
     }
   }
 };
