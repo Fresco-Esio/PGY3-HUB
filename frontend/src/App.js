@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
@@ -31,7 +31,10 @@ import {
   BookOpen,
   Trash2,
   X,
-  Shuffle
+  Shuffle,
+  Download,
+  Cloud,
+  CheckCircle
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
