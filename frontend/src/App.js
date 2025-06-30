@@ -458,24 +458,6 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
       }
     }
   };
-            newData[key] = newData[key].filter(item => item.id !== data.id);
-          }
-          return newData;
-        });
-        
-        // Refresh the visual nodes
-        setTimeout(() => {
-          loadMindMapData();
-        }, 100);
-        
-        // Close the subpage
-        onClose();
-        
-      } catch (error) {
-        console.error('Error deleting data:', error);
-      }
-    }
-  };
 
   if (!data) {
     return (
