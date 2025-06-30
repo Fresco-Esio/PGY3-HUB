@@ -1480,13 +1480,20 @@ const Dashboard = () => {
       setNodes((nds) => [...nds, newNode]);
       
       // Update mindMapData state to include the new node
-      setMindMapData(prevData => ({
-        ...prevData,
-        [nodeType === 'literature' ? 'literature' : nodeType + 's']: [
-          ...prevData[nodeType === 'literature' ? 'literature' : nodeType + 's'],
-          newNodeData
-        ]
-      }));
+      setMindMapData(prevData => {
+        const updatedData = {
+          ...prevData,
+          [nodeType === 'literature' ? 'literature' : nodeType + 's']: [
+            ...prevData[nodeType === 'literature' ? 'literature' : nodeType + 's'],
+            newNodeData
+          ]
+        };
+        
+        // Trigger auto-save
+        autoSaveMindMapData(updatedData);
+        
+        return updatedData;
+      });
       
     } catch (error) {
       console.error('Error adding new node:', error);
