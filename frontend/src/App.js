@@ -34,7 +34,22 @@ import {
   Shuffle,
   Download,
   Cloud,
-  CheckCircle
+  CheckCircle,
+  Tag,
+  Clock,
+  AlertCircle,
+  Info,
+  Star,
+  Zap,
+  Settings,
+  Eye,
+  Upload,
+  Bell,
+  CheckCircle2,
+  Loader2,
+  Sparkles,
+  Heart,
+  Bookmark
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
