@@ -248,6 +248,11 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData })
     }
   };
 
+  const handleCancel = () => {
+    setEditData(originalData);
+    setIsEditing(false);
+  };
+
   const handleDelete = async () => {
     if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
       try {
