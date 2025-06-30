@@ -1028,16 +1028,21 @@ const Dashboard = () => {
         // The handleNodesChange will trigger auto-save
       }, 200);
 
-      // Adjust viewport to show all realigned nodes
+      // Adjust viewport to show all realigned nodes with increased delay
       setTimeout(() => {
-        fitView({ 
-          duration: 1000, 
-          padding: 0.25,
-          includeHiddenNodes: false,
-          minZoom: 0.5,
-          maxZoom: 1.5
-        });
-      }, 300);
+        try {
+          fitView({ 
+            duration: 1000, 
+            padding: 0.25,
+            includeHiddenNodes: false,
+            minZoom: 0.5,
+            maxZoom: 1.5
+          });
+          console.log('Viewport adjusted to center realigned nodes');
+        } catch (error) {
+          console.error('Error adjusting viewport:', error);
+        }
+      }, 500); // Increased delay to 500ms
 
       console.log('Layout applied successfully');
       
