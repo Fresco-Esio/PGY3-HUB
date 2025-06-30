@@ -1613,6 +1613,19 @@ const Dashboard = () => {
             <Shuffle size={16} />
             Realign Nodes
           </button>
+
+          <button
+            onClick={handleExportPatientCases}
+            disabled={isExportingCSV || mindMapData.cases.length === 0}
+            className={`w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-colors text-white ${
+              isExportingCSV || mindMapData.cases.length === 0
+                ? 'bg-gray-500 cursor-not-allowed'
+                : 'bg-green-600 hover:bg-green-700'
+            }`}
+          >
+            <Download size={16} />
+            {isExportingCSV ? 'Exporting...' : `Export Patient Cases (${mindMapData.cases.length})`}
+          </button>
           
           <button
             onClick={() => {
