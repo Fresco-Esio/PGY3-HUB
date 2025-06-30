@@ -296,6 +296,8 @@ const SubpageWindow = ({ type, data, onClose }) => {
   };
 
   const renderContent = () => {
+    if (!editData) return <div>Loading...</div>;
+    
     switch (type) {
       case 'topic':
         return (
@@ -303,7 +305,7 @@ const SubpageWindow = ({ type, data, onClose }) => {
             <div className="flex items-center gap-4">
               <div 
                 className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: editData.color }}
+                style={{ backgroundColor: editData.color || '#3B82F6' }}
               ></div>
               {renderEditableField('Title', 'title')}
             </div>
@@ -321,13 +323,13 @@ const SubpageWindow = ({ type, data, onClose }) => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Completed</span>
-                    <span>{editData.completed_flashcards}/{editData.flashcard_count}</span>
+                    <span>{editData.completed_flashcards || 0}/{editData.flashcard_count || 0}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-green-500 h-2 rounded-full"
                       style={{ 
-                        width: `${editData.flashcard_count > 0 ? (editData.completed_flashcards / editData.flashcard_count) * 100 : 0}%` 
+                        width: `${editData.flashcard_count > 0 ? ((editData.completed_flashcards || 0) / editData.flashcard_count) * 100 : 0}%` 
                       }}
                     ></div>
                   </div>
