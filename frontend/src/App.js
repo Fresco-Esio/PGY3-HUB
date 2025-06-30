@@ -483,12 +483,22 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData })
           <h2 className="text-lg font-semibold text-gray-800 capitalize">{type} Details</h2>
           <div className="flex items-center gap-2">
             {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50"
-              >
-                <Edit3 size={16} />
-              </button>
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50"
+                  title="Edit"
+                >
+                  <Edit3 size={16} />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50"
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </>
             )}
             <button
               onClick={onClose}
