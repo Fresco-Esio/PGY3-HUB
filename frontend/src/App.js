@@ -604,28 +604,17 @@ const Dashboard = () => {
   };
 
   const arrangeNodesInCategory = (category) => {
-    // Get current viewport bounds
-    const viewport = reactFlowInstance?.getViewport();
-    const transform = viewport ? [viewport.x, viewport.y, viewport.zoom] : [0, 0, 1];
-    
-    // Calculate visible area based on current zoom and pan
+    // Calculate visible area
     const viewportWidth = window.innerWidth - 320; // Subtract sidebar width
     const viewportHeight = window.innerHeight;
-    const zoom = transform[2];
     
-    // Convert screen coordinates to flow coordinates
-    const visibleWidth = viewportWidth / zoom;
-    const visibleHeight = viewportHeight / zoom;
-    const centerX = -transform[0] / zoom;
-    const centerY = -transform[1] / zoom;
-    
-    // Calculate arrangement area within visible bounds
+    // Calculate arrangement area
     const padding = 50; // Padding from edges
-    const arrangeWidth = visibleWidth - (padding * 2);
-    const arrangeHeight = Math.min(visibleHeight - (padding * 2), 200); // Limit height for horizontal arrangement
+    const arrangeWidth = viewportWidth - (padding * 2);
+    const arrangeHeight = Math.min(viewportHeight - (padding * 2), 200); // Limit height for horizontal arrangement
     
     const categoryNodeSpacing = Math.min(280, arrangeWidth / 5); // Adaptive spacing
-    const baseY = centerY; // Center vertically in view
+    const baseY = 200; // Fixed Y position for horizontal arrangement
     
     let arrangedNodes = [...nodes];
     let categoryNodes = [];
@@ -646,12 +635,12 @@ const Dashboard = () => {
         break;
     }
 
-    // Arrange selected category nodes horizontally within visible area
+    // Arrange selected category nodes horizontally
     categoryNodes.forEach((node, index) => {
       const nodeIndex = arrangedNodes.findIndex(n => n.id === node.id);
       if (nodeIndex !== -1) {
         const totalWidth = (categoryNodes.length - 1) * categoryNodeSpacing;
-        const startX = centerX - totalWidth / 2;
+        const startX = -totalWidth / 2; // Center horizontally
         
         arrangedNodes[nodeIndex] = {
           ...arrangedNodes[nodeIndex],
@@ -668,19 +657,6 @@ const Dashboard = () => {
 
     // Center view on the arranged nodes
     if (categoryNodes.length > 0) {
-      const nodePositions = categoryNodes.map((_, index) => {
-        const totalWidth = (categoryNodes.length - 1) * categoryNodeSpacing;
-        const startX = centerX - totalWidth / 2;
-        return { x: startX + (index * categoryNodeSpacing), y: baseY };
-      });
-      
-      const bounds = {
-        x: Math.min(...nodePositions.map(p => p.x)) - 100,
-        y: baseY - 100,
-        width: Math.max(...nodePositions.map(p => p.x)) - Math.min(...nodePositions.map(p => p.x)) + 200,
-        height: 200
-      };
-      
       setTimeout(() => {
         fitView({ 
           padding: 0.1, 
