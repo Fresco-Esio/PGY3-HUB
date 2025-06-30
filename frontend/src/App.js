@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
-import ReactFlow, {
+import {
+  ReactFlow,
   addEdge,
   Background,
   Controls,
