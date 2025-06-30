@@ -244,6 +244,8 @@ const SubpageWindow = ({ type, data, onClose }) => {
   }
 
   const renderEditableField = (label, field, type = 'text', options = {}) => {
+    if (!editData) return null;
+    
     if (isEditing) {
       if (type === 'textarea') {
         return (
