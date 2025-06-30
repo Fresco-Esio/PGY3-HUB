@@ -1285,8 +1285,8 @@ const Dashboard = () => {
             onClick={() => {
               const newEditMode = !isEditing;
               setIsEditing(newEditMode);
-              // Refresh data to show/hide delete buttons
-              convertDataToReactFlow(mindMapData);
+              // Refresh data to show/hide delete buttons while preserving positions
+              convertDataToReactFlow(mindMapData, true);
             }}
             className={`w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm transition-colors ${
               isEditing 
