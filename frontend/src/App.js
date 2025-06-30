@@ -1204,6 +1204,14 @@ const Dashboard = () => {
           <div className="text-sm font-semibold text-slate-300 mb-3">Mind Map Controls</div>
           
           <button
+            onClick={applyLayout}
+            className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-purple-600 hover:bg-purple-700 transition-colors text-white"
+          >
+            <Shuffle size={16} />
+            Realign Nodes
+          </button>
+          
+          <button
             onClick={() => {
               const newEditMode = !isEditing;
               setIsEditing(newEditMode);
