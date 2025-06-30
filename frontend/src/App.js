@@ -754,16 +754,27 @@ const Dashboard = () => {
     }, 100);
   };
 
-  const convertDataToReactFlow = (data) => {
+  const convertDataToReactFlow = (data, preserveCurrentPositions = false) => {
     const flowNodes = [];
     const flowEdges = [];
 
+    // Create a map of current node positions if preserving
+    const currentPositions = {};
+    if (preserveCurrentPositions && nodes.length > 0) {
+      nodes.forEach(node => {
+        currentPositions[node.id] = node.position;
+      });
+    }
+
     // Convert topics to nodes
     data.topics.forEach(topic => {
+      const nodeId = `topic-${topic.id}`;
+      const currentPosition = currentPositions[nodeId];
+      
       flowNodes.push({
-        id: `topic-${topic.id}`,
+        id: nodeId,
         type: 'topic',
-        position: topic.position,
+        position: currentPosition || topic.position || { x: 0, y: 0 },
         data: {
           label: topic.title,
           category: topic.category,
@@ -778,10 +789,13 @@ const Dashboard = () => {
 
     // Convert literature to nodes
     data.literature && data.literature.forEach(lit => {
+      const nodeId = `literature-${lit.id}`;
+      const currentPosition = currentPositions[nodeId];
+      
       flowNodes.push({
-        id: `literature-${lit.id}`,
+        id: nodeId,
         type: 'literature',
-        position: lit.position,
+        position: currentPosition || lit.position || { x: 0, y: 0 },
         data: {
           label: lit.title,
           authors: lit.authors,
@@ -805,10 +819,13 @@ const Dashboard = () => {
 
     // Convert cases to nodes
     data.cases.forEach(caseItem => {
+      const nodeId = `case-${caseItem.id}`;
+      const currentPosition = currentPositions[nodeId];
+      
       flowNodes.push({
-        id: `case-${caseItem.id}`,
+        id: nodeId,
         type: 'case',
-        position: caseItem.position,
+        position: currentPosition || caseItem.position || { x: 0, y: 0 },
         data: {
           label: caseItem.case_id,
           diagnosis: caseItem.primary_diagnosis,
@@ -832,10 +849,13 @@ const Dashboard = () => {
 
     // Convert tasks to nodes
     data.tasks.forEach(task => {
+      const nodeId = `task-${task.id}`;
+      const currentPosition = currentPositions[nodeId];
+      
       flowNodes.push({
-        id: `task-${task.id}`,
+        id: nodeId,
         type: 'task',
-        position: task.position,
+        position: currentPosition || task.position || { x: 0, y: 0 },
         data: {
           label: task.title,
           priority: task.priority,
