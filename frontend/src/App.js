@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
-import {
-  ReactFlow,
+import ReactFlow, {
   addEdge,
   Background,
   Controls,
@@ -17,6 +15,7 @@ import {
   Position,
   useReactFlow,
 } from '@xyflow/react';
+import dagre from 'dagre';
 import { 
   Plus, 
   Brain, 
@@ -30,7 +29,8 @@ import {
   Target,
   BookOpen,
   Trash2,
-  X
+  X,
+  Shuffle
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
