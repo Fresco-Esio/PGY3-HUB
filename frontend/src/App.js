@@ -915,6 +915,67 @@ const Dashboard = () => {
     setSubpageData(null);
   };
 
+  // Dagre layout configuration
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+  const nodeWidth = 220;
+  const nodeHeight = 100;
+
+  const getLayoutedElements = (nodes, edges, direction = 'TB') => {
+    const isHorizontal = direction === 'LR';
+    dagreGraph.setGraph({ rankdir: direction, nodesep: 70, ranksep: 100 });
+
+    nodes.forEach((node) => {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
+
+    edges.forEach((edge) => {
+      dagreGraph.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(dagreGraph);
+
+    nodes.forEach((node) => {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      node.targetPosition = isHorizontal ? 'left' : 'top';
+      node.sourcePosition = isHorizontal ? 'right' : 'bottom';
+
+      // Shift to center the node based on its dimensions
+      node.position = {
+        x: nodeWithPosition.x - nodeWidth / 2,
+        y: nodeWithPosition.y - nodeHeight / 2,
+      };
+
+      return node;
+    });
+
+    return { nodes, edges };
+  };
+
+  const applyLayout = () => {
+    if (nodes.length === 0) {
+      console.log('No nodes to realign');
+      return;
+    }
+
+    console.log('Applying layout to', nodes.length, 'nodes and', edges.length, 'edges');
+    
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      nodes,
+      edges,
+      'TB' // Top to Bottom layout
+    );
+
+    setNodes([...layoutedNodes]);
+    setEdges([...layoutedEdges]);
+
+    // Fit view to show all realigned nodes
+    setTimeout(() => {
+      fitView({ duration: 800, padding: 0.1 });
+    }, 100);
+  };
+
   const initSampleData = async () => {
     try {
       await axios.post(`${API}/init-sample-data`);
