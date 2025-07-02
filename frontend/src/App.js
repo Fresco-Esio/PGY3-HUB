@@ -2745,7 +2745,6 @@ const Dashboard = () => {
             }}
             maskColor="rgba(0, 0, 0, 0.2)"
             className="bg-white rounded-lg shadow-lg border"
-            }}
           />
           
           <Panel position="top-right" className="bg-white rounded-lg shadow-lg p-4 m-4">
