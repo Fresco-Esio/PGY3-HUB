@@ -2533,16 +2533,7 @@ const Dashboard = () => {
     }
   }), [nodes, edges, nodeTypes, isEditing]);
 
-  // PERFORMANCE FIX: Memoize MiniMap nodeColor function
-  const miniMapNodeColor = useCallback((node) => {
-    switch (node.type) {
-      case 'topic': return node.data.color || '#3B82F6';
-      case 'case': return '#6B7280';
-      case 'task': return '#F59E0B';
-      case 'literature': return '#8B5CF6';
-      default: return '#6B7280';
-    }
-  }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
