@@ -385,26 +385,55 @@ const TopicNode = ({ data, selected }) => {
           : `0 4px 20px ${data.color || '#3B82F6'}20`
       }}
     >
-      {/* Connection Handles with enhanced styling */}
+      {/* Enhanced Connection Handles - Multiple handles for flexible connections */}
+      {/* Top handles */}
       <Handle 
+        id="target-top"
         type="target" 
         position={Position.Top} 
-        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ left: '50%', transform: 'translateX(-50%)' }}
       />
+      
+      {/* Bottom handles */}
       <Handle 
+        id="source-bottom"
         type="source" 
         position={Position.Bottom} 
-        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ left: '50%', transform: 'translateX(-50%)' }}
+      />
+      
+      {/* Left handles */}
+      <Handle 
+        id="target-left"
+        type="target" 
+        position={Position.Left} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '30%', transform: 'translateY(-50%)' }}
       />
       <Handle 
+        id="source-left"
         type="source" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '70%', transform: 'translateY(-50%)' }}
+      />
+      
+      {/* Right handles */}
+      <Handle 
+        id="target-right"
+        type="target" 
+        position={Position.Right} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '30%', transform: 'translateY(-50%)' }}
       />
       <Handle 
+        id="source-right"
         type="source" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150" 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '70%', transform: 'translateY(-50%)' }}
       />
       
       {/* Priority indicator */}
