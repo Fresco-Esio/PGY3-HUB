@@ -927,7 +927,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
 
   // PERFORMANCE FIX: Memoize delete handler
   const handleDelete = useCallback(async () => {
-    if (isLoading || !window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+    if (isLoading || !data?.id || !window.confirm(`Are you sure you want to delete this ${type}?`)) return; // Add null check here
     
     setIsLoading(true);
     try {
@@ -967,7 +967,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     } finally {
       setIsLoading(false);
     }
-  }, [type, data.id, setMindMapData, onAutoSave, onClose, loadMindMapData, isLoading]);
+  }, [type, data?.id, setMindMapData, onAutoSave, onClose, loadMindMapData, isLoading]);
 
   // PERFORMANCE FIX: Early return with loading state for better UX
   if (!data) {
