@@ -2097,12 +2097,16 @@ const Dashboard = () => {
       
       clearTimeout(timeoutId);
       
+      console.log('Successfully loaded subpage data:', response.data);
+      
       // PERFORMANCE FIX: Update state asynchronously to prevent blocking
       requestAnimationFrame(() => {
         setSubpageData(response.data);
       });
       
     } catch (error) {
+      console.error('Full error details:', error);
+      
       if (error.name === 'AbortError') {
         console.warn('Request timed out for:', nodeType, nodeId);
         addToast('Loading timed out. Please try again.', 'error');
@@ -2111,8 +2115,9 @@ const Dashboard = () => {
         addToast('Error loading data. Please try again.', 'error');
       }
       
-      // Set empty data to prevent infinite loading
-      setSubpageData(null);
+      // IMPORTANT FIX: Set empty object instead of null to prevent infinite loading
+      // This ensures the component renders error state instead of loading state
+      setSubpageData({});
     }
   }, [addToast]);
 
