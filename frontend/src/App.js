@@ -972,8 +972,18 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   // PERFORMANCE FIX: Early return with loading state for better UX
   if (!data) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm">
-        <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+      >
+        <div 
+          className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-center py-8">
             <Loader2 size={24} className="animate-spin text-blue-600" />
             <span className="ml-2 text-gray-500">Loading...</span>
