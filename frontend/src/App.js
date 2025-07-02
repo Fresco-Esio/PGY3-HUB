@@ -2498,6 +2498,7 @@ const Dashboard = () => {
   }), [nodes, edges, nodeTypes, isEditing]);
 
   // PERFORMANCE FIX: Memoize MiniMap nodeColor function
+  // Memoize miniMapNodeColor function
   const miniMapNodeColor = useCallback((node) => {
     switch (node.type) {
       case 'topic': return node.data.color || '#3B82F6';
@@ -2507,15 +2508,6 @@ const Dashboard = () => {
       default: return '#6B7280';
     }
   }, []);
-  // PERFORMANCE FIX: Memoize ReactFlow event handlers to prevent re-renders
-  const reactFlowEventHandlers = useMemo(() => ({
-    onNodesChange: handleNodesChange,
-    onEdgesChange: onEdgesChange,
-    onConnect: onConnect,
-    onNodeClick: onNodeClick,
-    onNodeDoubleClick: onNodeDoubleClick,
-    onInit: onReactFlowInit
-  }), [handleNodesChange, onEdgesChange, onConnect, onNodeClick, onNodeDoubleClick, onReactFlowInit]);
 
   // PERFORMANCE FIX: Memoize ReactFlow props to prevent unnecessary re-renders
   const reactFlowProps = useMemo(() => ({
