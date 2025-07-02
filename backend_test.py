@@ -375,7 +375,8 @@ class PsychiatryDashboardTester:
         # Update the task
         update_data = {
             "description": "Updated task description",
-            "status": "in_progress"
+            "status": "in_progress",
+            "due_date": (datetime.now()).isoformat()  # Update due date to test date formatting
         }
         
         update_response = requests.put(f"{self.base_url}/tasks/{task_id}", json=update_data)
