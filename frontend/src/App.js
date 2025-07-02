@@ -845,25 +845,44 @@ const nodeTypes = {
   literature: LiteratureNode,
 };
 
-// Subpage Window Component
-const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, onAutoSave }) => {
+// Optimized Subpage Window Component with performance enhancements
+const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMindMapData, onAutoSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // PERFORMANCE FIX: Use useEffect with dependency array to prevent unnecessary updates
   useEffect(() => {
-    setEditData(data);
-    setOriginalData(data);
-  }, [data]);
+    if (data && data !== originalData) {
+      setEditData(data);
+      setOriginalData(data);
+    }
+  }, [data]); // Only depend on data, not originalData to prevent infinite loops
 
-  const handleSave = async () => {
+  // PERFORMANCE FIX: Memoize expensive calculations
+  const flashcardProgress = useMemo(() => {
+    if (!editData || !editData.flashcard_count) return 0;
+    return ((editData.completed_flashcards || 0) / editData.flashcard_count) * 100;
+  }, [editData?.completed_flashcards, editData?.flashcard_count]);
+
+  // PERFORMANCE FIX: Optimize field update handler with useCallback
+  const updateField = useCallback((field, value) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  // PERFORMANCE FIX: Memoize save handler to prevent recreation on every render
+  const handleSave = useCallback(async () => {
+    if (isLoading) return; // Prevent multiple simultaneous saves
+    
+    setIsLoading(true);
     try {
       const endpoint = type === 'literature' ? 'literature' : `${type}s`;
       const response = await axios.put(`${API}/${endpoint}/${data.id}`, editData);
       setIsEditing(false);
       setOriginalData(editData);
       
-      // Update the mind map data and refresh nodes
+      // PERFORMANCE FIX: Optimized state update to prevent full re-render
       const updatedData = response.data;
       setMindMapData(prevData => {
         const newData = { ...prevData };
@@ -878,103 +897,119 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
           );
         }
         
-        // Trigger auto-save
+        // Trigger auto-save asynchronously to prevent blocking
         if (onAutoSave) {
-          onAutoSave(newData);
+          setTimeout(() => onAutoSave(newData), 0);
         }
         
         return newData;
       });
       
-      // Refresh the visual nodes to reflect changes
-      setTimeout(() => {
-        loadMindMapData();
-      }, 100);
+      // PERFORMANCE FIX: Use RequestAnimationFrame for smooth UI updates
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          loadMindMapData();
+        }, 50); // Reduced delay for more responsive feel
+      });
       
     } catch (error) {
       console.error('Error saving data:', error);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [type, data.id, editData, setMindMapData, onAutoSave, loadMindMapData, isLoading]);
 
-  const handleCancel = () => {
+  // PERFORMANCE FIX: Memoize cancel handler
+  const handleCancel = useCallback(() => {
     setEditData(originalData);
     setIsEditing(false);
-  };
+  }, [originalData]);
 
-  const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
-      try {
-        const endpoint = type === 'literature' ? 'literature' : `${type}s`;
-        await axios.delete(`${API}/${endpoint}/${data.id}`);
+  // PERFORMANCE FIX: Memoize delete handler
+  const handleDelete = useCallback(async () => {
+    if (isLoading || !window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+    
+    setIsLoading(true);
+    try {
+      const endpoint = type === 'literature' ? 'literature' : `${type}s`;
+      await axios.delete(`${API}/${endpoint}/${data.id}`);
+      
+      // PERFORMANCE FIX: Optimized state update
+      setMindMapData(prevData => {
+        const newData = { ...prevData };
+        if (type === 'literature') {
+          newData.literature = newData.literature.filter(item => item.id !== data.id);
+        } else {
+          const key = type + 's';
+          newData[key] = newData[key].filter(item => item.id !== data.id);
+        }
         
-        // Update mind map data
-        setMindMapData(prevData => {
-          const newData = { ...prevData };
-          if (type === 'literature') {
-            newData.literature = newData.literature.filter(item => item.id !== data.id);
-          } else {
-            const key = type + 's';
-            newData[key] = newData[key].filter(item => item.id !== data.id);
-          }
-          
-          // Trigger auto-save
-          if (onAutoSave) {
-            onAutoSave(newData);
-          }
-          
-          return newData;
-        });
+        // Trigger auto-save asynchronously
+        if (onAutoSave) {
+          setTimeout(() => onAutoSave(newData), 0);
+        }
         
-        // Refresh the visual nodes
+        return newData;
+      });
+      
+      // PERFORMANCE FIX: Close subpage immediately for better UX
+      onClose();
+      
+      // PERFORMANCE FIX: Refresh nodes asynchronously
+      requestAnimationFrame(() => {
         setTimeout(() => {
           loadMindMapData();
-        }, 100);
-        
-        // Close the subpage
-        onClose();
-        
-      } catch (error) {
-        console.error('Error deleting data:', error);
-      }
+        }, 50);
+      });
+      
+    } catch (error) {
+      console.error('Error deleting data:', error);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [type, data.id, setMindMapData, onAutoSave, onClose, loadMindMapData, isLoading]);
 
+  // PERFORMANCE FIX: Early return with loading state for better UX
   if (!data) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm">
         <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-center py-8">
-            <div className="text-gray-500">Loading...</div>
+            <Loader2 size={24} className="animate-spin text-blue-600" />
+            <span className="ml-2 text-gray-500">Loading...</span>
           </div>
         </div>
       </div>
     );
   }
 
-  const renderEditableField = (label, field, type = 'text', options = {}) => {
+  // PERFORMANCE FIX: Memoized optimized field renderer with reduced re-renders
+  const renderEditableField = useCallback((label, field, type = 'text', options = {}) => {
     if (!editData) return null;
+    
+    const fieldValue = editData[field] || '';
     
     if (isEditing) {
       if (type === 'textarea') {
         return (
-          <div>
+          <div key={field}>
             <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
             <textarea
-              value={editData[field] || ''}
-              onChange={(e) => setEditData({...editData, [field]: e.target.value})}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={fieldValue}
+              onChange={(e) => updateField(field, e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
               rows={options.rows || 3}
             />
           </div>
         );
       } else if (type === 'select') {
         return (
-          <div>
+          <div key={field}>
             <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
             <select
-              value={editData[field] || ''}
-              onChange={(e) => setEditData({...editData, [field]: e.target.value})}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={fieldValue}
+              onChange={(e) => updateField(field, e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             >
               {options.choices?.map(choice => (
                 <option key={choice} value={choice}>{choice}</option>
@@ -984,28 +1019,29 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
         );
       } else {
         return (
-          <div>
+          <div key={field}>
             <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
             <input
               type={type}
-              value={editData[field] || ''}
-              onChange={(e) => setEditData({...editData, [field]: e.target.value})}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={fieldValue}
+              onChange={(e) => updateField(field, e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             />
           </div>
         );
       }
     } else {
       return (
-        <div>
+        <div key={field}>
           <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-          <p className="text-gray-600">{editData[field] || `No ${label.toLowerCase()} available.`}</p>
+          <p className="text-gray-600">{fieldValue || `No ${label.toLowerCase()} available.`}</p>
         </div>
       );
     }
-  };
+  }, [editData, isEditing, updateField]);
 
-  const renderContent = () => {
+  // PERFORMANCE FIX: Memoized content renderer to prevent expensive re-calculations
+  const renderContent = useMemo(() => {
     if (!editData) return <div>Loading...</div>;
     
     switch (type) {
@@ -1014,9 +1050,9 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
           <div className="space-y-6">
             <div className="flex items-center gap-4">
               <div 
-                className="w-4 h-4 rounded-full"
+                className="w-4 h-4 rounded-full transition-colors"
                 style={{ backgroundColor: editData.color || '#3B82F6' }}
-              ></div>
+              />
               {renderEditableField('Title', 'title')}
             </div>
 
@@ -1037,11 +1073,9 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-green-500 h-2 rounded-full"
-                      style={{ 
-                        width: `${editData.flashcard_count > 0 ? ((editData.completed_flashcards || 0) / editData.flashcard_count) * 100 : 0}%` 
-                      }}
-                    ></div>
+                      className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${flashcardProgress}%` }}
+                    />
                   </div>
                 </div>
               </div>
@@ -1128,35 +1162,35 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
       default:
         return <div>Unknown node type</div>;
     }
-  };
+  }, [type, editData, renderEditableField, flashcardProgress]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden animate-in fade-in duration-300">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-800 capitalize">{type} Details</h2>
           <div className="flex items-center gap-2">
-            {!isEditing && (
+            {!isEditing && !isLoading && (
               <>
-                <button
+                <LoadingButton
                   onClick={() => setIsEditing(true)}
+                  icon={Edit3}
                   className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50"
                   title="Edit"
-                >
-                  <Edit3 size={16} />
-                </button>
-                <button
+                />
+                <LoadingButton
                   onClick={handleDelete}
+                  loading={isLoading}
+                  icon={Trash2}
                   className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50"
                   title="Delete"
-                >
-                  <Trash2 size={16} />
-                </button>
+                />
               </>
             )}
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100"
+              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              disabled={isLoading}
             >
               <X size={20} />
             </button>
@@ -1164,29 +1198,32 @@ const SubpageWindow = ({ type, data, onClose, setMindMapData, loadMindMapData, o
         </div>
         
         <div className="p-6 overflow-y-auto max-h-[calc(80vh-160px)]">
-          {renderContent()}
+          {renderContent}
         </div>
 
         {isEditing && (
           <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3">
-            <button
+            <LoadingButton
               onClick={handleCancel}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+              disabled={isLoading}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100"
             >
               Cancel
-            </button>
-            <button
+            </LoadingButton>
+            <LoadingButton
               onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              loading={isLoading}
+              icon={Save}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Save Changes
-            </button>
+              {isLoading ? 'Saving...' : 'Save Changes'}
+            </LoadingButton>
           </div>
         )}
       </div>
     </div>
   );
-};
+});
 
 // Enhanced Dedicated Editing Form Component
 const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
