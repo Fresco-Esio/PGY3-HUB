@@ -983,8 +983,8 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     );
   }
 
-  // PERFORMANCE FIX: Memoized optimized field renderer with reduced re-renders
-  const renderEditableField = useCallback((label, field, type = 'text', options = {}) => {
+  // PERFORMANCE FIX: Optimized field renderer without useCallback to avoid hook violations
+  const renderEditableField = (label, field, type = 'text', options = {}) => {
     if (!editData) return null;
     
     const fieldValue = editData[field] || '';
@@ -1038,7 +1038,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         </div>
       );
     }
-  }, [editData, isEditing, updateField]);
+  };
 
   // PERFORMANCE FIX: Regular content renderer without useMemo to avoid hook violations
   const renderContent = () => {
