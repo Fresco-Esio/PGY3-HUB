@@ -1198,7 +1198,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         </div>
         
         <div className="p-6 overflow-y-auto max-h-[calc(80vh-160px)]">
-          {renderContent}
+          {renderContent()}
         </div>
 
         {isEditing && (
