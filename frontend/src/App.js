@@ -2755,44 +2755,15 @@ const Dashboard = () => {
       {/* Main Mind Map Workspace */}
       <div className="flex-1 relative">
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={handleNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeClick={onNodeClick}
-          onNodeDoubleClick={onNodeDoubleClick}
-          onInit={onReactFlowInit}
-          nodeTypes={nodeTypes}
-          fitView
-          nodesDraggable={true}
-          nodesConnectable={isEditing}
-          edgesReconnectable={isEditing}
-          edgesFocusable={isEditing}
-          elementsSelectable={true}
-          className="bg-gradient-to-br from-slate-50 to-slate-100"
-          defaultEdgeOptions={{
-            type: 'smoothstep',
-            style: { strokeWidth: 2, stroke: '#6B7280' },
-            markerEnd: {
-              type: 'arrowclosed',
-              width: 15,
-              height: 15,
-              color: '#6B7280',
-            }
-          }}
+          {...reactFlowProps}
+          {...reactFlowEventHandlers}
         >
           <Background color="#aaa" gap={16} />
           <Controls />
           <MiniMap 
-            nodeColor={(node) => {
-              switch (node.type) {
-                case 'topic': return node.data.color || '#3B82F6';
-                case 'case': return '#6B7280';
-                case 'task': return '#F59E0B';
-                case 'literature': return '#8B5CF6';
-                default: return '#9CA3AF';
-              }
+            nodeColor={miniMapNodeColor}
+            maskColor="rgba(0, 0, 0, 0.2)"
+            className="bg-white rounded-lg shadow-lg border"
             }}
           />
           
