@@ -2497,41 +2497,7 @@ const Dashboard = () => {
     }
   }), [nodes, edges, nodeTypes, isEditing]);
 
-  // PERFORMANCE FIX: Memoize MiniMap nodeColor function
-  // Memoize miniMapNodeColor function
-  const miniMapNodeColor = useCallback((node) => {
-    switch (node.type) {
-      case 'topic': return node.data.color || '#3B82F6';
-      case 'case': return '#6B7280';
-      case 'task': return '#F59E0B';
-      case 'literature': return '#8B5CF6';
-      default: return '#6B7280';
-    }
-  }, []);
 
-  // PERFORMANCE FIX: Memoize ReactFlow props to prevent unnecessary re-renders
-  const reactFlowProps = useMemo(() => ({
-    nodes,
-    edges,
-    nodeTypes,
-    fitView: true,
-    nodesDraggable: true,
-    nodesConnectable: isEditing,
-    edgesReconnectable: isEditing,
-    edgesFocusable: isEditing,
-    elementsSelectable: true,
-    className: "bg-gradient-to-br from-slate-50 to-slate-100",
-    defaultEdgeOptions: {
-      type: 'smoothstep',
-      style: { strokeWidth: 2, stroke: '#6B7280' },
-      markerEnd: {
-        type: 'arrowclosed',
-        width: 15,
-        height: 15,
-        color: '#6B7280',
-      }
-    }
-  }), [nodes, edges, nodeTypes, isEditing]);
 
 
 
