@@ -983,6 +983,37 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     );
   }
 
+  // Handle empty data object (error state)
+  if (data && Object.keys(data).length === 0) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm">
+        <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">Error Loading Data</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
+              <p className="text-gray-600">Failed to load data. Please try again.</p>
+              <button
+                onClick={onClose}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // PERFORMANCE FIX: Optimized field renderer without useCallback to avoid hook violations
   const renderEditableField = (label, field, type = 'text', options = {}) => {
     if (!editData) return null;
