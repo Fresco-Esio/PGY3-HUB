@@ -2262,7 +2262,7 @@ const Dashboard = () => {
 
         <div className="space-y-4">
           <div 
-            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('topics')}
+            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('topics')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'topics' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
@@ -2271,7 +2271,7 @@ const Dashboard = () => {
             Topics ({mindMapData.topics.length})
           </div>
           <div 
-            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('literature')}
+            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('literature')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'literature' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
@@ -2280,7 +2280,7 @@ const Dashboard = () => {
             Literature ({mindMapData.literature?.length || 0})
           </div>
           <div 
-            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('cases')}
+            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('cases')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'cases' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
@@ -2289,7 +2289,7 @@ const Dashboard = () => {
             Cases ({mindMapData.cases.length})
           </div>
           <div 
-            onClick={() => openSubpage ? closeSubpage() : arrangeNodesInCategory('tasks')}
+            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('tasks')}
             className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
               focusedCategory === 'tasks' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
             }`}
