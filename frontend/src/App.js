@@ -1040,8 +1040,8 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     }
   }, [editData, isEditing, updateField]);
 
-  // PERFORMANCE FIX: Memoized content renderer to prevent expensive re-calculations
-  const renderContent = useMemo(() => {
+  // PERFORMANCE FIX: Regular content renderer without useMemo to avoid hook violations
+  const renderContent = () => {
     if (!editData) return <div>Loading...</div>;
     
     switch (type) {
@@ -1162,7 +1162,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
       default:
         return <div>Unknown node type</div>;
     }
-  }, [type, editData, renderEditableField, flashcardProgress]);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm">
