@@ -760,17 +760,62 @@ const TaskNode = ({ data, selected }) => {
 const LiteratureNode = ({ data, selected }) => {
   return (
     <div 
-      className={`px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-300 min-w-[200px] bg-purple-50 relative hover:shadow-2xl hover:scale-105 ${
+      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[200px] bg-purple-50 relative hover:shadow-2xl transform hover:scale-105 ${
         selected 
           ? 'border-purple-400 shadow-xl scale-105 ring-4 ring-purple-200' 
           : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
       }`}
     >
-      {/* Connection Handles */}
-      <Handle type="target" position={Position.Top} className="w-3 h-3 !bg-purple-500" />
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 !bg-purple-500" />
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-purple-500" />
-      <Handle type="target" position={Position.Right} className="w-3 h-3 !bg-purple-500" />
+      {/* Enhanced Connection Handles - Multiple handles for flexible connections */}
+      {/* Top handles */}
+      <Handle 
+        id="target-top"
+        type="target" 
+        position={Position.Top} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ left: '50%', transform: 'translateX(-50%)' }}
+      />
+      
+      {/* Bottom handles */}
+      <Handle 
+        id="source-bottom"
+        type="source" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ left: '50%', transform: 'translateX(-50%)' }}
+      />
+      
+      {/* Left handles */}
+      <Handle 
+        id="target-left"
+        type="target" 
+        position={Position.Left} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '30%', transform: 'translateY(-50%)' }}
+      />
+      <Handle 
+        id="source-left"
+        type="source" 
+        position={Position.Left} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '70%', transform: 'translateY(-50%)' }}
+      />
+      
+      {/* Right handles */}
+      <Handle 
+        id="target-right"
+        type="target" 
+        position={Position.Right} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '30%', transform: 'translateY(-50%)' }}
+      />
+      <Handle 
+        id="source-right"
+        type="source" 
+        position={Position.Right} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        style={{ top: '70%', transform: 'translateY(-50%)' }}
+      />
       
       <div className="flex items-center gap-2 mb-1">
         <BookOpen size={16} className="text-purple-600" />
@@ -781,7 +826,7 @@ const LiteratureNode = ({ data, selected }) => {
               e.stopPropagation();
               data.onDelete();
             }}
-            className="ml-auto p-1 hover:bg-purple-200 rounded"
+            className="ml-auto p-1 hover:bg-purple-200 rounded transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
           >
             <X size={12} />
           </button>
