@@ -389,7 +389,12 @@ class PsychiatryDashboardTester:
             print(f"  Task was not updated correctly: {updated_task}")
             return False
             
-        print(f"  Successfully updated task")
+        # Verify due date was updated correctly
+        if "due_date" not in updated_task or not updated_task["due_date"]:
+            print(f"  Due date was not updated correctly: {updated_task}")
+            return False
+            
+        print(f"  Successfully updated task with due date: {updated_task['due_date']}")
         
         # Delete the task
         delete_response = requests.delete(f"{self.base_url}/tasks/{task_id}")
