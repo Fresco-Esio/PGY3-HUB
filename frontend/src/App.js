@@ -1572,6 +1572,46 @@ const Dashboard = () => {
     }
   };
 
+  // Enhanced function to filter and center category nodes using fitView
+  const filterAndCenterCategory = (category) => {
+    // Filter nodes by category
+    let categoryNodes = [];
+    switch(category) {
+      case 'topics':
+        categoryNodes = nodes.filter(node => node.type === 'topic');
+        break;
+      case 'literature':
+        categoryNodes = nodes.filter(node => node.type === 'literature');
+        break;
+      case 'cases':
+        categoryNodes = nodes.filter(node => node.type === 'case');
+        break;
+      case 'tasks':
+        categoryNodes = nodes.filter(node => node.type === 'task');
+        break;
+    }
+
+    // Set focused category state
+    setFocusedCategory(category);
+
+    // Only center view if not in editing mode and we have nodes to show
+    if (!isEditing && categoryNodes.length > 0) {
+      // Small delay to ensure any state updates are processed
+      setTimeout(() => {
+        fitView({ 
+          nodes: categoryNodes.map(node => ({ id: node.id })),
+          duration: 800,
+          padding: 0.2,
+          minZoom: 0.5,
+          maxZoom: 1.5
+        });
+      }, 300);
+    }
+
+    // Add toast notification for user feedback
+    addToast(`Showing ${categoryNodes.length} ${category}`, 'info', 2000);
+  };
+
   const arrangeNodesInCategory = (category) => {
     // Get current viewport information
     const viewport = getViewport();
