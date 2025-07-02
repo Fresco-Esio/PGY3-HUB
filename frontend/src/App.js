@@ -873,7 +873,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
 
   // PERFORMANCE FIX: Memoize save handler to prevent recreation on every render
   const handleSave = useCallback(async () => {
-    if (isLoading) return; // Prevent multiple simultaneous saves
+    if (isLoading || !data?.id) return; // Add null check here
     
     setIsLoading(true);
     try {
@@ -917,7 +917,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     } finally {
       setIsLoading(false);
     }
-  }, [type, data.id, editData, setMindMapData, onAutoSave, loadMindMapData, isLoading]);
+  }, [type, data?.id, editData, setMindMapData, onAutoSave, loadMindMapData, isLoading]);
 
   // PERFORMANCE FIX: Memoize cancel handler
   const handleCancel = useCallback(() => {
