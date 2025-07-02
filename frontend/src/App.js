@@ -1069,12 +1069,26 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
           </div>
         );
       } else {
+        // Special handling for date fields to format correctly
+        let inputValue = fieldValue;
+        if (type === 'date' && fieldValue) {
+          // Convert to YYYY-MM-DD format if it's a date
+          try {
+            const date = new Date(fieldValue);
+            if (!isNaN(date.getTime())) {
+              inputValue = date.toISOString().split('T')[0];
+            }
+          } catch (error) {
+            console.warn('Error formatting date:', fieldValue);
+          }
+        }
+
         return (
           <div key={field}>
             <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
             <input
               type={type}
-              value={fieldValue}
+              value={inputValue}
               onChange={(e) => updateField(field, e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             />
