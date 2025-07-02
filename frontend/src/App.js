@@ -2091,25 +2091,40 @@ const Dashboard = () => {
 
   // PERFORMANCE FIX: Optimized node double-click handler with debouncing
   const onNodeDoubleClick = useCallback((event, node) => {
+    console.log('=== DEBUGGING SUBPAGE OPENING ===');
     console.log('Double-clicking node:', node);
+    console.log('Node ID:', node.id);
+    console.log('Current openSubpage state:', openSubpage);
     
     // Prevent multiple rapid clicks that could cause performance issues
-    if (openSubpage) return;
+    if (openSubpage) {
+      console.log('Subpage already open, ignoring click');
+      return;
+    }
     
     // Extract the node type and full ID
     const nodeType = node.id.split('-')[0];
     const nodeId = node.id.substring(nodeType.length + 1);
     console.log('Extracted nodeType:', nodeType, 'nodeId:', nodeId);
     
+    // Validate that we have the required data
+    if (!nodeType || !nodeId) {
+      console.error('Invalid node data:', { nodeType, nodeId });
+      addToast('Invalid node data', 'error');
+      return;
+    }
+    
     // PERFORMANCE FIX: Open subpage immediately for better UX, load data asynchronously
+    console.log('Setting openSubpage state...');
     setOpenSubpage({ type: nodeType, id: nodeId });
     setSubpageData(null); // Clear previous data immediately
     
     // Load data asynchronously to prevent blocking
+    console.log('Triggering async data load...');
     requestAnimationFrame(() => {
       loadSubpageData(nodeType, nodeId);
     });
-  }, [openSubpage]);
+  }, [openSubpage, addToast, loadSubpageData]);
 
   // PERFORMANCE FIX: Optimized async data loading with error handling and timeout
   const loadSubpageData = useCallback(async (nodeType, nodeId) => {
