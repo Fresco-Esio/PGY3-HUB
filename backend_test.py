@@ -354,12 +354,13 @@ class PsychiatryDashboardTester:
             print("  No topic ID available for testing")
             return False
         
-        # Create a new task
+        # Create a new task with due date to test date formatting
         new_task = {
             "title": f"Test Task {uuid.uuid4().hex[:6]}",
             "description": "A test task created by the test script",
             "priority": "high",
-            "linked_topic_id": self.topic_id
+            "linked_topic_id": self.topic_id,
+            "due_date": datetime.now().isoformat()  # Add due date to test date formatting
         }
         
         create_response = requests.post(f"{self.base_url}/tasks", json=new_task)
