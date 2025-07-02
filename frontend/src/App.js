@@ -2130,6 +2130,47 @@ const Dashboard = () => {
     }
   }, [addToast]);
 
+  // PERFORMANCE FIX: Optimized async data loading with error handling and timeout
+  const loadSubpageData = useCallback(async (nodeType, nodeId) => {
+    try {
+      console.log('Loading subpage data for:', nodeType, nodeId);
+      const endpoint = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
+      console.log('API endpoint:', `${API}/${endpoint}/${nodeId}`);
+      
+      // PERFORMANCE FIX: Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await axios.get(`${API}/${endpoint}/${nodeId}`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      console.log('Successfully loaded subpage data:', response.data);
+      
+      // PERFORMANCE FIX: Update state asynchronously to prevent blocking
+      requestAnimationFrame(() => {
+        setSubpageData(response.data);
+      });
+      
+    } catch (error) {
+      console.error('Full error details:', error);
+      
+      if (error.name === 'AbortError') {
+        console.warn('Request timed out for:', nodeType, nodeId);
+        addToast('Loading timed out. Please try again.', 'error');
+      } else {
+        console.error('Error loading subpage data:', error);
+        addToast('Error loading data. Please try again.', 'error');
+      }
+      
+      // IMPORTANT FIX: Set empty object instead of null to prevent infinite loading
+      // This ensures the component renders error state instead of loading state
+      setSubpageData({});
+    }
+  }, [addToast]);
+
   // PERFORMANCE FIX: Optimized node double-click handler with debouncing
   // PERFORMANCE FIX: Optimized async data loading with error handling and timeout
   const loadSubpageData = useCallback(async (nodeType, nodeId) => {
