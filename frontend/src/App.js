@@ -1265,8 +1265,9 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
             )}
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition-colors border border-gray-300 hover:border-gray-400"
               disabled={isLoading}
+              title="Close"
             >
               <X size={20} />
             </button>
