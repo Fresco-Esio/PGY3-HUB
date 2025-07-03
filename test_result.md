@@ -227,7 +227,6 @@ test_plan:
     - "Fix subpage loading issues"  
     - "Center new nodes in current view"
     - "Enhanced realign nodes with category columns"
-    - "Verify existing mind map API endpoints work correctly"
   stuck_tasks:
     - "Fix connection persistence during mode switches"
     - "Fix subpage loading issues"
