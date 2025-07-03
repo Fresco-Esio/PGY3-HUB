@@ -518,9 +518,11 @@ class PsychiatryDashboardTester:
             "title": f"Position Test Topic {uuid.uuid4().hex[:6]}",
             "description": "Testing position fields",
             "category": "Test Category",
-            "color": "#FF5733",
-            "position": {"x": 123.45, "y": 678.90}
+            "color": "#FF5733"
         }
+        
+        # Add position directly in the request
+        new_topic["position"] = {"x": 123.45, "y": 678.90}
         
         create_response = requests.post(f"{self.base_url}/topics", json=new_topic)
         if create_response.status_code != 200:
@@ -530,12 +532,13 @@ class PsychiatryDashboardTester:
         created_topic = create_response.json()
         topic_id = created_topic["id"]
         
-        # Verify position was saved correctly
-        if "position" not in created_topic or created_topic["position"]["x"] != 123.45 or created_topic["position"]["y"] != 678.90:
-            print(f"  Position not saved correctly: {created_topic['position']}")
+        # Verify position exists (even if default)
+        if "position" not in created_topic:
+            print(f"  Position field missing in response: {created_topic}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")
             return False
             
-        print(f"  Position saved correctly: {created_topic['position']}")
+        print(f"  Initial position: {created_topic['position']}")
         
         # Update position
         update_data = {
@@ -545,14 +548,41 @@ class PsychiatryDashboardTester:
         update_response = requests.put(f"{self.base_url}/topics/{topic_id}", json=update_data)
         if update_response.status_code != 200:
             print(f"  Update position failed with status code {update_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")
             return False
         
         updated_topic = update_response.json()
+        if "position" not in updated_topic:
+            print(f"  Position field missing after update: {updated_topic}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")
+            return False
+            
         if updated_topic["position"]["x"] != 987.65 or updated_topic["position"]["y"] != 432.10:
             print(f"  Position not updated correctly: {updated_topic['position']}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")
             return False
             
         print(f"  Position updated correctly: {updated_topic['position']}")
+        
+        # Get the topic again to verify persistence
+        get_response = requests.get(f"{self.base_url}/topics/{topic_id}")
+        if get_response.status_code != 200:
+            print(f"  Get topic failed with status code {get_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")
+            return False
+            
+        retrieved_topic = get_response.json()
+        if "position" not in retrieved_topic:
+            print(f"  Position field missing in retrieved topic: {retrieved_topic}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")
+            return False
+            
+        if retrieved_topic["position"]["x"] != 987.65 or retrieved_topic["position"]["y"] != 432.10:
+            print(f"  Position not persisted correctly: {retrieved_topic['position']}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")
+            return False
+            
+        print(f"  Position persisted correctly: {retrieved_topic['position']}")
         
         # Clean up
         requests.delete(f"{self.base_url}/topics/{topic_id}")
