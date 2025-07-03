@@ -2857,6 +2857,7 @@ const Dashboard = () => {
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
+          onEdgeDoubleClick={onEdgeDoubleClick}
           onInit={onReactFlowInit}
           nodeTypes={nodeTypes}
           fitView
