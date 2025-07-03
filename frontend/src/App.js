@@ -1836,10 +1836,10 @@ const Dashboard = () => {
     // Apply initial layout if data is already loaded
     if (mindMapData.topics.length > 0 && !hasAppliedInitialLayout) {
       setTimeout(() => {
-        console.log('Applying initial hierarchical layout after React Flow init...');
+        console.log('Applying initial layout after React Flow init...');
         applyLayout();
         setHasAppliedInitialLayout(true);
-      }, 1000);
+      }, 100); // Reduced delay to minimize jumping
     }
   }, [mindMapData, hasAppliedInitialLayout]);
   const deleteNode = async (nodeId, nodeType) => {
