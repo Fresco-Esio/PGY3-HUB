@@ -1648,6 +1648,26 @@ const Dashboard = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
+  // Enhanced auto-save function with visual feedback
+  const autoSaveMindMapData = useCallback((data) => {
+    const onSaveStart = () => {
+      setIsSaving(true);
+    };
+    
+    const onSaveComplete = (success, error) => {
+      setIsSaving(false);
+      if (success) {
+        setLastSaved(new Date());
+        addToast('Data auto-saved', 'saving', 2000);
+      } else {
+        addToast('Auto-save failed', 'error', 4000);
+        console.error('Auto-save error:', error);
+      }
+    };
+
+    localStorageUtils.save(data, onSaveStart, onSaveComplete);
+  }, [addToast]);
+
   // Function to clear the entire mind map
   const handleClearMap = useCallback(async () => {
     if (!window.confirm('Are you sure you want to clear the entire mind map? This action cannot be undone.')) {
@@ -1678,26 +1698,6 @@ const Dashboard = () => {
       addToast('Failed to clear mind map', 'error');
     }
   }, [setMindMapData, setNodes, setEdges, autoSaveMindMapData, addToast]);
-
-  // Enhanced auto-save function with visual feedback
-  const autoSaveMindMapData = useCallback((data) => {
-    const onSaveStart = () => {
-      setIsSaving(true);
-    };
-    
-    const onSaveComplete = (success, error) => {
-      setIsSaving(false);
-      if (success) {
-        setLastSaved(new Date());
-        addToast('Data auto-saved', 'saving', 2000);
-      } else {
-        addToast('Auto-save failed', 'error', 4000);
-        console.error('Auto-save error:', error);
-      }
-    };
-
-    localStorageUtils.save(data, onSaveStart, onSaveComplete);
-  }, [addToast]);
 
   // Modified handleNodesChange to trigger auto-save
   const handleNodesChange = useCallback((changes) => {
