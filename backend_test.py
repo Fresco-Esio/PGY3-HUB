@@ -6,7 +6,7 @@ import uuid
 import time
 
 # Use the public endpoint for testing
-BASE_URL = "https://12b7abb5-0d4a-489b-b450-4ea2a16e984e.preview.emergentagent.com/api"
+BASE_URL = "https://cd6a332d-a14e-4d37-b419-166bdd01349b.preview.emergentagent.com/api"
 
 class PsychiatryDashboardTester:
     def __init__(self, base_url):
