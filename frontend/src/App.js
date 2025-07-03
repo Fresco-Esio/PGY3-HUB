@@ -1771,10 +1771,10 @@ const Dashboard = () => {
             (localData.topics.length > 0 || localData.cases.length > 0 || 
              localData.tasks.length > 0 || localData.literature?.length > 0)) {
           setTimeout(() => {
-            console.log('Applying initial hierarchical layout from localStorage...');
+            console.log('Applying initial layout from localStorage...');
             applyLayout();
             setHasAppliedInitialLayout(true);
-          }, 1000);
+          }, 100); // Reduced delay to minimize jumping
         }
         
         // Optionally sync with backend in the background
