@@ -2251,6 +2251,16 @@ const Dashboard = () => {
     setSubpageData(null);
   }, []);
 
+  // Function to handle edge deletion in edit mode
+  const onEdgeDoubleClick = useCallback((event, edge) => {
+    if (!isEditing) return;
+    
+    if (window.confirm('Are you sure you want to delete this connection?')) {
+      setEdges((edges) => edges.filter((e) => e.id !== edge.id));
+      addToast('Connection deleted', 'success', 2000);
+    }
+  }, [isEditing, setEdges, addToast]);
+
   // Dagre layout configuration
   const getLayoutedElements = (nodes, edges, direction = 'TB') => {
     const dagreGraph = new dagre.graphlib.Graph();
