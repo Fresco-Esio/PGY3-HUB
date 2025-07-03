@@ -2898,9 +2898,10 @@ const Dashboard = () => {
             <div className="text-sm font-semibold text-gray-700 mb-2">Instructions</div>
             <div className="text-xs text-gray-500 space-y-1">
               <div>• Click to select nodes</div>
-              <div>• Double-click to view details</div>
+              <div>• Double-click nodes to view details</div>
               <div>• Hover and drag to reposition</div>
               <div>• {isEditing ? 'Connect nodes by dragging handles' : 'Edit mode: create connections'}</div>
+              {isEditing && <div>• Double-click connections to delete</div>}
               <div>• Use "Realign Nodes" for auto layout</div>
               <div>• Zoom with mouse wheel</div>
             </div>
