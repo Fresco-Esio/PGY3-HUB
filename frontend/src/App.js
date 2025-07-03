@@ -2656,30 +2656,49 @@ const Dashboard = () => {
 
   const addNewNode = async (nodeType) => {
     try {
-      // Find a free position that doesn't overlap with existing nodes
+      // Find a free position in the center of the current view
       const findFreePosition = () => {
         const existingPositions = nodes.map(node => node.position);
-        const gridSize = 300; // Spacing between potential positions
         
-        // Try positions in a grid pattern
-        for (let y = -200; y < 800; y += gridSize) {
-          for (let x = -400; x < 1200; x += gridSize) {
-            const testPosition = { x, y };
-            const tooClose = existingPositions.some(pos => 
-              Math.abs(pos.x - testPosition.x) < 250 && 
-              Math.abs(pos.y - testPosition.y) < 150
-            );
-            
-            if (!tooClose) {
-              return testPosition;
-            }
+        // Get current viewport information
+        const viewport = getViewport();
+        const { x, y, zoom } = viewport;
+        
+        // Calculate visible area center
+        const viewportWidth = window.innerWidth - 320; // Subtract sidebar width
+        const viewportHeight = window.innerHeight;
+        
+        // Convert screen coordinates to flow coordinates
+        const centerX = -x / zoom + (viewportWidth / 2) / zoom;
+        const centerY = -y / zoom + (viewportHeight / 2) / zoom;
+        
+        // Try positions in a spiral pattern around the center
+        const spiralRadius = 150;
+        const maxAttempts = 20;
+        
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const angle = (attempt * 2 * Math.PI) / 8; // 8 positions per ring
+          const radius = spiralRadius * (1 + Math.floor(attempt / 8));
+          
+          const testPosition = {
+            x: centerX + Math.cos(angle) * radius,
+            y: centerY + Math.sin(angle) * radius
+          };
+          
+          const tooClose = existingPositions.some(pos => 
+            Math.abs(pos.x - testPosition.x) < 250 && 
+            Math.abs(pos.y - testPosition.y) < 150
+          );
+          
+          if (!tooClose) {
+            return testPosition;
           }
         }
         
-        // Fallback to a random position if no free grid position found
+        // Fallback to center position with random offset
         return { 
-          x: Math.random() * 600 - 300, 
-          y: Math.random() * 400 - 200 
+          x: centerX + (Math.random() - 0.5) * 200, 
+          y: centerY + (Math.random() - 0.5) * 200 
         };
       };
 
