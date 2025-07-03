@@ -103,9 +103,16 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Implement two key features for the psychiatry resident dashboard:
-  1. Robust Local Data Persistence: Use localStorage to store all mind map data (topics, literature, cases, tasks, connections, node positions) with debounced auto-saving (500-1000ms delay) and auto-loading on app start with fallback to backend API
-  2. Patient Case CSV Export: Add 'Export Patient Cases' button in sidebar to export all case data as downloadable CSV file with visual feedback
+  Fix critical connection persistence issues and implement UX improvements for the psychiatry resident dashboard:
+  
+  CRITICAL FIXES:
+  1. Fix disappearing connection lines (edges) when exiting 'Edit Mind Map' mode or upon page refresh
+  2. Resolve difficulty loading data when trying to open subpages
+  
+  UX IMPROVEMENTS:
+  3. New nodes should generate in the center of the user's current view
+  4. On opening the app, nodes should already be positioned correctly (no jumping/shifting)
+  5. When "Realign Nodes" button is pressed, arrange nodes in columns by category type in the central viewing area
 
 backend:
   - task: "Verify existing mind map API endpoints work correctly"
@@ -114,36 +121,81 @@ backend:
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "main"
           comment: "All CRUD endpoints for topics, cases, tasks, literature are implemented. /api/mindmap-data endpoint returns all data. Position fields exist in models."
+        - working: true
+          agent: "main"
+          comment: "API endpoints should be retested after frontend fixes to ensure connection persistence works end-to-end"
 
 frontend:
-  - task: "Implement localStorage utilities with debounced auto-saving"
+  - task: "Fix connection persistence during mode switches"
     implemented: true
-    working: true
+    working: false
     file: "App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported that connections are still disappearing when switching in and out of edit mode"
         - working: true
-          agent: "testing"
-          comment: "VERIFIED: localStorage persistence working correctly. Auto-save indicator appears with timestamp. Position changes persist after page refresh."
+          agent: "main"
+          comment: "FIXED: Added delay in mode switching useEffect to ensure auto-save completes. Added immediate localStorage save for connections without debounce. Modified onConnect to force immediate save."
 
-  - task: "Auto-load mind map data from localStorage on startup"
+  - task: "Fix subpage loading issues"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported difficulty loading data when trying to open subpages"
+        - working: true
+          agent: "main"
+          comment: "FIXED: Added timeout and error handling to subpage data loading. Fixed data flow issues that were causing loading problems."
+
+  - task: "Center new nodes in current view"
     implemented: true
     working: true
     file: "App.js"
     stuck_count: 0
-    priority: "high"
-    needs_retesting: false
+    priority: "medium"
+    needs_retesting: true
     status_history:
         - working: true
-          agent: "testing"
-          comment: "VERIFIED: Application loads data instantly from localStorage on startup, maintains all node positions and data."
+          agent: "main"
+          comment: "IMPLEMENTED: Updated addNewNode function to use viewport center with spiral positioning algorithm to find free space around user's current view center."
+
+  - task: "Smooth app loading without node jumping"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "IMPROVED: Reduced initial layout delay from 1000ms to 100ms to minimize visible jumping when app loads."
+
+  - task: "Enhanced realign nodes with category columns"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "IMPLEMENTED: Completely rewrote applyLayout function to arrange nodes in columns by category type (topics, literature, cases, tasks) in the center of current viewing area."
 
   - task: "Auto-save mind map data on changes"
     implemented: true
@@ -151,53 +203,34 @@ frontend:
     file: "App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
           comment: "VERIFIED: Auto-save triggers on node drag, edit, create, and delete operations. Changes persist after refresh."
-
-  - task: "Add CSV export button to sidebar"
-    implemented: true
-    working: true
-    file: "App.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
         - working: true
-          agent: "testing"
-          comment: "VERIFIED: Export Patient Cases button visible in sidebar with correct case count display (2 cases)."
-
-  - task: "Implement CSV export functionality"
-    implemented: true
-    working: true
-    file: "App.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-        - working: true
-          agent: "testing"
-          comment: "VERIFIED: CSV export successfully generates file with date-stamped filename. Console logs confirm successful export of patient cases."
+          agent: "main"
+          comment: "ENHANCED: Added immediate save for connections to prevent timing issues with debounced auto-save."
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 0
+  version: "1.1"
+  test_sequence: 1
   run_ui: false
 
 test_plan:
   current_focus:
+    - "Fix connection persistence during mode switches"
+    - "Fix subpage loading issues"  
+    - "Center new nodes in current view"
+    - "Enhanced realign nodes with category columns"
     - "Verify existing mind map API endpoints work correctly"
-    - "Test localStorage persistence and auto-saving"
-    - "Test CSV export functionality"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Fix connection persistence during mode switches"
+    - "Fix subpage loading issues"
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
-      message: "Completed comprehensive enhancements to localStorage persistence and CSV export features. Added major visual improvements including toast notifications, enhanced node styling, loading animations, progress tracking, and dedicated editing forms. All features tested and working correctly."
-    - agent: "testing"
-      message: "VERIFIED: All enhanced features working perfectly. Visual effects, animations, toast notifications, progress tracking, and enhanced node data display correctly. Export functionality improved with detailed progress feedback. Auto-save with visual indicators operational."
+      message: "Implemented comprehensive fixes for connection persistence issues and UX improvements. Key changes: 1) Added delay in mode switching to ensure auto-save completes 2) Added immediate localStorage save for connections 3) Updated addNewNode to center in viewport 4) Rewrote applyLayout for category-based columns 5) Reduced initial layout delays. All tasks need retesting to verify fixes work."
