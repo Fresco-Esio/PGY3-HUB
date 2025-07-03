@@ -1710,6 +1710,37 @@ const Dashboard = () => {
     }
   }, [setMindMapData, setNodes, setEdges, autoSaveMindMapData, addToast]);
 
+  // Function to clear the entire mind map
+  const handleClearMap = useCallback(async () => {
+    if (!window.confirm('Are you sure you want to clear the entire mind map? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Clear all data
+      const emptyData = { topics: [], cases: [], tasks: [], literature: [] };
+      setMindMapData(emptyData);
+      setNodes([]);
+      setEdges([]);
+      
+      // Save empty state to localStorage
+      autoSaveMindMapData(emptyData);
+      
+      // Show success message
+      addToast('Mind map cleared successfully', 'success');
+      
+      // Reset other states
+      setSelectedNode(null);
+      setOpenSubpage(null);
+      setSubpageData(null);
+      setFocusedCategory(null);
+      
+    } catch (error) {
+      console.error('Error clearing mind map:', error);
+      addToast('Failed to clear mind map', 'error');
+    }
+  }, [setMindMapData, setNodes, setEdges, autoSaveMindMapData, addToast]);
+
   // Enhanced auto-save function with visual feedback
   const autoSaveMindMapData = useCallback((data) => {
     const onSaveStart = () => {
