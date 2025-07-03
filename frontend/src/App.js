@@ -1799,11 +1799,12 @@ const Dashboard = () => {
       if (isReactFlowReady && !hasAppliedInitialLayout && 
           (response.data.topics.length > 0 || response.data.cases.length > 0 || 
            response.data.tasks.length > 0 || response.data.literature?.length > 0)) {
+        // Apply layout immediately to prevent jumping
+        console.log('Applying initial layout from API...');
         setTimeout(() => {
-          console.log('Applying initial hierarchical layout from API...');
           applyLayout();
           setHasAppliedInitialLayout(true);
-        }, 1000);
+        }, 100); // Reduced delay to minimize jumping
       }
     } catch (error) {
       console.error('Error loading mind map data:', error);
