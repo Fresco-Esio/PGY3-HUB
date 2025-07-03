@@ -1737,7 +1737,10 @@ const Dashboard = () => {
   useEffect(() => {
     // Refresh nodes when edit mode changes
     if (mindMapData.topics.length > 0) {
-      convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
+      // Add small delay to ensure any pending auto-save operations complete
+      setTimeout(() => {
+        convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
+      }, 100);
     }
   }, [isEditing]);
 
