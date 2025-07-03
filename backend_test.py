@@ -510,6 +510,369 @@ class PsychiatryDashboardTester:
         return True
     
     
+    # Position field tests
+    def test_position_fields(self):
+        """Test that position fields are properly stored and retrieved"""
+        # Create a new topic with specific position
+        new_topic = {
+            "title": f"Position Test Topic {uuid.uuid4().hex[:6]}",
+            "description": "Testing position fields",
+            "category": "Test Category",
+            "color": "#FF5733",
+            "position": {"x": 123.45, "y": 678.90}
+        }
+        
+        create_response = requests.post(f"{self.base_url}/topics", json=new_topic)
+        if create_response.status_code != 200:
+            print(f"  Create topic failed with status code {create_response.status_code}")
+            return False
+        
+        created_topic = create_response.json()
+        topic_id = created_topic["id"]
+        
+        # Verify position was saved correctly
+        if "position" not in created_topic or created_topic["position"]["x"] != 123.45 or created_topic["position"]["y"] != 678.90:
+            print(f"  Position not saved correctly: {created_topic['position']}")
+            return False
+            
+        print(f"  Position saved correctly: {created_topic['position']}")
+        
+        # Update position
+        update_data = {
+            "position": {"x": 987.65, "y": 432.10}
+        }
+        
+        update_response = requests.put(f"{self.base_url}/topics/{topic_id}", json=update_data)
+        if update_response.status_code != 200:
+            print(f"  Update position failed with status code {update_response.status_code}")
+            return False
+        
+        updated_topic = update_response.json()
+        if updated_topic["position"]["x"] != 987.65 or updated_topic["position"]["y"] != 432.10:
+            print(f"  Position not updated correctly: {updated_topic['position']}")
+            return False
+            
+        print(f"  Position updated correctly: {updated_topic['position']}")
+        
+        # Clean up
+        requests.delete(f"{self.base_url}/topics/{topic_id}")
+        return True
+    
+    # Connection persistence tests
+    def test_topic_to_case_linking(self):
+        """Test that topics can be linked to cases and the connection persists"""
+        # Create a test topic
+        topic_data = {
+            "title": f"Link Test Topic {uuid.uuid4().hex[:6]}",
+            "description": "Testing topic linking",
+            "category": "Test Category"
+        }
+        
+        topic_response = requests.post(f"{self.base_url}/topics", json=topic_data)
+        if topic_response.status_code != 200:
+            print(f"  Create topic failed with status code {topic_response.status_code}")
+            return False
+            
+        topic = topic_response.json()
+        topic_id = topic["id"]
+        
+        # Create a test case linked to the topic
+        case_data = {
+            "case_id": f"LINK-{uuid.uuid4().hex[:6].upper()}",
+            "encounter_date": datetime.now().isoformat(),
+            "primary_diagnosis": "Test Diagnosis",
+            "chief_complaint": "Test complaint",
+            "linked_topics": [topic_id]  # Link to our test topic
+        }
+        
+        case_response = requests.post(f"{self.base_url}/cases", json=case_data)
+        if case_response.status_code != 200:
+            print(f"  Create case failed with status code {case_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            return False
+            
+        case = case_response.json()
+        case_id = case["id"]
+        
+        # Verify the link was created
+        if "linked_topics" not in case or topic_id not in case["linked_topics"]:
+            print(f"  Topic link not created correctly: {case}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/cases/{case_id}")  # Clean up
+            return False
+            
+        print(f"  Topic-to-case link created successfully")
+        
+        # Get the case again to verify persistence
+        get_response = requests.get(f"{self.base_url}/cases/{case_id}")
+        if get_response.status_code != 200:
+            print(f"  Get case failed with status code {get_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/cases/{case_id}")  # Clean up
+            return False
+            
+        retrieved_case = get_response.json()
+        if "linked_topics" not in retrieved_case or topic_id not in retrieved_case["linked_topics"]:
+            print(f"  Topic link not persisted: {retrieved_case}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/cases/{case_id}")  # Clean up
+            return False
+            
+        print(f"  Topic-to-case link persisted successfully")
+        
+        # Clean up
+        requests.delete(f"{self.base_url}/topics/{topic_id}")
+        requests.delete(f"{self.base_url}/cases/{case_id}")
+        return True
+    
+    def test_topic_to_literature_linking(self):
+        """Test that topics can be linked to literature and the connection persists"""
+        # Create a test topic
+        topic_data = {
+            "title": f"Lit Link Topic {uuid.uuid4().hex[:6]}",
+            "description": "Testing literature linking",
+            "category": "Test Category"
+        }
+        
+        topic_response = requests.post(f"{self.base_url}/topics", json=topic_data)
+        if topic_response.status_code != 200:
+            print(f"  Create topic failed with status code {topic_response.status_code}")
+            return False
+            
+        topic = topic_response.json()
+        topic_id = topic["id"]
+        
+        # Create a test literature linked to the topic
+        lit_data = {
+            "title": f"Test Literature {uuid.uuid4().hex[:6]}",
+            "authors": "Test Author",
+            "publication": "Test Journal",
+            "year": 2025,
+            "linked_topics": [topic_id]  # Link to our test topic
+        }
+        
+        lit_response = requests.post(f"{self.base_url}/literature", json=lit_data)
+        if lit_response.status_code != 200:
+            print(f"  Create literature failed with status code {lit_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            return False
+            
+        literature = lit_response.json()
+        lit_id = literature["id"]
+        
+        # Verify the link was created
+        if "linked_topics" not in literature or topic_id not in literature["linked_topics"]:
+            print(f"  Topic link not created correctly: {literature}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/literature/{lit_id}")  # Clean up
+            return False
+            
+        print(f"  Topic-to-literature link created successfully")
+        
+        # Get the literature again to verify persistence
+        get_response = requests.get(f"{self.base_url}/literature/{lit_id}")
+        if get_response.status_code != 200:
+            print(f"  Get literature failed with status code {get_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/literature/{lit_id}")  # Clean up
+            return False
+            
+        retrieved_lit = get_response.json()
+        if "linked_topics" not in retrieved_lit or topic_id not in retrieved_lit["linked_topics"]:
+            print(f"  Topic link not persisted: {retrieved_lit}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/literature/{lit_id}")  # Clean up
+            return False
+            
+        print(f"  Topic-to-literature link persisted successfully")
+        
+        # Clean up
+        requests.delete(f"{self.base_url}/topics/{topic_id}")
+        requests.delete(f"{self.base_url}/literature/{lit_id}")
+        return True
+    
+    def test_task_linking(self):
+        """Test that tasks can be linked to topics and cases"""
+        # Create a test topic
+        topic_data = {
+            "title": f"Task Link Topic {uuid.uuid4().hex[:6]}",
+            "description": "Testing task linking",
+            "category": "Test Category"
+        }
+        
+        topic_response = requests.post(f"{self.base_url}/topics", json=topic_data)
+        if topic_response.status_code != 200:
+            print(f"  Create topic failed with status code {topic_response.status_code}")
+            return False
+            
+        topic = topic_response.json()
+        topic_id = topic["id"]
+        
+        # Create a test case
+        case_data = {
+            "case_id": f"TASK-{uuid.uuid4().hex[:6].upper()}",
+            "encounter_date": datetime.now().isoformat(),
+            "primary_diagnosis": "Test Diagnosis",
+            "chief_complaint": "Test complaint"
+        }
+        
+        case_response = requests.post(f"{self.base_url}/cases", json=case_data)
+        if case_response.status_code != 200:
+            print(f"  Create case failed with status code {case_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            return False
+            
+        case = case_response.json()
+        case_id = case["id"]
+        
+        # Create a task linked to both topic and case
+        task_data = {
+            "title": f"Linked Task {uuid.uuid4().hex[:6]}",
+            "description": "Testing task linking",
+            "priority": "high",
+            "linked_topic_id": topic_id,
+            "linked_case_id": case_id
+        }
+        
+        task_response = requests.post(f"{self.base_url}/tasks", json=task_data)
+        if task_response.status_code != 200:
+            print(f"  Create task failed with status code {task_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/cases/{case_id}")  # Clean up
+            return False
+            
+        task = task_response.json()
+        task_id = task["id"]
+        
+        # Verify the links were created
+        if task["linked_topic_id"] != topic_id or task["linked_case_id"] != case_id:
+            print(f"  Task links not created correctly: {task}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/cases/{case_id}")  # Clean up
+            requests.delete(f"{self.base_url}/tasks/{task_id}")  # Clean up
+            return False
+            
+        print(f"  Task links created successfully")
+        
+        # Get the task again to verify persistence
+        get_response = requests.get(f"{self.base_url}/tasks/{task_id}")
+        if get_response.status_code != 200:
+            print(f"  Get task failed with status code {get_response.status_code}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/cases/{case_id}")  # Clean up
+            requests.delete(f"{self.base_url}/tasks/{task_id}")  # Clean up
+            return False
+            
+        retrieved_task = get_response.json()
+        if retrieved_task["linked_topic_id"] != topic_id or retrieved_task["linked_case_id"] != case_id:
+            print(f"  Task links not persisted: {retrieved_task}")
+            requests.delete(f"{self.base_url}/topics/{topic_id}")  # Clean up
+            requests.delete(f"{self.base_url}/cases/{case_id}")  # Clean up
+            requests.delete(f"{self.base_url}/tasks/{task_id}")  # Clean up
+            return False
+            
+        print(f"  Task links persisted successfully")
+        
+        # Clean up
+        requests.delete(f"{self.base_url}/topics/{topic_id}")
+        requests.delete(f"{self.base_url}/cases/{case_id}")
+        requests.delete(f"{self.base_url}/tasks/{task_id}")
+        return True
+    
+    def test_update_links(self):
+        """Test updating links between entities"""
+        # Create two test topics
+        topic1_data = {
+            "title": f"Link Update Topic 1 {uuid.uuid4().hex[:6]}",
+            "category": "Test Category"
+        }
+        
+        topic2_data = {
+            "title": f"Link Update Topic 2 {uuid.uuid4().hex[:6]}",
+            "category": "Test Category"
+        }
+        
+        topic1_response = requests.post(f"{self.base_url}/topics", json=topic1_data)
+        topic2_response = requests.post(f"{self.base_url}/topics", json=topic2_data)
+        
+        if topic1_response.status_code != 200 or topic2_response.status_code != 200:
+            print(f"  Create topics failed")
+            return False
+            
+        topic1 = topic1_response.json()
+        topic2 = topic2_response.json()
+        topic1_id = topic1["id"]
+        topic2_id = topic2["id"]
+        
+        # Create a literature with link to topic1
+        lit_data = {
+            "title": f"Update Link Literature {uuid.uuid4().hex[:6]}",
+            "authors": "Test Author",
+            "linked_topics": [topic1_id]
+        }
+        
+        lit_response = requests.post(f"{self.base_url}/literature", json=lit_data)
+        if lit_response.status_code != 200:
+            print(f"  Create literature failed")
+            requests.delete(f"{self.base_url}/topics/{topic1_id}")
+            requests.delete(f"{self.base_url}/topics/{topic2_id}")
+            return False
+            
+        literature = lit_response.json()
+        lit_id = literature["id"]
+        
+        # Update literature to link to both topics
+        update_data = {
+            "linked_topics": [topic1_id, topic2_id]
+        }
+        
+        update_response = requests.put(f"{self.base_url}/literature/{lit_id}", json=update_data)
+        if update_response.status_code != 200:
+            print(f"  Update literature links failed")
+            requests.delete(f"{self.base_url}/topics/{topic1_id}")
+            requests.delete(f"{self.base_url}/topics/{topic2_id}")
+            requests.delete(f"{self.base_url}/literature/{lit_id}")
+            return False
+            
+        updated_lit = update_response.json()
+        if len(updated_lit["linked_topics"]) != 2 or topic1_id not in updated_lit["linked_topics"] or topic2_id not in updated_lit["linked_topics"]:
+            print(f"  Literature links not updated correctly: {updated_lit['linked_topics']}")
+            requests.delete(f"{self.base_url}/topics/{topic1_id}")
+            requests.delete(f"{self.base_url}/topics/{topic2_id}")
+            requests.delete(f"{self.base_url}/literature/{lit_id}")
+            return False
+            
+        print(f"  Literature links updated successfully")
+        
+        # Update literature to remove all links
+        update_data = {
+            "linked_topics": []
+        }
+        
+        update_response = requests.put(f"{self.base_url}/literature/{lit_id}", json=update_data)
+        if update_response.status_code != 200:
+            print(f"  Update literature to remove links failed")
+            requests.delete(f"{self.base_url}/topics/{topic1_id}")
+            requests.delete(f"{self.base_url}/topics/{topic2_id}")
+            requests.delete(f"{self.base_url}/literature/{lit_id}")
+            return False
+            
+        updated_lit = update_response.json()
+        if len(updated_lit["linked_topics"]) != 0:
+            print(f"  Literature links not removed correctly: {updated_lit['linked_topics']}")
+            requests.delete(f"{self.base_url}/topics/{topic1_id}")
+            requests.delete(f"{self.base_url}/topics/{topic2_id}")
+            requests.delete(f"{self.base_url}/literature/{lit_id}")
+            return False
+            
+        print(f"  Literature links removed successfully")
+        
+        # Clean up
+        requests.delete(f"{self.base_url}/topics/{topic1_id}")
+        requests.delete(f"{self.base_url}/topics/{topic2_id}")
+        requests.delete(f"{self.base_url}/literature/{lit_id}")
+        return True
+    
     def run_all_tests(self):
         """Run all tests and print a summary"""
         print("🧪 Starting PGY-3 HQ Psychiatry Dashboard API Tests 🧪")
@@ -538,6 +901,13 @@ class PsychiatryDashboardTester:
         self.run_test("Get All Literature", self.test_get_literature)
         self.run_test("Get Literature by ID", self.test_get_literature_by_id)
         self.run_test("Create, Update, Delete Literature", self.test_create_update_delete_literature)
+        
+        # Position and connection persistence tests
+        self.run_test("Position Fields Storage and Retrieval", self.test_position_fields)
+        self.run_test("Topic to Case Linking", self.test_topic_to_case_linking)
+        self.run_test("Topic to Literature Linking", self.test_topic_to_literature_linking)
+        self.run_test("Task Linking to Topics and Cases", self.test_task_linking)
+        self.run_test("Update Entity Links", self.test_update_links)
         
         # Print summary
         print("\n📊 Test Summary:")
