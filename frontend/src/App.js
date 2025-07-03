@@ -2302,8 +2302,22 @@ const Dashboard = () => {
         
         if (updatedData) {
           console.log('Successfully updated mindMapData with new connection');
-          // Trigger auto-save to localStorage
+          // Trigger auto-save to localStorage immediately for connections
           autoSaveMindMapData(newData);
+          
+          // Force immediate save without debounce for critical connection data
+          try {
+            const storageData = {
+              version: '1.1',
+              timestamp: new Date().toISOString(),
+              data: newData
+            };
+            localStorage.setItem('pgy3_mindmap_data', JSON.stringify(storageData));
+            console.log('Connection data immediately saved to localStorage');
+          } catch (error) {
+            console.error('Error immediately saving connection:', error);
+          }
+          
           addToast('Connection created and saved', 'success', 2000);
         } else {
           console.log('Connection already exists or unsupported connection type');
