@@ -2580,25 +2580,84 @@ const Dashboard = () => {
     }
 
     try {
-      console.log(`Applying hierarchical layout to ${nodes.length} nodes and ${edges.length} edges`);
+      console.log(`Applying category-based column layout to ${nodes.length} nodes`);
       
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-        nodes,
-        edges,
-        'TB' // Top to Bottom hierarchical layout
-      );
+      // Get current viewport information
+      const viewport = getViewport();
+      const { x, y, zoom } = viewport;
+      
+      // Calculate visible area center
+      const viewportWidth = window.innerWidth - 320; // Subtract sidebar width
+      const viewportHeight = window.innerHeight;
+      
+      // Convert screen coordinates to flow coordinates
+      const centerX = -x / zoom + (viewportWidth / 2) / zoom;
+      const centerY = -y / zoom + (viewportHeight / 2) / zoom;
+      
+      // Group nodes by category
+      const nodesByCategory = {
+        topics: nodes.filter(n => n.type === 'topic'),
+        literature: nodes.filter(n => n.type === 'literature'),
+        cases: nodes.filter(n => n.type === 'case'),
+        tasks: nodes.filter(n => n.type === 'task')
+      };
+      
+      // Calculate column layout
+      const categories = Object.keys(nodesByCategory).filter(cat => nodesByCategory[cat].length > 0);
+      const columnWidth = 300;
+      const totalWidth = categories.length * columnWidth;
+      const startX = centerX - totalWidth / 2;
+      
+      let layoutedNodes = [...nodes];
+      
+      categories.forEach((category, columnIndex) => {
+        const categoryNodes = nodesByCategory[category];
+        const columnX = startX + (columnIndex * columnWidth);
+        
+        // Arrange nodes vertically in the column
+        const nodeSpacing = 150;
+        const columnHeight = Math.max(0, (categoryNodes.length - 1) * nodeSpacing);
+        const startY = centerY - columnHeight / 2;
+        
+        categoryNodes.forEach((node, nodeIndex) => {
+          const layoutedNodeIndex = layoutedNodes.findIndex(n => n.id === node.id);
+          if (layoutedNodeIndex !== -1) {
+            layoutedNodes[layoutedNodeIndex] = {
+              ...layoutedNodes[layoutedNodeIndex],
+              position: {
+                x: columnX,
+                y: startY + (nodeIndex * nodeSpacing)
+              }
+            };
+          }
+        });
+      });
 
       // Update node positions with smooth transition
-      setNodes([...layoutedNodes]);
-      setEdges([...layoutedEdges]);
+      setNodes(layoutedNodes);
 
-      // Auto-save positions to backend
+      // Auto-save positions
       setTimeout(() => {
         console.log('Auto-saving realigned positions...');
-        // The handleNodesChange will trigger auto-save
+        // Update mindMapData with new positions
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          layoutedNodes.forEach(node => {
+            const [nodeType, nodeId] = node.id.split('-');
+            const collection = nodeType === 'literature' ? 'literature' : nodeType + 's';
+            if (newData[collection]) {
+              const item = newData[collection].find(item => item.id === nodeId);
+              if (item) {
+                item.position = node.position;
+              }
+            }
+          });
+          autoSaveMindMapData(newData);
+          return newData;
+        });
       }, 200);
 
-      // Adjust viewport to show all realigned nodes with increased delay
+      // Adjust viewport to show all realigned nodes
       setTimeout(() => {
         try {
           fitView({ 
@@ -2612,12 +2671,14 @@ const Dashboard = () => {
         } catch (error) {
           console.error('Error adjusting viewport:', error);
         }
-      }, 500); // Increased delay to 500ms
+      }, 500);
 
-      console.log('Layout applied successfully');
+      console.log('Category-based column layout applied successfully');
+      addToast('Nodes arranged by category', 'success', 2000);
       
     } catch (error) {
       console.error('Error applying layout:', error);
+      addToast('Layout failed', 'error', 3000);
     }
   };
 
