@@ -2710,6 +2710,14 @@ const Dashboard = () => {
                 Add New Node
               </button>
 
+              <LoadingButton
+                onClick={handleClearMap}
+                icon={Trash2}
+                className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
+              >
+                Clear Entire Map
+              </LoadingButton>
+
               <div className="text-xs text-slate-400 mt-4">
                 <div className="mb-2">Hierarchy:</div>
                 <div className="space-y-1">
