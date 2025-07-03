@@ -1839,6 +1839,11 @@ const Dashboard = () => {
     }
   }, [mindMapData, hasAppliedInitialLayout]);
   const deleteNode = async (nodeId, nodeType) => {
+    // Add confirmation dialog
+    if (!window.confirm(`Are you sure you want to delete this ${nodeType}?`)) {
+      return;
+    }
+
     try {
       await axios.delete(`${API}/${nodeType}s/${nodeId}`);
       setNodes((nds) => nds.filter(n => n.id !== `${nodeType}-${nodeId}`));
@@ -1861,8 +1866,12 @@ const Dashboard = () => {
         return updatedData;
       });
       
+      // Show success message
+      addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} deleted successfully`, 'success');
+      
     } catch (error) {
       console.error('Error deleting node:', error);
+      addToast(`Failed to delete ${nodeType}`, 'error');
     }
   };
 
