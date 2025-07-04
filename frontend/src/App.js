@@ -1750,7 +1750,6 @@ const Dashboard = () => {
 
   // Effect to update React Flow nodes when mindMapData changes (preserving positions)
   useEffect(() => {
-    mindMapDataRef.current = mindMapData; // Keep ref in sync
     if (mindMapData.topics.length > 0 || mindMapData.cases.length > 0 || 
         mindMapData.tasks.length > 0 || mindMapData.literature?.length > 0) {
       console.log('Updating React Flow nodes from mindMapData changes (preserving positions)');
