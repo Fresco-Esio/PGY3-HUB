@@ -2058,6 +2058,14 @@ const Dashboard = () => {
   };
 
   const convertDataToReactFlow = (data, preserveCurrentPositions = false) => {
+    console.log('convertDataToReactFlow called with:', {
+      preserveCurrentPositions,
+      topics: data.topics.length,
+      cases: data.cases.length,
+      tasks: data.tasks.length,
+      literature: data.literature?.length || 0
+    });
+    
     const flowNodes = [];
     const flowEdges = [];
 
