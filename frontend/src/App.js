@@ -1732,42 +1732,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Refresh nodes when edit mode changes
-    if (mindMapDataRef.current.topics.length > 0) {
-      // Use the most recent data from ref to avoid race conditions
-      const currentData = mindMapDataRef.current;
-      
+    if (mindMapData.topics.length > 0) {
+      // Add small delay to ensure any pending auto-save operations complete
       setTimeout(() => {
-        console.log('Mode switch detected, using current mindMapData:', {
-          topics: currentData.topics.length,
-          cases: currentData.cases.length, 
-          literature: currentData.literature?.length || 0,
-          tasks: currentData.tasks.length
-        });
-        
-        // Log connection data for debugging
-        currentData.literature?.forEach(lit => {
-          if (lit.linked_topics?.length > 0) {
-            console.log(`Literature "${lit.title}" linked to topics:`, lit.linked_topics);
-          }
-        });
-        currentData.cases?.forEach(caseItem => {
-          if (caseItem.linked_topics?.length > 0) {
-            console.log(`Case "${caseItem.case_id}" linked to topics:`, caseItem.linked_topics);
-          }
-        });
-        currentData.tasks?.forEach(task => {
-          if (task.linked_case_id) {
-            console.log(`Task "${task.title}" linked to case:`, task.linked_case_id);
-          }
-          if (task.linked_topic_id) {
-            console.log(`Task "${task.title}" linked to topic:`, task.linked_topic_id);
-          }
-        });
-        
-        convertDataToReactFlow(currentData, true); // Preserve positions when toggling edit mode
-      }, 500); // Increased delay to ensure all state updates complete
+        convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
+      }, 100);
     }
-  }, [isEditing, convertDataToReactFlow]);
+  }, [isEditing]);
 
   // Effect to apply initial layout when both React Flow and data are ready
   useEffect(() => {
