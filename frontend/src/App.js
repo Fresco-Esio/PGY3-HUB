@@ -905,19 +905,16 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         return newData;
       });
       
-      // PERFORMANCE FIX: Use RequestAnimationFrame for smooth UI updates
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          loadMindMapData();
-        }, 50); // Reduced delay for more responsive feel
-      });
+      // PERFORMANCE FIX: Update nodes without full reload to preserve positions
+      // Don't call loadMindMapData() as it resets positions
+      // The data is already updated in mindMapData state above
       
     } catch (error) {
       console.error('Error saving data:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [type, data?.id, editData, setMindMapData, onAutoSave, loadMindMapData, isLoading]);
+  }, [type, data?.id, editData, setMindMapData, onAutoSave, isLoading]);
 
   // PERFORMANCE FIX: Memoize cancel handler
   const handleCancel = useCallback(() => {
