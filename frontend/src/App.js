@@ -952,19 +952,15 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
       // PERFORMANCE FIX: Close subpage immediately for better UX
       onClose();
       
-      // PERFORMANCE FIX: Refresh nodes asynchronously
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          loadMindMapData();
-        }, 50);
-      });
+      // No need to call loadMindMapData() as it resets positions
+      // The data is already updated in mindMapData state above
       
     } catch (error) {
       console.error('Error deleting data:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [type, data?.id, setMindMapData, onAutoSave, onClose, loadMindMapData, isLoading]);
+  }, [type, data?.id, setMindMapData, onAutoSave, onClose, isLoading]);
 
   // PERFORMANCE FIX: Early return with loading state for better UX
   if (!data) {
