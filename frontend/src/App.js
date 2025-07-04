@@ -2117,15 +2117,20 @@ const Dashboard = () => {
       });
 
       // Create edges from literature to linked topics
-      lit.linked_topics.forEach(topicId => {
-        flowEdges.push({
-          id: `literature-${lit.id}-topic-${topicId}`,
-          source: `topic-${topicId}`,
-          target: `literature-${lit.id}`,
-          type: 'smoothstep',
-          style: { stroke: '#8B5CF6', strokeWidth: 2, strokeDasharray: '4,4' }
+      if (lit.linked_topics && lit.linked_topics.length > 0) {
+        console.log(`Creating ${lit.linked_topics.length} edges for literature "${lit.title}"`);
+        lit.linked_topics.forEach(topicId => {
+          const edgeId = `literature-${lit.id}-topic-${topicId}`;
+          console.log(`Creating edge: ${edgeId}`);
+          flowEdges.push({
+            id: edgeId,
+            source: `topic-${topicId}`,
+            target: `literature-${lit.id}`,
+            type: 'smoothstep',
+            style: { stroke: '#8B5CF6', strokeWidth: 2, strokeDasharray: '4,4' }
+          });
         });
-      });
+      }
     });
 
     // Convert cases to nodes
