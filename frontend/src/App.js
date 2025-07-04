@@ -1632,9 +1632,6 @@ const Dashboard = () => {
   
   // Toast notifications state
   const [toasts, setToasts] = useState([]);
-  
-  // Ref to track the most recent mindMapData to avoid race conditions
-  const mindMapDataRef = useRef({ topics: [], cases: [], tasks: [], literature: [] });
 
   // Helper function to add toast notifications
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
