@@ -1748,6 +1748,15 @@ const Dashboard = () => {
     }
   }, [isReactFlowReady, mindMapData, hasAppliedInitialLayout, loading]);
 
+  // Effect to update React Flow nodes when mindMapData changes (preserving positions)
+  useEffect(() => {
+    if (mindMapData.topics.length > 0 || mindMapData.cases.length > 0 || 
+        mindMapData.tasks.length > 0 || mindMapData.literature?.length > 0) {
+      console.log('Updating React Flow nodes from mindMapData changes (preserving positions)');
+      convertDataToReactFlow(mindMapData, true); // Preserve positions
+    }
+  }, [mindMapData]);
+
   const loadMindMapData = async () => {
     try {
       // First try to load from localStorage
