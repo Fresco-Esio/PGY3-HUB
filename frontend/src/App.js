@@ -1732,29 +1732,30 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Refresh nodes when edit mode changes
-    if (mindMapData.topics.length > 0) {
-      // Add delay to ensure any pending auto-save operations complete
-      // and state updates are processed
+    if (mindMapDataRef.current.topics.length > 0) {
+      // Use the most recent data from ref to avoid race conditions
+      const currentData = mindMapDataRef.current;
+      
       setTimeout(() => {
-        console.log('Mode switch detected, current mindMapData:', {
-          topics: mindMapData.topics.length,
-          cases: mindMapData.cases.length, 
-          literature: mindMapData.literature?.length || 0,
-          tasks: mindMapData.tasks.length
+        console.log('Mode switch detected, using current mindMapData:', {
+          topics: currentData.topics.length,
+          cases: currentData.cases.length, 
+          literature: currentData.literature?.length || 0,
+          tasks: currentData.tasks.length
         });
         
         // Log connection data for debugging
-        mindMapData.literature?.forEach(lit => {
+        currentData.literature?.forEach(lit => {
           if (lit.linked_topics?.length > 0) {
             console.log(`Literature "${lit.title}" linked to topics:`, lit.linked_topics);
           }
         });
-        mindMapData.cases?.forEach(caseItem => {
+        currentData.cases?.forEach(caseItem => {
           if (caseItem.linked_topics?.length > 0) {
             console.log(`Case "${caseItem.case_id}" linked to topics:`, caseItem.linked_topics);
           }
         });
-        mindMapData.tasks?.forEach(task => {
+        currentData.tasks?.forEach(task => {
           if (task.linked_case_id) {
             console.log(`Task "${task.title}" linked to case:`, task.linked_case_id);
           }
@@ -1763,10 +1764,10 @@ const Dashboard = () => {
           }
         });
         
-        convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
-      }, 300); // Increased delay to ensure state updates complete
+        convertDataToReactFlow(currentData, true); // Preserve positions when toggling edit mode
+      }, 500); // Increased delay to ensure all state updates complete
     }
-  }, [isEditing]);
+  }, [isEditing, convertDataToReactFlow]);
 
   // Effect to apply initial layout when both React Flow and data are ready
   useEffect(() => {
