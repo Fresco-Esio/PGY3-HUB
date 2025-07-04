@@ -905,11 +905,11 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         return newData;
       });
       
-      // PERFORMANCE FIX: Use RequestAnimationFrame for smooth UI updates
+      // PERFORMANCE FIX: Update nodes without full reload to preserve positions
       requestAnimationFrame(() => {
         setTimeout(() => {
-          loadMindMapData();
-        }, 50); // Reduced delay for more responsive feel
+          convertDataToReactFlow(newData, true); // Preserve current positions
+        }, 50);
       });
       
     } catch (error) {
