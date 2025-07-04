@@ -2063,15 +2063,7 @@ const Dashboard = () => {
   };
 
   // Memoized function to convert data to React Flow format
-  const convertDataToReactFlow = useCallback((data, preserveCurrentPositions = false) => {
-    console.log('convertDataToReactFlow called with:', {
-      preserveCurrentPositions,
-      topics: data.topics.length,
-      cases: data.cases.length,
-      tasks: data.tasks.length,
-      literature: data.literature?.length || 0
-    });
-    
+  const convertDataToReactFlow = (data, preserveCurrentPositions = false) => {
     const flowNodes = [];
     const flowEdges = [];
 
