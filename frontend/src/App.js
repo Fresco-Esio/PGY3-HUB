@@ -902,9 +902,6 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
           setTimeout(() => onAutoSave(newData), 0);
         }
         
-        // Update ref immediately for mode switching  
-        mindMapDataRef.current = newData;
-        
         return newData;
       });
       
