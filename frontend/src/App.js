@@ -1732,7 +1732,24 @@ const Dashboard = () => {
     if (mindMapData.topics.length > 0) {
       // Add longer delay to ensure auto-save and state updates complete
       setTimeout(() => {
-        console.log('Mode switching - refreshing nodes with current mindMapData');
+        console.log('Mode switching - refreshing nodes with current mindMapData:');
+        console.log('Literature connections:', mindMapData.literature?.map(lit => ({
+          id: lit.id,
+          title: lit.title,
+          linked_topics: lit.linked_topics
+        })));
+        console.log('Case connections:', mindMapData.cases?.map(c => ({
+          id: c.id,
+          case_id: c.case_id,
+          linked_topics: c.linked_topics
+        })));
+        console.log('Task connections:', mindMapData.tasks?.map(t => ({
+          id: t.id,
+          title: t.title,
+          linked_case_id: t.linked_case_id,
+          linked_topic_id: t.linked_topic_id
+        })));
+        
         convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
       }, 800); // Increased to 800ms to ensure localStorage save completes
     }
