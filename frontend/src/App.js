@@ -2152,15 +2152,20 @@ const Dashboard = () => {
       });
 
       // Create edges from topics to cases (hierarchy: Topic → Case)
-      caseItem.linked_topics.forEach(topicId => {
-        flowEdges.push({
-          id: `topic-${topicId}-case-${caseItem.id}`,
-          source: `topic-${topicId}`,
-          target: `case-${caseItem.id}`,
-          type: 'smoothstep',
-          style: { stroke: '#3B82F6', strokeWidth: 3 }
+      if (caseItem.linked_topics && caseItem.linked_topics.length > 0) {
+        console.log(`Creating ${caseItem.linked_topics.length} edges for case "${caseItem.case_id}"`);
+        caseItem.linked_topics.forEach(topicId => {
+          const edgeId = `topic-${topicId}-case-${caseItem.id}`;
+          console.log(`Creating edge: ${edgeId}`);
+          flowEdges.push({
+            id: edgeId,
+            source: `topic-${topicId}`,
+            target: `case-${caseItem.id}`,
+            type: 'smoothstep',
+            style: { stroke: '#3B82F6', strokeWidth: 3 }
+          });
         });
-      });
+      }
     });
 
     // Convert tasks to nodes
