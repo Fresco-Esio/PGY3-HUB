@@ -1730,10 +1730,11 @@ const Dashboard = () => {
   useEffect(() => {
     // Refresh nodes when edit mode changes
     if (mindMapData.topics.length > 0) {
-      // Add small delay to ensure any pending auto-save operations complete
+      // Add longer delay to ensure auto-save and state updates complete
       setTimeout(() => {
+        console.log('Mode switching - refreshing nodes with current mindMapData');
         convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
-      }, 100);
+      }, 800); // Increased to 800ms to ensure localStorage save completes
     }
   }, [isEditing]);
 
