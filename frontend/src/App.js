@@ -2207,6 +2207,7 @@ const Dashboard = () => {
       }
     });
 
+    console.log(`convertDataToReactFlow completed: ${flowNodes.length} nodes, ${flowEdges.length} edges`);
     setNodes(flowNodes);
     setEdges(flowEdges);
   };
