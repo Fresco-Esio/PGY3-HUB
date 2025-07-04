@@ -2332,6 +2332,8 @@ const Dashboard = () => {
         
         if (updatedData) {
           console.log('Successfully updated mindMapData with new connection');
+          console.log('New mindMapData after connection:', newData);
+          
           // Trigger auto-save to localStorage immediately for connections
           autoSaveMindMapData(newData);
           
