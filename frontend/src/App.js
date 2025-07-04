@@ -1730,10 +1730,38 @@ const Dashboard = () => {
   useEffect(() => {
     // Refresh nodes when edit mode changes
     if (mindMapData.topics.length > 0) {
-      // Add small delay to ensure any pending auto-save operations complete
+      // Add delay to ensure any pending auto-save operations complete
+      // and state updates are processed
       setTimeout(() => {
+        console.log('Mode switch detected, current mindMapData:', {
+          topics: mindMapData.topics.length,
+          cases: mindMapData.cases.length, 
+          literature: mindMapData.literature?.length || 0,
+          tasks: mindMapData.tasks.length
+        });
+        
+        // Log connection data for debugging
+        mindMapData.literature?.forEach(lit => {
+          if (lit.linked_topics?.length > 0) {
+            console.log(`Literature "${lit.title}" linked to topics:`, lit.linked_topics);
+          }
+        });
+        mindMapData.cases?.forEach(caseItem => {
+          if (caseItem.linked_topics?.length > 0) {
+            console.log(`Case "${caseItem.case_id}" linked to topics:`, caseItem.linked_topics);
+          }
+        });
+        mindMapData.tasks?.forEach(task => {
+          if (task.linked_case_id) {
+            console.log(`Task "${task.title}" linked to case:`, task.linked_case_id);
+          }
+          if (task.linked_topic_id) {
+            console.log(`Task "${task.title}" linked to topic:`, task.linked_topic_id);
+          }
+        });
+        
         convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
-      }, 100);
+      }, 300); // Increased delay to ensure state updates complete
     }
   }, [isEditing]);
 
