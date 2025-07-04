@@ -241,6 +241,6 @@ test_plan:
 
 agent_communication:
     - agent: "main"
-      message: "Implemented comprehensive fixes for connection persistence issues and UX improvements. Key changes: 1) Added delay in mode switching to ensure auto-save completes 2) Added immediate localStorage save for connections 3) Updated addNewNode to center in viewport 4) Rewrote applyLayout for category-based columns 5) Reduced initial layout delays. All tasks need retesting to verify fixes work."
+      message: "Implemented comprehensive fixes for connection persistence issues and UX improvements. Key changes: 1) Added delay in mode switching to ensure auto-save completes 2) Added immediate localStorage save for connections 3) Updated addNewNode to center in viewport 4) Rewrote applyLayout for category-based columns 5) Reduced initial layout delays. Fixed syntax error in useCallback that was preventing page load. All tasks need retesting to verify fixes work."
     - agent: "testing"
       message: "Completed comprehensive backend API testing. All backend endpoints are working correctly. CRUD operations for all entity types (topics, cases, tasks, literature) function as expected. Position fields are properly stored and retrieved. Connection persistence between entities is working correctly. The init-sample-data endpoint successfully initializes sample data. The backend is ready to support the frontend connection persistence and UX improvements."
