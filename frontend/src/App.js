@@ -2316,7 +2316,24 @@ const Dashboard = () => {
         
         if (updatedData) {
           console.log('Successfully updated mindMapData with new connection');
-          console.log('New mindMapData after connection:', newData);
+          console.log('Updated data structure:', {
+            literature: newData.literature?.map(lit => ({ 
+              id: lit.id, 
+              title: lit.title, 
+              linked_topics: lit.linked_topics 
+            })),
+            cases: newData.cases?.map(c => ({ 
+              id: c.id, 
+              case_id: c.case_id, 
+              linked_topics: c.linked_topics 
+            })),
+            tasks: newData.tasks?.map(t => ({ 
+              id: t.id, 
+              title: t.title, 
+              linked_case_id: t.linked_case_id, 
+              linked_topic_id: t.linked_topic_id 
+            }))
+          });
           
           // Trigger auto-save to localStorage immediately for connections
           autoSaveMindMapData(newData);
