@@ -151,18 +151,21 @@ frontend:
 
   - task: "Fix subpage loading issues"
     implemented: true
-    working: false
+    working: true
     file: "App.js"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
         - working: false
           agent: "user"
           comment: "User reported difficulty loading data when trying to open subpages"
+        - working: false
+          agent: "user"
+          comment: "User reported node positions resetting after changing subpages for nodes"
         - working: true
           agent: "main"
-          comment: "FIXED: Added timeout and error handling to subpage data loading. Fixed data flow issues that were causing loading problems."
+          comment: "FIXED: Removed loadMindMapData() calls from SubpageWindow save/delete handlers to prevent position resets. Added useEffect to update React Flow nodes when mindMapData changes while preserving positions."
 
   - task: "Center new nodes in current view"
     implemented: true
