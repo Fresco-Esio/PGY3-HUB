@@ -2211,7 +2211,7 @@ const Dashboard = () => {
     console.log(`convertDataToReactFlow completed: ${flowNodes.length} nodes, ${flowEdges.length} edges`);
     setNodes(flowNodes);
     setEdges(flowEdges);
-  };
+  }, [nodes, isEditing]); // Add dependency array for useCallback
 
   const onConnect = useCallback((params) => {
       console.log('Creating new connection:', params);
