@@ -1849,7 +1849,7 @@ const Dashboard = () => {
         }, 100);
       } else if (hasNodePositions) {
         console.log('Skipping layout application - using saved node positions from API');
-        setHasAppliedInitialLayout(true); // Mark as applied since we're using saved positions // Reduced delay to minimize jumping
+        setHasAppliedInitialLayout(true); // Mark as applied since we're using saved positions
       }
     } catch (error) {
       console.error('Error loading mind map data:', error);
