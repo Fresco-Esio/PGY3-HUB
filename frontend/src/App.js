@@ -2096,6 +2096,45 @@ const Dashboard = () => {
         }
       });
 
+    // Convert cases to nodes  
+    data.cases.forEach(caseItem => {
+      const nodeId = `case-${caseItem.id}`;
+      const currentPosition = currentPositions[nodeId];
+      
+      flowNodes.push({
+        id: nodeId,
+        type: 'case',
+        position: currentPosition || caseItem.position || { x: 0, y: 0 },
+        data: {
+          label: caseItem.case_id,
+          diagnosis: caseItem.primary_diagnosis,
+          age: caseItem.age,
+          originalData: caseItem,
+          onDelete: isEditing ? () => deleteNode(caseItem.id, 'case') : undefined
+        }
+      });
+    });
+
+    // Convert tasks to nodes
+    data.tasks.forEach(task => {
+      const nodeId = `task-${task.id}`;
+      const currentPosition = currentPositions[nodeId];
+      
+      flowNodes.push({
+        id: nodeId,
+        type: 'task',
+        position: currentPosition || task.position || { x: 0, y: 0 },
+        data: {
+          label: task.title,
+          priority: task.priority,
+          status: task.status,
+          due_date: task.due_date,
+          originalData: task,
+          onDelete: isEditing ? () => deleteNode(task.id, 'task') : undefined
+        }
+      });
+    });
+
     // CRITICAL: Reconstruct edges from stored connections with complete properties
     console.log('Reconstructing edges from stored connections:', data.connections?.length || 0);
     if (data.connections && data.connections.length > 0) {
