@@ -1612,7 +1612,13 @@ const Dashboard = () => {
   const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [mindMapData, setMindMapData] = useState({ topics: [], cases: [], tasks: [], literature: [] });
+  const [mindMapData, setMindMapData] = useState({ 
+    topics: [], 
+    cases: [], 
+    tasks: [], 
+    literature: [],
+    connections: [] // Store complete React Flow edge objects for proper persistence
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(true);
