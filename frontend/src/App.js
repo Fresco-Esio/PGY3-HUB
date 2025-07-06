@@ -1764,11 +1764,22 @@ const Dashboard = () => {
   // Effect to apply initial layout when both React Flow and data are ready
   useEffect(() => {
     if (isReactFlowReady && mindMapData.topics.length > 0 && !hasAppliedInitialLayout && !loading) {
-      setTimeout(() => {
-        console.log('Applying initial hierarchical layout from useEffect...');
-        applyLayout();
+      // Only apply layout if nodes don't have saved positions
+      const hasNodePositions = mindMapData.topics.some(topic => topic.position) ||
+                               mindMapData.cases.some(caseItem => caseItem.position) ||
+                               mindMapData.tasks.some(task => task.position) ||
+                               (mindMapData.literature && mindMapData.literature.some(lit => lit.position));
+      
+      if (!hasNodePositions) {
+        setTimeout(() => {
+          console.log('Applying initial hierarchical layout from useEffect (no saved positions)...');
+          applyLayout();
+          setHasAppliedInitialLayout(true);
+        }, 1000);
+      } else {
+        console.log('Skipping layout from useEffect - using saved positions');
         setHasAppliedInitialLayout(true);
-      }, 1000);
+      }
     }
   }, [isReactFlowReady, mindMapData, hasAppliedInitialLayout, loading]);
 
