@@ -1789,15 +1789,23 @@ const Dashboard = () => {
         convertDataToReactFlow(localData);
         setLoading(false);
         
-        // Apply initial layout if React Flow is ready and data has nodes
-        if (isReactFlowReady && !hasAppliedInitialLayout && 
+        // Only apply initial layout if nodes don't have saved positions
+        const hasNodePositions = localData.topics.some(topic => topic.position) ||
+                                 localData.cases.some(caseItem => caseItem.position) ||
+                                 localData.tasks.some(task => task.position) ||
+                                 (localData.literature && localData.literature.some(lit => lit.position));
+        
+        if (isReactFlowReady && !hasAppliedInitialLayout && !hasNodePositions &&
             (localData.topics.length > 0 || localData.cases.length > 0 || 
              localData.tasks.length > 0 || localData.literature?.length > 0)) {
           setTimeout(() => {
-            console.log('Applying initial layout from localStorage...');
+            console.log('Applying initial layout from localStorage (no saved positions)...');
             applyLayout();
             setHasAppliedInitialLayout(true);
-          }, 100); // Reduced delay to minimize jumping
+          }, 100);
+        } else if (hasNodePositions) {
+          console.log('Skipping layout application - using saved node positions');
+          setHasAppliedInitialLayout(true); // Mark as applied since we're using saved positions
         }
         
         // Optionally sync with backend in the background
