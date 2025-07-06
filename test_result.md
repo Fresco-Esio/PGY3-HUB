@@ -157,6 +157,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "FIXED: Resolved syntax error (missing closing bracket in literature forEach loop). Comprehensive connection persistence solution now implemented with: 1) mindMapData.connections array for complete edge objects 2) Enhanced onConnect to capture sourceHandle/targetHandle 3) Updated convertDataToReactFlow to reconstruct edges from stored connections 4) Immediate localStorage persistence. Ready for testing."
+        - working: true
+          agent: "main"
+          comment: "ADDITIONAL FIX: Resolved 'Cannot read properties of undefined (reading some)' error by adding backward compatibility checks for connections array. Added proper initialization of connections array when loading from localStorage and backend API."
 
   - task: "Fix subpage loading issues"
     implemented: true
