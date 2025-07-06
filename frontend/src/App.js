@@ -1832,16 +1832,24 @@ const Dashboard = () => {
       // Save initial data to localStorage
       autoSaveMindMapData(response.data);
       
-      // Apply initial layout if React Flow is ready and data has nodes
-      if (isReactFlowReady && !hasAppliedInitialLayout && 
+      // Only apply initial layout if nodes don't have saved positions
+      const hasNodePositions = response.data.topics.some(topic => topic.position) ||
+                               response.data.cases.some(caseItem => caseItem.position) ||
+                               response.data.tasks.some(task => task.position) ||
+                               (response.data.literature && response.data.literature.some(lit => lit.position));
+      
+      if (isReactFlowReady && !hasAppliedInitialLayout && !hasNodePositions &&
           (response.data.topics.length > 0 || response.data.cases.length > 0 || 
            response.data.tasks.length > 0 || response.data.literature?.length > 0)) {
         // Apply layout immediately to prevent jumping
-        console.log('Applying initial layout from API...');
+        console.log('Applying initial layout from API (no saved positions)...');
         setTimeout(() => {
           applyLayout();
           setHasAppliedInitialLayout(true);
-        }, 100); // Reduced delay to minimize jumping
+        }, 100);
+      } else if (hasNodePositions) {
+        console.log('Skipping layout application - using saved node positions from API');
+        setHasAppliedInitialLayout(true); // Mark as applied since we're using saved positions // Reduced delay to minimize jumping
       }
     } catch (error) {
       console.error('Error loading mind map data:', error);
