@@ -2096,96 +2096,27 @@ const Dashboard = () => {
         }
       });
 
-      // Create edges from literature to linked topics
-      if (lit.linked_topics && lit.linked_topics.length > 0) {
-        console.log(`Creating ${lit.linked_topics.length} edges for literature "${lit.title}"`);
-        lit.linked_topics.forEach(topicId => {
-          const edgeId = `literature-${lit.id}-topic-${topicId}`;
-          console.log(`Creating edge: ${edgeId}`);
-          flowEdges.push({
-            id: edgeId,
-            source: `topic-${topicId}`,
-            target: `literature-${lit.id}`,
-            type: 'smoothstep',
-            style: { stroke: '#8B5CF6', strokeWidth: 2, strokeDasharray: '4,4' }
-          });
-        });
-      }
-    });
-
-    // Convert cases to nodes
-    data.cases.forEach(caseItem => {
-      const nodeId = `case-${caseItem.id}`;
-      const currentPosition = currentPositions[nodeId];
-      
-      flowNodes.push({
-        id: nodeId,
-        type: 'case',
-        position: currentPosition || caseItem.position || { x: 0, y: 0 },
-        data: {
-          label: caseItem.case_id,
-          diagnosis: caseItem.primary_diagnosis,
-          age: caseItem.age,
-          originalData: caseItem,
-          onDelete: isEditing ? () => deleteNode(caseItem.id, 'case') : undefined
-        }
+    // CRITICAL: Reconstruct edges from stored connections with complete properties
+    console.log('Reconstructing edges from stored connections:', data.connections?.length || 0);
+    if (data.connections && data.connections.length > 0) {
+      data.connections.forEach(connection => {
+        console.log('Reconstructing edge:', connection);
+        
+        // Ensure all critical properties are preserved
+        const reconstructedEdge = {
+          id: connection.id,
+          source: connection.source,
+          target: connection.target,
+          sourceHandle: connection.sourceHandle, // CRITICAL: Preserve source handle
+          targetHandle: connection.targetHandle, // CRITICAL: Preserve target handle
+          type: connection.type || 'smoothstep',
+          style: connection.style || { stroke: '#6B7280', strokeWidth: 2 }
+        };
+        
+        flowEdges.push(reconstructedEdge);
+        console.log('Edge reconstructed successfully:', reconstructedEdge);
       });
-
-      // Create edges from topics to cases (hierarchy: Topic → Case)
-      if (caseItem.linked_topics && caseItem.linked_topics.length > 0) {
-        console.log(`Creating ${caseItem.linked_topics.length} edges for case "${caseItem.case_id}"`);
-        caseItem.linked_topics.forEach(topicId => {
-          const edgeId = `topic-${topicId}-case-${caseItem.id}`;
-          console.log(`Creating edge: ${edgeId}`);
-          flowEdges.push({
-            id: edgeId,
-            source: `topic-${topicId}`,
-            target: `case-${caseItem.id}`,
-            type: 'smoothstep',
-            style: { stroke: '#3B82F6', strokeWidth: 3 }
-          });
-        });
-      }
-    });
-
-    // Convert tasks to nodes
-    data.tasks.forEach(task => {
-      const nodeId = `task-${task.id}`;
-      const currentPosition = currentPositions[nodeId];
-      
-      flowNodes.push({
-        id: nodeId,
-        type: 'task',
-        position: currentPosition || task.position || { x: 0, y: 0 },
-        data: {
-          label: task.title,
-          priority: task.priority,
-          status: task.status,
-          due_date: task.due_date,
-          originalData: task,
-          onDelete: isEditing ? () => deleteNode(task.id, 'task') : undefined
-        }
-      });
-
-      // Create edges following hierarchy: Case → Task or Topic → Task
-      if (task.linked_case_id) {
-        flowEdges.push({
-          id: `case-${task.linked_case_id}-task-${task.id}`,
-          source: `case-${task.linked_case_id}`,
-          target: `task-${task.id}`,
-          type: 'smoothstep',
-          style: { stroke: '#F59E0B', strokeWidth: 2 }
-        });
-      } else if (task.linked_topic_id) {
-        flowEdges.push({
-          id: `topic-${task.linked_topic_id}-task-${task.id}`,
-          source: `topic-${task.linked_topic_id}`,
-          target: `task-${task.id}`,
-          type: 'smoothstep',
-          style: { stroke: '#F59E0B', strokeWidth: 2 }
-        });
-      }
-    });
+    }
 
     console.log(`convertDataToReactFlow completed: ${flowNodes.length} nodes, ${flowEdges.length} edges`);
     setNodes(flowNodes);
