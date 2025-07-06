@@ -2193,189 +2193,66 @@ const Dashboard = () => {
   };
 
   const onConnect = useCallback((params) => {
-      console.log('Creating new connection:', params);
+    console.log('Creating new connection with full edge data:', params);
+    
+    // Create a complete edge object with all React Flow properties
+    const newEdge = {
+      id: `${params.source}-${params.target}`, // Ensure unique ID
+      source: params.source,
+      target: params.target,
+      sourceHandle: params.sourceHandle, // CRITICAL: Preserve source handle
+      targetHandle: params.targetHandle, // CRITICAL: Preserve target handle
+      type: 'smoothstep',
+      style: { stroke: '#6B7280', strokeWidth: 2 }
+    };
+    
+    console.log('Complete edge object created:', newEdge);
+    
+    // Add edge to React Flow state immediately
+    setEdges((eds) => addEdge(newEdge, eds));
+    
+    // CRITICAL FIX: Store the complete edge object in mindMapData.connections
+    setMindMapData(prevData => {
+      const newData = { ...prevData };
       
-      const newEdge = {
-        ...params,
-        type: 'smoothstep',
-        style: { stroke: '#6B7280', strokeWidth: 2 }
-      };
+      // Check if connection already exists (prevent duplicates)
+      const connectionExists = newData.connections.some(conn => 
+        conn.source === newEdge.source && 
+        conn.target === newEdge.target &&
+        conn.sourceHandle === newEdge.sourceHandle &&
+        conn.targetHandle === newEdge.targetHandle
+      );
       
-      // Add edge to React Flow state
-      setEdges((eds) => addEdge(newEdge, eds));
+      if (!connectionExists) {
+        // Add the complete edge object to connections array
+        newData.connections = [...newData.connections, newEdge];
+        
+        console.log('Edge added to mindMapData.connections:', newEdge);
+        console.log('Total connections now:', newData.connections.length);
+        
+        // Trigger immediate save to localStorage (no debounce for connections)
+        try {
+          const storageData = {
+            version: '1.1',
+            timestamp: new Date().toISOString(),
+            data: newData
+          };
+          localStorage.setItem('pgy3_mindmap_data', JSON.stringify(storageData));
+          console.log('Connection data immediately saved to localStorage');
+        } catch (error) {
+          console.error('Error immediately saving connection:', error);
+        }
+        
+        // Also trigger the debounced auto-save
+        autoSaveMindMapData(newData);
+        addToast('Connection created and saved', 'success', 2000);
+      } else {
+        console.log('Connection already exists, skipping duplicate');
+      }
       
-      // CRITICAL FIX: Update mindMapData to persist the connection
-      const sourceId = params.source.split('-')[1]; // Extract ID from "type-id"
-      const targetId = params.target.split('-')[1];
-      const sourceType = params.source.split('-')[0];
-      const targetType = params.target.split('-')[0];
-      
-      console.log('Connection details:', { sourceType, sourceId, targetType, targetId });
-      
-      // Update mindMapData to include the new connection
-      setMindMapData(prevData => {
-        const newData = { ...prevData };
-        
-        // Determine which node should store the connection based on hierarchy:
-        // Topics -> Literature, Topics -> Cases, Cases -> Tasks
-        let updatedData = false;
-        
-        // Case 1: Topic -> Literature (literature stores linked_topics)
-        if (sourceType === 'topic' && targetType === 'literature') {
-          newData.literature = newData.literature.map(lit => {
-            if (lit.id === targetId) {
-              const linkedTopics = lit.linked_topics || [];
-              if (!linkedTopics.includes(sourceId)) {
-                updatedData = true;
-                return { ...lit, linked_topics: [...linkedTopics, sourceId] };
-              }
-            }
-            return lit;
-          });
-        }
-        
-        // Case 2: Topic -> Case (case stores linked_topics)
-        else if (sourceType === 'topic' && targetType === 'case') {
-          newData.cases = newData.cases.map(caseItem => {
-            if (caseItem.id === targetId) {
-              const linkedTopics = caseItem.linked_topics || [];
-              if (!linkedTopics.includes(sourceId)) {
-                updatedData = true;
-                return { ...caseItem, linked_topics: [...linkedTopics, sourceId] };
-              }
-            }
-            return caseItem;
-          });
-        }
-        
-        // Case 3: Case -> Task (task stores linked_case_id)
-        else if (sourceType === 'case' && targetType === 'task') {
-          newData.tasks = newData.tasks.map(task => {
-            if (task.id === targetId) {
-              if (task.linked_case_id !== sourceId) {
-                updatedData = true;
-                return { ...task, linked_case_id: sourceId };
-              }
-            }
-            return task;
-          });
-        }
-        
-        // Case 4: Topic -> Task (task stores linked_topic_id)
-        else if (sourceType === 'topic' && targetType === 'task') {
-          newData.tasks = newData.tasks.map(task => {
-            if (task.id === targetId) {
-              if (task.linked_topic_id !== sourceId) {
-                updatedData = true;
-                return { ...task, linked_topic_id: sourceId };
-              }
-            }
-            return task;
-          });
-        }
-        
-        // Reverse connections (when user drags from target to source)
-        // Case 5: Literature -> Topic (literature stores linked_topics)
-        else if (sourceType === 'literature' && targetType === 'topic') {
-          newData.literature = newData.literature.map(lit => {
-            if (lit.id === sourceId) {
-              const linkedTopics = lit.linked_topics || [];
-              if (!linkedTopics.includes(targetId)) {
-                updatedData = true;
-                return { ...lit, linked_topics: [...linkedTopics, targetId] };
-              }
-            }
-            return lit;
-          });
-        }
-        
-        // Case 6: Case -> Topic (case stores linked_topics)
-        else if (sourceType === 'case' && targetType === 'topic') {
-          newData.cases = newData.cases.map(caseItem => {
-            if (caseItem.id === sourceId) {
-              const linkedTopics = caseItem.linked_topics || [];
-              if (!linkedTopics.includes(targetId)) {
-                updatedData = true;
-                return { ...caseItem, linked_topics: [...linkedTopics, targetId] };
-              }
-            }
-            return caseItem;
-          });
-        }
-        
-        // Case 7: Task -> Case (task stores linked_case_id)
-        else if (sourceType === 'task' && targetType === 'case') {
-          newData.tasks = newData.tasks.map(task => {
-            if (task.id === sourceId) {
-              if (task.linked_case_id !== targetId) {
-                updatedData = true;
-                return { ...task, linked_case_id: targetId };
-              }
-            }
-            return task;
-          });
-        }
-        
-        // Case 8: Task -> Topic (task stores linked_topic_id)
-        else if (sourceType === 'task' && targetType === 'topic') {
-          newData.tasks = newData.tasks.map(task => {
-            if (task.id === sourceId) {
-              if (task.linked_topic_id !== targetId) {
-                updatedData = true;
-                return { ...task, linked_topic_id: targetId };
-              }
-            }
-            return task;
-          });
-        }
-        
-        if (updatedData) {
-          console.log('Successfully updated mindMapData with new connection');
-          console.log('Updated data structure:', {
-            literature: newData.literature?.map(lit => ({ 
-              id: lit.id, 
-              title: lit.title, 
-              linked_topics: lit.linked_topics 
-            })),
-            cases: newData.cases?.map(c => ({ 
-              id: c.id, 
-              case_id: c.case_id, 
-              linked_topics: c.linked_topics 
-            })),
-            tasks: newData.tasks?.map(t => ({ 
-              id: t.id, 
-              title: t.title, 
-              linked_case_id: t.linked_case_id, 
-              linked_topic_id: t.linked_topic_id 
-            }))
-          });
-          
-          // Trigger auto-save to localStorage immediately for connections
-          autoSaveMindMapData(newData);
-          
-          // Force immediate save without debounce for critical connection data
-          try {
-            const storageData = {
-              version: '1.1',
-              timestamp: new Date().toISOString(),
-              data: newData
-            };
-            localStorage.setItem('pgy3_mindmap_data', JSON.stringify(storageData));
-            console.log('Connection data immediately saved to localStorage');
-          } catch (error) {
-            console.error('Error immediately saving connection:', error);
-          }
-          
-          addToast('Connection created and saved', 'success', 2000);
-        } else {
-          console.log('Connection already exists or unsupported connection type');
-        }
-        
-        return newData;
-      });
-    },
-    [setEdges, setMindMapData, autoSaveMindMapData, addToast]
-  );
+      return newData;
+    });
+  }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
