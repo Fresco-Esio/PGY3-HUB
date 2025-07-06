@@ -1675,7 +1675,7 @@ const Dashboard = () => {
 
     try {
       // Clear all data
-      const emptyData = { topics: [], cases: [], tasks: [], literature: [] };
+      const emptyData = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
       setMindMapData(emptyData);
       setNodes([]);
       setEdges([]);
