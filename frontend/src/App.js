@@ -1779,6 +1779,12 @@ const Dashboard = () => {
       
       if (localData) {
         console.log('Loading data from localStorage');
+        
+        // Ensure connections array exists for backward compatibility
+        if (!localData.connections) {
+          localData.connections = [];
+        }
+        
         setMindMapData(localData);
         convertDataToReactFlow(localData);
         setLoading(false);
