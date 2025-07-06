@@ -1878,13 +1878,23 @@ const Dashboard = () => {
     console.log('React Flow initialized');
     setIsReactFlowReady(true);
     
-    // Apply initial layout if data is already loaded
+    // Only apply initial layout if data is loaded AND nodes don't have saved positions
     if (mindMapData.topics.length > 0 && !hasAppliedInitialLayout) {
-      setTimeout(() => {
-        console.log('Applying initial layout after React Flow init...');
-        applyLayout();
+      const hasNodePositions = mindMapData.topics.some(topic => topic.position) ||
+                               mindMapData.cases.some(caseItem => caseItem.position) ||
+                               mindMapData.tasks.some(task => task.position) ||
+                               (mindMapData.literature && mindMapData.literature.some(lit => lit.position));
+      
+      if (!hasNodePositions) {
+        setTimeout(() => {
+          console.log('Applying initial layout after React Flow init (no saved positions)...');
+          applyLayout();
+          setHasAppliedInitialLayout(true);
+        }, 100);
+      } else {
+        console.log('Skipping layout after React Flow init - using saved positions');
         setHasAppliedInitialLayout(true);
-      }, 100); // Reduced delay to minimize jumping
+      }
     }
   }, [mindMapData, hasAppliedInitialLayout]);
   const deleteNode = async (nodeId, nodeType) => {
