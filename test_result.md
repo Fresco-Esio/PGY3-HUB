@@ -136,9 +136,9 @@ backend:
 frontend:
   - task: "Fix connection persistence during mode switches"
     implemented: true
-    working: true
+    working: false
     file: "App.js"
-    stuck_count: 2
+    stuck_count: 3
     priority: "high"
     needs_retesting: true
     status_history:
@@ -151,9 +151,9 @@ frontend:
         - working: false
           agent: "user"
           comment: "User reported page doesn't load - shows blank screen with error"
-        - working: true
+        - working: false
           agent: "main"
-          comment: "FIXED: Removed problematic useCallback and refs that were causing runtime errors. Simplified approach with increased delay (800ms) for mode switching and comprehensive debugging. Page now loads successfully with enhanced connection tracking."
+          comment: "ATTEMPTED: Comprehensive rewrite to store complete React Flow edge objects with sourceHandle/targetHandle in mindMapData.connections array. Currently has syntax error preventing compilation. Need to debug and fix syntax issue."
 
   - task: "Fix subpage loading issues"
     implemented: true
