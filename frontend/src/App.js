@@ -2186,6 +2186,11 @@ const Dashboard = () => {
     setMindMapData(prevData => {
       const newData = { ...prevData };
       
+      // Ensure connections array exists (for backward compatibility)
+      if (!newData.connections) {
+        newData.connections = [];
+      }
+      
       // Check if connection already exists (prevent duplicates)
       const connectionExists = newData.connections.some(conn => 
         conn.source === newEdge.source && 
