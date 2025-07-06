@@ -1811,6 +1811,12 @@ const Dashboard = () => {
       // Fallback to API if no localStorage data
       console.log('No localStorage data found, loading from API');
       const response = await axios.get(`${API}/mindmap-data`);
+      
+      // Ensure connections array exists for backend data too
+      if (!response.data.connections) {
+        response.data.connections = [];
+      }
+      
       setMindMapData(response.data);
       convertDataToReactFlow(response.data);
       setLoading(false);
