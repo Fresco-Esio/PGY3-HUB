@@ -2095,6 +2095,7 @@ const Dashboard = () => {
           onDelete: isEditing ? () => deleteNode(lit.id, 'literature') : undefined
         }
       });
+    });
 
     // Convert cases to nodes  
     data.cases.forEach(caseItem => {
