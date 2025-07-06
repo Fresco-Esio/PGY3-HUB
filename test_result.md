@@ -160,6 +160,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "ADDITIONAL FIX: Resolved 'Cannot read properties of undefined (reading some)' error by adding backward compatibility checks for connections array. Added proper initialization of connections array when loading from localStorage and backend API."
+        - working: true
+          agent: "main"
+          comment: "POSITION PRESERVATION FIX: Nodes now preserve their positions across page refreshes. Modified all automatic layout triggers to only apply layout when nodes don't have saved positions. This prevents unwanted repositioning on every refresh while still providing initial layout for new users."
 
   - task: "Fix subpage loading issues"
     implemented: true
