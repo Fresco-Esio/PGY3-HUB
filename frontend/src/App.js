@@ -925,14 +925,13 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
 
   // PERFORMANCE FIX: Memoize delete handler
   const handleDelete = useCallback(async () => {
-    if (isLoading || !data?.id || !window.confirm(`Are you sure you want to delete this ${type}?`)) return; // Add null check here
+    if (isLoading || !data?.id) return; // Removed confirmation dialog as requested
     
     setIsLoading(true);
     try {
-      const endpoint = type === 'literature' ? 'literature' : `${type}s`;
-      await axios.delete(`${API}/${endpoint}/${data.id}`);
+      console.log(`Deleting ${type} with ID:`, data.id);
       
-      // PERFORMANCE FIX: Optimized state update
+      // Update mindMapData directly (no API call needed)
       setMindMapData(prevData => {
         const newData = { ...prevData };
         if (type === 'literature') {
@@ -941,6 +940,15 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
           const key = type + 's';
           newData[key] = newData[key].filter(item => item.id !== data.id);
         }
+        
+        // Also remove any connections involving this node
+        if (newData.connections) {
+          newData.connections = newData.connections.filter(conn => 
+            !conn.source.includes(data.id) && !conn.target.includes(data.id)
+          );
+        }
+        
+        console.log(`Updated mindMapData after deleting ${type}:`, newData);
         
         // Trigger auto-save asynchronously
         if (onAutoSave) {
