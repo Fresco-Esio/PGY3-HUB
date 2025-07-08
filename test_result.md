@@ -211,6 +211,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "VERIFIED: Subpages can be opened by double-clicking on nodes. The application successfully loads with nodes positioned correctly."
+        - working: true
+          agent: "testing"
+          comment: "VERIFIED: Subpage editing is fully functional. Double-clicking nodes opens the subpage modal with correct data. Editing fields and saving changes works properly. Node positions are preserved after editing and saving. Deleting nodes from subpages works without confirmation dialogs as requested."
 
   - task: "Center new nodes in current view"
     implemented: true
