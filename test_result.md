@@ -163,6 +163,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "POSITION PRESERVATION FIX: Nodes now preserve their positions across page refreshes. Modified all automatic layout triggers to only apply layout when nodes don't have saved positions. This prevents unwanted repositioning on every refresh while still providing initial layout for new users."
+        - working: true
+          agent: "main"
+          comment: "LOCAL BACKEND SETUP: Successfully modified backend to use local JSON file storage instead of MongoDB. Added CORS configuration for localhost:3000. Created comprehensive GET/PUT endpoints for mindmap-data. Updated frontend to use http://localhost:8000 API. Added dual save (localStorage + backend) functionality. Created mindmap_data.json with initial dummy data."
 
   - task: "Fix subpage loading issues"
     implemented: true
