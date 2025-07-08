@@ -1664,8 +1664,28 @@ const Dashboard = () => {
       }
     };
 
+    // Save to localStorage (primary)
     localStorageUtils.save(data, onSaveStart, onSaveComplete);
+    
+    // Also save to backend (secondary, for persistence)
+    saveToBackend(data);
   }, [addToast]);
+
+  // Function to save data to the local backend
+  const saveToBackend = useCallback(async (data) => {
+    try {
+      console.log('Saving data to local backend...');
+      const response = await axios.put(`${API}/mindmap-data`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Data successfully saved to backend:', response.data.message);
+    } catch (error) {
+      console.warn('Failed to save to backend (continuing with localStorage):', error);
+      // Don't show error toast since localStorage is primary
+    }
+  }, [API]);
 
   // Function to clear the entire mind map
   const handleClearMap = useCallback(async () => {
