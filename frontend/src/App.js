@@ -914,7 +914,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     } finally {
       setIsLoading(false);
     }
-  }, [type, data?.id, editData, setMindMapData, onAutoSave, isLoading]);
+  }, [type, data?.id, editData, setMindMapData, onAutoSave, isLoading, addToast]);
 
   // PERFORMANCE FIX: Memoize cancel handler
   const handleCancel = useCallback(() => {
