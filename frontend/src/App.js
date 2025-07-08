@@ -2180,7 +2180,7 @@ const Dashboard = () => {
           diagnosis: caseItem.primary_diagnosis,
           age: caseItem.age,
           originalData: caseItem,
-          onDelete: isEditing ? () => deleteNode(caseItem.id, 'case') : undefined
+          onDelete: () => deleteNode(caseItem.id, 'case') // Always available, not just in edit mode
         }
       });
     });
