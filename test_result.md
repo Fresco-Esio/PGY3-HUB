@@ -175,6 +175,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "VERIFIED: Node position persistence is working correctly. Nodes maintain their positions after being moved and refreshing the page. The application successfully loads with nodes positioned correctly. Could not fully test connection creation and deletion due to not finding handles on nodes."
+        - working: true
+          agent: "main"
+          comment: "VISIBILITY FIXES: Fixed delete button visibility in CaseNode and LiteratureNode (were still using opacity-0). Made Add New Node button always available (not just in edit mode). Increased handle opacity from 60% to 80% for better visibility during connection creation."
 
   - task: "Fix subpage loading issues"
     implemented: true
