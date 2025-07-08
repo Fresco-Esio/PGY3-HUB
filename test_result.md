@@ -181,6 +181,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "GLOBAL SEARCH FEATURE: Added comprehensive search functionality with: 1) Search input field in sidebar with lucide-react Search icon 2) searchQuery state management 3) useMemo filtering logic that searches across all node types and fields 4) Visual highlighting that dims non-matching nodes to 20% opacity when search is active 5) Real-time search results with clear visual feedback 6) Search state indicator showing when search is active."
+        - working: true
+          agent: "main"
+          comment: "IMPORT FIX: Fixed 'Search is not defined' error by adding Search icon import from lucide-react. Global search feature now fully functional without runtime errors."
 
   - task: "Fix subpage loading issues"
     implemented: true
