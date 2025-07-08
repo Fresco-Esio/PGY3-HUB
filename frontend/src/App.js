@@ -2142,7 +2142,7 @@ const Dashboard = () => {
           flashcard_count: topic.flashcard_count,
           completed_flashcards: topic.completed_flashcards,
           originalData: topic,
-          onDelete: isEditing ? () => deleteNode(topic.id, 'topic') : undefined
+          onDelete: () => deleteNode(topic.id, 'topic') // Always available, not just in edit mode
         }
       });
     });
