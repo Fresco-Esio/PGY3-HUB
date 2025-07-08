@@ -846,7 +846,7 @@ const nodeTypes = {
 };
 
 // Optimized Subpage Window Component with performance enhancements
-const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMindMapData, onAutoSave }) => {
+const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMindMapData, onAutoSave, addToast }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
