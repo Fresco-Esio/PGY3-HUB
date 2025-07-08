@@ -269,9 +269,7 @@ test_plan:
     - "Fix subpage loading issues"  
     - "Center new nodes in current view"
     - "Enhanced realign nodes with category columns"
-  stuck_tasks:
-    - "Fix connection persistence during mode switches"
-    - "Fix subpage loading issues"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
