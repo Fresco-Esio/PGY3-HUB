@@ -1929,13 +1929,10 @@ const Dashboard = () => {
     }
   }, [mindMapData, hasAppliedInitialLayout]);
   const deleteNode = async (nodeId, nodeType) => {
-    // Add confirmation dialog
-    if (!window.confirm(`Are you sure you want to delete this ${nodeType}?`)) {
-      return;
-    }
-
     try {
-      await axios.delete(`${API}/${nodeType}s/${nodeId}`);
+      console.log(`Deleting ${nodeType} with ID:`, nodeId);
+      
+      // Remove from React Flow visually
       setNodes((nds) => nds.filter(n => n.id !== `${nodeType}-${nodeId}`));
       setEdges((eds) => eds.filter(e => 
         !e.id.includes(`${nodeType}-${nodeId}`)
@@ -1950,7 +1947,16 @@ const Dashboard = () => {
           updatedData[collection] = updatedData[collection].filter(item => item.id !== nodeId);
         }
         
-        // Trigger auto-save
+        // Also remove any connections involving this node
+        if (updatedData.connections) {
+          updatedData.connections = updatedData.connections.filter(conn => 
+            !conn.source.includes(nodeId) && !conn.target.includes(nodeId)
+          );
+        }
+        
+        console.log(`Updated mindMapData after deleting ${nodeType}:`, updatedData);
+        
+        // Trigger auto-save to both localStorage and backend
         autoSaveMindMapData(updatedData);
         
         return updatedData;
