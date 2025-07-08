@@ -877,25 +877,26 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     
     setIsLoading(true);
     try {
-      const endpoint = type === 'literature' ? 'literature' : `${type}s`;
-      const response = await axios.put(`${API}/${endpoint}/${data.id}`, editData);
+      console.log(`Saving ${type} with ID:`, data.id, editData);
+      
       setIsEditing(false);
       setOriginalData(editData);
       
-      // PERFORMANCE FIX: Optimized state update to prevent full re-render
-      const updatedData = response.data;
+      // Update mindMapData directly (no API call needed)
       setMindMapData(prevData => {
         const newData = { ...prevData };
         if (type === 'literature') {
           newData.literature = newData.literature.map(item => 
-            item.id === data.id ? updatedData : item
+            item.id === data.id ? { ...item, ...editData, updated_at: new Date() } : item
           );
         } else {
           const key = type + 's';
           newData[key] = newData[key].map(item => 
-            item.id === data.id ? updatedData : item
+            item.id === data.id ? { ...item, ...editData, updated_at: new Date() } : item
           );
         }
+        
+        console.log(`Updated mindMapData after saving ${type}:`, newData);
         
         // Trigger auto-save asynchronously to prevent blocking
         if (onAutoSave) {
@@ -905,12 +906,11 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         return newData;
       });
       
-      // PERFORMANCE FIX: Update nodes without full reload to preserve positions
-      // Don't call loadMindMapData() as it resets positions
-      // The data is already updated in mindMapData state above
+      // No need to call loadMindMapData() as it resets positions
       
     } catch (error) {
       console.error('Error saving data:', error);
+      addToast(`Failed to save ${type}`, 'error');
     } finally {
       setIsLoading(false);
     }
