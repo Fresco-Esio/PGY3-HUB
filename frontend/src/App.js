@@ -1648,6 +1648,84 @@ const Dashboard = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
+  // Global search filtering logic
+  const filteredNodeIds = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return []; // Return empty array when no search query
+    }
+
+    const query = searchQuery.toLowerCase();
+    const matchingIds = [];
+
+    // Search through topics
+    mindMapData.topics.forEach(topic => {
+      const searchableText = [
+        topic.title,
+        topic.description,
+        topic.category,
+        ...(topic.resources?.map(r => r.title) || [])
+      ].join(' ').toLowerCase();
+      
+      if (searchableText.includes(query)) {
+        matchingIds.push(`topic-${topic.id}`);
+      }
+    });
+
+    // Search through literature
+    mindMapData.literature?.forEach(lit => {
+      const searchableText = [
+        lit.title,
+        lit.authors,
+        lit.publication,
+        lit.abstract,
+        lit.notes,
+        lit.year?.toString()
+      ].join(' ').toLowerCase();
+      
+      if (searchableText.includes(query)) {
+        matchingIds.push(`literature-${lit.id}`);
+      }
+    });
+
+    // Search through cases
+    mindMapData.cases.forEach(caseItem => {
+      const searchableText = [
+        caseItem.case_id,
+        caseItem.primary_diagnosis,
+        caseItem.chief_complaint,
+        caseItem.history_present_illness,
+        caseItem.medical_history,
+        caseItem.assessment_plan,
+        caseItem.notes,
+        caseItem.age?.toString(),
+        caseItem.gender,
+        ...(caseItem.secondary_diagnoses || []),
+        ...(caseItem.medications || [])
+      ].join(' ').toLowerCase();
+      
+      if (searchableText.includes(query)) {
+        matchingIds.push(`case-${caseItem.id}`);
+      }
+    });
+
+    // Search through tasks
+    mindMapData.tasks.forEach(task => {
+      const searchableText = [
+        task.title,
+        task.description,
+        task.priority,
+        task.status
+      ].join(' ').toLowerCase();
+      
+      if (searchableText.includes(query)) {
+        matchingIds.push(`task-${task.id}`);
+      }
+    });
+
+    console.log(`Search "${query}" found ${matchingIds.length} matching nodes:`, matchingIds);
+    return matchingIds;
+  }, [searchQuery, mindMapData]);
+
   // Enhanced auto-save function with visual feedback
   const autoSaveMindMapData = useCallback((data) => {
     const onSaveStart = () => {
