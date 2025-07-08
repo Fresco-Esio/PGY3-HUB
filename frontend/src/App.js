@@ -2947,6 +2947,36 @@ const Dashboard = () => {
           <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
         </div>
 
+        {/* Global Search */}
+        <div className="mb-6">
+          <div className="relative">
+            <Search 
+              size={18} 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" 
+            />
+            <input
+              type="text"
+              placeholder="Search nodes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-700 bg-opacity-50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-xs text-slate-400">
+              Search active - non-matching nodes are dimmed
+            </div>
+          )}
+        </div>
+
         <div className="space-y-4">
           <div 
             onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('topics')}
