@@ -184,6 +184,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "IMPORT FIX: Fixed 'Search is not defined' error by adding Search icon import from lucide-react. Global search feature now fully functional without runtime errors."
+        - working: true
+          agent: "main"
+          comment: "SUBPAGE EDITING FIX: Fixed persistent error when editing node data by: 1) Updated loadSubpageData to use local mindMapData instead of non-existent API endpoints 2) Fixed SubpageWindow handleDelete to work with JSON backend 3) Removed confirmation dialogs as requested 4) Added connection cleanup when deleting nodes 5) All subpage functionality now works with local state without API calls."
 
   - task: "Fix subpage loading issues"
     implemented: true
