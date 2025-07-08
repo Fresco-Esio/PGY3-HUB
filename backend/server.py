@@ -1,8 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException
-from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import json
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
@@ -12,14 +11,11 @@ from datetime import datetime
 from enum import Enum
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Local JSON file for mind map data storage
+MINDMAP_DATA_FILE = ROOT_DIR / 'mindmap_data.json'
 
-# Create the main app without a prefix
+# Create the main app
 app = FastAPI()
 
 # Create a router with the /api prefix
@@ -98,7 +94,7 @@ class Task(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-# Create models
+# Create models for requests
 class LiteratureCreate(BaseModel):
     title: str
     authors: Optional[str] = None
@@ -140,349 +136,236 @@ class TaskCreate(BaseModel):
     linked_case_id: Optional[str] = None
     linked_topic_id: Optional[str] = None
 
+class MindMapData(BaseModel):
+    topics: List[PsychiatricTopic] = Field(default_factory=list)
+    cases: List[PatientCase] = Field(default_factory=list)
+    tasks: List[Task] = Field(default_factory=list)
+    literature: List[Literature] = Field(default_factory=list)
+    connections: List[Dict[str, Any]] = Field(default_factory=list)
+
+# Utility functions for JSON file operations
+def load_mind_map_data() -> MindMapData:
+    """Load mind map data from JSON file"""
+    try:
+        if MINDMAP_DATA_FILE.exists():
+            with open(MINDMAP_DATA_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Convert datetime strings back to datetime objects
+            for topic in data.get('topics', []):
+                if 'created_at' in topic:
+                    topic['created_at'] = datetime.fromisoformat(topic['created_at'].replace('Z', '+00:00'))
+                if 'updated_at' in topic:
+                    topic['updated_at'] = datetime.fromisoformat(topic['updated_at'].replace('Z', '+00:00'))
+            
+            for case in data.get('cases', []):
+                if 'created_at' in case:
+                    case['created_at'] = datetime.fromisoformat(case['created_at'].replace('Z', '+00:00'))
+                if 'updated_at' in case:
+                    case['updated_at'] = datetime.fromisoformat(case['updated_at'].replace('Z', '+00:00'))
+                if 'encounter_date' in case:
+                    case['encounter_date'] = datetime.fromisoformat(case['encounter_date'].replace('Z', '+00:00'))
+            
+            for task in data.get('tasks', []):
+                if 'created_at' in task:
+                    task['created_at'] = datetime.fromisoformat(task['created_at'].replace('Z', '+00:00'))
+                if 'updated_at' in task:
+                    task['updated_at'] = datetime.fromisoformat(task['updated_at'].replace('Z', '+00:00'))
+                if 'due_date' in task and task['due_date']:
+                    task['due_date'] = datetime.fromisoformat(task['due_date'].replace('Z', '+00:00'))
+            
+            for lit in data.get('literature', []):
+                if 'created_at' in lit:
+                    lit['created_at'] = datetime.fromisoformat(lit['created_at'].replace('Z', '+00:00'))
+                if 'updated_at' in lit:
+                    lit['updated_at'] = datetime.fromisoformat(lit['updated_at'].replace('Z', '+00:00'))
+            
+            return MindMapData(**data)
+        else:
+            # Create initial dummy data if file doesn't exist
+            dummy_data = create_initial_dummy_data()
+            save_mind_map_data(dummy_data)
+            return dummy_data
+    except Exception as e:
+        logger.error(f"Error loading mind map data: {e}")
+        # Return empty data structure on error
+        return MindMapData()
+
+def save_mind_map_data(data: MindMapData) -> None:
+    """Save mind map data to JSON file"""
+    try:
+        # Convert to dict and handle datetime serialization
+        data_dict = data.dict()
+        
+        # Convert datetime objects to ISO strings
+        for topic in data_dict.get('topics', []):
+            if 'created_at' in topic and topic['created_at']:
+                topic['created_at'] = topic['created_at'].isoformat()
+            if 'updated_at' in topic and topic['updated_at']:
+                topic['updated_at'] = topic['updated_at'].isoformat()
+        
+        for case in data_dict.get('cases', []):
+            if 'created_at' in case and case['created_at']:
+                case['created_at'] = case['created_at'].isoformat()
+            if 'updated_at' in case and case['updated_at']:
+                case['updated_at'] = case['updated_at'].isoformat()
+            if 'encounter_date' in case and case['encounter_date']:
+                case['encounter_date'] = case['encounter_date'].isoformat()
+        
+        for task in data_dict.get('tasks', []):
+            if 'created_at' in task and task['created_at']:
+                task['created_at'] = task['created_at'].isoformat()
+            if 'updated_at' in task and task['updated_at']:
+                task['updated_at'] = task['updated_at'].isoformat()
+            if 'due_date' in task and task['due_date']:
+                task['due_date'] = task['due_date'].isoformat()
+        
+        for lit in data_dict.get('literature', []):
+            if 'created_at' in lit and lit['created_at']:
+                lit['created_at'] = lit['created_at'].isoformat()
+            if 'updated_at' in lit and lit['updated_at']:
+                lit['updated_at'] = lit['updated_at'].isoformat()
+        
+        with open(MINDMAP_DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data_dict, f, indent=2, ensure_ascii=False, default=str)
+        
+        logger.info("Mind map data saved successfully")
+    except Exception as e:
+        logger.error(f"Error saving mind map data: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save data")
+
+def create_initial_dummy_data() -> MindMapData:
+    """Create initial dummy data for first-time users"""
+    
+    # Create sample topics
+    topic1 = PsychiatricTopic(
+        title="Major Depressive Disorder",
+        description="Unipolar depression, treatment-resistant depression, and related mood disorders",
+        category="Mood Disorders",
+        color="#3B82F6",
+        position={"x": 200, "y": 100},
+        flashcard_count=25,
+        completed_flashcards=18,
+        resources=[
+            {"title": "DSM-5-TR Criteria", "url": "#", "type": "reference"},
+            {"title": "Treatment Guidelines", "url": "#", "type": "guideline"}
+        ]
+    )
+    
+    topic2 = PsychiatricTopic(
+        title="Anxiety Disorders",
+        description="GAD, panic disorder, phobias, and anxiety management",
+        category="Anxiety Disorders",
+        color="#059669",
+        position={"x": -200, "y": 150},
+        flashcard_count=20,
+        completed_flashcards=15
+    )
+    
+    # Create sample case
+    case1 = PatientCase(
+        case_id="CASE-001",
+        encounter_date=datetime(2024, 3, 15),
+        primary_diagnosis="Major Depressive Disorder, Severe",
+        secondary_diagnoses=["Generalized Anxiety Disorder"],
+        age=34,
+        gender="Female",
+        chief_complaint="I can't get out of bed anymore",
+        history_present_illness="34-year-old female with 3-month history of worsening depression",
+        medical_history="Hypertension, no prior psychiatric history",
+        medications=["Sertraline 50mg daily", "Lisinopril 10mg daily"],
+        mental_status_exam="Depressed mood, restricted affect, no SI/HI",
+        assessment_plan="Increase sertraline to 100mg, CBT referral",
+        notes="Good insight and judgment, strong family support",
+        linked_topics=[topic1.id],
+        position={"x": 300, "y": 200}
+    )
+    
+    # Create sample task
+    task1 = Task(
+        title="Review MDD treatment guidelines",
+        description="Read updated APA guidelines for treatment-resistant depression",
+        priority="high",
+        due_date=datetime(2024, 3, 20),
+        linked_topic_id=topic1.id,
+        position={"x": 400, "y": 50}
+    )
+    
+    # Create sample literature
+    lit1 = Literature(
+        title="Efficacy of CBT in Major Depression",
+        authors="Beck, A.T., Rush, A.J.",
+        publication="Archives of General Psychiatry",
+        year=2021,
+        abstract="Comprehensive review of cognitive behavioral therapy effectiveness",
+        notes="Key study for MDD treatment protocols",
+        linked_topics=[topic1.id],
+        position={"x": 100, "y": -100}
+    )
+    
+    return MindMapData(
+        topics=[topic1, topic2],
+        cases=[case1],
+        tasks=[task1],
+        literature=[lit1],
+        connections=[]
+    )
+
 # Basic routes
 @api_router.get("/")
 async def root():
-    return {"message": "PGY-3 HQ API is running"}
+    return {"message": "PGY-3 HQ API is running with local JSON storage"}
 
-# Psychiatric Topics routes
-@api_router.post("/topics", response_model=PsychiatricTopic)
-async def create_topic(topic: PsychiatricTopicCreate):
-    topic_dict = topic.dict()
-    topic_obj = PsychiatricTopic(**topic_dict)
-    await db.psychiatric_topics.insert_one(topic_obj.dict())
-    return topic_obj
+# NEW: Mind Map Data endpoints for local communication
+@api_router.get("/mindmap-data")
+async def get_mindmap_data():
+    """Get all mind map data from local JSON file"""
+    try:
+        data = load_mind_map_data()
+        return data.dict()
+    except Exception as e:
+        logger.error(f"Error getting mind map data: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load mind map data")
 
+@api_router.put("/mindmap-data")
+async def save_mindmap_data(data: MindMapData):
+    """Save complete mind map data to local JSON file"""
+    try:
+        save_mind_map_data(data)
+        return {"message": "Mind map data saved successfully"}
+    except Exception as e:
+        logger.error(f"Error saving mind map data: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save mind map data")
+
+# Individual CRUD endpoints (kept for compatibility)
 @api_router.get("/topics", response_model=List[PsychiatricTopic])
 async def get_topics():
-    topics = await db.psychiatric_topics.find().to_list(1000)
-    return [PsychiatricTopic(**topic) for topic in topics]
-
-@api_router.get("/topics/{topic_id}", response_model=PsychiatricTopic)
-async def get_topic(topic_id: str):
-    topic = await db.psychiatric_topics.find_one({"id": topic_id})
-    if not topic:
-        raise HTTPException(status_code=404, detail="Topic not found")
-    return PsychiatricTopic(**topic)
-
-@api_router.put("/topics/{topic_id}", response_model=PsychiatricTopic)
-async def update_topic(topic_id: str, topic_update: dict):
-    topic_update["updated_at"] = datetime.utcnow()
-    result = await db.psychiatric_topics.update_one(
-        {"id": topic_id}, 
-        {"$set": topic_update}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Topic not found")
-    
-    updated_topic = await db.psychiatric_topics.find_one({"id": topic_id})
-    return PsychiatricTopic(**updated_topic)
-
-@api_router.delete("/topics/{topic_id}")
-async def delete_topic(topic_id: str):
-    result = await db.psychiatric_topics.delete_one({"id": topic_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Topic not found")
-    return {"message": "Topic deleted successfully"}
-
-# Patient Cases routes
-@api_router.post("/cases", response_model=PatientCase)
-async def create_case(case: PatientCaseCreate):
-    case_dict = case.dict()
-    case_obj = PatientCase(**case_dict)
-    await db.patient_cases.insert_one(case_obj.dict())
-    return case_obj
+    data = load_mind_map_data()
+    return data.topics
 
 @api_router.get("/cases", response_model=List[PatientCase])
 async def get_cases():
-    cases = await db.patient_cases.find().to_list(1000)
-    return [PatientCase(**case) for case in cases]
-
-@api_router.get("/cases/{case_id}", response_model=PatientCase)
-async def get_case(case_id: str):
-    case = await db.patient_cases.find_one({"id": case_id})
-    if not case:
-        raise HTTPException(status_code=404, detail="Case not found")
-    return PatientCase(**case)
-
-@api_router.put("/cases/{case_id}", response_model=PatientCase)
-async def update_case(case_id: str, case_update: dict):
-    case_update["updated_at"] = datetime.utcnow()
-    result = await db.patient_cases.update_one(
-        {"id": case_id}, 
-        {"$set": case_update}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Case not found")
-    
-    updated_case = await db.patient_cases.find_one({"id": case_id})
-    return PatientCase(**updated_case)
-
-@api_router.delete("/cases/{case_id}")
-async def delete_case(case_id: str):
-    result = await db.patient_cases.delete_one({"id": case_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Case not found")
-    return {"message": "Case deleted successfully"}
-
-# Literature routes
-@api_router.post("/literature", response_model=Literature)
-async def create_literature(literature: LiteratureCreate):
-    literature_dict = literature.dict()
-    literature_obj = Literature(**literature_dict)
-    await db.literature.insert_one(literature_obj.dict())
-    return literature_obj
-
-@api_router.get("/literature", response_model=List[Literature])
-async def get_literature():
-    literature = await db.literature.find().to_list(1000)
-    return [Literature(**lit) for lit in literature]
-
-@api_router.get("/literature/{literature_id}", response_model=Literature)
-async def get_literature_item(literature_id: str):
-    literature = await db.literature.find_one({"id": literature_id})
-    if not literature:
-        raise HTTPException(status_code=404, detail="Literature not found")
-    return Literature(**literature)
-
-@api_router.put("/literature/{literature_id}", response_model=Literature)
-async def update_literature(literature_id: str, literature_update: dict):
-    literature_update["updated_at"] = datetime.utcnow()
-    result = await db.literature.update_one(
-        {"id": literature_id}, 
-        {"$set": literature_update}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Literature not found")
-    
-    updated_literature = await db.literature.find_one({"id": literature_id})
-    return Literature(**updated_literature)
-
-@api_router.delete("/literature/{literature_id}")
-async def delete_literature(literature_id: str):
-    result = await db.literature.delete_one({"id": literature_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Literature not found")
-    return {"message": "Literature deleted successfully"}
-
-# Tasks routes
-@api_router.post("/tasks", response_model=Task)
-async def create_task(task: TaskCreate):
-    task_dict = task.dict()
-    task_obj = Task(**task_dict)
-    await db.tasks.insert_one(task_obj.dict())
-    return task_obj
+    data = load_mind_map_data()
+    return data.cases
 
 @api_router.get("/tasks", response_model=List[Task])
 async def get_tasks():
-    tasks = await db.tasks.find().to_list(1000)
-    return [Task(**task) for task in tasks]
+    data = load_mind_map_data()
+    return data.tasks
 
-@api_router.get("/tasks/{task_id}", response_model=Task)
-async def get_task(task_id: str):
-    task = await db.tasks.find_one({"id": task_id})
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return Task(**task)
-
-@api_router.put("/tasks/{task_id}", response_model=Task)
-async def update_task(task_id: str, task_update: dict):
-    task_update["updated_at"] = datetime.utcnow()
-    result = await db.tasks.update_one(
-        {"id": task_id}, 
-        {"$set": task_update}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
-    updated_task = await db.tasks.find_one({"id": task_id})
-    return Task(**updated_task)
-
-@api_router.delete("/tasks/{task_id}")
-async def delete_task(task_id: str):
-    result = await db.tasks.delete_one({"id": task_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return {"message": "Task deleted successfully"}
-
-# Mind Map Data endpoint
-@api_router.get("/mindmap-data")
-async def get_mindmap_data():
-    topics = await db.psychiatric_topics.find().to_list(1000)
-    cases = await db.patient_cases.find().to_list(1000)
-    tasks = await db.tasks.find().to_list(1000)
-    literature = await db.literature.find().to_list(1000)
-    
-    return {
-        "topics": [PsychiatricTopic(**topic) for topic in topics],
-        "cases": [PatientCase(**case) for case in cases],
-        "tasks": [Task(**task) for task in tasks],
-        "literature": [Literature(**lit) for lit in literature]
-    }
-
-# Initialize sample data
-@api_router.post("/init-sample-data")
-async def init_sample_data():
-    # Clear existing data
-    await db.psychiatric_topics.delete_many({})
-    await db.patient_cases.delete_many({})
-    await db.tasks.delete_many({})
-    await db.literature.delete_many({})
-    
-    # Sample topics
-    sample_topics = [
-        {
-            "title": "Major Depressive Disorder",
-            "description": "Unipolar depression, treatment-resistant depression, and related mood disorders",
-            "category": "Mood Disorders",
-            "color": "#3B82F6",
-            "position": {"x": 200, "y": 100},
-            "flashcard_count": 25,
-            "completed_flashcards": 18,
-            "resources": [
-                {"title": "DSM-5-TR Criteria", "url": "#", "type": "reference"},
-                {"title": "Treatment Guidelines", "url": "#", "type": "guideline"}
-            ]
-        },
-        {
-            "title": "Schizophrenia Spectrum",
-            "description": "Schizophrenia, brief psychotic disorder, and delusional disorders",
-            "category": "Psychotic Disorders",
-            "color": "#DC2626",
-            "position": {"x": -200, "y": 150},
-            "flashcard_count": 30,
-            "completed_flashcards": 22,
-            "resources": [
-                {"title": "Antipsychotic Guidelines", "url": "#", "type": "guideline"}
-            ]
-        },
-        {
-            "title": "Anxiety Disorders",
-            "description": "GAD, panic disorder, phobias, and anxiety management",
-            "category": "Anxiety Disorders",
-            "color": "#059669",
-            "position": {"x": 0, "y": -150},
-            "flashcard_count": 20,
-            "completed_flashcards": 15
-        }
-    ]
-    
-    # Insert topics and get their IDs
-    topic_ids = []
-    for topic_data in sample_topics:
-        topic_obj = PsychiatricTopic(**topic_data)
-        await db.psychiatric_topics.insert_one(topic_obj.dict())
-        topic_ids.append(topic_obj.id)
-    
-    # Sample cases
-    sample_cases = [
-        {
-            "case_id": "CASE-001",
-            "encounter_date": datetime(2024, 3, 15),
-            "primary_diagnosis": "Major Depressive Disorder, Severe",
-            "secondary_diagnoses": ["Generalized Anxiety Disorder"],
-            "age": 34,
-            "gender": "Female",
-            "chief_complaint": "I can't get out of bed anymore",
-            "history_present_illness": "34-year-old female with 3-month history of worsening depression",
-            "medical_history": "Hypertension, no prior psychiatric history",
-            "medications": ["Sertraline 50mg daily", "Lisinopril 10mg daily"],
-            "mental_status_exam": "Depressed mood, restricted affect, no SI/HI",
-            "assessment_plan": "Increase sertraline to 100mg, CBT referral",
-            "notes": "Good insight and judgment, strong family support",
-            "linked_topics": [topic_ids[0]],
-            "position": {"x": 300, "y": 200}
-        },
-        {
-            "case_id": "CASE-002", 
-            "encounter_date": datetime(2024, 3, 10),
-            "primary_diagnosis": "Schizophrenia, Paranoid Type",
-            "age": 28,
-            "gender": "Male",
-            "chief_complaint": "They're watching me through the cameras",
-            "history_present_illness": "28-year-old male with 2-week history of paranoid delusions",
-            "medications": ["Risperidone 2mg BID"],
-            "mental_status_exam": "Paranoid delusions, auditory hallucinations present",
-            "assessment_plan": "Increase risperidone, social work consultation",
-            "linked_topics": [topic_ids[1]],
-            "position": {"x": -300, "y": 250}
-        }
-    ]
-    
-    case_ids = []
-    for case_data in sample_cases:
-        case_obj = PatientCase(**case_data)
-        await db.patient_cases.insert_one(case_obj.dict())
-        case_ids.append(case_obj.id)
-    
-    # Sample tasks
-    sample_tasks = [
-        {
-            "title": "Review MDD treatment guidelines",
-            "description": "Read updated APA guidelines for treatment-resistant depression",
-            "priority": "high",
-            "due_date": datetime(2024, 3, 20),
-            "linked_topic_id": topic_ids[0],
-            "position": {"x": 400, "y": 50}
-        },
-        {
-            "title": "Follow up with CASE-001",
-            "description": "Check medication compliance and side effects",
-            "priority": "medium",
-            "due_date": datetime(2024, 3, 22),
-            "linked_case_id": case_ids[0],
-            "position": {"x": 450, "y": 300}
-        },
-        {
-            "title": "Study antipsychotic mechanisms",
-            "description": "Review D2 receptor blockade and side effect profiles",
-            "priority": "medium",
-            "linked_topic_id": topic_ids[1],
-            "position": {"x": -400, "y": 100}
-        }
-    ]
-    
-    for task_data in sample_tasks:
-        task_obj = Task(**task_data)
-        await db.tasks.insert_one(task_obj.dict())
-    
-    # Sample literature
-    sample_literature = [
-        {
-            "title": "Efficacy of CBT in Major Depression",
-            "authors": "Beck, A.T., Rush, A.J.",
-            "publication": "Archives of General Psychiatry",
-            "year": 2021,
-            "abstract": "Comprehensive review of cognitive behavioral therapy effectiveness",
-            "notes": "Key study for MDD treatment protocols",
-            "linked_topics": [topic_ids[0]],
-            "position": {"x": 100, "y": -100}
-        },
-        {
-            "title": "Antipsychotic Treatment Guidelines",
-            "authors": "American Psychiatric Association",
-            "publication": "APA Guidelines",
-            "year": 2022,
-            "abstract": "Updated guidelines for antipsychotic medication management",
-            "notes": "Essential reference for schizophrenia treatment",
-            "linked_topics": [topic_ids[1]],
-            "position": {"x": -100, "y": -50}
-        }
-    ]
-    
-    for lit_data in sample_literature:
-        lit_obj = Literature(**lit_data)
-        await db.literature.insert_one(lit_obj.dict())
-    
-    return {"message": "Sample data initialized successfully"}
+@api_router.get("/literature", response_model=List[Literature])
+async def get_literature():
+    data = load_mind_map_data()
+    return data.literature
 
 # Include the router in the main app
 app.include_router(api_router)
 
+# CORS middleware configuration for local development
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Specific to local frontend
     allow_credentials=True,
-    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -493,7 +376,3 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
