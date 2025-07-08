@@ -2427,46 +2427,54 @@ const Dashboard = () => {
     console.log('Node clicked:', node);
   };
 
-  // PERFORMANCE FIX: Optimized async data loading with error handling and timeout
+  // PERFORMANCE FIX: Optimized data loading from local state instead of API calls
   const loadSubpageData = useCallback(async (nodeType, nodeId) => {
     try {
       console.log('Loading subpage data for:', nodeType, nodeId);
-      const endpoint = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
-      console.log('API endpoint:', `${API}/${endpoint}/${nodeId}`);
       
-      // PERFORMANCE FIX: Add timeout to prevent hanging requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      // Get data from local mindMapData state instead of API call
+      let nodeData = null;
       
-      const response = await axios.get(`${API}/${endpoint}/${nodeId}`, {
-        signal: controller.signal
-      });
+      switch (nodeType) {
+        case 'topic':
+          nodeData = mindMapData.topics.find(topic => topic.id === nodeId);
+          break;
+        case 'case':
+          nodeData = mindMapData.cases.find(caseItem => caseItem.id === nodeId);
+          break;
+        case 'task':
+          nodeData = mindMapData.tasks.find(task => task.id === nodeId);
+          break;
+        case 'literature':
+          nodeData = mindMapData.literature?.find(lit => lit.id === nodeId);
+          break;
+        default:
+          throw new Error(`Unknown node type: ${nodeType}`);
+      }
       
-      clearTimeout(timeoutId);
+      if (!nodeData) {
+        throw new Error(`${nodeType} with ID ${nodeId} not found in local data`);
+      }
       
-      console.log('Successfully loaded subpage data:', response.data);
+      console.log('Successfully loaded subpage data from local state:', nodeData);
       
-      // PERFORMANCE FIX: Update state asynchronously to prevent blocking
+      // Update state asynchronously to prevent blocking
       requestAnimationFrame(() => {
-        setSubpageData(response.data);
+        setSubpageData(nodeData);
       });
       
     } catch (error) {
-      console.error('Full error details:', error);
+      console.error('Error loading subpage data:', error);
       
-      if (error.name === 'AbortError') {
-        console.warn('Request timed out for:', nodeType, nodeId);
-        addToast('Loading timed out. Please try again.', 'error');
-      } else {
-        console.error('Error loading subpage data:', error);
-        addToast('Error loading data. Please try again.', 'error');
-      }
+      // Show user-friendly error message
+      addToast(`Failed to load ${nodeType} data`, 'error', 4000);
       
-      // IMPORTANT FIX: Set empty object instead of null to prevent infinite loading
-      // This ensures the component renders error state instead of loading state
-      setSubpageData({});
+      // Set error state to show fallback UI
+      requestAnimationFrame(() => {
+        setSubpageData({ error: `Failed to load ${nodeType} data: ${error.message}` });
+      });
     }
-  }, [addToast]);
+  }, [mindMapData, addToast]);
 
   // PERFORMANCE FIX: Optimized node double-click handler with debouncing
   const onNodeDoubleClick = useCallback((event, node) => {
