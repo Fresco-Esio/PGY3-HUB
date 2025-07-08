@@ -1882,6 +1882,15 @@ const Dashboard = () => {
     }
   }, [isReactFlowReady, mindMapData, hasAppliedInitialLayout, loading]);
 
+  // Effect to re-render nodes when search query changes
+  useEffect(() => {
+    if (mindMapData.topics.length > 0 || mindMapData.cases.length > 0 || 
+        mindMapData.tasks.length > 0 || mindMapData.literature?.length > 0) {
+      console.log('Search query changed, updating node visibility');
+      convertDataToReactFlow(mindMapData, true); // Preserve positions
+    }
+  }, [searchQuery, filteredNodeIds]);
+
   const loadMindMapData = async () => {
     try {
       // First try to load from localStorage
