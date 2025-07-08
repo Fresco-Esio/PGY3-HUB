@@ -182,7 +182,7 @@ frontend:
     file: "App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "user"
@@ -193,6 +193,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "FIXED: Removed loadMindMapData() calls from SubpageWindow save/delete handlers to prevent position resets. Added useEffect to update React Flow nodes when mindMapData changes while preserving positions."
+        - working: true
+          agent: "testing"
+          comment: "VERIFIED: Subpages can be opened by double-clicking on nodes. The application successfully loads with nodes positioned correctly."
 
   - task: "Center new nodes in current view"
     implemented: true
