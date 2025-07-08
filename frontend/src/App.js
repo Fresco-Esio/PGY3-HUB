@@ -3280,6 +3280,7 @@ const Dashboard = () => {
           setMindMapData={setMindMapData}
           loadMindMapData={loadMindMapData}
           onAutoSave={autoSaveMindMapData}
+          addToast={addToast}
         />
       )}
 
