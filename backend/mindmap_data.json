@@ -217,5 +217,30 @@
       "updated_at": "2025-07-03T12:57:16.359000"
     }
   ],
-  "connections": []
+  "connections": [
+    {
+      "id": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586-task-57d04233-c52d-4475-9dfe-a6444d867f32",
+      "source": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586",
+      "target": "task-57d04233-c52d-4475-9dfe-a6444d867f32",
+      "sourceHandle": "source-bottom",
+      "targetHandle": "target-top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586-topic-ddf247e8-c862-41c6-9797-f884cf3262e8",
+      "source": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586",
+      "target": "topic-ddf247e8-c862-41c6-9797-f884cf3262e8",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      }
+    }
+  ]
 }

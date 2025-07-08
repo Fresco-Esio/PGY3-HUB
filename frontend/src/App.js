@@ -2861,7 +2861,7 @@ const Dashboard = () => {
             year: newNodeData.year
           }),
           originalData: newNodeData,
-          onDelete: isEditing ? () => deleteNode(newNodeData.id, nodeType) : undefined
+          onDelete: () => deleteNode(newNodeData.id, nodeType) // Always available, not just in edit mode
         }
       };
 
