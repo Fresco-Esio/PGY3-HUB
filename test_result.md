@@ -166,6 +166,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "LOCAL BACKEND SETUP: Successfully modified backend to use local JSON file storage instead of MongoDB. Added CORS configuration for localhost:3000. Created comprehensive GET/PUT endpoints for mindmap-data. Updated frontend to use http://localhost:8000 API. Added dual save (localStorage + backend) functionality. Created mindmap_data.json with initial dummy data."
+        - working: true
+          agent: "main"
+          comment: "NODE CREATION FIX: Fixed broken node creation functionality by rewriting addNewNode function to work with JSON-based backend instead of individual POST endpoints. Added local ID generation, proper data structure creation, and direct mindMapData updates. ALWAYS VISIBLE DELETE BUTTONS: Made delete buttons always visible (not just on hover) and available in all modes (not just edit mode) so nodes maintain consistent size and functionality."
 
   - task: "Fix subpage loading issues"
     implemented: true
