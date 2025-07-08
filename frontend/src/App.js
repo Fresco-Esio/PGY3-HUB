@@ -2399,102 +2399,37 @@ const Dashboard = () => {
   const onEdgeDoubleClick = useCallback((event, edge) => {
     if (!isEditing) return;
     
-    if (window.confirm('Are you sure you want to delete this connection?')) {
-      console.log('Deleting edge:', edge);
+    console.log('Deleting edge:', edge);
+    
+    // Remove edge from React Flow state
+    setEdges((edges) => edges.filter((e) => e.id !== edge.id));
+    
+    // CRITICAL FIX: Remove the connection from mindMapData.connections array
+    setMindMapData(prevData => {
+      const newData = { ...prevData };
       
-      // Remove edge from React Flow state
-      setEdges((edges) => edges.filter((e) => e.id !== edge.id));
+      // Ensure connections array exists
+      if (!newData.connections) {
+        newData.connections = [];
+      }
       
-      // CRITICAL FIX: Also remove the connection from mindMapData
-      const sourceId = edge.source.split('-')[1];
-      const targetId = edge.target.split('-')[1];
-      const sourceType = edge.source.split('-')[0];
-      const targetType = edge.target.split('-')[0];
+      // Remove the connection from the connections array
+      const initialLength = newData.connections.length;
+      newData.connections = newData.connections.filter(conn => 
+        conn.id !== edge.id
+      );
       
-      setMindMapData(prevData => {
-        const newData = { ...prevData };
-        let updatedData = false;
-        
-        // Remove connection based on the edge pattern
-        // Literature -> Topic connections (stored in literature.linked_topics)
-        if ((sourceType === 'topic' && targetType === 'literature') || 
-            (sourceType === 'literature' && targetType === 'topic')) {
-          const litId = sourceType === 'literature' ? sourceId : targetId;
-          const topicId = sourceType === 'topic' ? sourceId : targetId;
-          
-          newData.literature = newData.literature.map(lit => {
-            if (lit.id === litId) {
-              const linkedTopics = lit.linked_topics || [];
-              const newLinkedTopics = linkedTopics.filter(id => id !== topicId);
-              if (newLinkedTopics.length !== linkedTopics.length) {
-                updatedData = true;
-                return { ...lit, linked_topics: newLinkedTopics };
-              }
-            }
-            return lit;
-          });
-        }
-        
-        // Topic -> Case connections (stored in case.linked_topics)
-        else if ((sourceType === 'topic' && targetType === 'case') || 
-                 (sourceType === 'case' && targetType === 'topic')) {
-          const caseId = sourceType === 'case' ? sourceId : targetId;
-          const topicId = sourceType === 'topic' ? sourceId : targetId;
-          
-          newData.cases = newData.cases.map(caseItem => {
-            if (caseItem.id === caseId) {
-              const linkedTopics = caseItem.linked_topics || [];
-              const newLinkedTopics = linkedTopics.filter(id => id !== topicId);
-              if (newLinkedTopics.length !== linkedTopics.length) {
-                updatedData = true;
-                return { ...caseItem, linked_topics: newLinkedTopics };
-              }
-            }
-            return caseItem;
-          });
-        }
-        
-        // Case -> Task connections (stored in task.linked_case_id)
-        else if ((sourceType === 'case' && targetType === 'task') || 
-                 (sourceType === 'task' && targetType === 'case')) {
-          const taskId = sourceType === 'task' ? sourceId : targetId;
-          const caseId = sourceType === 'case' ? sourceId : targetId;
-          
-          newData.tasks = newData.tasks.map(task => {
-            if (task.id === taskId && task.linked_case_id === caseId) {
-              updatedData = true;
-              return { ...task, linked_case_id: null };
-            }
-            return task;
-          });
-        }
-        
-        // Topic -> Task connections (stored in task.linked_topic_id)
-        else if ((sourceType === 'topic' && targetType === 'task') || 
-                 (sourceType === 'task' && targetType === 'topic')) {
-          const taskId = sourceType === 'task' ? sourceId : targetId;
-          const topicId = sourceType === 'topic' ? sourceId : targetId;
-          
-          newData.tasks = newData.tasks.map(task => {
-            if (task.id === taskId && task.linked_topic_id === topicId) {
-              updatedData = true;
-              return { ...task, linked_topic_id: null };
-            }
-            return task;
-          });
-        }
-        
-        if (updatedData) {
-          console.log('Successfully removed connection from mindMapData');
-          autoSaveMindMapData(newData);
-          addToast('Connection deleted and saved', 'success', 2000);
-        }
-        
-        return newData;
-      });
+      if (newData.connections.length !== initialLength) {
+        console.log('Successfully removed connection from mindMapData.connections');
+        autoSaveMindMapData(newData);
+        addToast('Connection deleted and saved', 'success', 2000);
+      } else {
+        console.log('Connection not found in mindMapData.connections, but removed from visual state');
+        addToast('Connection deleted', 'success', 2000);
+      }
       
-      addToast('Connection deleted', 'success', 2000);
-    }
+      return newData;
+    });
   }, [isEditing, setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
   // Dagre layout configuration
