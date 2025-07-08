@@ -187,6 +187,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "SUBPAGE EDITING FIX: Fixed persistent error when editing node data by: 1) Updated loadSubpageData to use local mindMapData instead of non-existent API endpoints 2) Fixed SubpageWindow handleDelete to work with JSON backend 3) Removed confirmation dialogs as requested 4) Added connection cleanup when deleting nodes 5) All subpage functionality now works with local state without API calls."
+        - working: true
+          agent: "testing"
+          comment: "VERIFIED: Connection persistence is working correctly. Connection handles are visible with 80% opacity as specified. Connections persist when switching between edit and normal modes. Connections also persist after page refresh. The application successfully loads with all connections intact."
 
   - task: "Fix subpage loading issues"
     implemented: true
