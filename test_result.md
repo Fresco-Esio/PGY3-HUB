@@ -178,6 +178,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "VISIBILITY FIXES: Fixed delete button visibility in CaseNode and LiteratureNode (were still using opacity-0). Made Add New Node button always available (not just in edit mode). Increased handle opacity from 60% to 80% for better visibility during connection creation."
+        - working: true
+          agent: "main"
+          comment: "GLOBAL SEARCH FEATURE: Added comprehensive search functionality with: 1) Search input field in sidebar with lucide-react Search icon 2) searchQuery state management 3) useMemo filtering logic that searches across all node types and fields 4) Visual highlighting that dims non-matching nodes to 20% opacity when search is active 5) Real-time search results with clear visual feedback 6) Search state indicator showing when search is active."
 
   - task: "Fix subpage loading issues"
     implemented: true
