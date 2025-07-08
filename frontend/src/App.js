@@ -48,6 +48,7 @@ import {
   CheckCircle2,
   Loader2,
   Sparkles,
+  Search, // Added for global search functionality
   Heart,
   Bookmark
 } from 'lucide-react';
