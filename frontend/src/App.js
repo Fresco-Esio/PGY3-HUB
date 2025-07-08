@@ -2200,7 +2200,7 @@ const Dashboard = () => {
           status: task.status,
           due_date: task.due_date,
           originalData: task,
-          onDelete: isEditing ? () => deleteNode(task.id, 'task') : undefined
+          onDelete: () => deleteNode(task.id, 'task') // Always available, not just in edit mode
         }
       });
     });
