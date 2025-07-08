@@ -3038,16 +3038,17 @@ const Dashboard = () => {
             {isEditing ? 'Exit Edit Mode' : 'Edit Mind Map'}
           </LoadingButton>
 
+          {/* Add New Node button - always available */}
+          <button
+            onClick={() => setShowNodeSelector(true)}
+            className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-blue-600 hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={16} />
+            Add New Node
+          </button>
+
           {isEditing && (
             <>
-              <button
-                onClick={() => setShowNodeSelector(true)}
-                className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-blue-600 hover:bg-blue-700 transition-colors"
-              >
-                <Plus size={16} />
-                Add New Node
-              </button>
-
               <LoadingButton
                 onClick={handleClearMap}
                 icon={Trash2}
