@@ -409,7 +409,7 @@ const TopicNode = ({ data, selected }) => {
         id="target-left"
         type="target" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '30%', transform: 'translateY(-50%)' }}
       />
       <Handle 
