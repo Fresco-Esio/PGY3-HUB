@@ -1,7 +1,7 @@
 {
   "topics": [
     {
-      "id": "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5",
+      "id": "ddf247e8-c862-41c6-9797-f884cf3262e8",
       "title": "Major Depressive Disorder",
       "description": "Unipolar depression, treatment-resistant depression, and related mood disorders",
       "category": "Mood Disorders",
@@ -24,29 +24,51 @@
           "type": "guideline"
         }
       ],
-      "created_at": "2025-07-08T13:32:34.746163",
-      "updated_at": "2025-07-08T13:32:34.746166"
+      "created_at": "2025-07-03T12:57:16.350000",
+      "updated_at": "2025-07-03T12:57:16.350000"
     },
     {
-      "id": "67fffae6-71ce-428b-8706-80ec20f94e6a",
+      "id": "c1fa704c-6593-4acc-aedb-d90662d82660",
+      "title": "Schizophrenia Spectrum",
+      "description": "Schizophrenia, brief psychotic disorder, and delusional disorders",
+      "category": "Psychotic Disorders",
+      "color": "#DC2626",
+      "position": {
+        "x": -200.0,
+        "y": 150.0
+      },
+      "flashcard_count": 30,
+      "completed_flashcards": 22,
+      "resources": [
+        {
+          "title": "Antipsychotic Guidelines",
+          "url": "#",
+          "type": "guideline"
+        }
+      ],
+      "created_at": "2025-07-03T12:57:16.351000",
+      "updated_at": "2025-07-03T12:57:16.351000"
+    },
+    {
+      "id": "e3743b43-293f-4a2f-bc37-c0d69a07a586",
       "title": "Anxiety Disorders",
       "description": "GAD, panic disorder, phobias, and anxiety management",
       "category": "Anxiety Disorders",
       "color": "#059669",
       "position": {
-        "x": -200.0,
-        "y": 150.0
+        "x": 0.0,
+        "y": -150.0
       },
       "flashcard_count": 20,
       "completed_flashcards": 15,
       "resources": [],
-      "created_at": "2025-07-08T13:32:34.746184",
-      "updated_at": "2025-07-08T13:32:34.746185"
+      "created_at": "2025-07-03T12:57:16.352000",
+      "updated_at": "2025-07-03T12:57:16.352000"
     }
   ],
   "cases": [
     {
-      "id": "94ffbc19-8814-4fc2-bd5e-938d2705749e",
+      "id": "0139538f-5e11-455a-be19-0718a4cfed51",
       "case_id": "CASE-001",
       "encounter_date": "2024-03-15T00:00:00",
       "primary_diagnosis": "Major Depressive Disorder, Severe",
@@ -67,37 +89,97 @@
       "notes": "Good insight and judgment, strong family support",
       "status": "active",
       "linked_topics": [
-        "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5"
+        "ddf247e8-c862-41c6-9797-f884cf3262e8"
       ],
       "position": {
         "x": 300.0,
         "y": 200.0
       },
-      "created_at": "2025-07-08T13:32:34.746213",
-      "updated_at": "2025-07-08T13:32:34.746214"
+      "created_at": "2025-07-03T12:57:16.354000",
+      "updated_at": "2025-07-03T12:57:16.354000"
+    },
+    {
+      "id": "58bec2f5-e38a-498a-b5f7-0cb8fcf02f24",
+      "case_id": "CASE-002",
+      "encounter_date": "2024-03-10T00:00:00",
+      "primary_diagnosis": "Schizophrenia, Paranoid Type",
+      "secondary_diagnoses": [],
+      "age": 28,
+      "gender": "Male",
+      "chief_complaint": "They're watching me through the cameras",
+      "history_present_illness": "28-year-old male with 2-week history of paranoid delusions",
+      "medical_history": null,
+      "medications": [
+        "Risperidone 2mg BID"
+      ],
+      "mental_status_exam": "Paranoid delusions, auditory hallucinations present",
+      "assessment_plan": "Increase risperidone, social work consultation",
+      "notes": null,
+      "status": "active",
+      "linked_topics": [
+        "c1fa704c-6593-4acc-aedb-d90662d82660"
+      ],
+      "position": {
+        "x": -300.0,
+        "y": 250.0
+      },
+      "created_at": "2025-07-03T12:57:16.355000",
+      "updated_at": "2025-07-03T12:57:16.355000"
     }
   ],
   "tasks": [
     {
-      "id": "9a50229b-0a61-4c83-9146-7c8824169e37",
+      "id": "1e7b1a22-dc03-4745-bf0a-e5da49da5053",
       "title": "Review MDD treatment guidelines",
       "description": "Read updated APA guidelines for treatment-resistant depression",
       "status": "pending",
       "priority": "high",
       "due_date": "2024-03-20T00:00:00",
       "linked_case_id": null,
-      "linked_topic_id": "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5",
+      "linked_topic_id": "ddf247e8-c862-41c6-9797-f884cf3262e8",
       "position": {
         "x": 400.0,
         "y": 50.0
       },
-      "created_at": "2025-07-08T13:32:34.746239",
-      "updated_at": "2025-07-08T13:32:34.746240"
+      "created_at": "2025-07-03T12:57:16.355000",
+      "updated_at": "2025-07-03T12:57:16.355000"
+    },
+    {
+      "id": "bb2493e7-93e4-4c09-b4af-60cde7970b05",
+      "title": "Follow up with CASE-001",
+      "description": "Check medication compliance and side effects",
+      "status": "pending",
+      "priority": "medium",
+      "due_date": "2024-03-22T00:00:00",
+      "linked_case_id": "0139538f-5e11-455a-be19-0718a4cfed51",
+      "linked_topic_id": null,
+      "position": {
+        "x": 450.0,
+        "y": 300.0
+      },
+      "created_at": "2025-07-03T12:57:16.356000",
+      "updated_at": "2025-07-03T12:57:16.356000"
+    },
+    {
+      "id": "57d04233-c52d-4475-9dfe-a6444d867f32",
+      "title": "Study antipsychotic mechanisms",
+      "description": "Review D2 receptor blockade and side effect profiles",
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": "c1fa704c-6593-4acc-aedb-d90662d82660",
+      "position": {
+        "x": -400.0,
+        "y": 100.0
+      },
+      "created_at": "2025-07-03T12:57:16.357000",
+      "updated_at": "2025-07-03T12:57:16.357000"
     }
   ],
   "literature": [
     {
-      "id": "9b8bb996-a839-453d-b864-20b63f8c2773",
+      "id": "bb1927af-2fb7-4ae7-9e32-37a8a4d043ee",
       "title": "Efficacy of CBT in Major Depression",
       "authors": "Beck, A.T., Rush, A.J.",
       "publication": "Archives of General Psychiatry",
@@ -106,14 +188,33 @@
       "abstract": "Comprehensive review of cognitive behavioral therapy effectiveness",
       "notes": "Key study for MDD treatment protocols",
       "linked_topics": [
-        "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5"
+        "ddf247e8-c862-41c6-9797-f884cf3262e8"
       ],
       "position": {
         "x": 100.0,
         "y": -100.0
       },
-      "created_at": "2025-07-08T13:32:34.746268",
-      "updated_at": "2025-07-08T13:32:34.746269"
+      "created_at": "2025-07-03T12:57:16.358000",
+      "updated_at": "2025-07-03T12:57:16.358000"
+    },
+    {
+      "id": "bb862846-b986-4706-9ec9-b82145b9f8a9",
+      "title": "Antipsychotic Treatment Guidelines",
+      "authors": "American Psychiatric Association",
+      "publication": "APA Guidelines",
+      "year": 2022,
+      "doi": null,
+      "abstract": "Updated guidelines for antipsychotic medication management",
+      "notes": "Essential reference for schizophrenia treatment",
+      "linked_topics": [
+        "c1fa704c-6593-4acc-aedb-d90662d82660"
+      ],
+      "position": {
+        "x": -100.0,
+        "y": -50.0
+      },
+      "created_at": "2025-07-03T12:57:16.359000",
+      "updated_at": "2025-07-03T12:57:16.359000"
     }
   ],
   "connections": []
