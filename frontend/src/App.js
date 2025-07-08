@@ -2750,51 +2750,91 @@ const Dashboard = () => {
 
       const newPosition = findFreePosition();
       
-      let newData = {};
+      // Generate unique ID using uuid-like approach
+      const generateId = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+      
+      const newId = generateId();
+      const now = new Date();
+      
+      // Create new node data based on type
+      let newNodeData = {
+        id: newId,
+        position: newPosition,
+        created_at: now,
+        updated_at: now
+      };
+      
       switch(nodeType) {
         case 'topic':
-          newData = {
+          newNodeData = {
+            ...newNodeData,
             title: 'New Topic',
             description: 'New topic description',
             category: 'New Category',
-            color: '#3B82F6'
+            color: '#3B82F6',
+            flashcard_count: 0,
+            completed_flashcards: 0,
+            resources: []
           };
           break;
         case 'case':
-          newData = {
+          newNodeData = {
+            ...newNodeData,
             case_id: `CASE-${Date.now()}`,
-            encounter_date: new Date().toISOString(),
+            encounter_date: now,
             primary_diagnosis: 'New Diagnosis',
+            secondary_diagnoses: [],
+            age: null,
+            gender: null,
             chief_complaint: 'New complaint',
+            history_present_illness: null,
+            medical_history: null,
+            medications: [],
+            mental_status_exam: null,
+            assessment_plan: null,
+            notes: null,
+            status: 'active',
             linked_topics: []
           };
           break;
         case 'task':
-          newData = {
+          newNodeData = {
+            ...newNodeData,
             title: 'New Task',
             description: 'New task description',
+            status: 'pending',
             priority: 'medium',
-            status: 'pending'
+            due_date: null,
+            linked_case_id: null,
+            linked_topic_id: null
           };
           break;
         case 'literature':
-          newData = {
+          newNodeData = {
+            ...newNodeData,
             title: 'New Literature',
             authors: 'New Author',
             publication: 'New Publication',
             year: new Date().getFullYear(),
+            doi: null,
+            abstract: null,
+            notes: null,
             linked_topics: []
           };
           break;
+        default:
+          throw new Error(`Unknown node type: ${nodeType}`);
       }
 
-      // Set position
-      newData.position = newPosition;
-
-      const response = await axios.post(`${API}/${nodeType === 'literature' ? 'literature' : nodeType + 's'}`, newData);
-      const newNodeData = response.data;
+      console.log('Creating new node:', nodeType, newNodeData);
       
-      // Add the new node to existing nodes without resetting positions
+      // Create React Flow node
       const newNode = {
         id: `${nodeType}-${newNodeData.id}`,
         type: nodeType,
@@ -2825,27 +2865,33 @@ const Dashboard = () => {
         }
       };
 
-      // Add to existing nodes array instead of reloading all data
+      // Add to existing nodes array
       setNodes((nds) => [...nds, newNode]);
       
       // Update mindMapData state to include the new node
       setMindMapData(prevData => {
+        const collectionName = nodeType === 'literature' ? 'literature' : nodeType + 's';
         const updatedData = {
           ...prevData,
-          [nodeType === 'literature' ? 'literature' : nodeType + 's']: [
-            ...prevData[nodeType === 'literature' ? 'literature' : nodeType + 's'],
+          [collectionName]: [
+            ...prevData[collectionName],
             newNodeData
           ]
         };
         
-        // Trigger auto-save
+        console.log('Updated mindMapData with new node:', updatedData);
+        
+        // Trigger auto-save to both localStorage and backend
         autoSaveMindMapData(updatedData);
         
         return updatedData;
       });
       
+      addToast(`New ${nodeType} created successfully`, 'success', 2000);
+      
     } catch (error) {
       console.error('Error adding new node:', error);
+      addToast(`Failed to create new ${nodeType}`, 'error', 3000);
     }
   };
 
