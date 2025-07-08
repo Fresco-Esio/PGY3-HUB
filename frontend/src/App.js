@@ -1628,6 +1628,7 @@ const Dashboard = () => {
   const [subpageData, setSubpageData] = useState(null);
   const [isReactFlowReady, setIsReactFlowReady] = useState(false);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); // Global search state
   const [isExportingCSV, setIsExportingCSV] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
