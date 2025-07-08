@@ -826,7 +826,7 @@ const LiteratureNode = ({ data, selected }) => {
               e.stopPropagation();
               data.onDelete();
             }}
-            className="ml-auto p-1 hover:bg-purple-200 rounded transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
+            className="ml-auto p-1 hover:bg-purple-200 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
           >
             <X size={12} />
           </button>
