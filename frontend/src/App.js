@@ -2161,7 +2161,7 @@ const Dashboard = () => {
           authors: lit.authors,
           year: lit.year,
           originalData: lit,
-          onDelete: isEditing ? () => deleteNode(lit.id, 'literature') : undefined
+          onDelete: () => deleteNode(lit.id, 'literature') // Always available, not just in edit mode
         }
       });
     });
