@@ -2211,6 +2211,22 @@ const Dashboard = () => {
       });
     }
 
+    // Helper function to determine if a node should be dimmed based on search
+    const getNodeStyle = (nodeId) => {
+      if (!searchQuery.trim()) {
+        return {}; // No search active, normal style
+      }
+      
+      const isMatch = filteredNodeIds.includes(nodeId);
+      if (isMatch) {
+        return {}; // Matching node, normal style
+      } else {
+        return { 
+          opacity: 0.2, // Dim non-matching nodes
+        };
+      }
+    };
+
     // Convert topics to nodes
     data.topics.forEach(topic => {
       const nodeId = `topic-${topic.id}`;
@@ -2220,6 +2236,7 @@ const Dashboard = () => {
         id: nodeId,
         type: 'topic',
         position: currentPosition || topic.position || { x: 0, y: 0 },
+        style: getNodeStyle(nodeId), // Apply search highlighting
         data: {
           label: topic.title,
           category: topic.category,
@@ -2241,6 +2258,7 @@ const Dashboard = () => {
         id: nodeId,
         type: 'literature',
         position: currentPosition || lit.position || { x: 0, y: 0 },
+        style: getNodeStyle(nodeId), // Apply search highlighting
         data: {
           label: lit.title,
           authors: lit.authors,
@@ -2260,6 +2278,7 @@ const Dashboard = () => {
         id: nodeId,
         type: 'case',
         position: currentPosition || caseItem.position || { x: 0, y: 0 },
+        style: getNodeStyle(nodeId), // Apply search highlighting
         data: {
           label: caseItem.case_id,
           diagnosis: caseItem.primary_diagnosis,
@@ -2279,6 +2298,7 @@ const Dashboard = () => {
         id: nodeId,
         type: 'task',
         position: currentPosition || task.position || { x: 0, y: 0 },
+        style: getNodeStyle(nodeId), // Apply search highlighting
         data: {
           label: task.title,
           priority: task.priority,
