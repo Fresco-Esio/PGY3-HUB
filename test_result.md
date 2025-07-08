@@ -132,6 +132,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "Comprehensive backend testing completed. All API endpoints are working correctly. CRUD operations for topics, cases, tasks, and literature function as expected. Position fields are properly stored and retrieved. Connection persistence between entities (topics-cases, topics-literature, tasks-topics, tasks-cases) is working correctly. The init-sample-data endpoint successfully initializes sample data."
+        - working: true
+          agent: "testing"
+          comment: "Tested local JSON-based backend implementation. All tests passed successfully. GET /api/mindmap-data returns all data from JSON file. PUT /api/mindmap-data correctly saves data to JSON file. Connections array with sourceHandle/targetHandle is properly handled. JSON file is created with initial dummy data if it doesn't exist. Data persists correctly between requests. Datetime serialization/deserialization works properly. All data structures (topics, cases, tasks, literature, connections) are validated correctly. CORS is properly configured for localhost:3000. Error handling for invalid JSON data works as expected. File permissions are correctly set. Integration tests for creating, updating, and deleting nodes via bulk mindmap-data endpoint passed. Connection persistence tests confirmed that connections with sourceHandle/targetHandle are properly saved and retrieved."
 
 frontend:
   - task: "Fix connection persistence during mode switches"
