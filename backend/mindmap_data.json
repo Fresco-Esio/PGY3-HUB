@@ -1,0 +1,120 @@
+{
+  "topics": [
+    {
+      "id": "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5",
+      "title": "Major Depressive Disorder",
+      "description": "Unipolar depression, treatment-resistant depression, and related mood disorders",
+      "category": "Mood Disorders",
+      "color": "#3B82F6",
+      "position": {
+        "x": 200.0,
+        "y": 100.0
+      },
+      "flashcard_count": 25,
+      "completed_flashcards": 18,
+      "resources": [
+        {
+          "title": "DSM-5-TR Criteria",
+          "url": "#",
+          "type": "reference"
+        },
+        {
+          "title": "Treatment Guidelines",
+          "url": "#",
+          "type": "guideline"
+        }
+      ],
+      "created_at": "2025-07-08T13:32:34.746163",
+      "updated_at": "2025-07-08T13:32:34.746166"
+    },
+    {
+      "id": "67fffae6-71ce-428b-8706-80ec20f94e6a",
+      "title": "Anxiety Disorders",
+      "description": "GAD, panic disorder, phobias, and anxiety management",
+      "category": "Anxiety Disorders",
+      "color": "#059669",
+      "position": {
+        "x": -200.0,
+        "y": 150.0
+      },
+      "flashcard_count": 20,
+      "completed_flashcards": 15,
+      "resources": [],
+      "created_at": "2025-07-08T13:32:34.746184",
+      "updated_at": "2025-07-08T13:32:34.746185"
+    }
+  ],
+  "cases": [
+    {
+      "id": "94ffbc19-8814-4fc2-bd5e-938d2705749e",
+      "case_id": "CASE-001",
+      "encounter_date": "2024-03-15T00:00:00",
+      "primary_diagnosis": "Major Depressive Disorder, Severe",
+      "secondary_diagnoses": [
+        "Generalized Anxiety Disorder"
+      ],
+      "age": 34,
+      "gender": "Female",
+      "chief_complaint": "I can't get out of bed anymore",
+      "history_present_illness": "34-year-old female with 3-month history of worsening depression",
+      "medical_history": "Hypertension, no prior psychiatric history",
+      "medications": [
+        "Sertraline 50mg daily",
+        "Lisinopril 10mg daily"
+      ],
+      "mental_status_exam": "Depressed mood, restricted affect, no SI/HI",
+      "assessment_plan": "Increase sertraline to 100mg, CBT referral",
+      "notes": "Good insight and judgment, strong family support",
+      "status": "active",
+      "linked_topics": [
+        "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5"
+      ],
+      "position": {
+        "x": 300.0,
+        "y": 200.0
+      },
+      "created_at": "2025-07-08T13:32:34.746213",
+      "updated_at": "2025-07-08T13:32:34.746214"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "9a50229b-0a61-4c83-9146-7c8824169e37",
+      "title": "Review MDD treatment guidelines",
+      "description": "Read updated APA guidelines for treatment-resistant depression",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2024-03-20T00:00:00",
+      "linked_case_id": null,
+      "linked_topic_id": "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5",
+      "position": {
+        "x": 400.0,
+        "y": 50.0
+      },
+      "created_at": "2025-07-08T13:32:34.746239",
+      "updated_at": "2025-07-08T13:32:34.746240"
+    }
+  ],
+  "literature": [
+    {
+      "id": "9b8bb996-a839-453d-b864-20b63f8c2773",
+      "title": "Efficacy of CBT in Major Depression",
+      "authors": "Beck, A.T., Rush, A.J.",
+      "publication": "Archives of General Psychiatry",
+      "year": 2021,
+      "doi": null,
+      "abstract": "Comprehensive review of cognitive behavioral therapy effectiveness",
+      "notes": "Key study for MDD treatment protocols",
+      "linked_topics": [
+        "fd14a5e6-136d-4af1-aa8d-b1d6bbf072f5"
+      ],
+      "position": {
+        "x": 100.0,
+        "y": -100.0
+      },
+      "created_at": "2025-07-08T13:32:34.746268",
+      "updated_at": "2025-07-08T13:32:34.746269"
+    }
+  ],
+  "connections": []
+}
