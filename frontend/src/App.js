@@ -3576,13 +3576,15 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Edge Label Modal */}
-      <EdgeLabelModal 
-        edge={editingEdge}
-        isOpen={editingEdge !== null}
-        onClose={() => setEditingEdge(null)}
-        onSave={saveEdgeLabel}
-      />
+      {/* Edge Label Modal - Only render when needed for performance */}
+      {editingEdge && (
+        <EdgeLabelModal 
+          edge={editingEdge}
+          isOpen={true}
+          onClose={() => setEditingEdge(null)}
+          onSave={saveEdgeLabel}
+        />
+      )}
 
       {/* Enhanced Auto-save Indicator */}
       {isSaving && (
