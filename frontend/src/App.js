@@ -2644,12 +2644,8 @@ const Dashboard = () => {
     event.preventDefault();
     event.stopPropagation();
     
-    // Cancel any pending single-click action
-    if (edge._clickTimeout) {
-      clearTimeout(edge._clickTimeout);
-      edge._clickTimeout = null;
-      console.log('Cancelled edge click due to double-click');
-    }
+    // Close any open modal first
+    setEditingEdge(null);
     
     console.log('Deleting edge:', edge);
     
