@@ -2473,7 +2473,16 @@ const Dashboard = () => {
       targetHandle: params.targetHandle, // CRITICAL: Preserve target handle
       type: 'smoothstep',
       style: { stroke: '#6B7280', strokeWidth: 2 },
-      label: '' // NEW: Add label property for edge labeling
+      label: '', // NEW: Add label property for edge labeling
+      labelStyle: { fill: '#374151', fontWeight: 500 }, // Add label styling
+      labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 }, // Add label background
+      labelBgPadding: [8, 4], // Add padding around label
+      labelShowBg: true, // Show background for label
+      labelBgBorderRadius: 4, // Rounded corners for label background
+      animated: false,
+      selectable: true,
+      focusable: true,
+      deletable: true
     };
     
     console.log('Complete edge object created:', newEdge);
