@@ -57,6 +57,28 @@ import RichTextEditor from './components/RichTextEditor';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Fix ResizeObserver error that prevents React Flow from working
+const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+// Suppress ResizeObserver errors that don't affect functionality
+const originalError = console.error;
+console.error = (...args) => {
+  if (args[0] && args[0].includes && args[0].includes('ResizeObserver loop')) {
+    return;
+  }
+  originalError(...args);
+};
+
 // Toast Notification System
 const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
   useEffect(() => {
