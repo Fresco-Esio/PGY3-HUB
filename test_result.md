@@ -304,12 +304,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix edge labeling functionality"
-    - "Fix edge click handlers"
-    - "Fix edge label display"
-    - "Fix connection creation"
-  stuck_tasks: 
-    - "Edge labeling functionality"
+    - "Fix programmatic connection system"
+    - "Test handle ID migration"
+    - "Test connection creation between nodes"
+    - "Verify connection persistence"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
