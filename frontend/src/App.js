@@ -2637,11 +2637,31 @@ const Dashboard = () => {
     });
   }, [isEditing, setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Edge click handler for opening label editing modal
+  // Edge click handler for opening label editing modal with double-click conflict prevention
   const onEdgeClick = useCallback((event, edge) => {
     console.log('Edge clicked:', edge);
-    setEditingEdge(edge);
+    
+    // Add delay to avoid conflict with double-click delete
+    const clickTimeout = setTimeout(() => {
+      console.log('Opening edge label modal after delay');
+      setEditingEdge(edge);
+    }, 250); // 250ms delay to allow double-click to cancel
+    
+    // Store timeout reference to allow cancellation by double-click
+    edge._clickTimeout = clickTimeout;
   }, []);
+
+  // Update double-click handler to cancel single-click
+  const onEdgeDoubleClick = useCallback((event, edge) => {
+    if (!isEditing) return;
+    
+    // Cancel any pending single-click action
+    if (edge._clickTimeout) {
+      clearTimeout(edge._clickTimeout);
+      edge._clickTimeout = null;
+    }
+    
+    console.log('Deleting edge:', edge);
 
   // Function to save edge label
   const saveEdgeLabel = useCallback((edgeId, newLabel) => {
