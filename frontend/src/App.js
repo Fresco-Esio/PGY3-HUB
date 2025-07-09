@@ -3532,6 +3532,7 @@ const Dashboard = () => {
           onEdgeDoubleClick={onEdgeDoubleClick}
           onInit={onReactFlowInit}
           nodeTypes={nodeTypes}
+          isValidConnection={() => true} // Allow connections between any handles
           fitView
           nodesDraggable={true}
           nodesConnectable={true} // Always allow connection creation for edge labeling
