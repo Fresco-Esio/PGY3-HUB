@@ -1040,10 +1040,10 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         return (
           <div key={field}>
             <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-            <textarea
-              value={fieldValue}
-              onChange={(e) => updateField(field, e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            <RichTextEditor
+              content={fieldValue}
+              onChange={(htmlContent) => updateField(field, htmlContent)}
+              placeholder={`Enter ${label.toLowerCase()}...`}
               rows={options.rows || 3}
             />
           </div>
