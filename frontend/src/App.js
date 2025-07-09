@@ -2369,6 +2369,77 @@ const Dashboard = () => {
     }, 100);
   };
 
+  // Programmatic connection handler
+  const handleNodeHandleClick = useCallback((nodeId, handleId) => {
+    console.log('Handle clicked:', nodeId, handleId);
+    
+    if (!startHandle) {
+      // Start a new connection
+      setStartHandle({ nodeId, handleId });
+      console.log('Connection started from:', nodeId, handleId);
+      addToast('Connection started - click another handle to complete', 'info', 2000);
+    } else {
+      // Complete the connection
+      const targetHandle = { nodeId, handleId };
+      
+      // Prevent self-connections
+      if (startHandle.nodeId === targetHandle.nodeId) {
+        console.log('Cannot connect node to itself');
+        addToast('Cannot connect a node to itself', 'error', 2000);
+        setStartHandle(null);
+        return;
+      }
+      
+      // Create new edge object
+      const newEdge = {
+        id: `edge-${Date.now()}`, // Unique ID
+        source: startHandle.nodeId,
+        target: targetHandle.nodeId,
+        sourceHandle: startHandle.handleId,
+        targetHandle: targetHandle.handleId,
+        type: 'smoothstep',
+        style: { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
+        label: '',
+        labelStyle: { fill: '#374151', fontWeight: 500 },
+        labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 },
+        labelBgPadding: [8, 4],
+        labelShowBg: true,
+        labelBgBorderRadius: 4,
+        animated: false,
+        selectable: true,
+        focusable: true,
+        deletable: true
+      };
+      
+      console.log('Creating connection:', newEdge);
+      
+      // Add edge to React Flow
+      addEdges([newEdge]);
+      
+      // Update mindMapData and trigger auto-save
+      setMindMapData(prevData => {
+        const newData = { ...prevData };
+        
+        // Ensure connections array exists
+        if (!newData.connections) {
+          newData.connections = [];
+        }
+        
+        // Add the new connection
+        newData.connections = [...newData.connections, newEdge];
+        
+        // Trigger auto-save
+        autoSaveMindMapData(newData);
+        addToast('Connection created and saved', 'success', 2000);
+        
+        return newData;
+      });
+      
+      // Reset connection state
+      setStartHandle(null);
+    }
+  }, [startHandle, addEdges, setMindMapData, autoSaveMindMapData, addToast]);
+
   // Memoized function to convert data to React Flow format
   const convertDataToReactFlow = (data, preserveCurrentPositions = false) => {
     const flowNodes = [];
