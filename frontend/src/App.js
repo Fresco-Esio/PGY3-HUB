@@ -2636,6 +2636,45 @@ const Dashboard = () => {
     });
   }, [isEditing, setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
+  // Edge click handler for opening label editing modal
+  const onEdgeClick = useCallback((event, edge) => {
+    console.log('Edge clicked:', edge);
+    setEditingEdge(edge);
+  }, []);
+
+  // Function to save edge label
+  const saveEdgeLabel = useCallback((edgeId, newLabel) => {
+    console.log('Saving edge label:', edgeId, newLabel);
+    
+    // Update the label in mindMapData.connections
+    setMindMapData(prevData => {
+      const newData = { ...prevData };
+      
+      // Ensure connections array exists
+      if (!newData.connections) {
+        newData.connections = [];
+      }
+      
+      // Find and update the connection
+      newData.connections = newData.connections.map(conn => 
+        conn.id === edgeId ? { ...conn, label: newLabel } : conn
+      );
+      
+      // Also update the React Flow edges state
+      setEdges(prev => prev.map(edge => 
+        edge.id === edgeId ? { ...edge, label: newLabel } : edge
+      ));
+      
+      console.log('Updated connection label in mindMapData');
+      
+      // Trigger auto-save
+      autoSaveMindMapData(newData);
+      addToast('Connection label updated', 'success', 2000);
+      
+      return newData;
+    });
+  }, [setMindMapData, setEdges, autoSaveMindMapData, addToast]);
+
   // Dagre layout configuration
   const getLayoutedElements = (nodes, edges, direction = 'TB') => {
     const dagreGraph = new dagre.graphlib.Graph();
