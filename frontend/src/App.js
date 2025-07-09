@@ -1799,8 +1799,8 @@ const Dashboard = () => {
         lit.title,
         lit.authors,
         lit.publication,
-        lit.abstract,
-        lit.notes,
+        stripHtml(lit.abstract), // Strip HTML from abstract
+        stripHtml(lit.notes), // Strip HTML from notes
         lit.year?.toString()
       ].join(' ').toLowerCase();
       
