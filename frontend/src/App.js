@@ -3498,9 +3498,12 @@ const Dashboard = () => {
           fitView
           nodesDraggable={true}
           nodesConnectable={true} // Always allow connection creation for edge labeling
-          edgesReconnectable={isEditing}
+          edgesReconnectable={false} // Disable edge reconnection to avoid conflicts
           edgesFocusable={true} // Always allow edge interaction for labeling
           elementsSelectable={true}
+          selectNodesOnDrag={false} // Improve connection creation experience
+          deleteKeyCode={['Delete', 'Backspace']} // Allow deletion with keyboard
+          multiSelectionKeyCode={['Control', 'Meta']} // Allow multi-selection
           className="bg-gradient-to-br from-slate-50 to-slate-100"
           defaultEdgeOptions={{
             type: 'smoothstep',
@@ -3510,7 +3513,10 @@ const Dashboard = () => {
               width: 15,
               height: 15,
               color: '#6B7280',
-            }
+            },
+            focusable: true,
+            selectable: true,
+            deletable: true
           }}
         >
           <Background color="#aaa" gap={16} />
