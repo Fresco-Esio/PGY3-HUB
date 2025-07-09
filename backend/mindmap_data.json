@@ -614,6 +614,38 @@
       "selectable": true,
       "focusable": true,
       "deletable": true
+    },
+    {
+      "id": "topic-0dcc0181-31c2-49a2-a0b7-17a130e67a30-literature-541fac83-c2fe-43d9-9418-84f160614049",
+      "source": "topic-0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "target": "literature-541fac83-c2fe-43d9-9418-84f160614049",
+      "sourceHandle": "source-left",
+      "targetHandle": "target-right",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
     }
   ]
 }
