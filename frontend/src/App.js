@@ -1091,6 +1091,21 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         );
       }
     } else {
+      // For textarea fields, render HTML content properly
+      if (type === 'textarea') {
+        return (
+          <div key={field}>
+            <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
+            <div 
+              className="text-gray-600 prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ 
+                __html: fieldValue || `<p>No ${label.toLowerCase()} available.</p>` 
+              }}
+            />
+          </div>
+        );
+      }
+      
       return (
         <div key={field}>
           <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
