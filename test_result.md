@@ -305,7 +305,9 @@ test_plan:
     - "Fix subpage loading issues"  
     - "Center new nodes in current view"
     - "Enhanced realign nodes with category columns"
-  stuck_tasks: []
+    - "Edge labeling functionality"
+  stuck_tasks: 
+    - "Edge labeling functionality"
   test_all: false
   test_priority: "high_first"
 
