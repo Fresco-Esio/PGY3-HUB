@@ -1755,6 +1755,21 @@ const Dashboard = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
+  // Helper function to strip HTML tags from content for search
+  const stripHtml = useCallback((html) => {
+    if (!html || typeof html !== 'string') return '';
+    
+    // Check if it contains HTML tags
+    if (!html.includes('<') || !html.includes('>')) {
+      return html; // Already plain text
+    }
+    
+    // Create a temporary div to parse HTML and extract text
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  }, []);
+
   // Global search filtering logic
   const filteredNodeIds = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -1768,7 +1783,7 @@ const Dashboard = () => {
     mindMapData.topics.forEach(topic => {
       const searchableText = [
         topic.title,
-        topic.description,
+        stripHtml(topic.description), // Strip HTML from description
         topic.category,
         ...(topic.resources?.map(r => r.title) || [])
       ].join(' ').toLowerCase();
