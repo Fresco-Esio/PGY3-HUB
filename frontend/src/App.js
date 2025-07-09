@@ -2429,13 +2429,26 @@ const Dashboard = () => {
       data.connections.forEach(connection => {
         console.log('Reconstructing edge:', connection);
         
+        // Handle migration: Convert old handle IDs to new simplified format
+        const migrateHandleId = (handleId) => {
+          if (!handleId) return null;
+          
+          // Convert old format (source-bottom, target-top) to new format (bottom, top)
+          if (handleId.startsWith('source-') || handleId.startsWith('target-')) {
+            return handleId.split('-')[1]; // Extract the position part
+          }
+          
+          // Already in new format
+          return handleId;
+        };
+        
         // Ensure all critical properties are preserved
         const reconstructedEdge = {
           id: connection.id,
           source: connection.source,
           target: connection.target,
-          sourceHandle: connection.sourceHandle, // CRITICAL: Preserve source handle
-          targetHandle: connection.targetHandle, // CRITICAL: Preserve target handle
+          sourceHandle: migrateHandleId(connection.sourceHandle), // CRITICAL: Migrate and preserve source handle
+          targetHandle: migrateHandleId(connection.targetHandle), // CRITICAL: Migrate and preserve target handle
           type: connection.type || 'smoothstep',
           style: connection.style || { stroke: '#6B7280', strokeWidth: 2 },
           label: connection.label || '', // NEW: Preserve edge label
