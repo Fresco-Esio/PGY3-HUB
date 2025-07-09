@@ -805,14 +805,14 @@ const LiteratureNode = ({ data, selected }) => {
         id="target-left"
         type="target" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '30%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-left"
         type="source" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '70%', transform: 'translateY(-50%)' }}
       />
       
@@ -821,14 +821,14 @@ const LiteratureNode = ({ data, selected }) => {
         id="target-right"
         type="target" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '30%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-right"
         type="source" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '70%', transform: 'translateY(-50%)' }}
       />
       
