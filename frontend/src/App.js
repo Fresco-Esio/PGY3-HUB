@@ -3473,7 +3473,7 @@ const Dashboard = () => {
           nodesDraggable={true}
           nodesConnectable={isEditing}
           edgesReconnectable={isEditing}
-          edgesFocusable={isEditing}
+          edgesFocusable={true} // Always allow edge interaction for labeling
           elementsSelectable={true}
           className="bg-gradient-to-br from-slate-50 to-slate-100"
           defaultEdgeOptions={{
