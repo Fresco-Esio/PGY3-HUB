@@ -301,11 +301,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix connection persistence during mode switches"
-    - "Fix subpage loading issues"  
-    - "Center new nodes in current view"
-    - "Enhanced realign nodes with category columns"
-    - "Edge labeling functionality"
+    - "Fix edge labeling functionality"
+    - "Fix edge click handlers"
+    - "Fix edge label display"
+    - "Fix connection creation"
   stuck_tasks: 
     - "Edge labeling functionality"
   test_all: false
