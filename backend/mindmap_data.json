@@ -256,6 +256,23 @@
       },
       "created_at": "2025-07-09T12:50:19.227000+00:00",
       "updated_at": "2025-07-09T12:50:19.227000+00:00"
+    },
+    {
+      "id": "17f7da9b-ab62-4b63-bce6-56ac566fadc1",
+      "title": "New Literature",
+      "authors": "New Author",
+      "publication": "New Publication",
+      "year": 2025,
+      "doi": null,
+      "abstract": null,
+      "notes": null,
+      "linked_topics": [],
+      "position": {
+        "x": 379.6605168127239,
+        "y": -32.45817752466564
+      },
+      "created_at": "2025-07-09T12:59:50.297000+00:00",
+      "updated_at": "2025-07-09T12:59:50.297000+00:00"
     }
   ],
   "connections": [
@@ -326,134 +343,6 @@
     {
       "id": "e9d38c4d9b84849ec9ad505df7c2f6fd8",
       "source": "some-id"
-    },
-    {
-      "id": "topic-d5c779b5-4f43-4028-898f-10847bba377d-literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
-      "source": "topic-d5c779b5-4f43-4028-898f-10847bba377d",
-      "target": "literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
-      "sourceHandle": "source-left",
-      "targetHandle": "target-right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#6B7280",
-        "strokeWidth": 2
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "topic-d5c779b5-4f43-4028-898f-10847bba377d-case-3361cea1-544d-4826-8b6a-361efb4bf589",
-      "source": "topic-d5c779b5-4f43-4028-898f-10847bba377d",
-      "target": "case-3361cea1-544d-4826-8b6a-361efb4bf589",
-      "sourceHandle": "source-bottom",
-      "targetHandle": "target-top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#6B7280",
-        "strokeWidth": 2
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "topic-d5c779b5-4f43-4028-898f-10847bba377d-case-1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "source": "topic-d5c779b5-4f43-4028-898f-10847bba377d",
-      "target": "case-1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "sourceHandle": "source-bottom",
-      "targetHandle": "target-top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#6B7280",
-        "strokeWidth": 2
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "topic-d5c779b5-4f43-4028-898f-10847bba377d-literature-ec0e1a31-2247-412e-b3a5-24d211206ace",
-      "source": "topic-d5c779b5-4f43-4028-898f-10847bba377d",
-      "target": "literature-ec0e1a31-2247-412e-b3a5-24d211206ace",
-      "sourceHandle": "source-left",
-      "targetHandle": "target-right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#6B7280",
-        "strokeWidth": 2
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
     },
     {
       "id": "case-3361cea1-544d-4826-8b6a-361efb4bf589-task-fa32e500-a4ec-4bfa-a040-26cb85747944",
@@ -621,6 +510,38 @@
       "target": "literature-541fac83-c2fe-43d9-9418-84f160614049",
       "sourceHandle": "source-left",
       "targetHandle": "target-right",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
+    },
+    {
+      "id": "topic-d5c779b5-4f43-4028-898f-10847bba377d-literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1",
+      "source": "topic-d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1",
+      "sourceHandle": "source-top",
+      "targetHandle": "target-bottom",
       "type": "smoothstep",
       "style": {
         "stroke": "#6B7280",

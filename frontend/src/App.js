@@ -386,11 +386,11 @@ const TopicNode = ({ data, selected }) => {
           : `0 4px 20px ${data.color || '#3B82F6'}20`
       }}
     >
-      {/* Enhanced Connection Handles - All positions have both source and target handles */}
+      {/* Enhanced Connection Handles - All handles set to 'source' for bidirectional connections */}
       {/* Top handles */}
       <Handle 
         id="target-top"
-        type="target" 
+        type="source" 
         position={Position.Top} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ left: '40%', transform: 'translateX(-50%)' }}
@@ -406,7 +406,7 @@ const TopicNode = ({ data, selected }) => {
       {/* Bottom handles */}
       <Handle 
         id="target-bottom"
-        type="target" 
+        type="source" 
         position={Position.Bottom} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ left: '40%', transform: 'translateX(-50%)' }}
@@ -422,7 +422,7 @@ const TopicNode = ({ data, selected }) => {
       {/* Left handles */}
       <Handle 
         id="target-left"
-        type="target" 
+        type="source" 
         position={Position.Left} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '40%', transform: 'translateY(-50%)' }}
@@ -438,7 +438,7 @@ const TopicNode = ({ data, selected }) => {
       {/* Right handles */}
       <Handle 
         id="target-right"
-        type="target" 
+        type="source" 
         position={Position.Right} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '40%', transform: 'translateY(-50%)' }}
