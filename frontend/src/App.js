@@ -2692,14 +2692,8 @@ const Dashboard = () => {
     event.preventDefault();
     event.stopPropagation();
     
-    // Add delay to avoid conflict with double-click delete
-    const clickTimeout = setTimeout(() => {
-      console.log('Opening edge label modal after delay');
-      setEditingEdge(edge);
-    }, 250); // 250ms delay to allow double-click to cancel
-    
-    // Store timeout reference to allow cancellation by double-click
-    edge._clickTimeout = clickTimeout;
+    // Simplified approach - open modal immediately but track double-click separately
+    setEditingEdge(edge);
   }, []);
 
   // Function to save edge label with improved state synchronization
