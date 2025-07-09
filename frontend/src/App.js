@@ -2420,7 +2420,8 @@ const Dashboard = () => {
           sourceHandle: connection.sourceHandle, // CRITICAL: Preserve source handle
           targetHandle: connection.targetHandle, // CRITICAL: Preserve target handle
           type: connection.type || 'smoothstep',
-          style: connection.style || { stroke: '#6B7280', strokeWidth: 2 }
+          style: connection.style || { stroke: '#6B7280', strokeWidth: 2 },
+          label: connection.label || '' // NEW: Preserve edge label
         };
         
         flowEdges.push(reconstructedEdge);
