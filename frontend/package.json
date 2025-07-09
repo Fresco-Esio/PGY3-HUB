@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@tiptap/react": "^2.25.0",
+    "@tiptap/starter-kit": "^2.25.0",
     "@types/dagre": "^0.7.52",
     "@types/react": "^19.1.8",
     "@xyflow/react": "^12.8.1",
