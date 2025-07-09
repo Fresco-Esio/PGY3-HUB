@@ -6,7 +6,7 @@ import os
 import time
 
 # Use localhost for testing the local JSON implementation
-BASE_URL = "http://localhost:8000/api"
+BASE_URL = "http://localhost:8001/api"
 
 class LocalBackendTester:
     def __init__(self, base_url):
