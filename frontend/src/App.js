@@ -786,11 +786,18 @@ const LiteratureNode = ({ data, selected }) => {
       
       {/* Bottom handles */}
       <Handle 
+        id="target-bottom"
+        type="target" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '40%', transform: 'translateX(-50%)' }}
+      />
+      <Handle 
         id="source-bottom"
         type="source" 
         position={Position.Bottom} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '60%', transform: 'translateX(-50%)' }}
       />
       
       {/* Left handles */}
