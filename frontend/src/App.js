@@ -1809,6 +1809,24 @@ const Dashboard = () => {
       }
     });
 
+    // Search through connection labels (NEW: Include edge labels in search)
+    mindMapData.connections?.forEach(conn => {
+      if (conn.label && conn.label.toLowerCase().includes(query)) {
+        // Add both connected nodes to matching results
+        const sourceNode = conn.source; // e.g., "topic-123"
+        const targetNode = conn.target; // e.g., "case-456"
+        
+        if (!matchingIds.includes(sourceNode)) {
+          matchingIds.push(sourceNode);
+        }
+        if (!matchingIds.includes(targetNode)) {
+          matchingIds.push(targetNode);
+        }
+        
+        console.log(`Found edge label match: "${conn.label}" connecting ${sourceNode} to ${targetNode}`);
+      }
+    });
+
     console.log(`Search "${query}" found ${matchingIds.length} matching nodes:`, matchingIds);
     return matchingIds;
   }, [searchQuery, mindMapData]);
