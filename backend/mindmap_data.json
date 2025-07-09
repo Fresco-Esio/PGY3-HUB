@@ -25,7 +25,7 @@
         }
       ],
       "created_at": "2025-07-03T12:57:16.350000",
-      "updated_at": "2025-07-08T23:50:37.968000+00:00"
+      "updated_at": "2025-07-03T12:57:16.350000"
     },
     {
       "id": "c1fa704c-6593-4acc-aedb-d90662d82660",
@@ -241,6 +241,19 @@
         "stroke": "#6B7280",
         "strokeWidth": 2
       }
+    },
+    {
+      "id": "case-58bec2f5-e38a-498a-b5f7-0cb8fcf02f24-literature-bb862846-b986-4706-9ec9-b82145b9f8a9",
+      "source": "case-58bec2f5-e38a-498a-b5f7-0cb8fcf02f24",
+      "target": "literature-bb862846-b986-4706-9ec9-b82145b9f8a9",
+      "sourceHandle": "source-bottom",
+      "targetHandle": "target-top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#6B7280",
+        "strokeWidth": 2
+      },
+      "label": ""
     }
   ]
 }
