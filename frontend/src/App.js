@@ -1616,6 +1616,81 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   );
 };
 
+// Edge Label Modal Component
+const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
+  const [label, setLabel] = useState(edge?.label || '');
+
+  // Update label when edge changes
+  useEffect(() => {
+    setLabel(edge?.label || '');
+  }, [edge]);
+
+  const handleSave = () => {
+    onSave(edge.id, label);
+    onClose();
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  if (!isOpen || !edge) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-gray-800">Edit Connection Label</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 p-1 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Connection Label
+          </label>
+          <input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Enter a label for this connection..."
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            autoFocus
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Press Enter to save, Escape to cancel
+          </p>
+        </div>
+        
+        <div className="flex items-center justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Save size={16} />
+            Save Label
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Enhanced Main Dashboard Component with improved visual effects
 const Dashboard = () => {
   const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
