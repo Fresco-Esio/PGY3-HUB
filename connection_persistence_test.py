@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # Use the public endpoint for testing
-BASE_URL = "https://d079a299-d109-44a5-8380-50d81d53784f.preview.emergentagent.com"
+BASE_URL = "https://fa1b7cf3-fa60-4e7f-ba81-f14611e9e147.preview.emergentagent.com"
 API_URL = f"{BASE_URL}/api"
 
 def test_connection_persistence():
