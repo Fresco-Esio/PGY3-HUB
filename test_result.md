@@ -141,6 +141,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "Specifically tested handle ID migration and compatibility. Created connections with both old format (source-bottom) and new format (bottom) handle IDs. Both formats are properly stored and retrieved. Connections with mixed handle ID formats can coexist in the system. Updating and deleting connections works correctly. Connections between different entity types (topics, cases, tasks, literature) are properly handled. Connection persistence is maintained across multiple requests. The backend successfully handles both handle ID formats gracefully as required."
+        - working: true
+          agent: "testing"
+          comment: "Verified backend API is still working correctly with the rich text editor changes. All tests passed successfully. The GET /api/mindmap-data endpoint correctly returns all data including topics, cases, tasks, literature, and connections. Data structures for all entity types are correct with proper position fields. The PUT /api/mindmap-data endpoint successfully updates and persists changes. Connection persistence is maintained with both old and new format handle IDs. Cross-entity connections work correctly. The backend API is fully functional and ready to support the frontend rich text editor changes."
 
 frontend:
   - task: "Fix programmatic connection system"
