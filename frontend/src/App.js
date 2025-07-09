@@ -1091,17 +1091,26 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         );
       }
     } else {
-      // For textarea fields, render HTML content properly
+      // For textarea fields, handle both HTML and plain text content
       if (type === 'textarea') {
+        const fieldContent = fieldValue || '';
+        const isHtml = fieldContent.includes('<') && fieldContent.includes('>');
+        
         return (
           <div key={field}>
             <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-            <div 
-              className="text-gray-600 prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ 
-                __html: fieldValue || `<p>No ${label.toLowerCase()} available.</p>` 
-              }}
-            />
+            {isHtml ? (
+              <div 
+                className="text-gray-600 prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ 
+                  __html: fieldContent || `<p>No ${label.toLowerCase()} available.</p>` 
+                }}
+              />
+            ) : (
+              <p className="text-gray-600 whitespace-pre-wrap">
+                {fieldContent || `No ${label.toLowerCase()} available.`}
+              </p>
+            )}
           </div>
         );
       }
