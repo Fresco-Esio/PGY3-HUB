@@ -3471,7 +3471,7 @@ const Dashboard = () => {
           nodeTypes={nodeTypes}
           fitView
           nodesDraggable={true}
-          nodesConnectable={isEditing}
+          nodesConnectable={true} // Always allow connection creation for edge labeling
           edgesReconnectable={isEditing}
           edgesFocusable={true} // Always allow edge interaction for labeling
           elementsSelectable={true}
