@@ -34,6 +34,7 @@ class LocalBackendTester:
         except Exception as e:
             self.test_results["failed"] += 1
             status = f"❌ ERROR: {str(e)}"
+            result = False
             
         self.test_results["details"].append({
             "name": name,
