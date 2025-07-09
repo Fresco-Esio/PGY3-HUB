@@ -3500,7 +3500,7 @@ const Dashboard = () => {
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
-          onEdgeClick={onEdgeClick} // NEW: Add edge click handler
+          onEdgeContextMenu={onEdgeContextMenu} // NEW: Add edge right-click handler
           onEdgeDoubleClick={onEdgeDoubleClick}
           onInit={onReactFlowInit}
           nodeTypes={nodeTypes}
