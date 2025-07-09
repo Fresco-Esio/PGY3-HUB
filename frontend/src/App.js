@@ -3593,9 +3593,10 @@ const Dashboard = () => {
               <div>• Click to select nodes</div>
               <div>• Double-click nodes to view details</div>
               <div>• Hover and drag to reposition</div>
-              <div>• Drag between connection handles to create connections</div>
+              <div>• Click connection handles to create connections</div>
               <div>• Right-click connections to edit labels</div>
               <div>• Double-click connections to delete</div>
+              <div>• Click empty space to cancel connection</div>
               <div>• Use "Realign Nodes" for auto layout</div>
               <div>• Zoom with mouse wheel</div>
             </div>
