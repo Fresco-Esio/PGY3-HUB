@@ -236,19 +236,22 @@ class LocalBackendTester:
             print(f"  Error testing invalid JSON: {e}")
             return False
         
-        # Test with missing required fields
-        incomplete_data = {
-            "topics": [],
-            # Missing other required fields
+        # Test with invalid data types
+        invalid_types = {
+            "topics": [{"id": 123, "title": "Invalid ID Type"}],  # ID should be string
+            "cases": [],
+            "tasks": [],
+            "literature": [],
+            "connections": []
         }
         try:
-            response = requests.put(f"{self.base_url}/mindmap-data", json=incomplete_data)
+            response = requests.put(f"{self.base_url}/mindmap-data", json=invalid_types)
             if response.status_code < 400:  # Should be a 4xx error
-                print(f"  Expected error status code for incomplete data, got {response.status_code}")
+                print(f"  Expected error status code for invalid data types, got {response.status_code}")
                 return False
-            print(f"  Server correctly rejected incomplete data with status {response.status_code}")
+            print(f"  Server correctly rejected invalid data types with status {response.status_code}")
         except Exception as e:
-            print(f"  Error testing incomplete data: {e}")
+            print(f"  Error testing invalid data types: {e}")
             return False
         
         return True
