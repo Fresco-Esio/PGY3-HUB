@@ -393,16 +393,30 @@ const TopicNode = ({ data, selected }) => {
         type="target" 
         position={Position.Top} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        style={{ left: '40%', transform: 'translateX(-50%)' }}
+      />
+      <Handle 
+        id="source-top"
+        type="source" 
+        position={Position.Top} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '60%', transform: 'translateX(-50%)' }}
       />
       
       {/* Bottom handles */}
+      <Handle 
+        id="target-bottom"
+        type="target" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '40%', transform: 'translateX(-50%)' }}
+      />
       <Handle 
         id="source-bottom"
         type="source" 
         position={Position.Bottom} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        style={{ left: '60%', transform: 'translateX(-50%)' }}
       />
       
       {/* Left handles */}
