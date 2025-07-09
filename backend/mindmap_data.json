@@ -1,259 +1,125 @@
 {
   "topics": [
     {
-      "id": "ddf247e8-c862-41c6-9797-f884cf3262e8",
-      "title": "Major Depressive Disorder",
-      "description": "Unipolar depression, treatment-resistant depression, and related mood disorders",
-      "category": "Mood Disorders",
-      "color": "#3B82F6",
-      "position": {
-        "x": 200.0,
-        "y": 100.0
-      },
-      "flashcard_count": 25,
-      "completed_flashcards": 18,
-      "resources": [
-        {
-          "title": "DSM-5-TR Criteria",
-          "url": "#",
-          "type": "reference"
-        },
-        {
-          "title": "Treatment Guidelines",
-          "url": "#",
-          "type": "guideline"
-        }
-      ],
-      "created_at": "2025-07-03T12:57:16.350000",
-      "updated_at": "2025-07-03T12:57:16.350000"
-    },
-    {
-      "id": "c1fa704c-6593-4acc-aedb-d90662d82660",
-      "title": "Schizophrenia Spectrum",
-      "description": "Schizophrenia, brief psychotic disorder, and delusional disorders",
-      "category": "Psychotic Disorders",
-      "color": "#DC2626",
+      "id": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "title": "Bulk Test Topic 070e65",
+      "description": "Testing bulk updates",
+      "category": "Test Category",
+      "color": "#3366FF",
       "position": {
         "x": -200.0,
-        "y": 150.0
+        "y": 100.0
       },
-      "flashcard_count": 30,
-      "completed_flashcards": 22,
-      "resources": [
-        {
-          "title": "Antipsychotic Guidelines",
-          "url": "#",
-          "type": "guideline"
-        }
-      ],
-      "created_at": "2025-07-03T12:57:16.351000",
-      "updated_at": "2025-07-03T12:57:16.351000"
-    },
-    {
-      "id": "e3743b43-293f-4a2f-bc37-c0d69a07a586",
-      "title": "Anxiety Disorders",
-      "description": "GAD, panic disorder, phobias, and anxiety management",
-      "category": "Anxiety Disorders",
-      "color": "#059669",
-      "position": {
-        "x": 0.0,
-        "y": -150.0
-      },
-      "flashcard_count": 20,
-      "completed_flashcards": 15,
+      "flashcard_count": 3,
+      "completed_flashcards": 1,
       "resources": [],
-      "created_at": "2025-07-03T12:57:16.352000",
-      "updated_at": "2025-07-03T12:57:16.352000"
+      "created_at": "2025-07-09T03:28:16.978496",
+      "updated_at": "2025-07-09T03:28:16.978502"
     }
   ],
   "cases": [
     {
-      "id": "0139538f-5e11-455a-be19-0718a4cfed51",
-      "case_id": "CASE-001",
-      "encounter_date": "2024-03-15T00:00:00",
-      "primary_diagnosis": "Major Depressive Disorder, Severe",
-      "secondary_diagnoses": [
-        "Generalized Anxiety Disorder"
-      ],
-      "age": 34,
-      "gender": "Female",
-      "chief_complaint": "I can't get out of bed anymore",
-      "history_present_illness": "34-year-old female with 3-month history of worsening depression",
-      "medical_history": "Hypertension, no prior psychiatric history",
-      "medications": [
-        "Sertraline 50mg daily",
-        "Lisinopril 10mg daily"
-      ],
-      "mental_status_exam": "Depressed mood, restricted affect, no SI/HI",
-      "assessment_plan": "Increase sertraline to 100mg, CBT referral",
-      "notes": "Good insight and judgment, strong family support",
-      "status": "active",
-      "linked_topics": [
-        "ddf247e8-c862-41c6-9797-f884cf3262e8"
-      ],
-      "position": {
-        "x": 300.0,
-        "y": 200.0
-      },
-      "created_at": "2025-07-03T12:57:16.354000",
-      "updated_at": "2025-07-03T12:57:16.354000"
-    },
-    {
-      "id": "58bec2f5-e38a-498a-b5f7-0cb8fcf02f24",
-      "case_id": "CASE-002",
-      "encounter_date": "2024-03-10T00:00:00",
-      "primary_diagnosis": "Schizophrenia, Paranoid Type",
+      "id": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "case_id": "BULK-FEFE8F",
+      "encounter_date": "2025-07-09T03:28:16.978516",
+      "primary_diagnosis": "Bulk Test Diagnosis",
       "secondary_diagnoses": [],
-      "age": 28,
-      "gender": "Male",
-      "chief_complaint": "They're watching me through the cameras",
-      "history_present_illness": "28-year-old male with 2-week history of paranoid delusions",
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Bulk test complaint",
+      "history_present_illness": null,
       "medical_history": null,
-      "medications": [
-        "Risperidone 2mg BID"
-      ],
-      "mental_status_exam": "Paranoid delusions, auditory hallucinations present",
-      "assessment_plan": "Increase risperidone, social work consultation",
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
       "notes": null,
       "status": "active",
-      "linked_topics": [
-        "c1fa704c-6593-4acc-aedb-d90662d82660"
-      ],
+      "linked_topics": [],
       "position": {
         "x": -300.0,
-        "y": 250.0
+        "y": 200.0
       },
-      "created_at": "2025-07-03T12:57:16.355000",
-      "updated_at": "2025-07-03T12:57:16.355000"
+      "created_at": "2025-07-09T03:28:16.978518",
+      "updated_at": "2025-07-09T03:28:16.978519"
     }
   ],
   "tasks": [
     {
-      "id": "1e7b1a22-dc03-4745-bf0a-e5da49da5053",
-      "title": "Review MDD treatment guidelines",
-      "description": "Read updated APA guidelines for treatment-resistant depression",
+      "id": "10246319-e1e6-4032-9acd-3725b1d85c45",
+      "title": "Datetime Test Task ba2cb5",
+      "description": "Testing datetime handling",
       "status": "pending",
       "priority": "high",
-      "due_date": "2024-03-20T00:00:00",
+      "due_date": "2025-07-09T03:28:16.969560",
       "linked_case_id": null,
-      "linked_topic_id": "ddf247e8-c862-41c6-9797-f884cf3262e8",
-      "position": {
-        "x": 400.0,
-        "y": 50.0
-      },
-      "created_at": "2025-07-03T12:57:16.355000",
-      "updated_at": "2025-07-03T12:57:16.355000"
-    },
-    {
-      "id": "bb2493e7-93e4-4c09-b4af-60cde7970b05",
-      "title": "Follow up with CASE-001",
-      "description": "Check medication compliance and side effects",
-      "status": "pending",
-      "priority": "medium",
-      "due_date": "2024-03-22T00:00:00",
-      "linked_case_id": "0139538f-5e11-455a-be19-0718a4cfed51",
       "linked_topic_id": null,
       "position": {
-        "x": 450.0,
-        "y": 300.0
+        "x": 400.0,
+        "y": 200.0
       },
-      "created_at": "2025-07-03T12:57:16.356000",
-      "updated_at": "2025-07-03T12:57:16.356000"
+      "created_at": "2025-07-09T03:28:16.969568",
+      "updated_at": "2025-07-09T03:28:16.969569"
     },
     {
-      "id": "57d04233-c52d-4475-9dfe-a6444d867f32",
-      "title": "Study antipsychotic mechanisms",
-      "description": "Review D2 receptor blockade and side effect profiles",
+      "id": "fa32e500-a4ec-4bfa-a040-26cb85747944",
+      "title": "Bulk Test Task c1f0b7",
+      "description": "Testing bulk updates",
       "status": "pending",
       "priority": "medium",
       "due_date": null,
       "linked_case_id": null,
-      "linked_topic_id": "c1fa704c-6593-4acc-aedb-d90662d82660",
+      "linked_topic_id": null,
       "position": {
         "x": -400.0,
-        "y": 100.0
+        "y": 300.0
       },
-      "created_at": "2025-07-03T12:57:16.357000",
-      "updated_at": "2025-07-03T12:57:16.357000"
+      "created_at": "2025-07-09T03:28:16.978546",
+      "updated_at": "2025-07-09T03:28:16.978549"
     }
   ],
   "literature": [
     {
-      "id": "bb1927af-2fb7-4ae7-9e32-37a8a4d043ee",
-      "title": "Efficacy of CBT in Major Depression",
-      "authors": "Beck, A.T., Rush, A.J.",
-      "publication": "Archives of General Psychiatry",
-      "year": 2021,
+      "id": "ec0e1a31-2247-412e-b3a5-24d211206ace",
+      "title": "Bulk Test Literature d478a5",
+      "authors": "Bulk Test Author",
+      "publication": null,
+      "year": 2025,
       "doi": null,
-      "abstract": "Comprehensive review of cognitive behavioral therapy effectiveness",
-      "notes": "Key study for MDD treatment protocols",
-      "linked_topics": [
-        "ddf247e8-c862-41c6-9797-f884cf3262e8"
-      ],
+      "abstract": null,
+      "notes": null,
+      "linked_topics": [],
       "position": {
-        "x": 100.0,
-        "y": -100.0
+        "x": -500.0,
+        "y": 400.0
       },
-      "created_at": "2025-07-03T12:57:16.358000",
-      "updated_at": "2025-07-03T12:57:16.358000"
-    },
-    {
-      "id": "bb862846-b986-4706-9ec9-b82145b9f8a9",
-      "title": "Antipsychotic Treatment Guidelines",
-      "authors": "American Psychiatric Association",
-      "publication": "APA Guidelines",
-      "year": 2022,
-      "doi": null,
-      "abstract": "Updated guidelines for antipsychotic medication management",
-      "notes": "Essential reference for schizophrenia treatment",
-      "linked_topics": [
-        "c1fa704c-6593-4acc-aedb-d90662d82660"
-      ],
-      "position": {
-        "x": -100.0,
-        "y": -50.0
-      },
-      "created_at": "2025-07-03T12:57:16.359000",
-      "updated_at": "2025-07-03T12:57:16.359000"
+      "created_at": "2025-07-09T03:28:16.978558",
+      "updated_at": "2025-07-09T03:28:16.978560"
     }
   ],
   "connections": [
     {
-      "id": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586-task-57d04233-c52d-4475-9dfe-a6444d867f32",
-      "source": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586",
-      "target": "task-57d04233-c52d-4475-9dfe-a6444d867f32",
-      "sourceHandle": "source-bottom",
-      "targetHandle": "target-top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#6B7280",
-        "strokeWidth": 2
-      }
+      "id": "ee633399ba0604d15b454a78d17e0349b",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Topic-Case Connection"
     },
     {
-      "id": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586-topic-ddf247e8-c862-41c6-9797-f884cf3262e8",
-      "source": "topic-e3743b43-293f-4a2f-bc37-c0d69a07a586",
-      "target": "topic-ddf247e8-c862-41c6-9797-f884cf3262e8",
-      "sourceHandle": "source-right",
-      "targetHandle": "target-top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#6B7280",
-        "strokeWidth": 2
-      }
+      "id": "ec1df06d203c24353aa2384aeec8c234c",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "ec0e1a31-2247-412e-b3a5-24d211206ace",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Topic-Literature Connection"
     },
     {
-      "id": "case-58bec2f5-e38a-498a-b5f7-0cb8fcf02f24-literature-bb862846-b986-4706-9ec9-b82145b9f8a9",
-      "source": "case-58bec2f5-e38a-498a-b5f7-0cb8fcf02f24",
-      "target": "literature-bb862846-b986-4706-9ec9-b82145b9f8a9",
-      "sourceHandle": "source-bottom",
-      "targetHandle": "target-top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#6B7280",
-        "strokeWidth": 2
-      },
-      "label": ""
+      "id": "e1fa5ced8bd6140059d5c079bee12c9f2",
+      "source": "fa32e500-a4ec-4bfa-a040-26cb85747944",
+      "target": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "top",
+      "targetHandle": "bottom",
+      "label": "Task-Topic Connection"
     }
   ]
 }
