@@ -2800,7 +2800,7 @@ const Dashboard = () => {
         sourceHandle: startHandle.handleId,
         targetHandle: targetHandle.handleId,
         type: 'smoothstep',
-        style: { stroke: '#6B7280', strokeWidth: 2 },
+        style: { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
         label: '',
         labelStyle: { fill: '#374151', fontWeight: 500 },
         labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 },
