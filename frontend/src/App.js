@@ -2509,6 +2509,13 @@ const Dashboard = () => {
     }
 
     console.log(`convertDataToReactFlow completed: ${flowNodes.length} nodes, ${flowEdges.length} edges`);
+    
+    // Add connection loading debug info
+    if (flowEdges.length > 0) {
+      console.log('Sample edge styles:', flowEdges[0].style);
+      console.log('All edge IDs:', flowEdges.map(e => e.id));
+    }
+    
     setNodes(flowNodes);
     setEdges(flowEdges);
   };
