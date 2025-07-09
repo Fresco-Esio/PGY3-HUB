@@ -2664,6 +2664,10 @@ const Dashboard = () => {
   const onEdgeClick = useCallback((event, edge) => {
     console.log('Edge clicked:', edge);
     
+    // Prevent default to avoid other interactions
+    event.preventDefault();
+    event.stopPropagation();
+    
     // Add delay to avoid conflict with double-click delete
     const clickTimeout = setTimeout(() => {
       console.log('Opening edge label modal after delay');
