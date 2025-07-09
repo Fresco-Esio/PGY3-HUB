@@ -2620,8 +2620,6 @@ const Dashboard = () => {
 
   // Function to handle edge deletion in edit mode
   const onEdgeDoubleClick = useCallback((event, edge) => {
-    if (!isEditing) return;
-    
     // Cancel any pending single-click action
     if (edge._clickTimeout) {
       clearTimeout(edge._clickTimeout);
