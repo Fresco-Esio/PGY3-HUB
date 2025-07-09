@@ -15,6 +15,38 @@
       "resources": [],
       "created_at": "2025-07-09T03:28:16.978496",
       "updated_at": "2025-07-09T03:28:16.978502"
+    },
+    {
+      "id": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "title": "Test Topic 1742ed",
+      "description": "A test topic created by the test script",
+      "category": "Test Category",
+      "color": "#FF5733",
+      "position": {
+        "x": 500.0,
+        "y": 300.0
+      },
+      "flashcard_count": 5,
+      "completed_flashcards": 2,
+      "resources": [],
+      "created_at": "2025-07-09T03:28:36.173440",
+      "updated_at": "2025-07-09T03:28:36.173458"
+    },
+    {
+      "id": "04a7c0d1-29ac-424d-925b-4b660fb10eee",
+      "title": "Bulk Test Topic bea3c1",
+      "description": "Testing bulk updates",
+      "category": "Test Category",
+      "color": "#3366FF",
+      "position": {
+        "x": -200.0,
+        "y": 100.0
+      },
+      "flashcard_count": 3,
+      "completed_flashcards": 1,
+      "resources": [],
+      "created_at": "2025-07-09T03:28:36.246667",
+      "updated_at": "2025-07-09T03:28:36.246674"
     }
   ],
   "cases": [
@@ -41,6 +73,30 @@
       },
       "created_at": "2025-07-09T03:28:16.978518",
       "updated_at": "2025-07-09T03:28:16.978519"
+    },
+    {
+      "id": "1732b75e-1da6-4c6e-a237-e7f88a451164",
+      "case_id": "BULK-EAC513",
+      "encounter_date": "2025-07-09T03:28:36.246687",
+      "primary_diagnosis": "Bulk Test Diagnosis",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Bulk test complaint",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": -300.0,
+        "y": 200.0
+      },
+      "created_at": "2025-07-09T03:28:36.246689",
+      "updated_at": "2025-07-09T03:28:36.246690"
     }
   ],
   "tasks": [
@@ -75,6 +131,38 @@
       },
       "created_at": "2025-07-09T03:28:16.978546",
       "updated_at": "2025-07-09T03:28:16.978549"
+    },
+    {
+      "id": "ced95f63-0c7c-4af2-8c87-047bf4f9cdef",
+      "title": "Datetime Test Task fd0e3a",
+      "description": "Testing datetime handling",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2025-07-09T03:28:36.206291",
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "position": {
+        "x": 400.0,
+        "y": 200.0
+      },
+      "created_at": "2025-07-09T03:28:36.206299",
+      "updated_at": "2025-07-09T03:28:36.206300"
+    },
+    {
+      "id": "b9a4da6b-c731-48de-8557-95d8f4fc7ff2",
+      "title": "Bulk Test Task a42748",
+      "description": "Testing bulk updates",
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "position": {
+        "x": -400.0,
+        "y": 300.0
+      },
+      "created_at": "2025-07-09T03:28:36.246700",
+      "updated_at": "2025-07-09T03:28:36.246701"
     }
   ],
   "literature": [
@@ -94,6 +182,23 @@
       },
       "created_at": "2025-07-09T03:28:16.978558",
       "updated_at": "2025-07-09T03:28:16.978560"
+    },
+    {
+      "id": "181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
+      "title": "Bulk Test Literature 481058",
+      "authors": "Bulk Test Author",
+      "publication": null,
+      "year": 2025,
+      "doi": null,
+      "abstract": null,
+      "notes": null,
+      "linked_topics": [],
+      "position": {
+        "x": -500.0,
+        "y": 400.0
+      },
+      "created_at": "2025-07-09T03:28:36.246710",
+      "updated_at": "2025-07-09T03:28:36.246712"
     }
   ],
   "connections": [
@@ -117,6 +222,38 @@
       "id": "e1fa5ced8bd6140059d5c079bee12c9f2",
       "source": "fa32e500-a4ec-4bfa-a040-26cb85747944",
       "target": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "top",
+      "targetHandle": "bottom",
+      "label": "Task-Topic Connection"
+    },
+    {
+      "id": "e723219e85f6a41218a6283ee52d0f13c",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Test Connection"
+    },
+    {
+      "id": "e8370994ac94445c9ae7c20ee63ffb962",
+      "source": "04a7c0d1-29ac-424d-925b-4b660fb10eee",
+      "target": "1732b75e-1da6-4c6e-a237-e7f88a451164",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Topic-Case Connection"
+    },
+    {
+      "id": "e942ab5649052456a841f2f89924c8b02",
+      "source": "04a7c0d1-29ac-424d-925b-4b660fb10eee",
+      "target": "181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Topic-Literature Connection"
+    },
+    {
+      "id": "e860d0f77b3e143e5898383af97ed2dd3",
+      "source": "b9a4da6b-c731-48de-8557-95d8f4fc7ff2",
+      "target": "04a7c0d1-29ac-424d-925b-4b660fb10eee",
       "sourceHandle": "top",
       "targetHandle": "bottom",
       "label": "Task-Topic Connection"
