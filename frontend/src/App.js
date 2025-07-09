@@ -2366,7 +2366,8 @@ const Dashboard = () => {
       sourceHandle: params.sourceHandle, // CRITICAL: Preserve source handle
       targetHandle: params.targetHandle, // CRITICAL: Preserve target handle
       type: 'smoothstep',
-      style: { stroke: '#6B7280', strokeWidth: 2 }
+      style: { stroke: '#6B7280', strokeWidth: 2 },
+      label: '' // NEW: Add label property for edge labeling
     };
     
     console.log('Complete edge object created:', newEdge);
