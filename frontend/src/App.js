@@ -848,14 +848,14 @@ const LiteratureNode = ({ data, selected }) => {
         type="source" 
         position={Position.Left} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
-        style={{ top: '30%', transform: 'translateY(-50%)' }}
+        style={{ top: '40%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-left"
         type="source" 
         position={Position.Left} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
-        style={{ top: '70%', transform: 'translateY(-50%)' }}
+        style={{ top: '60%', transform: 'translateY(-50%)' }}
       />
       
       {/* Right handles */}
@@ -864,14 +864,14 @@ const LiteratureNode = ({ data, selected }) => {
         type="source" 
         position={Position.Right} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
-        style={{ top: '30%', transform: 'translateY(-50%)' }}
+        style={{ top: '40%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-right"
         type="source" 
         position={Position.Right} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
-        style={{ top: '70%', transform: 'translateY(-50%)' }}
+        style={{ top: '60%', transform: 'translateY(-50%)' }}
       />
       
       <div className="flex items-center gap-2 mb-1">
