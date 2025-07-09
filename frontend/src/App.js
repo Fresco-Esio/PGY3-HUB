@@ -3617,7 +3617,7 @@ const Dashboard = () => {
               type: 'arrowclosed',
               width: 15,
               height: 15,
-              color: '#6B7280',
+              color: '#2563eb', // Changed to blue for consistency
             },
             focusable: true,
             selectable: true,
