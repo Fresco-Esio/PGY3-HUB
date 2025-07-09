@@ -2640,9 +2640,11 @@ const Dashboard = () => {
   const onEdgeDoubleClick = useCallback((event, edge) => {
     console.log('Edge double-clicked:', edge);
     
-    // Prevent default to avoid other interactions
-    event.preventDefault();
-    event.stopPropagation();
+    // Clear any pending single-click timeout
+    if (edge._clickTimeout) {
+      clearTimeout(edge._clickTimeout);
+      edge._clickTimeout = null;
+    }
     
     // Close any open modal first
     setEditingEdge(null);
