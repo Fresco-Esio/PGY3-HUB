@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Toolbar from './Toolbar';
 
 const RichTextEditor = ({ content, onChange, placeholder, rows = 3 }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   const editor = useEditor({
     extensions: [StarterKit],
-    content: content || '',
+    content: '',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onChange(html);
@@ -17,14 +19,31 @@ const RichTextEditor = ({ content, onChange, placeholder, rows = 3 }) => {
         style: `min-height: ${rows * 1.5}rem;`,
       },
     },
+    onCreate: () => {
+      setIsInitialized(true);
+    },
   });
 
-  // Update editor content when content prop changes
+  // Safely update editor content when content prop changes
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content || '');
+    if (editor && isInitialized) {
+      const currentContent = editor.getHTML();
+      const newContent = content || '<p></p>';
+      
+      // Only update if content actually changed and avoid loops
+      if (currentContent !== newContent) {
+        editor.commands.setContent(newContent, false);
+      }
     }
-  }, [content, editor]);
+  }, [content, editor, isInitialized]);
+
+  if (!editor) {
+    return (
+      <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 animate-pulse" style={{minHeight: `${rows * 1.5}rem`}}>
+        <div className="text-gray-400 text-sm">Loading editor...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="rich-text-editor">
