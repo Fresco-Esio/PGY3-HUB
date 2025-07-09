@@ -614,6 +614,53 @@
       "sourceHandle": "bottom",
       "targetHandle": "top",
       "label": "Malformed Connection"
+    },
+    {
+      "id": "eacd30e9408744eefbe4d8eab51311751",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "sourceHandle": "d5c779b5-4f43-4028-898f-10847bba377d-bottom",
+      "targetHandle": "0dcc0181-31c2-49a2-a0b7-17a130e67a30-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e6d6c512f90764c7abe4aac0525f832e4",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Topic-Case Connection"
+    },
+    {
+      "id": "e975c60afe26c48dc9a431119a33af7cd",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "ec0e1a31-2247-412e-b3a5-24d211206ace",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Topic-Literature Connection"
+    },
+    {
+      "id": "ea30a97542a804d179b77b8a8b86ce282",
+      "source": "10246319-e1e6-4032-9acd-3725b1d85c45",
+      "target": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Task-Topic Connection"
+    },
+    {
+      "id": "e940cb632fdff49aead2034262b6ee3c5",
+      "source": "10246319-e1e6-4032-9acd-3725b1d85c45",
+      "target": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Task-Case Connection"
+    },
+    {
+      "id": "ef50ab62dee734fc9b29523ee441c9f8c",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
     }
   ]
 }
