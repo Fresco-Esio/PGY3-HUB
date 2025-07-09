@@ -2658,19 +2658,7 @@ const Dashboard = () => {
     edge._clickTimeout = clickTimeout;
   }, []);
 
-  // Update double-click handler to cancel single-click
-  const onEdgeDoubleClick = useCallback((event, edge) => {
-    if (!isEditing) return;
-    
-    // Cancel any pending single-click action
-    if (edge._clickTimeout) {
-      clearTimeout(edge._clickTimeout);
-      edge._clickTimeout = null;
-    }
-    
-    console.log('Deleting edge:', edge);
-
-  // Function to save edge label
+  // Function to save edge label with improved state synchronization
   const saveEdgeLabel = useCallback((edgeId, newLabel) => {
     console.log('Saving edge label:', edgeId, newLabel);
     
