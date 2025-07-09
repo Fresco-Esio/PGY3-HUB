@@ -563,23 +563,37 @@ const CaseNode = ({ data, selected }) => {
           : 'border-gray-200 hover:border-blue-300 hover:ring-2 hover:ring-blue-100'
       } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''}`}
     >
-      {/* Enhanced Connection Handles - Multiple handles for flexible connections */}
+      {/* Enhanced Connection Handles - All positions have both source and target handles */}
       {/* Top handles */}
       <Handle 
         id="target-top"
         type="target" 
         position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '40%', transform: 'translateX(-50%)' }}
+      />
+      <Handle 
+        id="source-top"
+        type="source" 
+        position={Position.Top} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '60%', transform: 'translateX(-50%)' }}
       />
       
       {/* Bottom handles */}
       <Handle 
+        id="target-bottom"
+        type="target" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '40%', transform: 'translateX(-50%)' }}
+      />
+      <Handle 
         id="source-bottom"
         type="source" 
         position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '60%', transform: 'translateX(-50%)' }}
       />
       
       {/* Left handles */}
@@ -587,15 +601,15 @@ const CaseNode = ({ data, selected }) => {
         id="target-left"
         type="target" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '30%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '40%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-left"
         type="source" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '70%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '60%', transform: 'translateY(-50%)' }}
       />
       
       {/* Right handles */}
@@ -603,15 +617,15 @@ const CaseNode = ({ data, selected }) => {
         id="target-right"
         type="target" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '30%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '40%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-right"
         type="source" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '70%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '60%', transform: 'translateY(-50%)' }}
       />
       
       {/* Urgency indicator */}
