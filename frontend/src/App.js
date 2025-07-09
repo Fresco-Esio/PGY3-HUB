@@ -2620,6 +2620,12 @@ const Dashboard = () => {
 
   // Function to handle edge deletion in edit mode
   const onEdgeDoubleClick = useCallback((event, edge) => {
+    console.log('Edge double-clicked:', edge);
+    
+    // Prevent default to avoid other interactions
+    event.preventDefault();
+    event.stopPropagation();
+    
     // Cancel any pending single-click action
     if (edge._clickTimeout) {
       clearTimeout(edge._clickTimeout);
@@ -2658,7 +2664,7 @@ const Dashboard = () => {
       
       return newData;
     });
-  }, [isEditing, setEdges, setMindMapData, autoSaveMindMapData, addToast]);
+  }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
   // Edge click handler for opening label editing modal with double-click conflict prevention
   const onEdgeClick = useCallback((event, edge) => {
