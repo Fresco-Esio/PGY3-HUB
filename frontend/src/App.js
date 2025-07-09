@@ -2395,7 +2395,8 @@ const Dashboard = () => {
           diagnosis: caseItem.primary_diagnosis,
           age: caseItem.age,
           originalData: caseItem,
-          onDelete: () => deleteNode(caseItem.id, 'case') // Always available, not just in edit mode
+          onDelete: () => deleteNode(caseItem.id, 'case'), // Always available, not just in edit mode
+          onHandleClick: handleNodeHandleClick // Add handle click handler
         }
       });
     });
