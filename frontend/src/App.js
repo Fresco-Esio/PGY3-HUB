@@ -3612,7 +3612,7 @@ const Dashboard = () => {
           className="bg-gradient-to-br from-slate-50 to-slate-100"
           defaultEdgeOptions={{
             type: 'smoothstep',
-            style: { strokeWidth: 2, stroke: '#6B7280' },
+            style: { strokeWidth: 3, stroke: '#2563eb' }, // Changed to blue and thicker for better visibility
             markerEnd: {
               type: 'arrowclosed',
               width: 15,
