@@ -47,6 +47,22 @@
       "resources": [],
       "created_at": "2025-07-09T03:28:36.246667",
       "updated_at": "2025-07-09T03:28:36.246674"
+    },
+    {
+      "id": "8f681cee-e689-43c9-89e1-31efadbd4e04",
+      "title": "Test Topic 5f9ded",
+      "description": "Updated description for PUT test",
+      "category": "Test Category",
+      "color": "#FF5733",
+      "position": {
+        "x": 500.0,
+        "y": 300.0
+      },
+      "flashcard_count": 5,
+      "completed_flashcards": 2,
+      "resources": [],
+      "created_at": "2025-07-09T03:29:51.009332",
+      "updated_at": "2025-07-09T03:29:51.009339"
     }
   ],
   "cases": [
@@ -257,6 +273,18 @@
       "sourceHandle": "top",
       "targetHandle": "bottom",
       "label": "Task-Topic Connection"
+    },
+    {
+      "id": "ed5ef6fe549504555a5771c49c3ba34f4",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Updated Connection Label"
+    },
+    {
+      "id": "e9d38c4d9b84849ec9ad505df7c2f6fd8",
+      "source": "some-id"
     }
   ]
 }
