@@ -239,6 +239,23 @@
       },
       "created_at": "2025-07-09T03:28:36.246710",
       "updated_at": "2025-07-09T03:28:36.246712"
+    },
+    {
+      "id": "541fac83-c2fe-43d9-9418-84f160614049",
+      "title": "New Literature",
+      "authors": "New Author",
+      "publication": "New Publication",
+      "year": 2025,
+      "doi": null,
+      "abstract": null,
+      "notes": null,
+      "linked_topics": [],
+      "position": {
+        "x": 135.3342584689748,
+        "y": 850.6415684173725
+      },
+      "created_at": "2025-07-09T12:50:19.227000+00:00",
+      "updated_at": "2025-07-09T12:50:19.227000+00:00"
     }
   ],
   "connections": [
