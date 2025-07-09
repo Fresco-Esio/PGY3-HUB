@@ -2684,12 +2684,18 @@ const Dashboard = () => {
   const onEdgeClick = useCallback((event, edge) => {
     console.log('Edge clicked:', edge);
     
-    // Prevent default to avoid other interactions
-    event.preventDefault();
-    event.stopPropagation();
+    // Use setTimeout to differentiate between single click and double click
+    if (edge._clickTimeout) {
+      clearTimeout(edge._clickTimeout);
+      edge._clickTimeout = null;
+      return; // This is part of a double-click, ignore single-click
+    }
     
-    // Simplified approach - open modal immediately but track double-click separately
-    setEditingEdge(edge);
+    edge._clickTimeout = setTimeout(() => {
+      console.log('Opening edge label modal after single-click confirmation');
+      setEditingEdge(edge);
+      edge._clickTimeout = null;
+    }, 300); // Wait 300ms to see if a double-click occurs
   }, []);
 
   // Function to save edge label with improved state synchronization
