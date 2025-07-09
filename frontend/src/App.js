@@ -3532,10 +3532,10 @@ const Dashboard = () => {
           onEdgeDoubleClick={onEdgeDoubleClick}
           onInit={onReactFlowInit}
           nodeTypes={nodeTypes}
-          isValidConnection={() => true} // Allow connections between any handles
+          onPaneClick={() => setStartHandle(null)} // Reset connection start on pane click
           fitView
           nodesDraggable={true}
-          nodesConnectable={true} // Always allow connection creation for edge labeling
+          nodesConnectable={false} // Disable default drag connections
           edgesReconnectable={false} // Disable edge reconnection to avoid conflicts
           edgesFocusable={true} // Always allow edge interaction for labeling
           elementsSelectable={true}
