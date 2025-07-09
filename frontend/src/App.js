@@ -2490,7 +2490,7 @@ const Dashboard = () => {
           sourceHandle: migrateHandleId(connection.sourceHandle), // CRITICAL: Migrate and preserve source handle
           targetHandle: migrateHandleId(connection.targetHandle), // CRITICAL: Migrate and preserve target handle
           type: connection.type || 'smoothstep',
-          style: connection.style || { stroke: '#6B7280', strokeWidth: 2 },
+          style: connection.style || { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
           label: connection.label || '', // NEW: Preserve edge label
           labelStyle: { fill: '#374151', fontWeight: 500 }, // Add label styling
           labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 }, // Add label background
