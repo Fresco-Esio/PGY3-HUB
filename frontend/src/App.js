@@ -2353,7 +2353,8 @@ const Dashboard = () => {
           flashcard_count: topic.flashcard_count,
           completed_flashcards: topic.completed_flashcards,
           originalData: topic,
-          onDelete: () => deleteNode(topic.id, 'topic') // Always available, not just in edit mode
+          onDelete: () => deleteNode(topic.id, 'topic'), // Always available, not just in edit mode
+          onHandleClick: handleNodeHandleClick // Add handle click handler
         }
       });
     });
