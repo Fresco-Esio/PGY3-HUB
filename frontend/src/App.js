@@ -2664,15 +2664,9 @@ const Dashboard = () => {
     setSubpageData(null);
   }, []);
 
-  // Function to handle edge deletion in edit mode
+  // Edge double-click handler for deletion (no conflict with right-click)
   const onEdgeDoubleClick = useCallback((event, edge) => {
     console.log('Edge double-clicked:', edge);
-    
-    // Clear any pending single-click timeout
-    if (edge._clickTimeout) {
-      clearTimeout(edge._clickTimeout);
-      edge._clickTimeout = null;
-    }
     
     // Close any open modal first
     setEditingEdge(null);
@@ -2710,22 +2704,11 @@ const Dashboard = () => {
     });
   }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Edge click handler for opening label editing modal with double-click conflict prevention
-  const onEdgeClick = useCallback((event, edge) => {
-    console.log('Edge clicked:', edge);
-    
-    // Use setTimeout to differentiate between single click and double click
-    if (edge._clickTimeout) {
-      clearTimeout(edge._clickTimeout);
-      edge._clickTimeout = null;
-      return; // This is part of a double-click, ignore single-click
-    }
-    
-    edge._clickTimeout = setTimeout(() => {
-      console.log('Opening edge label modal after single-click confirmation');
-      setEditingEdge(edge);
-      edge._clickTimeout = null;
-    }, 300); // Wait 300ms to see if a double-click occurs
+  // Edge right-click handler for opening label editing modal (no conflict with double-click delete)
+  const onEdgeContextMenu = useCallback((event, edge) => {
+    event.preventDefault(); // Prevent browser context menu
+    console.log('Edge right-clicked:', edge);
+    setEditingEdge(edge);
   }, []);
 
   // Function to save edge label with improved state synchronization
