@@ -2662,7 +2662,7 @@ const Dashboard = () => {
   const saveEdgeLabel = useCallback((edgeId, newLabel) => {
     console.log('Saving edge label:', edgeId, newLabel);
     
-    // Update the label in mindMapData.connections
+    // Update mindMapData first, then React Flow edges in sequence
     setMindMapData(prevData => {
       const newData = { ...prevData };
       
@@ -2676,12 +2676,15 @@ const Dashboard = () => {
         conn.id === edgeId ? { ...conn, label: newLabel } : conn
       );
       
-      // Also update the React Flow edges state
-      setEdges(prev => prev.map(edge => 
-        edge.id === edgeId ? { ...edge, label: newLabel } : edge
-      ));
-      
       console.log('Updated connection label in mindMapData');
+      
+      // Update React Flow edges immediately after mindMapData update
+      requestAnimationFrame(() => {
+        setEdges(prev => prev.map(edge => 
+          edge.id === edgeId ? { ...edge, label: newLabel } : edge
+        ));
+        console.log('Updated edge label in React Flow state');
+      });
       
       // Trigger auto-save
       autoSaveMindMapData(newData);
