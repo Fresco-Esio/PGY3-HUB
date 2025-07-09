@@ -809,11 +809,11 @@ const LiteratureNode = ({ data, selected }) => {
           : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
       }`}
     >
-      {/* Enhanced Connection Handles - All handles set to 'source' for bidirectional connections */}
+      {/* Enhanced Connection Handles - Mixed types for React Flow compatibility with isValidConnection override */}
       {/* Top handles */}
       <Handle 
         id="target-top"
-        type="source" 
+        type="target" 
         position={Position.Top} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ left: '40%', transform: 'translateX(-50%)' }}
@@ -829,7 +829,7 @@ const LiteratureNode = ({ data, selected }) => {
       {/* Bottom handles */}
       <Handle 
         id="target-bottom"
-        type="source" 
+        type="target" 
         position={Position.Bottom} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ left: '40%', transform: 'translateX(-50%)' }}
@@ -845,7 +845,7 @@ const LiteratureNode = ({ data, selected }) => {
       {/* Left handles */}
       <Handle 
         id="target-left"
-        type="source" 
+        type="target" 
         position={Position.Left} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '40%', transform: 'translateY(-50%)' }}
@@ -861,7 +861,7 @@ const LiteratureNode = ({ data, selected }) => {
       {/* Right handles */}
       <Handle 
         id="target-right"
-        type="source" 
+        type="target" 
         position={Position.Right} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '40%', transform: 'translateY(-50%)' }}
