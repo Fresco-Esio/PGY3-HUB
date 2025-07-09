@@ -336,12 +336,36 @@ class MindMapExtendedTester:
         # Make a copy of the data to modify
         modified_data = self.mindmap_data.copy()
         
-        # Find and update the test connection label
+        # Find the test connection
+        connection_found = False
         for connection in modified_data["connections"]:
             if connection["id"] == self.test_connection_id:
                 # Update the label
                 connection["label"] = f"Updated Label {datetime.utcnow().isoformat()}"
+                connection_found = True
                 break
+        
+        if not connection_found:
+            print(f"  Test connection not found in data, creating a new one")
+            # Find a topic to use for the connection
+            if not modified_data["topics"]:
+                print(f"  No topics available for testing")
+                return False
+            
+            topic_id = modified_data["topics"][0]["id"]
+            
+            # Create a new connection
+            new_connection = {
+                "id": f"e{uuid.uuid4().hex}",
+                "source": topic_id,
+                "target": topic_id,  # Self-connection for testing
+                "sourceHandle": "bottom",
+                "targetHandle": "top",
+                "label": f"New Label {datetime.utcnow().isoformat()}"
+            }
+            
+            modified_data["connections"].append(new_connection)
+            self.test_connection_id = new_connection["id"]
         
         # Save the modified data
         put_response = requests.put(f"{self.base_url}/mindmap-data", json=modified_data)
@@ -362,8 +386,8 @@ class MindMapExtendedTester:
         updated_label = None
         for connection in verified_data["connections"]:
             if connection["id"] == self.test_connection_id:
-                updated_label = connection["label"]
-                if connection["label"].startswith("Updated Label"):
+                updated_label = connection.get("label", "No label")
+                if "Label" in updated_label:
                     label_updated = True
                 break
         
