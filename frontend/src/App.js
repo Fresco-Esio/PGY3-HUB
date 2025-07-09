@@ -1834,7 +1834,7 @@ const Dashboard = () => {
     mindMapData.tasks.forEach(task => {
       const searchableText = [
         task.title,
-        task.description,
+        stripHtml(task.description), // Strip HTML from description
         task.priority,
         task.status
       ].join(' ').toLowerCase();
