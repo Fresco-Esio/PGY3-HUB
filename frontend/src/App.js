@@ -712,23 +712,37 @@ const TaskNode = ({ data, selected }) => {
           : 'border-transparent hover:border-yellow-300 hover:ring-2 hover:ring-yellow-100'
       } ${statusColors[data.status] || 'bg-gray-500'}`}
     >
-      {/* Enhanced Connection Handles - Multiple handles for flexible connections */}
+      {/* Enhanced Connection Handles - All positions have both source and target handles */}
       {/* Top handles */}
       <Handle 
         id="target-top"
         type="target" 
         position={Position.Top} 
-        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '40%', transform: 'translateX(-50%)' }}
+      />
+      <Handle 
+        id="source-top"
+        type="source" 
+        position={Position.Top} 
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '60%', transform: 'translateX(-50%)' }}
       />
       
       {/* Bottom handles */}
       <Handle 
+        id="target-bottom"
+        type="target" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '40%', transform: 'translateX(-50%)' }}
+      />
+      <Handle 
         id="source-bottom"
         type="source" 
         position={Position.Bottom} 
-        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ left: '60%', transform: 'translateX(-50%)' }}
       />
       
       {/* Left handles */}
@@ -736,15 +750,15 @@ const TaskNode = ({ data, selected }) => {
         id="target-left"
         type="target" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '30%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '40%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-left"
         type="source" 
         position={Position.Left} 
-        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '70%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '60%', transform: 'translateY(-50%)' }}
       />
       
       {/* Right handles */}
@@ -752,15 +766,15 @@ const TaskNode = ({ data, selected }) => {
         id="target-right"
         type="target" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '30%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '40%', transform: 'translateY(-50%)' }}
       />
       <Handle 
         id="source-right"
         type="source" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-60 hover:opacity-100" 
-        style={{ top: '70%', transform: 'translateY(-50%)' }}
+        className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
+        style={{ top: '60%', transform: 'translateY(-50%)' }}
       />
       
       <div className="flex items-center gap-2 mb-1">
