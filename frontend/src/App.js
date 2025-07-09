@@ -1749,7 +1749,7 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
 
 // Enhanced Main Dashboard Component with improved visual effects
 const Dashboard = () => {
-  const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
+  const { fitView, setCenter, zoomTo, getViewport, addEdges } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [mindMapData, setMindMapData] = useState({ 
