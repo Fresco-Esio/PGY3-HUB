@@ -1814,11 +1814,11 @@ const Dashboard = () => {
       const searchableText = [
         caseItem.case_id,
         caseItem.primary_diagnosis,
-        caseItem.chief_complaint,
-        caseItem.history_present_illness,
-        caseItem.medical_history,
-        caseItem.assessment_plan,
-        caseItem.notes,
+        stripHtml(caseItem.chief_complaint), // Strip HTML
+        stripHtml(caseItem.history_present_illness), // Strip HTML
+        stripHtml(caseItem.medical_history), // Strip HTML
+        stripHtml(caseItem.assessment_plan), // Strip HTML
+        stripHtml(caseItem.notes), // Strip HTML
         caseItem.age?.toString(),
         caseItem.gender,
         ...(caseItem.secondary_diagnoses || []),
