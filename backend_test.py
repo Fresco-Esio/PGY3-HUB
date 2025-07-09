@@ -4,8 +4,8 @@ import uuid
 from datetime import datetime
 import time
 
-# Use the public endpoint for testing
-BASE_URL = "https://fa1b7cf3-fa60-4e7f-ba81-f14611e9e147.preview.emergentagent.com/api"
+# Use the local backend URL for testing
+BASE_URL = "http://localhost:8001/api"
 
 class MindMapConnectionTester:
     def __init__(self, base_url):
