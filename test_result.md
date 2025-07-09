@@ -135,6 +135,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "Tested local JSON-based backend implementation. All tests passed successfully. GET /api/mindmap-data returns all data from JSON file. PUT /api/mindmap-data correctly saves data to JSON file. Connections array with sourceHandle/targetHandle is properly handled. JSON file is created with initial dummy data if it doesn't exist. Data persists correctly between requests. Datetime serialization/deserialization works properly. All data structures (topics, cases, tasks, literature, connections) are validated correctly. CORS is properly configured for localhost:3000. Error handling for invalid JSON data works as expected. File permissions are correctly set. Integration tests for creating, updating, and deleting nodes via bulk mindmap-data endpoint passed. Connection persistence tests confirmed that connections with sourceHandle/targetHandle are properly saved and retrieved."
+        - working: true
+          agent: "testing"
+          comment: "Conducted comprehensive testing of the mind map API endpoints. The GET /api/mindmap-data endpoint correctly returns all mind map data with the proper structure including topics, cases, tasks, literature, and connections. The PUT /api/mindmap-data endpoint successfully saves the entire mind map data structure to the JSON file. Connections with sourceHandle, targetHandle, and label properties are properly handled and persisted. Error handling for malformed JSON and invalid data types works correctly. CORS is properly configured for localhost:3000. Minor issue: The API accepts connections without a target field, which is not ideal but not a critical issue as the frontend should always provide complete connection data."
 
 frontend:
   - task: "Fix connection persistence during mode switches"
