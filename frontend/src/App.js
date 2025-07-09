@@ -3540,6 +3540,14 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Edge Label Modal */}
+      <EdgeLabelModal 
+        edge={editingEdge}
+        isOpen={editingEdge !== null}
+        onClose={() => setEditingEdge(null)}
+        onSave={saveEdgeLabel}
+      />
+
       {/* Enhanced Auto-save Indicator */}
       {isSaving && (
         <div className="fixed bottom-4 left-4 z-40">
