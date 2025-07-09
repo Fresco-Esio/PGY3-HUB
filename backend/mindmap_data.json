@@ -79,6 +79,22 @@
       "resources": [],
       "created_at": "2025-07-09T20:33:20.367053",
       "updated_at": "2025-07-09T20:33:20.367053"
+    },
+    {
+      "id": "topic-5415f719cd8745d6bd7ca1e8740b73b1",
+      "title": "Test Topic 2025-07-09T20:34:54.940635",
+      "description": "Created during extended testing",
+      "category": "Test Category",
+      "color": "#FF5733",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "created_at": "2025-07-09T20:34:54.940635",
+      "updated_at": "2025-07-09T20:34:54.940635"
     }
   ],
   "cases": [
@@ -291,5 +307,14 @@
       "updated_at": "2025-07-09T12:59:50.297000+00:00"
     }
   ],
-  "connections": []
+  "connections": [
+    {
+      "id": "eb9fe1cee240c427c9a9ccb8e66adcae8",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Cycle 3 - 2025-07-09T20:34:56.078801"
+    }
+  ]
 }
