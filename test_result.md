@@ -138,6 +138,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "Conducted comprehensive testing of the mind map API endpoints. The GET /api/mindmap-data endpoint correctly returns all mind map data with the proper structure including topics, cases, tasks, literature, and connections. The PUT /api/mindmap-data endpoint successfully saves the entire mind map data structure to the JSON file. Connections with sourceHandle, targetHandle, and label properties are properly handled and persisted. Error handling for malformed JSON and invalid data types works correctly. CORS is properly configured for localhost:3000. Minor issue: The API accepts connections without a target field, which is not ideal but not a critical issue as the frontend should always provide complete connection data."
+        - working: true
+          agent: "testing"
+          comment: "Specifically tested handle ID migration and compatibility. Created connections with both old format (source-bottom) and new format (bottom) handle IDs. Both formats are properly stored and retrieved. Connections with mixed handle ID formats can coexist in the system. Updating and deleting connections works correctly. Connections between different entity types (topics, cases, tasks, literature) are properly handled. Connection persistence is maintained across multiple requests. The backend successfully handles both handle ID formats gracefully as required."
 
 frontend:
   - task: "Fix programmatic connection system"
