@@ -140,7 +140,20 @@ backend:
           comment: "Conducted comprehensive testing of the mind map API endpoints. The GET /api/mindmap-data endpoint correctly returns all mind map data with the proper structure including topics, cases, tasks, literature, and connections. The PUT /api/mindmap-data endpoint successfully saves the entire mind map data structure to the JSON file. Connections with sourceHandle, targetHandle, and label properties are properly handled and persisted. Error handling for malformed JSON and invalid data types works correctly. CORS is properly configured for localhost:3000. Minor issue: The API accepts connections without a target field, which is not ideal but not a critical issue as the frontend should always provide complete connection data."
 
 frontend:
-  - task: "Fix connection persistence during mode switches"
+  - task: "Fix programmatic connection system"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported that programmatic connection creation is not working after recent implementation"
+        - working: true
+          agent: "main"
+          comment: "FIXED PROGRAMMATIC CONNECTION SYSTEM: 1) Added handle ID migration in convertDataToReactFlow to convert old format (source-bottom, target-top) to new format (bottom, top) 2) Verified onHandleClick prop is properly passed to all node components 3) handleNodeHandleClick function is implemented and working 4) onPaneClick handler resets connection state 5) All visual elements (handles, nodes, connections) are displaying correctly. The issue was a mismatch between stored handle IDs and current UI handle IDs."
     implemented: true
     working: true
     file: "App.js"
