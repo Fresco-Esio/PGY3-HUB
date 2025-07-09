@@ -712,11 +712,11 @@ const TaskNode = ({ data, selected }) => {
           : 'border-transparent hover:border-yellow-300 hover:ring-2 hover:ring-yellow-100'
       } ${statusColors[data.status] || 'bg-gray-500'}`}
     >
-      {/* Enhanced Connection Handles - All handles set to 'source' for bidirectional connections */}
+      {/* Enhanced Connection Handles - Mixed types for React Flow compatibility with isValidConnection override */}
       {/* Top handles */}
       <Handle 
         id="target-top"
-        type="source" 
+        type="target" 
         position={Position.Top} 
         className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ left: '40%', transform: 'translateX(-50%)' }}
@@ -732,7 +732,7 @@ const TaskNode = ({ data, selected }) => {
       {/* Bottom handles */}
       <Handle 
         id="target-bottom"
-        type="source" 
+        type="target" 
         position={Position.Bottom} 
         className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ left: '40%', transform: 'translateX(-50%)' }}
@@ -748,7 +748,7 @@ const TaskNode = ({ data, selected }) => {
       {/* Left handles */}
       <Handle 
         id="target-left"
-        type="source" 
+        type="target" 
         position={Position.Left} 
         className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '40%', transform: 'translateY(-50%)' }}
@@ -764,7 +764,7 @@ const TaskNode = ({ data, selected }) => {
       {/* Right handles */}
       <Handle 
         id="target-right"
-        type="source" 
+        type="target" 
         position={Position.Right} 
         className="w-3 h-3 !bg-white transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100" 
         style={{ top: '40%', transform: 'translateY(-50%)' }}
