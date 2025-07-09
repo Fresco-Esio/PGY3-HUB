@@ -1645,6 +1645,9 @@ const Dashboard = () => {
   
   // Toast notifications state
   const [toasts, setToasts] = useState([]);
+  
+  // Edge label editing state
+  const [editingEdge, setEditingEdge] = useState(null);
 
   // Helper function to add toast notifications
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
