@@ -2604,6 +2604,13 @@ const Dashboard = () => {
   const onEdgeDoubleClick = useCallback((event, edge) => {
     if (!isEditing) return;
     
+    // Cancel any pending single-click action
+    if (edge._clickTimeout) {
+      clearTimeout(edge._clickTimeout);
+      edge._clickTimeout = null;
+      console.log('Cancelled edge click due to double-click');
+    }
+    
     console.log('Deleting edge:', edge);
     
     // Remove edge from React Flow state
