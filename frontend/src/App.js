@@ -1864,7 +1864,7 @@ const Dashboard = () => {
 
     console.log(`Search "${query}" found ${matchingIds.length} matching nodes:`, matchingIds);
     return matchingIds;
-  }, [searchQuery, mindMapData]);
+  }, [searchQuery, mindMapData, stripHtml]);
 
   // Enhanced auto-save function with visual feedback
   const autoSaveMindMapData = useCallback((data) => {
