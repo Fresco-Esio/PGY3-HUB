@@ -579,7 +579,7 @@ const CaseNode = ({ data, selected }) => {
         id="top"
         type="source" 
         position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
+        isConnectable={true} 
         style={{ left: '50%', transform: 'translateX(-50%)' }}
         onClick={(e) => {
           e.stopPropagation();
