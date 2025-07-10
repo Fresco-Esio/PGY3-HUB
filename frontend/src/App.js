@@ -409,58 +409,27 @@ const TopicNode = ({ data, selected }) => {
           : `0 4px 20px ${data.color || '#3B82F6'}20`
       }}
     >
-      {/* Connection Handles - One per position with click handlers */}
+      {/* Connection Hotspot - Single handle on right side */}
       <Handle 
-        id="top"
-        type="source" 
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('top');
-        }}
-      />
-      
-      <Handle 
-        id="bottom"
-        type="source" 
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('bottom');
-        }}
-      />
-      
-      <Handle 
-        id="left"
-        type="source" 
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('left');
-        }}
-      />
-      
-      <Handle 
-        id="right"
+        id="connection-hotspot"
         type="source" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('right');
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 group-hover:opacity-100 cursor-pointer" 
+        style={{ 
+          top: '50%', 
+          transform: 'translateY(-50%)', 
+          opacity: '0',
+          transition: 'opacity 0.3s ease'
         }}
+        isConnectable={true}
       />
+      
+      {/* Custom CSS for hover effect */}
+      <style jsx>{`
+        .group:hover .connection-hotspot {
+          opacity: 1;
+        }
+      `}</style>
       
       {/* Priority indicator */}
       {data.priority && (
