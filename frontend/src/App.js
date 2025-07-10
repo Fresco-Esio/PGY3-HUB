@@ -2676,7 +2676,7 @@ const Dashboard = () => {
     
     // Create a complete edge object with all React Flow properties
     const newEdge = {
-      id: `${params.source}-${params.target}`, // Ensure unique ID
+      id: `${params.source}-${params.target}-${Date.now()}`, // Ensure unique ID
       source: params.source,
       target: params.target,
       sourceHandle: params.sourceHandle, // CRITICAL: Preserve source handle
@@ -2697,10 +2697,8 @@ const Dashboard = () => {
     
     console.log('Complete edge object created:', newEdge);
     
-    // Add edge to React Flow state immediately
-    setEdges((eds) => addEdge(newEdge, eds));
-    
-    // CRITICAL FIX: Store the complete edge object in mindMapData.connections
+    // SINGLE SOURCE OF TRUTH: Only update mindMapData.connections
+    // The visual edges will be updated by the useEffect hook
     setMindMapData(prevData => {
       const newData = { ...prevData };
       
@@ -2724,20 +2722,7 @@ const Dashboard = () => {
         console.log('Edge added to mindMapData.connections:', newEdge);
         console.log('Total connections now:', newData.connections.length);
         
-        // Trigger immediate save to localStorage (no debounce for connections)
-        try {
-          const storageData = {
-            version: '1.1',
-            timestamp: new Date().toISOString(),
-            data: newData
-          };
-          localStorage.setItem('pgy3_mindmap_data', JSON.stringify(storageData));
-          console.log('Connection data immediately saved to localStorage');
-        } catch (error) {
-          console.error('Error immediately saving connection:', error);
-        }
-        
-        // Also trigger the debounced auto-save
+        // Trigger auto-save
         autoSaveMindMapData(newData);
         addToast('Connection created and saved', 'success', 2000);
       } else {
@@ -2746,7 +2731,7 @@ const Dashboard = () => {
       
       return newData;
     });
-  }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
+  }, [setMindMapData, autoSaveMindMapData, addToast]);
 
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
