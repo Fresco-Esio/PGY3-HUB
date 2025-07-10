@@ -2625,11 +2625,11 @@ const Dashboard = () => {
           return handleId;
         };
         
-        // Ensure all critical properties are preserved
+        // Ensure all critical properties are preserved with corrected node IDs
         const reconstructedEdge = {
           id: connection.id,
-          source: connection.source,
-          target: connection.target,
+          source: sourceNodeId, // Use corrected full node ID
+          target: targetNodeId, // Use corrected full node ID
           sourceHandle: migrateHandleId(connection.sourceHandle), // CRITICAL: Migrate and preserve source handle
           targetHandle: migrateHandleId(connection.targetHandle), // CRITICAL: Migrate and preserve target handle
           type: connection.type || 'smoothstep',
