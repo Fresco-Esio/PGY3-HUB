@@ -657,14 +657,28 @@ const TaskNode = ({ data, selected }) => {
           : 'border-transparent hover:border-yellow-300 hover:ring-2 hover:ring-yellow-100'
       } ${statusColors[data.status] || 'bg-gray-500'}`}
     >
-      {/* Connection Hotspot - Single handle on right side */}
+      {/* Connection Hotspot - Stacked source and target handles */}
       <Handle 
         id="connection-hotspot"
+        type="source"
         position={Position.Right} 
         className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
         style={{ 
           top: '50%', 
-          transform: 'translateY(-50%)'
+          transform: 'translateY(-50%)',
+          zIndex: 2
+        }}
+        isConnectable={true}
+      />
+      <Handle 
+        id="connection-hotspot"
+        type="target"
+        position={Position.Right} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          zIndex: 1
         }}
         isConnectable={true}
       />
