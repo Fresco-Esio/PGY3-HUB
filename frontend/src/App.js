@@ -2467,7 +2467,6 @@ const Dashboard = () => {
           age: caseItem.age,
           originalData: caseItem,
           onDelete: () => deleteNode(caseItem.id, 'case'), // Always available, not just in edit mode
-          onHandleClick: (handleId) => handleNodeHandleClick(nodeId, handleId), // Pass full node ID
           nodeId: nodeId // Add full node ID for reference
         }
       });
