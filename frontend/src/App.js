@@ -2229,7 +2229,6 @@ const Dashboard = () => {
   // Memoized function to convert data to React Flow format
   const convertDataToReactFlow = (data, preserveCurrentPositions = false) => {
     const flowNodes = [];
-    const flowEdges = [];
 
     // Create a map of current node positions if preserving
     const currentPositions = {};
