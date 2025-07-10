@@ -423,8 +423,32 @@ const TopicNode = ({ data, selected }) => {
       />
       
       <Handle 
+        id="top-target"
+        type="target" 
+        position={Position.Top} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
+        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        onClick={(e) => {
+          e.stopPropagation();
+          data.onHandleClick?.('top');
+        }}
+      />
+      
+      <Handle 
         id="bottom"
         type="source" 
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
+        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        onClick={(e) => {
+          e.stopPropagation();
+          data.onHandleClick?.('bottom');
+        }}
+      />
+      
+      <Handle 
+        id="bottom-target"
+        type="target" 
         position={Position.Bottom} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
         style={{ left: '50%', transform: 'translateX(-50%)' }}
@@ -447,8 +471,32 @@ const TopicNode = ({ data, selected }) => {
       />
       
       <Handle 
+        id="left-target"
+        type="target" 
+        position={Position.Left} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
+        style={{ top: '50%', transform: 'translateY(-50%)' }}
+        onClick={(e) => {
+          e.stopPropagation();
+          data.onHandleClick?.('left');
+        }}
+      />
+      
+      <Handle 
         id="right"
         type="source" 
+        position={Position.Right} 
+        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
+        style={{ top: '50%', transform: 'translateY(-50%)' }}
+        onClick={(e) => {
+          e.stopPropagation();
+          data.onHandleClick?.('right');
+        }}
+      />
+      
+      <Handle 
+        id="right-target"
+        type="target" 
         position={Position.Right} 
         className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
         style={{ top: '50%', transform: 'translateY(-50%)' }}
