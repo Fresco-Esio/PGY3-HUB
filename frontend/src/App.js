@@ -715,14 +715,28 @@ const LiteratureNode = ({ data, selected }) => {
           : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
       }`}
     >
-      {/* Connection Hotspot - Single handle on right side */}
+      {/* Connection Hotspot - Stacked source and target handles */}
       <Handle 
         id="connection-hotspot"
+        type="source"
         position={Position.Right} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
         style={{ 
           top: '50%', 
-          transform: 'translateY(-50%)'
+          transform: 'translateY(-50%)',
+          zIndex: 2
+        }}
+        isConnectable={true}
+      />
+      <Handle 
+        id="connection-hotspot"
+        type="target"
+        position={Position.Right} 
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          zIndex: 1
         }}
         isConnectable={true}
       />
