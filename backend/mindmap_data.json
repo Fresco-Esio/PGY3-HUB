@@ -874,6 +874,38 @@
       "selectable": true,
       "focusable": true,
       "deletable": true
+    },
+    {
+      "id": "case-1732b75e-1da6-4c6e-a237-e7f88a451164-topic-04a7c0d1-29ac-424d-925b-4b660fb10eee-1752130605018",
+      "source": "case-1732b75e-1da6-4c6e-a237-e7f88a451164",
+      "target": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
     }
   ]
 }
