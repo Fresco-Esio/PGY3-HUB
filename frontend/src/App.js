@@ -2029,7 +2029,7 @@ const Dashboard = () => {
       }
     }
   }, [mindMapData, hasAppliedInitialLayout]);
-  const deleteNode = async (nodeId, nodeType) => {
+  const deleteNode = useCallback(async (nodeId, nodeType) => {
     try {
       console.log(`Deleting ${nodeType} with ID:`, nodeId);
       
@@ -2070,7 +2070,7 @@ const Dashboard = () => {
       console.error('Error deleting node:', error);
       addToast(`Failed to delete ${nodeType}`, 'error');
     }
-  };
+  }, [setNodes, setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
   // Enhanced function to filter and center category nodes using fitView
   const filterAndCenterCategory = (category) => {
