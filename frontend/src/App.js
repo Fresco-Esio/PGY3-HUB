@@ -953,7 +953,7 @@ const LiteratureNode = ({ data, selected }) => {
         selected 
           ? 'border-purple-400 shadow-xl scale-105 ring-4 ring-purple-200' 
           : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
-      } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''}`}
+      }`}
     >
       {/* Connection Hotspots - Multi-directional stacked handles */}
       
