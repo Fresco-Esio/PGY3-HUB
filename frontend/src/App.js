@@ -2487,7 +2487,8 @@ const Dashboard = () => {
           completed_flashcards: topic.completed_flashcards,
           originalData: topic,
           onDelete: () => deleteNode(topic.id, 'topic'), // Always available, not just in edit mode
-          onHandleClick: handleNodeHandleClick // Add handle click handler
+          onHandleClick: (handleId) => handleNodeHandleClick(nodeId, handleId), // Pass full node ID
+          nodeId: nodeId // Add full node ID for reference
         }
       });
     });
