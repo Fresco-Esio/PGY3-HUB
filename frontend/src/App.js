@@ -414,12 +414,10 @@ const TopicNode = ({ data, selected }) => {
         id="connection-hotspot"
         type="source" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 group-hover:opacity-100 cursor-pointer" 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
         style={{ 
           top: '50%', 
-          transform: 'translateY(-50%)', 
-          opacity: '0',
-          transition: 'opacity 0.3s ease'
+          transform: 'translateY(-50%)'
         }}
         isConnectable={true}
       />
