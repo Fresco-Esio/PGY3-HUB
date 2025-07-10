@@ -3112,30 +3112,6 @@ const Dashboard = () => {
     onInit: onReactFlowInit
   }), [handleNodesChange, onEdgesChange, onConnect, onNodeClick, onNodeDoubleClick, onReactFlowInit]);
 
-  // PERFORMANCE FIX: Memoize ReactFlow props to prevent unnecessary re-renders
-  const reactFlowProps = useMemo(() => ({
-    nodes,
-    edges,
-    nodeTypes,
-    fitView: true,
-    nodesDraggable: true,
-    nodesConnectable: isEditing,
-    edgesReconnectable: isEditing,
-    edgesFocusable: isEditing,
-    elementsSelectable: true,
-    className: "bg-gradient-to-br from-slate-50 to-slate-100",
-    defaultEdgeOptions: {
-      type: 'smoothstep',
-      style: { strokeWidth: 2, stroke: '#6B7280' },
-      markerEnd: {
-        type: 'arrowclosed',
-        width: 15,
-        height: 15,
-        color: '#6B7280',
-      }
-    }
-  }), [nodes, edges, nodeTypes, isEditing]);
-
 
 
 
