@@ -2580,15 +2580,35 @@ const Dashboard = () => {
       data.connections.forEach(connection => {
         console.log('Reconstructing edge:', connection);
         
+        // Fix the critical issue: Convert raw UUIDs to full node IDs
+        const findFullNodeId = (rawId) => {
+          if (!rawId) return null;
+          
+          // If it's already a full ID (contains dash prefix), use as-is
+          if (rawId.includes('topic-') || rawId.includes('case-') || rawId.includes('task-') || rawId.includes('literature-')) {
+            return rawId;
+          }
+          
+          // Find the corresponding full node ID
+          const matchingNode = flowNodes.find(node => 
+            node.id === `topic-${rawId}` || 
+            node.id === `case-${rawId}` || 
+            node.id === `task-${rawId}` || 
+            node.id === `literature-${rawId}`
+          );
+          
+          return matchingNode ? matchingNode.id : null;
+        };
+        
+        const sourceNodeId = findFullNodeId(connection.source);
+        const targetNodeId = findFullNodeId(connection.target);
+        
+        console.log(`Original source: ${connection.source} -> Full node ID: ${sourceNodeId}`);
+        console.log(`Original target: ${connection.target} -> Full node ID: ${targetNodeId}`);
+        
         // Validate that source and target nodes exist
-        const sourceExists = flowNodes.some(node => node.id === connection.source);
-        const targetExists = flowNodes.some(node => node.id === connection.target);
-        
-        console.log(`Source node ${connection.source} exists: ${sourceExists}`);
-        console.log(`Target node ${connection.target} exists: ${targetExists}`);
-        
-        if (!sourceExists || !targetExists) {
-          console.warn(`Skipping edge reconstruction - missing nodes. Source: ${sourceExists}, Target: ${targetExists}`);
+        if (!sourceNodeId || !targetNodeId) {
+          console.warn(`Skipping edge reconstruction - missing or invalid node IDs. Source: ${sourceNodeId}, Target: ${targetNodeId}`);
           return; // Skip this edge
         }
         
