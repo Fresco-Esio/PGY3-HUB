@@ -391,9 +391,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix programmatic connection system"
+    - "Add multi-directional connection handles to all nodes"
     - "Rich text editor integration"
-    - "Delete button visibility on nodes"
   stuck_tasks:
     - "Fix programmatic connection system"
     - "Rich text editor integration"
