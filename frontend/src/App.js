@@ -427,7 +427,7 @@ const TopicNode = ({ data, selected }) => {
         id="bottom"
         type="source" 
         position={Position.Bottom} 
-        className="w-3 h-3 !bg-white border-2 border-current transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
         style={{ left: '50%', transform: 'translateX(-50%)' }}
         isConnectable={true}
         onClick={(e) => {
