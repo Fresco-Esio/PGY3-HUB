@@ -2786,23 +2786,12 @@ const Dashboard = () => {
     
     // Convert connections to React Flow edges
     const visualEdges = mindMapData.connections.map(connection => {
-      // Handle migration: Convert old handle IDs to new "connection-hotspot" format
-      const migrateToHotspot = (handleId) => {
-        if (!handleId) return 'connection-hotspot';
-        
-        // If it's already the new format, keep it
-        if (handleId === 'connection-hotspot') return handleId;
-        
-        // Convert any old format to the new hotspot format
-        return 'connection-hotspot';
-      };
-      
       return {
         id: connection.id,
         source: connection.source,
         target: connection.target,
-        sourceHandle: migrateToHotspot(connection.sourceHandle),
-        targetHandle: migrateToHotspot(connection.targetHandle),
+        sourceHandle: connection.sourceHandle,
+        targetHandle: connection.targetHandle,
         type: connection.type || 'smoothstep',
         style: connection.style || { stroke: '#2563eb', strokeWidth: 3 },
         label: connection.label || '',
