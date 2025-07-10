@@ -3378,7 +3378,6 @@ const Dashboard = () => {
           selectNodesOnDrag={false} // Improve connection creation experience
           deleteKeyCode={['Delete', 'Backspace']} // Allow deletion with keyboard
           multiSelectionKeyCode={['Control', 'Meta']} // Allow multi-selection
-          isValidConnection={() => true} // Enable universal connections between any nodes
           className="bg-gradient-to-br from-slate-50 to-slate-100"
           defaultEdgeOptions={{
             type: 'smoothstep',
