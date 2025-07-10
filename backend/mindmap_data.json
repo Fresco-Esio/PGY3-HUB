@@ -314,6 +314,70 @@
       "sourceHandle": "bottom",
       "targetHandle": "top",
       "label": "Malformed Connection"
+    },
+    {
+      "id": "edge-1752113901805",
+      "source": "181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
+      "target": "1732b75e-1da6-4c6e-a237-e7f88a451164",
+      "sourceHandle": "top",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
+    },
+    {
+      "id": "edge-1752113912344",
+      "source": "181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
+      "target": "1732b75e-1da6-4c6e-a237-e7f88a451164",
+      "sourceHandle": "bottom",
+      "targetHandle": "left",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
     }
   ]
 }
