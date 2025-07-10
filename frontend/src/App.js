@@ -2417,25 +2417,38 @@ const Dashboard = () => {
     console.log('Updating visual edges from mindMapData.connections:', mindMapData.connections.length);
     
     // Convert connections to React Flow edges
-    const visualEdges = mindMapData.connections.map(connection => ({
-      id: connection.id,
-      source: connection.source,
-      target: connection.target,
-      sourceHandle: connection.sourceHandle,
-      targetHandle: connection.targetHandle,
-      type: connection.type || 'smoothstep',
-      style: connection.style || { stroke: '#2563eb', strokeWidth: 3 },
-      label: connection.label || '',
-      labelStyle: connection.labelStyle || { fill: '#374151', fontWeight: 500 },
-      labelBgStyle: connection.labelBgStyle || { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 },
-      labelBgPadding: connection.labelBgPadding || [8, 4],
-      labelShowBg: connection.labelShowBg !== undefined ? connection.labelShowBg : true,
-      labelBgBorderRadius: connection.labelBgBorderRadius || 4,
-      animated: connection.animated || false,
-      selectable: connection.selectable !== undefined ? connection.selectable : true,
-      focusable: connection.focusable !== undefined ? connection.focusable : true,
-      deletable: connection.deletable !== undefined ? connection.deletable : true
-    }));
+    const visualEdges = mindMapData.connections.map(connection => {
+      // Handle migration: Convert old handle IDs to new "connection-hotspot" format
+      const migrateToHotspot = (handleId) => {
+        if (!handleId) return 'connection-hotspot';
+        
+        // If it's already the new format, keep it
+        if (handleId === 'connection-hotspot') return handleId;
+        
+        // Convert any old format to the new hotspot format
+        return 'connection-hotspot';
+      };
+      
+      return {
+        id: connection.id,
+        source: connection.source,
+        target: connection.target,
+        sourceHandle: migrateToHotspot(connection.sourceHandle),
+        targetHandle: migrateToHotspot(connection.targetHandle),
+        type: connection.type || 'smoothstep',
+        style: connection.style || { stroke: '#2563eb', strokeWidth: 3 },
+        label: connection.label || '',
+        labelStyle: connection.labelStyle || { fill: '#374151', fontWeight: 500 },
+        labelBgStyle: connection.labelBgStyle || { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 },
+        labelBgPadding: connection.labelBgPadding || [8, 4],
+        labelShowBg: connection.labelShowBg !== undefined ? connection.labelShowBg : true,
+        labelBgBorderRadius: connection.labelBgBorderRadius || 4,
+        animated: connection.animated || false,
+        selectable: connection.selectable !== undefined ? connection.selectable : true,
+        focusable: connection.focusable !== undefined ? connection.focusable : true,
+        deletable: connection.deletable !== undefined ? connection.deletable : true
+      };
+    });
     
     console.log('Setting visual edges:', visualEdges);
     setEdges(visualEdges);
