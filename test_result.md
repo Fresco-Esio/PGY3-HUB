@@ -147,6 +147,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "Conducted comprehensive testing of the connection system. Created a new comprehensive test suite that verifies all aspects of the connection system. All tests passed successfully. The backend correctly handles both old format (source-bottom) and new format (bottom) handle IDs. Connections between different entity types (topic-to-case, case-to-literature, task-to-topic, etc.) work correctly. The API properly stores and retrieves all connection properties including sourceHandle, targetHandle, label, style, and custom data. Connection persistence is maintained across multiple save/load cycles. The backend gracefully handles missing connections array and malformed connection data. CORS is properly configured for localhost:3000. The backend API is fully functional and ready to support the frontend connection system."
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL ISSUE FOUND: Comprehensive frontend testing revealed that programmatic connection creation is NOT working. While handles are visible with 80% opacity and clicking shows 'Connection started' toast, clicking a second handle does not create visual connections on the canvas. Console logs show handle clicks are registered but no connections are created. The system reconstructs 3 stored connections from localStorage but new connections cannot be created through the UI. This is a critical functionality failure that prevents users from creating new connections between nodes. The connection creation logic appears to be broken in the current implementation."
 
 frontend:
   - task: "Fix programmatic connection system"
