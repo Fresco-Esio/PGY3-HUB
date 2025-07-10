@@ -284,9 +284,65 @@ frontend:
         - working: true
           agent: "testing"
           comment: "VERIFIED: The application loads smoothly with nodes positioned correctly. No visible jumping of nodes was observed during testing."
+  - task: "Rich text editor integration"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL ISSUE: Rich text editor is NOT accessible through the current UI. Testing revealed that while the RichTextEditor component exists in the codebase with proper TipTap integration, it cannot be accessed through the subpage modals. The Edit button is missing from subpage modals, preventing users from entering edit mode where the rich text editor should be available. The subpage modal only shows read-only content without any editing capabilities. This is a major functionality gap that prevents users from editing node descriptions with rich text formatting."
+
+  - task: "Delete button visibility on nodes"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 1
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "ISSUE FOUND: Delete buttons are present on nodes but are not easily discoverable. Testing found that delete buttons exist (with X icons) but they are not prominently visible. The buttons are present in the DOM and functional, but users may have difficulty finding them. This affects the user experience for node management operations."
+
+  - task: "Global search functionality"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
         - working: true
           agent: "testing"
-          comment: "VERIFIED: The application consistently loads with nodes in their correct positions without any visible jumping or repositioning. The reduced layout delay (100ms) and position preservation logic work effectively to provide a smooth loading experience."
+          comment: "VERIFIED: Global search functionality is working correctly. Search input is present and functional. When searching for 'test', the system correctly identified 14 matching nodes across all node types (topics, literature, cases, tasks). The search functionality properly filters content and updates node visibility. However, the visual dimming of non-matching nodes during search was not clearly visible during testing, but the core search functionality is operational."
+
+  - task: "Node creation and positioning"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "VERIFIED: Add New Node functionality is working correctly. The Add New Node button opens a modal with options for different node types (Psychiatric Topic, Literature, Patient Case, Task). The modal interface is clean and functional. Node positioning and layout preservation is working as nodes maintain their positions after page refresh."
+
+  - task: "Application stability and error handling"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "VERIFIED: Application stability is good. The app loads consistently without red screen errors. Node positions persist correctly after page refresh. The application handles 17 nodes and reconstructs 3 stored connections from localStorage successfully. Console shows proper data loading and saving operations. No critical JavaScript errors were detected during comprehensive testing. The app demonstrates good resilience and data persistence."
 
   - task: "Enhanced realign nodes with category columns"
     implemented: true
