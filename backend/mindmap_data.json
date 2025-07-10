@@ -1113,6 +1113,46 @@
       "sourceHandle": "right",
       "targetHandle": "0dcc0181-31c2-49a2-a0b7-17a130e67a30-left",
       "label": "Mixed Format: New Source, Old Target"
+    },
+    {
+      "id": "test-2212d7eb6ab24e548c7c2cde610e9935",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "PUT Test Connection"
+    },
+    {
+      "id": "multi-dir-top-f921af95",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "sourceHandle": "top",
+      "targetHandle": "bottom",
+      "label": "Multi-directional: top to bottom"
+    },
+    {
+      "id": "multi-dir-right-f8e4fad2",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Multi-directional: right to left"
+    },
+    {
+      "id": "multi-dir-bottom-8ff192e1",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Multi-directional: bottom to top"
+    },
+    {
+      "id": "multi-dir-left-ddf4ae4f",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "sourceHandle": "left",
+      "targetHandle": "right",
+      "label": "Multi-directional: left to right"
     }
   ]
 }
