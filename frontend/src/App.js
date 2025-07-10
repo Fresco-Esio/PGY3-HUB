@@ -2369,6 +2369,84 @@ const Dashboard = () => {
     }, 100);
   };
 
+  // onConnect function - moved before handleNodeHandleClick to fix reference error
+  const onConnect = useCallback((params) => {
+    console.log('Creating new connection with full edge data:', params);
+    
+    // Create a complete edge object with all React Flow properties
+    const newEdge = {
+      id: `${params.source}-${params.target}`, // Ensure unique ID
+      source: params.source,
+      target: params.target,
+      sourceHandle: params.sourceHandle, // CRITICAL: Preserve source handle
+      targetHandle: params.targetHandle, // CRITICAL: Preserve target handle
+      type: 'smoothstep',
+      style: { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
+      label: '', // NEW: Add label property for edge labeling
+      labelStyle: { fill: '#374151', fontWeight: 500 }, // Add label styling
+      labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 }, // Add label background
+      labelBgPadding: [8, 4], // Add padding around label
+      labelShowBg: true, // Show background for label
+      labelBgBorderRadius: 4, // Rounded corners for label background
+      animated: false,
+      selectable: true,
+      focusable: true,
+      deletable: true
+    };
+    
+    console.log('Complete edge object created:', newEdge);
+    
+    // Add edge to React Flow state immediately
+    setEdges((eds) => addEdge(newEdge, eds));
+    
+    // CRITICAL FIX: Store the complete edge object in mindMapData.connections
+    setMindMapData(prevData => {
+      const newData = { ...prevData };
+      
+      // Ensure connections array exists (for backward compatibility)
+      if (!newData.connections) {
+        newData.connections = [];
+      }
+      
+      // Check if connection already exists (prevent duplicates)
+      const connectionExists = newData.connections.some(conn => 
+        conn.source === newEdge.source && 
+        conn.target === newEdge.target &&
+        conn.sourceHandle === newEdge.sourceHandle &&
+        conn.targetHandle === newEdge.targetHandle
+      );
+      
+      if (!connectionExists) {
+        // Add the complete edge object to connections array
+        newData.connections = [...newData.connections, newEdge];
+        
+        console.log('Edge added to mindMapData.connections:', newEdge);
+        console.log('Total connections now:', newData.connections.length);
+        
+        // Trigger immediate save to localStorage (no debounce for connections)
+        try {
+          const storageData = {
+            version: '1.1',
+            timestamp: new Date().toISOString(),
+            data: newData
+          };
+          localStorage.setItem('pgy3_mindmap_data', JSON.stringify(storageData));
+          console.log('Connection data immediately saved to localStorage');
+        } catch (error) {
+          console.error('Error immediately saving connection:', error);
+        }
+        
+        // Also trigger the debounced auto-save
+        autoSaveMindMapData(newData);
+        addToast('Connection created and saved', 'success', 2000);
+      } else {
+        console.log('Connection already exists, skipping duplicate');
+      }
+      
+      return newData;
+    });
+  }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
+
   // Programmatic connection handler
   const handleNodeHandleClick = useCallback((nodeId, handleId) => {
     console.log('Handle clicked:', nodeId, handleId);
