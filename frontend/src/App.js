@@ -2446,7 +2446,6 @@ const Dashboard = () => {
           year: lit.year,
           originalData: lit,
           onDelete: () => deleteNode(lit.id, 'literature'), // Always available, not just in edit mode
-          onHandleClick: (handleId) => handleNodeHandleClick(nodeId, handleId), // Pass full node ID
           nodeId: nodeId // Add full node ID for reference
         }
       });
