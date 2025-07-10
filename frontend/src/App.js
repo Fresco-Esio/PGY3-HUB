@@ -2554,7 +2554,8 @@ const Dashboard = () => {
           due_date: task.due_date,
           originalData: task,
           onDelete: () => deleteNode(task.id, 'task'), // Always available, not just in edit mode
-          onHandleClick: handleNodeHandleClick // Add handle click handler
+          onHandleClick: (handleId) => handleNodeHandleClick(nodeId, handleId), // Pass full node ID
+          nodeId: nodeId // Add full node ID for reference
         }
       });
     });
