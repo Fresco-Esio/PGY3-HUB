@@ -366,7 +366,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # Local development frontend
-        "https://nodemap-studio.preview.emergentagent.com"  # Frontend preview environment
+        "https://d9923774-e8d4-4f3b-9061-6ce205a98e0e.preview.emergentagent.com"  # Frontend preview environment
     ],
     allow_credentials=True,
     allow_methods=["*"],
