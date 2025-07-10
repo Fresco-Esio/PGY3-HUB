@@ -810,6 +810,70 @@
       "selectable": true,
       "focusable": true,
       "deletable": true
+    },
+    {
+      "id": "literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0-topic-d5c779b5-4f43-4028-898f-10847bba377d-1752128988373",
+      "source": "literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
+      "target": "topic-d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "right",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
+    },
+    {
+      "id": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee-literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0-1752128992784",
+      "source": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee",
+      "target": "literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
     }
   ]
 }
