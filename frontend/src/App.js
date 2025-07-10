@@ -2355,8 +2355,8 @@ const Dashboard = () => {
       id: `${params.source}-${params.target}-${Date.now()}`, // Ensure unique ID
       source: params.source,
       target: params.target,
-      sourceHandle: params.sourceHandle, // CRITICAL: Preserve source handle
-      targetHandle: params.targetHandle, // CRITICAL: Preserve target handle
+      sourceHandle: params.sourceHandle || 'connection-hotspot', // Default to hotspot if not provided
+      targetHandle: params.targetHandle || 'connection-hotspot', // Default to hotspot if not provided
       type: 'smoothstep',
       style: { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
       label: '', // NEW: Add label property for edge labeling
