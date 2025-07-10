@@ -712,57 +712,17 @@ const LiteratureNode = ({ data, selected }) => {
           : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
       }`}
     >
-      {/* Connection Handles - One per position with click handlers */}
+      {/* Connection Hotspot - Single handle on right side */}
       <Handle 
-        id="top"
-        type="source" 
-        position={Position.Top} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('top');
-        }}
-      />
-      
-      <Handle 
-        id="bottom"
-        type="source" 
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('bottom');
-        }}
-      />
-      
-      <Handle 
-        id="left"
-        type="source" 
-        position={Position.Left} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('left');
-        }}
-      />
-      
-      <Handle 
-        id="right"
+        id="connection-hotspot"
         type="source" 
         position={Position.Right} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 opacity-80 hover:opacity-100 cursor-pointer" 
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-        isConnectable={true}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('right');
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          top: '50%', 
+          transform: 'translateY(-50%)'
         }}
+        isConnectable={true}
       />
       
       <div className="flex items-center gap-2 mb-1">
