@@ -166,6 +166,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "FIXED PROGRAMMATIC CONNECTION SYSTEM: 1) Added handle ID migration in convertDataToReactFlow to convert old format (source-bottom, target-top) to new format (bottom, top) 2) Verified onHandleClick prop is properly passed to all node components 3) handleNodeHandleClick function is implemented and working 4) onPaneClick handler resets connection state 5) All visual elements (handles, nodes, connections) are displaying correctly. The issue was a mismatch between stored handle IDs and current UI handle IDs."
+        - working: true
+          agent: "main"
+          comment: "CRITICAL FIX APPLIED: 1) Fixed function declaration order - moved handleNodeHandleClick before convertDataToReactFlow to prevent ReferenceError 2) Updated all node types to pass correct nodeId format (topic-123 instead of raw 123) 3) Modified handle click handlers to use simplified signature 4) Standardized backend URL to http://localhost:8001 5) Connection system now works correctly - handles respond to clicks, toast notifications appear, and connections are created between different nodes. Visual evidence shows purple connection lines between nodes and console logs confirm successful connection reconstruction."
     implemented: true
     working: true
     file: "App.js"
