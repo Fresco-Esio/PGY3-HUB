@@ -2342,94 +2342,10 @@ const Dashboard = () => {
       });
     });
 
-    // CRITICAL: Reconstruct edges from stored connections with complete properties
-    console.log('Reconstructing edges from stored connections:', data.connections?.length || 0);
-    console.log('Available node IDs:', flowNodes.map(n => n.id));
-    if (data.connections && data.connections.length > 0) {
-      data.connections.forEach(connection => {
-        console.log('Reconstructing edge:', connection);
-        
-        // Fix the critical issue: Convert raw UUIDs to full node IDs
-        const findFullNodeId = (rawId) => {
-          if (!rawId) return null;
-          
-          // If it's already a full ID (contains dash prefix), use as-is
-          if (rawId.includes('topic-') || rawId.includes('case-') || rawId.includes('task-') || rawId.includes('literature-')) {
-            return rawId;
-          }
-          
-          // Find the corresponding full node ID
-          const matchingNode = flowNodes.find(node => 
-            node.id === `topic-${rawId}` || 
-            node.id === `case-${rawId}` || 
-            node.id === `task-${rawId}` || 
-            node.id === `literature-${rawId}`
-          );
-          
-          return matchingNode ? matchingNode.id : null;
-        };
-        
-        const sourceNodeId = findFullNodeId(connection.source);
-        const targetNodeId = findFullNodeId(connection.target);
-        
-        console.log(`Original source: ${connection.source} -> Full node ID: ${sourceNodeId}`);
-        console.log(`Original target: ${connection.target} -> Full node ID: ${targetNodeId}`);
-        
-        // Validate that source and target nodes exist
-        if (!sourceNodeId || !targetNodeId) {
-          console.warn(`Skipping edge reconstruction - missing or invalid node IDs. Source: ${sourceNodeId}, Target: ${targetNodeId}`);
-          return; // Skip this edge
-        }
-        
-        // Handle migration: Convert old handle IDs to new simplified format
-        const migrateHandleId = (handleId) => {
-          if (!handleId) return null;
-          
-          // Convert old format (source-bottom, target-top) to new format (bottom, top)
-          if (handleId.startsWith('source-') || handleId.startsWith('target-')) {
-            return handleId.split('-')[1]; // Extract the position part
-          }
-          
-          // Already in new format
-          return handleId;
-        };
-        
-        // Ensure all critical properties are preserved with corrected node IDs
-        const reconstructedEdge = {
-          id: connection.id,
-          source: sourceNodeId, // Use corrected full node ID
-          target: targetNodeId, // Use corrected full node ID
-          sourceHandle: migrateHandleId(connection.sourceHandle), // CRITICAL: Migrate and preserve source handle
-          targetHandle: migrateHandleId(connection.targetHandle), // CRITICAL: Migrate and preserve target handle
-          type: connection.type || 'smoothstep',
-          style: connection.style || { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
-          label: connection.label || '', // NEW: Preserve edge label
-          labelStyle: { fill: '#374151', fontWeight: 500 }, // Add label styling
-          labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 }, // Add label background
-          labelBgPadding: [8, 4], // Add padding around label
-          labelShowBg: true, // Show background for label
-          labelBgBorderRadius: 4, // Rounded corners for label background
-          animated: false,
-          selectable: true,
-          focusable: true,
-          deletable: true
-        };
-        
-        flowEdges.push(reconstructedEdge);
-        console.log('Edge reconstructed successfully:', reconstructedEdge);
-      });
-    }
-
-    console.log(`convertDataToReactFlow completed: ${flowNodes.length} nodes, ${flowEdges.length} edges`);
+    console.log(`convertDataToReactFlow completed: ${flowNodes.length} nodes`);
     
-    // Add connection loading debug info
-    if (flowEdges.length > 0) {
-      console.log('Sample edge styles:', flowEdges[0].style);
-      console.log('All edge IDs:', flowEdges.map(e => e.id));
-    }
-    
+    // Set only nodes - edges will be handled by the useEffect watching mindMapData.connections
     setNodes(flowNodes);
-    setEdges(flowEdges);
   };
 
   const onConnect = useCallback((params) => {
