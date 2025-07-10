@@ -2396,15 +2396,22 @@ const Dashboard = () => {
         return;
       }
       
-      // Create new edge object
+      console.log('Creating connection:', {
+        source: startHandle.nodeId,
+        target: targetHandle.nodeId,
+        sourceHandle: startHandle.handleId,
+        targetHandle: targetHandle.handleId
+      });
+      
+      // Create new edge object directly
       const newEdge = {
-        id: `edge-${Date.now()}`, // Unique ID
+        id: `${startHandle.nodeId}-${targetHandle.nodeId}-${Date.now()}`, // Unique ID
         source: startHandle.nodeId,
         target: targetHandle.nodeId,
         sourceHandle: startHandle.handleId,
         targetHandle: targetHandle.handleId,
         type: 'smoothstep',
-        style: { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
+        style: { stroke: '#2563eb', strokeWidth: 3 },
         label: '',
         labelStyle: { fill: '#374151', fontWeight: 500 },
         labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 },
@@ -2417,21 +2424,29 @@ const Dashboard = () => {
         deletable: true
       };
       
-      console.log('Creating connection:', newEdge);
+      console.log('Adding edge directly:', newEdge);
       
-      // Use the same onConnect approach for consistency
-      // This ensures proper validation and React Flow integration
-      const connectionParams = {
-        source: startHandle.nodeId,
-        target: targetHandle.nodeId,
-        sourceHandle: startHandle.handleId,
-        targetHandle: targetHandle.handleId
-      };
+      // Add edge to React Flow state
+      setEdges((eds) => addEdge(newEdge, eds));
       
-      console.log('Connection params for onConnect:', connectionParams);
-      
-      // Call the onConnect function to ensure proper edge creation
-      onConnect(connectionParams);
+      // Update mindMapData and trigger auto-save
+      setMindMapData(prevData => {
+        const newData = { ...prevData };
+        
+        // Ensure connections array exists
+        if (!newData.connections) {
+          newData.connections = [];
+        }
+        
+        // Add the new connection
+        newData.connections = [...newData.connections, newEdge];
+        
+        // Trigger auto-save
+        autoSaveMindMapData(newData);
+        addToast('Connection created and saved', 'success', 2000);
+        
+        return newData;
+      });
       
       // Reset connection state
       setStartHandle(null);
