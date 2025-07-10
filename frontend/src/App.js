@@ -422,13 +422,6 @@ const TopicNode = ({ data, selected }) => {
         isConnectable={true}
       />
       
-      {/* Custom CSS for hover effect */}
-      <style jsx>{`
-        .group:hover .connection-hotspot {
-          opacity: 1;
-        }
-      `}</style>
-      
       {/* Priority indicator */}
       {data.priority && (
         <div className="absolute -top-2 -right-2">
