@@ -2451,7 +2451,7 @@ const Dashboard = () => {
       // Reset connection state
       setStartHandle(null);
     }
-  }, [startHandle, onConnect, addToast]);
+  }, [startHandle, setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
   // Memoized function to convert data to React Flow format
   const convertDataToReactFlow = (data, preserveCurrentPositions = false) => {
