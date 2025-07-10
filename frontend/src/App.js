@@ -2372,6 +2372,7 @@ const Dashboard = () => {
   // Programmatic connection handler
   const handleNodeHandleClick = useCallback((nodeId, handleId) => {
     console.log('Handle clicked:', nodeId, handleId);
+    console.log('Node ID type:', typeof nodeId, 'Handle ID type:', typeof handleId);
     
     if (!startHandle) {
       // Start a new connection
@@ -2381,6 +2382,9 @@ const Dashboard = () => {
     } else {
       // Complete the connection
       const targetHandle = { nodeId, handleId };
+      
+      console.log('Start handle:', startHandle);
+      console.log('Target handle:', targetHandle);
       
       // Prevent self-connections
       if (startHandle.nodeId === targetHandle.nodeId) {
