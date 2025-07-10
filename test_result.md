@@ -301,9 +301,9 @@ frontend:
 
   - task: "Add multi-directional connection handles to all nodes"
     implemented: true
-    working: true
+    working: false
     file: "App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -313,6 +313,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "COMPREHENSIVE BACKEND TESTING COMPLETED: All backend API endpoints are working correctly with the new multi-directional handle IDs. Tested GET /api/mindmap-data which returns complete mind map data structure including topics, cases, tasks, literature, and connections. Tested PUT /api/mindmap-data which successfully saves complete mind map data structure. Verified connection persistence with different handle IDs (top, right, bottom, left) - all are properly stored and retrieved. Backend correctly handles both old format (source-bottom) and new format (bottom) handle IDs for backward compatibility. Created and verified connections using all four directional handles: top-to-bottom, right-to-left, bottom-to-top, left-to-right. Cross-entity connections between different node types work correctly. Connection persistence is maintained across multiple save/load cycles. The backend API fully supports the new multi-directional handle ID system as required."
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL ISSUES FOUND IN MULTI-DIRECTIONAL CONNECTION SYSTEM: 1) HANDLE IDs MISSING: All handles have ID='no-id' instead of the expected 'top', 'right', 'bottom', 'left' IDs. This breaks the handle identification system. 2) HANDLE VISIBILITY BROKEN: Handles have opacity-0 group-hover:opacity-100 classes but nodes don't have 'group' class, so handles never become visible on hover. 3) CONNECTION CREATION FAILING: Cannot create new connections through UI interaction due to handle visibility and ID issues. 4) EXISTING CONNECTIONS WORKING: 10 existing connections persist correctly across mode switches and page refreshes, indicating the persistence system works. 5) HANDLE STRUCTURE CORRECT: Each node has 8 handles (2 per side) with correct positioning classes, but the implementation has critical flaws preventing user interaction. The multi-directional system is structurally implemented but functionally broken."
 
   - task: "Global search functionality"
     implemented: true
