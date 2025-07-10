@@ -874,6 +874,85 @@
       "selectable": true,
       "focusable": true,
       "deletable": true
+    },
+    {
+      "id": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee-topic-topic-5496ea5e916d488298a03d9eb5612665-1752128997638",
+      "source": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee",
+      "target": "topic-topic-5496ea5e916d488298a03d9eb5612665",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
+    },
+    {
+      "id": "e6622fec627ef4a6fac4dc5861786595b",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
+      "sourceHandle": "d5c779b5-4f43-4028-898f-10847bba377d-bottom",
+      "targetHandle": "0dcc0181-31c2-49a2-a0b7-17a130e67a30-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e4a5da3b1b6334714af6056cface9af89",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Topic-Case Connection"
+    },
+    {
+      "id": "e3a6665a430924f83a733ec2d8787ac14",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "target": "ec0e1a31-2247-412e-b3a5-24d211206ace",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Topic-Literature Connection"
+    },
+    {
+      "id": "ede17a3e5cbb64146bfa24db9083857c4",
+      "source": "10246319-e1e6-4032-9acd-3725b1d85c45",
+      "target": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Task-Topic Connection"
+    },
+    {
+      "id": "eddcd462cd39c400b96669f1affaa0f09",
+      "source": "10246319-e1e6-4032-9acd-3725b1d85c45",
+      "target": "3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Task-Case Connection"
+    },
+    {
+      "id": "e135282c9a4ec493ba13b211a0c098133",
+      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
     }
   ]
 }
