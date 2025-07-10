@@ -534,53 +534,17 @@ const CaseNode = ({ data, selected }) => {
           : 'border-gray-200 hover:border-blue-300 hover:ring-2 hover:ring-blue-100'
       } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''}`}
     >
-      {/* Connection Handles - One per position with click handlers */}
+      {/* Connection Hotspot - Single handle on right side */}
       <Handle 
-        id="top"
-        type="source" 
-        position={Position.Top} 
-        isConnectable={true} 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('top');
-        }}
-      />
-      
-      <Handle 
-        id="bottom"
-        type="source" 
-        position={Position.Bottom} 
-        isConnectable={true} 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('bottom');
-        }}
-      />
-      
-      <Handle 
-        id="left"
-        type="source" 
-        position={Position.Left} 
-        isConnectable={true} 
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('left');
-        }}
-      />
-      
-      <Handle 
-        id="right"
+        id="connection-hotspot"
         type="source" 
         position={Position.Right} 
-        isConnectable={true} 
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onHandleClick?.('right');
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          top: '50%', 
+          transform: 'translateY(-50%)'
         }}
+        isConnectable={true}
       />
       
       {/* Urgency indicator */}
