@@ -793,7 +793,7 @@ const LiteratureNode = ({ data, selected }) => {
         style={{ left: '50%', transform: 'translateX(-50%)' }}
         onClick={(e) => {
           e.stopPropagation();
-          data.onHandleClick?.(data.originalData.id, 'top');
+          data.onHandleClick?.('top');
         }}
       />
       
