@@ -676,7 +676,6 @@ const LiteratureNode = ({ data, selected }) => {
       {/* Connection Hotspot - Single handle on right side */}
       <Handle 
         id="connection-hotspot"
-        type="source" 
         position={Position.Right} 
         className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
         style={{ 
