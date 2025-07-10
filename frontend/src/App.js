@@ -2575,9 +2575,22 @@ const Dashboard = () => {
 
     // CRITICAL: Reconstruct edges from stored connections with complete properties
     console.log('Reconstructing edges from stored connections:', data.connections?.length || 0);
+    console.log('Available node IDs:', flowNodes.map(n => n.id));
     if (data.connections && data.connections.length > 0) {
       data.connections.forEach(connection => {
         console.log('Reconstructing edge:', connection);
+        
+        // Validate that source and target nodes exist
+        const sourceExists = flowNodes.some(node => node.id === connection.source);
+        const targetExists = flowNodes.some(node => node.id === connection.target);
+        
+        console.log(`Source node ${connection.source} exists: ${sourceExists}`);
+        console.log(`Target node ${connection.target} exists: ${targetExists}`);
+        
+        if (!sourceExists || !targetExists) {
+          console.warn(`Skipping edge reconstruction - missing nodes. Source: ${sourceExists}, Target: ${targetExists}`);
+          return; // Skip this edge
+        }
         
         // Handle migration: Convert old handle IDs to new simplified format
         const migrateHandleId = (handleId) => {
