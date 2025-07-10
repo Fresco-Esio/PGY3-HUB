@@ -430,7 +430,7 @@ const TopicNode = ({ data, selected }) => {
         style={{ left: '50%', transform: 'translateX(-50%)' }}
         onClick={(e) => {
           e.stopPropagation();
-          data.onHandleClick?.(data.originalData.id, 'bottom');
+          data.onHandleClick?.('bottom');
         }}
       />
       
