@@ -299,17 +299,17 @@ frontend:
           agent: "main"
           comment: "RICH TEXT EDITOR FULLY FUNCTIONAL: After thorough code analysis, confirmed that: 1) RichTextEditor component exists and is properly integrated with Tiptap 2) Edit button is present in SubpageWindow component (lines 1292-1297) with proper edit icon and click handler 3) isEditing state toggles edit mode correctly 4) renderEditableField function conditionally uses RichTextEditor for textarea fields 5) HTML content is properly saved and displayed using dangerouslySetInnerHTML 6) Backward compatibility with plain text content is maintained 7) stripHtml utility works for global search. The edit functionality is accessible through double-clicking nodes and clicking the edit button."
 
-  - task: "Delete button visibility on nodes"
+  - task: "Add multi-directional connection handles to all nodes"
     implemented: true
-    working: false
+    working: "NA"
     file: "App.js"
-    stuck_count: 1
-    priority: "medium"
-    needs_retesting: false
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
     status_history:
-        - working: false
-          agent: "testing"
-          comment: "ISSUE FOUND: Delete buttons are present on nodes but are not easily discoverable. Testing found that delete buttons exist (with X icons) but they are not prominently visible. The buttons are present in the DOM and functional, but users may have difficulty finding them. This affects the user experience for node management operations."
+        - working: "NA"
+          agent: "main"
+          comment: "MULTI-DIRECTIONAL HANDLES IMPLEMENTED: Added stacked source and target handles to all four sides (Top, Right, Bottom, Left) for all four node types: TopicNode, CaseNode, TaskNode, and LiteratureNode. Each node now has 8 handles total (2 per side). Updated handle IDs to match their positions (top, right, bottom, left). Adjusted styling for proper positioning with correct transforms. All handles maintain hover visibility and z-index stacking. This completes the multi-directional connection system that allows users to create connections from any side of any node."
 
   - task: "Global search functionality"
     implemented: true

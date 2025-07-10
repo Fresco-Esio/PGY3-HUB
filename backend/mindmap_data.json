@@ -682,6 +682,134 @@
       "selectable": true,
       "focusable": true,
       "deletable": true
+    },
+    {
+      "id": "topic-e22bf3be-9160-472a-823f-c0557af9e57c-case-3361cea1-544d-4826-8b6a-361efb4bf589-1752128613720",
+      "source": "topic-e22bf3be-9160-472a-823f-c0557af9e57c",
+      "target": "case-3361cea1-544d-4826-8b6a-361efb4bf589",
+      "sourceHandle": "right",
+      "targetHandle": "right",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
+    },
+    {
+      "id": "task-10246319-e1e6-4032-9acd-3725b1d85c45-case-43a75b57-f47f-49c1-aacc-991f3fb1f6f5-1752128619301",
+      "source": "task-10246319-e1e6-4032-9acd-3725b1d85c45",
+      "target": "case-43a75b57-f47f-49c1-aacc-991f3fb1f6f5",
+      "sourceHandle": "right",
+      "targetHandle": "right",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
+    },
+    {
+      "id": "literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1-topic-topic-5496ea5e916d488298a03d9eb5612665-1752128628544",
+      "source": "literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1",
+      "target": "topic-topic-5496ea5e916d488298a03d9eb5612665",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
+    },
+    {
+      "id": "topic-topic-5415f719cd8745d6bd7ca1e8740b73b1-literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1-1752128632388",
+      "source": "topic-topic-5415f719cd8745d6bd7ca1e8740b73b1",
+      "target": "literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1",
+      "sourceHandle": "right",
+      "targetHandle": "right",
+      "type": "smoothstep",
+      "style": {
+        "stroke": "#2563eb",
+        "strokeWidth": 3
+      },
+      "label": "",
+      "labelStyle": {
+        "fill": "#374151",
+        "fontWeight": 500
+      },
+      "labelBgStyle": {
+        "fill": "#f9fafb",
+        "stroke": "#d1d5db",
+        "strokeWidth": 1
+      },
+      "labelBgPadding": [
+        8,
+        4
+      ],
+      "labelShowBg": true,
+      "labelBgBorderRadius": 4,
+      "animated": false,
+      "selectable": true,
+      "focusable": true,
+      "deletable": true
     }
   ]
 }
