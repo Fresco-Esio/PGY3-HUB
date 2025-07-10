@@ -2413,27 +2413,19 @@ const Dashboard = () => {
       
       console.log('Creating connection:', newEdge);
       
-      // Add edge to React Flow
-      addEdges([newEdge]);
+      // Use the same onConnect approach for consistency
+      // This ensures proper validation and React Flow integration
+      const connectionParams = {
+        source: startHandle.nodeId,
+        target: targetHandle.nodeId,
+        sourceHandle: startHandle.handleId,
+        targetHandle: targetHandle.handleId
+      };
       
-      // Update mindMapData and trigger auto-save
-      setMindMapData(prevData => {
-        const newData = { ...prevData };
-        
-        // Ensure connections array exists
-        if (!newData.connections) {
-          newData.connections = [];
-        }
-        
-        // Add the new connection
-        newData.connections = [...newData.connections, newEdge];
-        
-        // Trigger auto-save
-        autoSaveMindMapData(newData);
-        addToast('Connection created and saved', 'success', 2000);
-        
-        return newData;
-      });
+      console.log('Connection params for onConnect:', connectionParams);
+      
+      // Call the onConnect function to ensure proper edge creation
+      onConnect(connectionParams);
       
       // Reset connection state
       setStartHandle(null);
