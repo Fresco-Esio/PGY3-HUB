@@ -953,14 +953,42 @@ const LiteratureNode = ({ data, selected }) => {
         selected 
           ? 'border-purple-400 shadow-xl scale-105 ring-4 ring-purple-200' 
           : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
-      }`}
+      } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''}`}
     >
-      {/* Connection Hotspot - Stacked source and target handles */}
+      {/* Connection Hotspots - Multi-directional stacked handles */}
+      
+      {/* Top Handles */}
       <Handle 
-        id="connection-hotspot"
+        id="top"
+        type="source"
+        position={Position.Top} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          zIndex: 2
+        }}
+        isConnectable={true}
+      />
+      <Handle 
+        id="top"
+        type="target"
+        position={Position.Top} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          zIndex: 1
+        }}
+        isConnectable={true}
+      />
+      
+      {/* Right Handles */}
+      <Handle 
+        id="right"
         type="source"
         position={Position.Right} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
         style={{ 
           top: '50%', 
           transform: 'translateY(-50%)',
@@ -969,10 +997,62 @@ const LiteratureNode = ({ data, selected }) => {
         isConnectable={true}
       />
       <Handle 
-        id="connection-hotspot"
+        id="right"
         type="target"
         position={Position.Right} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          zIndex: 1
+        }}
+        isConnectable={true}
+      />
+      
+      {/* Bottom Handles */}
+      <Handle 
+        id="bottom"
+        type="source"
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          zIndex: 2
+        }}
+        isConnectable={true}
+      />
+      <Handle 
+        id="bottom"
+        type="target"
+        position={Position.Bottom} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          zIndex: 1
+        }}
+        isConnectable={true}
+      />
+      
+      {/* Left Handles */}
+      <Handle 
+        id="left"
+        type="source"
+        position={Position.Left} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        style={{ 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          zIndex: 2
+        }}
+        isConnectable={true}
+      />
+      <Handle 
+        id="left"
+        type="target"
+        position={Position.Left} 
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
         style={{ 
           top: '50%', 
           transform: 'translateY(-50%)',
