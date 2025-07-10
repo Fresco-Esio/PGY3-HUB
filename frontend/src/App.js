@@ -409,108 +409,51 @@ const TopicNode = ({ data, selected }) => {
           : `0 4px 20px ${data.color || '#3B82F6'}20`
       }}
     >
-      {/* Connection Hotspots - Multi-directional stacked handles */}
-      
-      {/* Top Handles */}
+      {/* Universal Always-On Handles */}
       <Handle 
         id="top"
         type="source"
         position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        className="w-3 h-3 !bg-blue-500 border-2 border-white shadow-md" 
         style={{ 
           left: '50%', 
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle 
-        id="top"
-        type="target"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
-          transform: 'translateX(-50%)',
-          zIndex: 1
+          transform: 'translateX(-50%)'
         }}
         isConnectable={true}
       />
       
-      {/* Right Handles */}
       <Handle 
         id="right"
         type="source"
         position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        className="w-3 h-3 !bg-blue-500 border-2 border-white shadow-md" 
         style={{ 
           top: '50%', 
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle 
-        id="right"
-        type="target"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
-          transform: 'translateY(-50%)',
-          zIndex: 1
+          transform: 'translateY(-50%)'
         }}
         isConnectable={true}
       />
       
-      {/* Bottom Handles */}
       <Handle 
         id="bottom"
         type="source"
         position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        className="w-3 h-3 !bg-blue-500 border-2 border-white shadow-md" 
         style={{ 
           left: '50%', 
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle 
-        id="bottom"
-        type="target"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
-          transform: 'translateX(-50%)',
-          zIndex: 1
+          transform: 'translateX(-50%)'
         }}
         isConnectable={true}
       />
       
-      {/* Left Handles */}
       <Handle 
         id="left"
         type="source"
         position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
+        className="w-3 h-3 !bg-blue-500 border-2 border-white shadow-md" 
         style={{ 
           top: '50%', 
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle 
-        id="left"
-        type="target"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
-          transform: 'translateY(-50%)',
-          zIndex: 1
+          transform: 'translateY(-50%)'
         }}
         isConnectable={true}
       />
