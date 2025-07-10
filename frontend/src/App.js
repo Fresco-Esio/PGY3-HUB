@@ -1771,8 +1771,7 @@ const Dashboard = () => {
   // Edge label editing state
   const [editingEdge, setEditingEdge] = useState(null);
   
-  // Programmatic connection state
-  const [startHandle, setStartHandle] = useState(null);
+
 
   // Helper function to add toast notifications
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
