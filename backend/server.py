@@ -361,10 +361,13 @@ async def get_literature():
 # Include the router in the main app
 app.include_router(api_router)
 
-# CORS middleware configuration for local development
+# CORS middleware configuration for local development and preview environment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Specific to local frontend
+    allow_origins=[
+        "http://localhost:3000",  # Local development frontend
+        "https://nodemap-studio.preview.emergentagent.com"  # Frontend preview environment
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
