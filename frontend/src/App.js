@@ -52,6 +52,7 @@ import {
   Heart,
   Bookmark
 } from 'lucide-react';
+import TemplateManager from './components/TemplateManager';
 import RichTextEditor from './components/RichTextEditor';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -1831,7 +1832,18 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
     </div>
   );
 };
-const NodeSelector = ({ isOpen, onClose, onSelect }) => {
+const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
+  const [selectedNodeType, setSelectedNodeType] = useState(null);
+
+  // When the modal is closed, reset the internal state
+  useEffect(() => {
+    if (!isOpen) {
+      // Add a small delay to allow the closing animation to finish before state reset
+      const timer = setTimeout(() => setSelectedNodeType(null), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const nodeTypes = [
@@ -1841,11 +1853,35 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
     { type: 'task', label: 'Task', icon: CheckSquare, color: 'bg-amber-600', description: 'Add a task or to-do item' }
   ];
 
+  const handleNodeTypeSelect = (nodeType) => {
+    setSelectedNodeType(nodeType);
+  };
+
+  const handleFinalSelect = (templateId = null) => {
+    onSelect(selectedNodeType, templateId);
+    onClose();
+  };
+
+  const filteredTemplates = selectedNodeType ? (templates || []).filter(t => t.nodeType === selectedNodeType) : [];
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm animate-in fade-in-25 duration-300">
+      <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 ease-out">
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">Add New Node</h3>
+          <div className="flex items-center gap-3">
+            {selectedNodeType && (
+              <button
+                onClick={() => setSelectedNodeType(null)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <ArrowLeft size={20} />
+              </button>
+            )}
+            <h3 className="text-xl font-semibold text-gray-800">
+              {selectedNodeType ? `Select a ${selectedNodeType} template` : 'Add New Node'}
+            </h3>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 p-1"
@@ -1853,26 +1889,74 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
             <X size={20} />
           </button>
         </div>
-        
-        <div className="space-y-3">
-          {nodeTypes.map(({ type, label, icon: Icon, color, description }) => (
-            <button
-              key={type}
-              onClick={() => {
-                onSelect(type);
-                onClose();
-              }}
-              className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
-            >
-              <div className={`${color} p-2 rounded-lg text-white`}>
-                <Icon size={20} />
+
+        {/* Content */}
+        <div className="relative overflow-hidden" style={{ minHeight: '200px' }}>
+          {/* View 1: Node Type Selection */}
+          <div className={`transition-transform duration-300 ease-in-out ${selectedNodeType ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}>
+            <div className="space-y-3">
+              {nodeTypes.map(({ type, label, icon: Icon, color, description }) => (
+                <button
+                  key={type}
+                  onClick={() => handleNodeTypeSelect(type)}
+                  className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
+                >
+                  <div className={`${color} p-2 rounded-lg text-white`}>
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-800">{label}</div>
+                    <div className="text-sm text-gray-500">{description}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* View 2: Template Selection */}
+          <div className={`absolute top-0 left-0 w-full transition-transform duration-300 ease-in-out ${selectedNodeType ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
+            {selectedNodeType && (
+              <div className="space-y-3">
+                {/* Create Blank Option */}
+                <button
+                  onClick={() => handleFinalSelect(null)}
+                  className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
+                >
+                  <div className="bg-gray-200 p-2 rounded-lg text-gray-600">
+                    <Plus size={20} />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-800">Create Blank {selectedNodeType}</div>
+                    <div className="text-sm text-gray-500">Start with an empty node.</div>
+                  </div>
+                </button>
+
+                {/* Filtered Templates */}
+                {filteredTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => handleFinalSelect(template.id)}
+                    className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
+                  >
+                    <div className="bg-indigo-100 p-2 rounded-lg text-indigo-600">
+                      <FileText size={20} />
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-800">{template.name}</div>
+                      <div className="text-sm text-gray-500 truncate">{template.data?.description || template.data?.abstract || template.data?.assessment_plan || 'No description'}</div>
+
+                    </div>
+                  </button>
+                ))}
+                
+                {filteredTemplates.length === 0 && (
+                   <div className="text-center text-sm text-gray-500 py-4">
+                     No templates found for this node type.
+                   </div>
+                )}
               </div>
-              <div className="text-left">
-                <div className="font-medium text-gray-800">{label}</div>
-                <div className="text-sm text-gray-500">{description}</div>
-              </div>
-            </button>
-          ))}
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -1960,10 +2044,15 @@ const Dashboard = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [mindMapData, setMindMapData] = useState({ 
+    // ... topics, cases, tasks, literature, templates, connections
     topics: [], 
     cases: [], 
     tasks: [], 
     literature: [],
+    templates: [
+      { id: 'test-template-1', name: 'My Test Template', nodeType: 'case', content: 'Hello World' }, 
+      { id: 'test-template-2', name: 'Another Test Template', nodeType: 'topic', content: 'Some topic content' }
+    ],
     connections: [] // Store complete React Flow edge objects for proper persistence
   });
   const [isEditing, setIsEditing] = useState(false);
@@ -1986,6 +2075,7 @@ const Dashboard = () => {
   
   // Edge label editing state
   const [editingEdge, setEditingEdge] = useState(null);
+  const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   
 
 
@@ -2158,8 +2248,8 @@ const Dashboard = () => {
     }
 
     try {
-      // Clear all data
-      const emptyData = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
+      // Clear all data, including templates
+      const emptyData = { topics: [], cases: [], tasks: [], literature: [], templates: [], connections: [] };
       setMindMapData(emptyData);
       setNodes([]);
       setEdges([]);
@@ -2288,6 +2378,10 @@ const Dashboard = () => {
         if (!localData.connections) {
           localData.connections = [];
         }
+        // Ensure templates array exists for backward compatibility
+        if (!localData.templates) {
+          localData.templates = [];
+        }
         
         setMindMapData(localData);
         convertDataToReactFlow(localData);
@@ -2327,6 +2421,10 @@ const Dashboard = () => {
       // Ensure connections array exists for backend data too
       if (!response.data.connections) {
         response.data.connections = [];
+      }
+      // Ensure templates array exists for backend data too
+      if (!response.data.templates) {
+        response.data.templates = [];
       }
       
       setMindMapData(response.data);
@@ -2995,7 +3093,58 @@ const Dashboard = () => {
     });
   }, [setMindMapData, setEdges, autoSaveMindMapData, addToast]);
 
+  // Placeholder handlers for Template Manager
+  const handleCreateTemplate = useCallback((newTemplate) => {
+    const generateId = () => {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    };
 
+    const completeNewTemplate = {
+      ...newTemplate,
+      id: generateId(),
+    };
+
+    setMindMapData(prevData => {
+      const updatedData = {
+        ...prevData,
+        templates: [...(prevData.templates || []), completeNewTemplate]
+      };
+      autoSaveMindMapData(updatedData);
+      addToast('Template created successfully', 'success');
+      return updatedData;
+    });
+  }, [setMindMapData, autoSaveMindMapData, addToast]);
+
+  const handleDeleteTemplate = useCallback((templateId) => {
+    setMindMapData(prevData => {
+      const updatedData = {
+        ...prevData,
+        templates: prevData.templates.filter(template => template.id !== templateId)
+      };
+      autoSaveMindMapData(updatedData);
+      addToast('Template deleted', 'success');
+      return updatedData;
+        });
+  }, [setMindMapData, autoSaveMindMapData, addToast]);
+
+  const handleUpdateTemplate = useCallback((updatedTemplate) => {
+    setMindMapData(prevData => {
+      const updatedTemplates = prevData.templates.map(t => 
+        t.id === updatedTemplate.id ? { ...t, ...updatedTemplate } : t
+      );
+      const updatedData = {
+        ...prevData,
+        templates: updatedTemplates
+      };
+      autoSaveMindMapData(updatedData);
+      addToast('Template updated successfully', 'success');
+      return updatedData;
+    });
+  }, [setMindMapData, autoSaveMindMapData, addToast]);
 
   // Dagre layout configuration
   const getLayoutedElements = (nodes, edges, direction = 'TB') => {
@@ -3206,7 +3355,7 @@ const Dashboard = () => {
     }
   };
 
-  const addNewNode = async (nodeType) => {
+  const addNewNode = async (nodeType, templateId) => {
     try {
       // Find a free position in the center of the current view
       const findFreePosition = () => {
@@ -3268,6 +3417,15 @@ const Dashboard = () => {
       const newId = generateId();
       const now = new Date();
       
+      // Find the template data if a templateId is provided
+      let templateData = {};
+      if (templateId) {
+        const template = mindMapData.templates.find(t => t.id === templateId);
+        if (template) {
+          templateData = template.data || {};
+        }
+      }
+      
       // Create new node data based on type
       let newNodeData = {
         id: newId,
@@ -3292,19 +3450,19 @@ const Dashboard = () => {
         case 'case':
           newNodeData = {
             ...newNodeData,
-            case_id: `CASE-${Date.now()}`,
+            case_id: `CASE-${Date.now()}`, // Keep ID unique
             encounter_date: now,
             primary_diagnosis: 'New Diagnosis',
             secondary_diagnoses: [],
             age: null,
             gender: null,
-            chief_complaint: 'New complaint',
+            chief_complaint: 'New complaint', // Template content is better for assessment/plan
             history_present_illness: null,
             medical_history: null,
             medications: [],
             mental_status_exam: null,
             assessment_plan: null,
-            notes: null,
+            notes: null, // Or here, but assessment_plan seems more appropriate for a template
             status: 'active',
             linked_topics: []
           };
@@ -3334,11 +3492,15 @@ const Dashboard = () => {
             linked_topics: []
           };
           break;
-        default:
+                default:
           throw new Error(`Unknown node type: ${nodeType}`);
       }
 
+      // Apply template data over defaults
+      Object.assign(newNodeData, templateData);
+
       console.log('Creating new node:', nodeType, newNodeData);
+      
       
       // Create React Flow node
       const newNode = {
@@ -3579,6 +3741,14 @@ const Dashboard = () => {
           </LoadingButton>
 
           <LoadingButton
+            onClick={() => setIsTemplateManagerOpen(true)}
+            icon={Bookmark}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm"
+          >
+            Manage Templates
+          </LoadingButton>
+
+          <LoadingButton
             onClick={handleExportPatientCases}
             loading={isExportingCSV}
             disabled={mindMapData.cases.length === 0}
@@ -3805,6 +3975,7 @@ const Dashboard = () => {
         isOpen={showNodeSelector}
         onClose={() => setShowNodeSelector(false)}
         onSelect={addNewNode}
+        templates={mindMapData.templates || []}
       />
 
       {/* Toast Notifications */}
@@ -3852,6 +4023,18 @@ const Dashboard = () => {
           isOpen={true}
           onClose={() => setEditingEdge(null)}
           onSave={saveEdgeLabel}
+        />
+      )}
+
+      {/* Template Manager Modal */}
+      {isTemplateManagerOpen && (
+        <TemplateManager
+          isOpen={isTemplateManagerOpen}
+          onClose={() => setIsTemplateManagerOpen(false)}
+          onCreate={handleCreateTemplate}
+          onUpdate={handleUpdateTemplate}
+          onDelete={handleDeleteTemplate} 
+          templates={mindMapData.templates}
         />
       )}
 
