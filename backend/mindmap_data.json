@@ -1,160 +1,64 @@
 {
   "topics": [
     {
-      "id": "d5c779b5-4f43-4028-898f-10847bba377d",
-      "title": "Bulk Test Topic 070e65",
-      "description": "Testing bulk updates",
-      "category": "Test Category",
-      "color": "#3366FF",
-      "position": {
-        "x": -200.0,
-        "y": 100.0
-      },
-      "flashcard_count": 3,
-      "completed_flashcards": 1,
-      "resources": [],
-      "created_at": "2025-07-09T03:28:16.978496",
-      "updated_at": "2025-07-09T03:28:16.978502"
-    },
-    {
-      "id": "0dcc0181-31c2-49a2-a0b7-17a130e67a30",
-      "title": "Test Topic 1742ed",
-      "description": "A test topic created by the test script",
-      "category": "Test Category",
-      "color": "#FF5733",
-      "position": {
-        "x": 500.0,
-        "y": 300.0
-      },
-      "flashcard_count": 5,
-      "completed_flashcards": 2,
-      "resources": [],
-      "created_at": "2025-07-09T03:28:36.173440",
-      "updated_at": "2025-07-09T03:28:36.173458"
-    },
-    {
-      "id": "04a7c0d1-29ac-424d-925b-4b660fb10eee",
-      "title": "Bulk Test Topic bea3c1",
-      "description": "Testing bulk updates",
-      "category": "Test Category",
-      "color": "#3366FF",
-      "position": {
-        "x": -200.0,
-        "y": 100.0
-      },
-      "flashcard_count": 3,
-      "completed_flashcards": 1,
-      "resources": [],
-      "created_at": "2025-07-09T03:28:36.246667",
-      "updated_at": "2025-07-09T03:28:36.246674"
-    },
-    {
-      "id": "8f681cee-e689-43c9-89e1-31efadbd4e04",
-      "title": "Test Topic 5f9ded",
-      "description": "Updated description for PUT test",
-      "category": "Test Category",
-      "color": "#FF5733",
-      "position": {
-        "x": 500.0,
-        "y": 300.0
-      },
-      "flashcard_count": 5,
-      "completed_flashcards": 2,
-      "resources": [],
-      "created_at": "2025-07-09T03:29:51.009332",
-      "updated_at": "2025-07-09T03:29:51.009339"
-    },
-    {
-      "id": "topic-5496ea5e916d488298a03d9eb5612665",
-      "title": "Test Topic 2025-07-09T20:33:20.367053",
-      "description": "Created during extended testing",
-      "category": "Test Category",
-      "color": "#FF5733",
-      "position": {
-        "x": 100.0,
-        "y": 100.0
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "created_at": "2025-07-09T20:33:20.367053",
-      "updated_at": "2025-07-09T20:33:20.367053"
-    },
-    {
-      "id": "topic-5415f719cd8745d6bd7ca1e8740b73b1",
-      "title": "Test Topic 2025-07-09T20:34:54.940635",
-      "description": "Created during extended testing",
-      "category": "Test Category",
-      "color": "#FF5733",
-      "position": {
-        "x": 100.0,
-        "y": 100.0
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "created_at": "2025-07-09T20:34:54.940635",
-      "updated_at": "2025-07-09T20:34:54.940635"
-    },
-    {
-      "id": "b7cc4a7d-4c0a-44af-b214-bdfae8ec0a94",
-      "title": "New Topic",
-      "description": "New topic description",
-      "category": "New Category",
+      "id": "1752879667798",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 93.36201711166336,
-        "y": 638.3007188537227
+        "x": 427.9230247704141,
+        "y": 489.1906646050563
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
       "resources": [],
-      "created_at": "2025-07-10T04:17:30.153000+00:00",
-      "updated_at": "2025-07-10T04:17:30.153000+00:00"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     },
     {
-      "id": "2737e135-e76a-4a52-8339-31f186f1085f",
-      "title": "New Topic",
-      "description": "New topic description",
-      "category": "New Category",
+      "id": "1752879672652",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 262.95852402746004,
-        "y": 453.09169544635336
+        "x": 1319.7533076466916,
+        "y": 599.2987009698712
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
       "resources": [],
-      "created_at": "2025-07-10T05:30:06.862000+00:00",
-      "updated_at": "2025-07-10T05:30:06.862000+00:00"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     },
     {
-      "id": "e22bf3be-9160-472a-823f-c0557af9e57c",
-      "title": "New Topic",
-      "description": "New topic description",
-      "category": "New Category",
+      "id": "1752881076121",
+      "title": "Generalized Anxiety Disorder",
+      "description": "<p></p>",
+      "category": "Anxiety Disorder",
       "color": "#3B82F6",
       "position": {
-        "x": 6.892506849477897,
-        "y": 347.0256782683712
+        "x": 1028.2690279099513,
+        "y": 5.019692153245893
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
       "resources": [],
-      "created_at": "2025-07-10T05:30:11.814000+00:00",
-      "updated_at": "2025-07-10T05:30:11.814000+00:00"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     }
   ],
   "cases": [
     {
-      "id": "3361cea1-544d-4826-8b6a-361efb4bf589",
-      "case_id": "BULK-FEFE8F",
-      "encounter_date": "2025-07-09T03:28:16.978516",
-      "primary_diagnosis": "Bulk Test Diagnosis",
+      "id": "1752879872662",
+      "case_id": "CASE-1752881447809",
+      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
+      "primary_diagnosis": "Unspecified",
       "secondary_diagnoses": [],
       "age": null,
       "gender": null,
-      "chief_complaint": "Bulk test complaint",
+      "chief_complaint": "Unspecified",
       "history_present_illness": null,
       "medical_history": null,
       "medications": [],
@@ -164,21 +68,21 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": -300.0,
-        "y": 200.0
+        "x": 1355.814438394425,
+        "y": 811.1426185963802
       },
-      "created_at": "2025-07-09T03:28:16.978518",
-      "updated_at": "2025-07-09T03:28:16.978519"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     },
     {
-      "id": "1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "case_id": "BULK-EAC513",
-      "encounter_date": "2025-07-09T03:28:36.246687",
-      "primary_diagnosis": "Bulk Test Diagnosis",
+      "id": "1752881237876",
+      "case_id": "CASE-1752881447809",
+      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
+      "primary_diagnosis": "Unspecified",
       "secondary_diagnoses": [],
       "age": null,
       "gender": null,
-      "chief_complaint": "Bulk test complaint",
+      "chief_complaint": "Unspecified",
       "history_present_illness": null,
       "medical_history": null,
       "medications": [],
@@ -188,21 +92,21 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": -300.0,
-        "y": 200.0
+        "x": 246.56704305107257,
+        "y": 621.7968303205199
       },
-      "created_at": "2025-07-09T03:28:36.246689",
-      "updated_at": "2025-07-09T03:28:36.246690"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     },
     {
-      "id": "43a75b57-f47f-49c1-aacc-991f3fb1f6f5",
-      "case_id": "CASE-1752064699883",
-      "encounter_date": "2025-07-09T12:38:19.883000+00:00",
-      "primary_diagnosis": "New Diagnosis",
+      "id": "1752881297886",
+      "case_id": "CASE-1752881447809",
+      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
+      "primary_diagnosis": "Unspecified",
       "secondary_diagnoses": [],
       "age": null,
       "gender": null,
-      "chief_complaint": "New complaint",
+      "chief_complaint": "Unspecified",
       "history_present_illness": null,
       "medical_history": null,
       "medications": [],
@@ -212,636 +116,209 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 499.91704805492003,
-        "y": 267.47826086956525
+        "x": 574.939439395754,
+        "y": 644.5092383701416
       },
-      "created_at": "2025-07-09T12:38:19.883000+00:00",
-      "updated_at": "2025-07-09T12:38:19.883000+00:00"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+    },
+    {
+      "id": "1752881325676",
+      "case_id": "CASE-1752881447809",
+      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Unspecified",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1219.743562727844,
+        "y": 108.98013132204537
+      },
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+    },
+    {
+      "id": "1752881340119",
+      "case_id": "CASE-1752881447809",
+      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Unspecified",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 862.3339768610148,
+        "y": 146.17404426875606
+      },
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     }
   ],
   "tasks": [
     {
-      "id": "10246319-e1e6-4032-9acd-3725b1d85c45",
-      "title": "Datetime Test Task ba2cb5",
-      "description": "Testing datetime handling",
-      "status": "pending",
-      "priority": "high",
-      "due_date": "2025-07-09T03:28:16.969560",
+      "id": "1752881268566",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "in_progress",
+      "priority": "medium",
+      "due_date": null,
       "linked_case_id": null,
       "linked_topic_id": null,
       "position": {
-        "x": 400.0,
-        "y": 200.0
+        "x": 63.61544830615688,
+        "y": 750.3513216195591
       },
-      "created_at": "2025-07-09T03:28:16.969568",
-      "updated_at": "2025-07-09T03:28:16.969569"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     },
     {
-      "id": "fa32e500-a4ec-4bfa-a040-26cb85747944",
-      "title": "Bulk Test Task c1f0b7",
-      "description": "Testing bulk updates",
+      "id": "1752881381247",
+      "title": "Untitled Task",
+      "description": null,
       "status": "pending",
       "priority": "medium",
       "due_date": null,
       "linked_case_id": null,
       "linked_topic_id": null,
       "position": {
-        "x": -400.0,
-        "y": 300.0
+        "x": 62.338543956841335,
+        "y": 505.40279123187304
       },
-      "created_at": "2025-07-09T03:28:16.978546",
-      "updated_at": "2025-07-09T03:28:16.978549"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     },
     {
-      "id": "ced95f63-0c7c-4af2-8c87-047bf4f9cdef",
-      "title": "Datetime Test Task fd0e3a",
-      "description": "Testing datetime handling",
-      "status": "pending",
-      "priority": "high",
-      "due_date": "2025-07-09T03:28:36.206291",
-      "linked_case_id": null,
-      "linked_topic_id": null,
-      "position": {
-        "x": 400.0,
-        "y": 200.0
-      },
-      "created_at": "2025-07-09T03:28:36.206299",
-      "updated_at": "2025-07-09T03:28:36.206300"
-    },
-    {
-      "id": "b9a4da6b-c731-48de-8557-95d8f4fc7ff2",
-      "title": "Bulk Test Task a42748",
-      "description": "Testing bulk updates",
+      "id": "1752881384028",
+      "title": "Untitled Task",
+      "description": null,
       "status": "pending",
       "priority": "medium",
       "due_date": null,
       "linked_case_id": null,
       "linked_topic_id": null,
       "position": {
-        "x": -400.0,
-        "y": 300.0
+        "x": 293.3554647824197,
+        "y": 831.9470573481938
       },
-      "created_at": "2025-07-09T03:28:36.246700",
-      "updated_at": "2025-07-09T03:28:36.246701"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     }
   ],
   "literature": [
     {
-      "id": "ec0e1a31-2247-412e-b3a5-24d211206ace",
-      "title": "Bulk Test Literature d478a5",
-      "authors": "Bulk Test Author",
+      "id": "1752879687757",
+      "title": "Untitled Literature",
+      "authors": null,
       "publication": null,
-      "year": 2025,
+      "year": null,
       "doi": null,
       "abstract": null,
       "notes": null,
+      "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": -500.0,
-        "y": 400.0
+        "x": -69.92772265642435,
+        "y": -35.330132352090004
       },
-      "created_at": "2025-07-09T03:28:16.978558",
-      "updated_at": "2025-07-09T03:28:16.978560"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     },
     {
-      "id": "181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
-      "title": "Bulk Test Literature 481058",
-      "authors": "Bulk Test Author",
+      "id": "1752879695806",
+      "title": "Untitled Literature",
+      "authors": null,
       "publication": null,
-      "year": 2025,
+      "year": null,
       "doi": null,
       "abstract": null,
       "notes": null,
+      "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": -500.0,
-        "y": 400.0
+        "x": 563.1461824980031,
+        "y": 314.5783842513915
       },
-      "created_at": "2025-07-09T03:28:36.246710",
-      "updated_at": "2025-07-09T03:28:36.246712"
-    },
-    {
-      "id": "541fac83-c2fe-43d9-9418-84f160614049",
-      "title": "New Literature",
-      "authors": "New Author",
-      "publication": "New Publication",
-      "year": 2025,
-      "doi": null,
-      "abstract": null,
-      "notes": null,
-      "linked_topics": [],
-      "position": {
-        "x": 135.3342584689748,
-        "y": 850.6415684173725
-      },
-      "created_at": "2025-07-09T12:50:19.227000+00:00",
-      "updated_at": "2025-07-09T12:50:19.227000+00:00"
-    },
-    {
-      "id": "17f7da9b-ab62-4b63-bce6-56ac566fadc1",
-      "title": "New Literature",
-      "authors": "New Author",
-      "publication": "New Publication",
-      "year": 2025,
-      "doi": null,
-      "abstract": null,
-      "notes": null,
-      "linked_topics": [],
-      "position": {
-        "x": 379.6605168127239,
-        "y": -32.45817752466564
-      },
-      "created_at": "2025-07-09T12:59:50.297000+00:00",
-      "updated_at": "2025-07-09T12:59:50.297000+00:00"
+      "created_at": "2025-07-18T23:30:47.809000+00:00",
+      "updated_at": "2025-07-18T23:30:47.809000+00:00"
     }
   ],
   "connections": [
     {
-      "id": "ef526aa5a804a4a0c92c222b877c0b349",
-      "source": "d5c779b5-4f43-4028-898f-10847bba377d",
-      "sourceHandle": "bottom",
-      "targetHandle": "top",
-      "label": "Malformed Connection"
+      "id": "conn-1752880678059",
+      "source": "literature-1752879695806",
+      "target": "topic-1752879667798",
+      "label": ""
     },
     {
-      "id": "edge-1752113901805",
-      "source": "181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
-      "target": "1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "sourceHandle": "top",
-      "targetHandle": "top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881106553",
+      "source": "topic-1752879667798",
+      "target": "literature-1752879687757",
+      "label": ""
     },
     {
-      "id": "edge-1752113912344",
-      "source": "181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
-      "target": "1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "sourceHandle": "bottom",
-      "targetHandle": "left",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881121386",
+      "source": "topic-1752879672652",
+      "target": "case-1752879872662",
+      "label": ""
     },
     {
-      "id": "case-1732b75e-1da6-4c6e-a237-e7f88a451164-topic-e22bf3be-9160-472a-823f-c0557af9e57c-1752125755306",
-      "source": "case-1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "target": "topic-e22bf3be-9160-472a-823f-c0557af9e57c",
-      "sourceHandle": "right",
-      "targetHandle": "top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881241050",
+      "source": "topic-1752879667798",
+      "target": "case-1752881237876",
+      "label": ""
     },
     {
-      "id": "topic-b7cc4a7d-4c0a-44af-b214-bdfae8ec0a94-topic-e22bf3be-9160-472a-823f-c0557af9e57c-1752125783312",
-      "source": "topic-b7cc4a7d-4c0a-44af-b214-bdfae8ec0a94",
-      "target": "topic-e22bf3be-9160-472a-823f-c0557af9e57c",
-      "sourceHandle": "top",
-      "targetHandle": "bottom",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881282991",
+      "source": "task-1752881268566",
+      "target": "case-1752881237876",
+      "label": ""
     },
     {
-      "id": "topic-e22bf3be-9160-472a-823f-c0557af9e57c-literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0-1752128079439",
-      "source": "topic-e22bf3be-9160-472a-823f-c0557af9e57c",
-      "target": "literature-181a8b6e-17f0-43d5-add8-55e7e6ad2ee0",
-      "sourceHandle": "connection-hotspot",
-      "targetHandle": "connection-hotspot",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881302913",
+      "source": "topic-1752879667798",
+      "target": "case-1752881297886",
+      "label": ""
     },
     {
-      "id": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee-case-3361cea1-544d-4826-8b6a-361efb4bf589-1752128601483",
-      "source": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee",
-      "target": "case-3361cea1-544d-4826-8b6a-361efb4bf589",
-      "sourceHandle": "top",
-      "targetHandle": "connection-hotspot",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881333197",
+      "source": "topic-1752881076121",
+      "target": "case-1752881325676",
+      "label": ""
     },
     {
-      "id": "case-1732b75e-1da6-4c6e-a237-e7f88a451164-topic-04a7c0d1-29ac-424d-925b-4b660fb10eee-1752128606801",
-      "source": "case-1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "target": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee",
-      "sourceHandle": "connection-hotspot",
-      "targetHandle": "right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881343505",
+      "source": "topic-1752881076121",
+      "target": "case-1752881340119",
+      "label": ""
     },
     {
-      "id": "case-1732b75e-1da6-4c6e-a237-e7f88a451164-task-b9a4da6b-c731-48de-8557-95d8f4fc7ff2-1752128610915",
-      "source": "case-1732b75e-1da6-4c6e-a237-e7f88a451164",
-      "target": "task-b9a4da6b-c731-48de-8557-95d8f4fc7ff2",
-      "sourceHandle": "connection-hotspot",
-      "targetHandle": "right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881389251",
+      "source": "task-1752881384028",
+      "target": "case-1752881237876",
+      "label": ""
     },
     {
-      "id": "topic-e22bf3be-9160-472a-823f-c0557af9e57c-case-3361cea1-544d-4826-8b6a-361efb4bf589-1752128613720",
-      "source": "topic-e22bf3be-9160-472a-823f-c0557af9e57c",
-      "target": "case-3361cea1-544d-4826-8b6a-361efb4bf589",
-      "sourceHandle": "right",
-      "targetHandle": "right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "task-10246319-e1e6-4032-9acd-3725b1d85c45-case-43a75b57-f47f-49c1-aacc-991f3fb1f6f5-1752128619301",
-      "source": "task-10246319-e1e6-4032-9acd-3725b1d85c45",
-      "target": "case-43a75b57-f47f-49c1-aacc-991f3fb1f6f5",
-      "sourceHandle": "right",
-      "targetHandle": "right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1-topic-topic-5496ea5e916d488298a03d9eb5612665-1752128628544",
-      "source": "literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1",
-      "target": "topic-topic-5496ea5e916d488298a03d9eb5612665",
-      "sourceHandle": "bottom",
-      "targetHandle": "top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "topic-topic-5415f719cd8745d6bd7ca1e8740b73b1-literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1-1752128632388",
-      "source": "topic-topic-5415f719cd8745d6bd7ca1e8740b73b1",
-      "target": "literature-17f7da9b-ab62-4b63-bce6-56ac566fadc1",
-      "sourceHandle": "right",
-      "targetHandle": "right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee-topic-topic-5496ea5e916d488298a03d9eb5612665-1752128997638",
-      "source": "topic-04a7c0d1-29ac-424d-925b-4b660fb10eee",
-      "target": "topic-topic-5496ea5e916d488298a03d9eb5612665",
-      "sourceHandle": "bottom",
-      "targetHandle": "top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "literature-ec0e1a31-2247-412e-b3a5-24d211206ace-topic-d5c779b5-4f43-4028-898f-10847bba377d-1752130630454",
-      "source": "literature-ec0e1a31-2247-412e-b3a5-24d211206ace",
-      "target": "topic-d5c779b5-4f43-4028-898f-10847bba377d",
-      "sourceHandle": "left",
-      "targetHandle": "right",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
-    },
-    {
-      "id": "topic-0dcc0181-31c2-49a2-a0b7-17a130e67a30-case-3361cea1-544d-4826-8b6a-361efb4bf589-1752130636109",
-      "source": "topic-0dcc0181-31c2-49a2-a0b7-17a130e67a30",
-      "target": "case-3361cea1-544d-4826-8b6a-361efb4bf589",
-      "sourceHandle": "right",
-      "targetHandle": "top",
-      "type": "smoothstep",
-      "style": {
-        "stroke": "#2563eb",
-        "strokeWidth": 3
-      },
-      "label": "",
-      "labelStyle": {
-        "fill": "#374151",
-        "fontWeight": 500
-      },
-      "labelBgStyle": {
-        "fill": "#f9fafb",
-        "stroke": "#d1d5db",
-        "strokeWidth": 1
-      },
-      "labelBgPadding": [
-        8,
-        4
-      ],
-      "labelShowBg": true,
-      "labelBgBorderRadius": 4,
-      "animated": false,
-      "selectable": true,
-      "focusable": true,
-      "deletable": true
+      "id": "conn-1752881394124",
+      "source": "task-1752881381247",
+      "target": "case-1752881237876",
+      "label": ""
     }
   ]
 }

@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form
 from starlette.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 import os
 import json
 import logging
@@ -7,6 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import uuid
+import shutil
 from datetime import datetime
 from enum import Enum
 
@@ -14,9 +16,25 @@ ROOT_DIR = Path(__file__).parent
 
 # Local JSON file for mind map data storage
 MINDMAP_DATA_FILE = ROOT_DIR / 'mindmap_data.json'
+UPLOADS_DIR = ROOT_DIR / 'uploads'
 
 # Create the main app
 app = FastAPI()
+
+# CORS middleware should be added near the top, before routes are defined.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Specific to local frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Ensure uploads directory exists
+UPLOADS_DIR.mkdir(exist_ok=True)
+
+# Mount the uploads directory to be served statically
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -42,6 +60,7 @@ class Literature(BaseModel):
     doi: Optional[str] = None
     abstract: Optional[str] = None
     notes: Optional[str] = None
+    pdf_path: Optional[str] = None
     linked_topics: List[str] = Field(default_factory=list)  # Topic IDs
     position: Dict[str, float] = Field(default_factory=lambda: {"x": 0, "y": 0})
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -299,6 +318,7 @@ def create_initial_dummy_data() -> MindMapData:
         year=2021,
         abstract="Comprehensive review of cognitive behavioral therapy effectiveness",
         notes="Key study for MDD treatment protocols",
+        pdf_path=None,
         linked_topics=[topic1.id],
         position={"x": 100, "y": -100}
     )
@@ -358,17 +378,42 @@ async def get_literature():
     data = load_mind_map_data()
     return data.literature
 
+# NEW: PDF Upload endpoint
+@api_router.post("/upload-pdf")
+async def upload_pdf(
+    pdf: UploadFile = File(...)
+):
+    """
+    Handle PDF uploads. Saves the file and returns its public path.
+    This endpoint is now decoupled from the data file to prevent race conditions.
+    The frontend is responsible for associating the returned path with a node.
+    """
+    if not pdf.filename.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
+
+    # Create a unique filename to avoid overwrites
+    unique_filename = f"{uuid.uuid4()}-{pdf.filename}"
+    file_location = UPLOADS_DIR / unique_filename
+
+    try:
+        # Save the uploaded file
+        with open(file_location, "wb+") as file_object:
+            shutil.copyfileobj(pdf.file, file_object)
+
+        # The path to be stored and used in the URL
+        url_file_path = f"/uploads/{unique_filename}"
+
+        return {"message": "File uploaded successfully.", "filePath": url_file_path}
+
+    except Exception as e:
+        # Clean up the uploaded file if any error occurs
+        if file_location.exists():
+            file_location.unlink()
+        logger.error(f"Error processing PDF upload: {e}")
+        raise HTTPException(status_code=500, detail="Error processing upload.")
+
 # Include the router in the main app
 app.include_router(api_router)
-
-# CORS middleware configuration for local development
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Specific to local frontend
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Configure logging
 logging.basicConfig(

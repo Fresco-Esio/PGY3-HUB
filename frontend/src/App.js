@@ -16,14 +16,18 @@ import {
   Position,
   useReactFlow,
 } from '@xyflow/react';
+import {
+  forceSimulation, forceManyBody, forceLink, forceCenter, forceCollide
+} from 'd3-force';
+
 import dagre from 'dagre';
-import { 
-  Plus, 
-  Brain, 
-  Users, 
-  CheckSquare, 
-  Edit3, 
-  Save, 
+import {
+  Plus,
+  Brain,
+  Users,
+  CheckSquare,
+  Edit3,
+  Save,
   ArrowLeft,
   FileText,
   Calendar,
@@ -54,8 +58,13 @@ import {
 } from 'lucide-react';
 import TemplateManager from './components/TemplateManager';
 import RichTextEditor from './components/RichTextEditor';
+import FloatingEdge from './components/FloatingEdge'; // Import the custom FloatingEdge component
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// Use the environment variable for the backend URL, but provide a fallback
+// to the local server for development. This is a more robust pattern.
+// The .replace() call removes any trailing slashes to prevent "404 Not Found"
+// errors caused by double slashes in the request path (e.g., "//api/").
+const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
 const API = `${BACKEND_URL}/api`;
 
 // Fix ResizeObserver error that prevents React Flow from working
@@ -99,7 +108,7 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
   };
 
   const getIcon = () => {
-    switch(type) {
+    switch (type) {
       case 'success': return <CheckCircle2 size={16} className="mr-2" />;
       case 'error': return <AlertCircle size={16} className="mr-2" />;
       case 'info': return <Info size={16} className="mr-2" />;
@@ -130,9 +139,8 @@ const LoadingButton = ({ onClick, loading, disabled, children, className, icon: 
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`${className} transform transition-all duration-200 hover:scale-105 active:scale-95 ${
-        disabled || loading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
-      }`}
+      className={`${className} transform transition-all duration-200 hover:scale-105 active:scale-95 ${disabled || loading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
+        }`}
       {...props}
     >
       <div className="flex items-center gap-2">
@@ -157,9 +165,9 @@ const localStorageUtils = {
     let timeoutId;
     return (data, onSaveStart, onSaveComplete) => {
       clearTimeout(timeoutId);
-      
+
       if (onSaveStart) onSaveStart();
-      
+
       timeoutId = setTimeout(() => {
         try {
           const storageData = {
@@ -173,7 +181,7 @@ const localStorageUtils = {
         } catch (error) {
           console.error('Error saving to localStorage:', error);
           if (onSaveComplete) onSaveComplete(false, error);
-          
+
           if (error.name === 'QuotaExceededError') {
             console.warn('localStorage quota exceeded, clearing old data...');
             try {
@@ -197,7 +205,7 @@ const localStorageUtils = {
       }
 
       const storageData = JSON.parse(stored);
-      
+
       // Version check
       if (storageData.version !== STORAGE_VERSION) {
         console.log('localStorage version mismatch, clearing old data');
@@ -234,7 +242,7 @@ const localStorageUtils = {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return null;
-      
+
       const data = JSON.parse(stored);
       return {
         version: data.version,
@@ -283,7 +291,7 @@ const csvUtils = {
     // Convert cases to CSV rows with enhanced data
     const rows = cases.map((caseItem, index) => {
       if (onProgress) onProgress(30 + (index / cases.length) * 50, `Processing case ${index + 1}/${cases.length}...`);
-      
+
       return [
         caseItem.case_id || '',
         caseItem.encounter_date ? new Date(caseItem.encounter_date).toLocaleDateString() : '',
@@ -331,15 +339,15 @@ const csvUtils = {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     URL.revokeObjectURL(url);
   },
 
@@ -391,142 +399,140 @@ const csvUtils = {
 
 // Enhanced Custom Node Components with better visual effects and data
 const TopicNode = ({ data, selected }) => {
-  const completionPercentage = data.flashcard_count > 0 
-    ? ((data.completed_flashcards || 0) / data.flashcard_count) * 100 
+  const completionPercentage = data.flashcard_count > 0
+    ? ((data.completed_flashcards || 0) / data.flashcard_count) * 100
     : 0;
 
   return (
-    <div 
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[220px] relative hover:shadow-2xl transform hover:scale-105 backdrop-blur-sm ${
-        selected 
-          ? 'border-teal-400 shadow-xl scale-105 ring-4 ring-teal-200 animate-pulse' 
+    <div
+      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[220px] relative hover:shadow-2xl transform hover:scale-105 backdrop-blur-sm ${selected
+          ? 'border-teal-400 shadow-xl scale-105 ring-4 ring-teal-200 animate-pulse'
           : 'border-transparent hover:border-teal-300 hover:ring-2 hover:ring-teal-100'
-      }`}
-      style={{ 
+        }`}
+      style={{
         backgroundColor: data.color || '#3B82F6',
         color: 'white',
-        boxShadow: selected 
-          ? `0 0 20px ${data.color || '#3B82F6'}40` 
+        boxShadow: selected
+          ? `0 0 20px ${data.color || '#3B82F6'}40`
           : `0 4px 20px ${data.color || '#3B82F6'}20`
       }}
     >
       {/* Connection Hotspots - Stacked source and target handles for all four sides */}
       {/* Top handles */}
-      <Handle 
+      <Handle
         id="top"
         type="source"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="top"
         type="target"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Right handles */}
-      <Handle 
+      <Handle
         id="right"
         type="source"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="right"
         type="target"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Bottom handles */}
-      <Handle 
+      <Handle
         id="bottom"
         type="source"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="bottom"
         type="target"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Left handles */}
-      <Handle 
+      <Handle
         id="left"
         type="source"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="left"
         type="target"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Priority indicator */}
       {data.priority && (
         <div className="absolute -top-2 -right-2">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white ${
-            data.priority === 'high' ? 'bg-red-500' :
-            data.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-          }`}>
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white ${data.priority === 'high' ? 'bg-red-500' :
+              data.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+            }`}>
             {data.priority === 'high' ? '!' : data.priority === 'medium' ? '•' : '✓'}
           </div>
         </div>
       )}
-      
+
       <div className="flex items-center gap-2 mb-2">
         <div className="flex items-center gap-1">
           <Brain size={16} className="drop-shadow-sm" />
@@ -547,9 +553,9 @@ const TopicNode = ({ data, selected }) => {
           </button>
         )}
       </div>
-      
+
       <div className="text-xs opacity-90 mb-2">{data.category}</div>
-      
+
       {/* Enhanced progress display */}
       {data.flashcard_count > 0 && (
         <div className="text-xs mt-2 space-y-1">
@@ -558,20 +564,20 @@ const TopicNode = ({ data, selected }) => {
             <span className="font-semibold">{Math.round(completionPercentage)}%</span>
           </div>
           <div className="w-full bg-white bg-opacity-20 rounded-full h-2 overflow-hidden">
-            <div 
+            <div
               className="h-full bg-white rounded-full transition-all duration-1000 ease-out"
               style={{ width: `${completionPercentage}%` }}
             />
           </div>
         </div>
       )}
-      
+
       {/* Tags display */}
       {data.tags && data.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
           {data.tags.slice(0, 3).map((tag, index) => (
-            <span 
-              key={index} 
+            <span
+              key={index}
               className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs"
             >
               {tag}
@@ -584,7 +590,7 @@ const TopicNode = ({ data, selected }) => {
           )}
         </div>
       )}
-      
+
       {/* Last updated indicator */}
       {data.updated_at && (
         <div className="absolute bottom-1 right-1 opacity-50">
@@ -597,7 +603,7 @@ const TopicNode = ({ data, selected }) => {
 
 const CaseNode = ({ data, selected }) => {
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'active': return 'bg-green-100 text-green-800 border-green-200';
       case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
       case 'follow_up': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -610,7 +616,7 @@ const CaseNode = ({ data, selected }) => {
     const urgentKeywords = ['emergency', 'urgent', 'crisis', 'acute', 'severe'];
     const complaint = data.chief_complaint?.toLowerCase() || '';
     const diagnosis = data.diagnosis?.toLowerCase() || '';
-    
+
     if (urgentKeywords.some(keyword => complaint.includes(keyword) || diagnosis.includes(keyword))) {
       return 'high';
     }
@@ -620,118 +626,117 @@ const CaseNode = ({ data, selected }) => {
   const urgency = getUrgencyLevel(data);
 
   return (
-    <div 
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[220px] bg-white relative hover:shadow-2xl transform hover:scale-105 ${
-        selected 
-          ? 'border-blue-400 shadow-xl scale-105 ring-4 ring-blue-200' 
+    <div
+      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[220px] bg-white relative hover:shadow-2xl transform hover:scale-105 ${selected
+          ? 'border-blue-400 shadow-xl scale-105 ring-4 ring-blue-200'
           : 'border-gray-200 hover:border-blue-300 hover:ring-2 hover:ring-blue-100'
-      } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''}`}
+        } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''}`}
     >
       {/* Connection Hotspots - Stacked source and target handles for all four sides */}
       {/* Top handles */}
-      <Handle 
+      <Handle
         id="top"
         type="source"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="top"
         type="target"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Right handles */}
-      <Handle 
+      <Handle
         id="right"
         type="source"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="right"
         type="target"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Bottom handles */}
-      <Handle 
+      <Handle
         id="bottom"
         type="source"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="bottom"
         type="target"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Left handles */}
-      <Handle 
+      <Handle
         id="left"
         type="source"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="left"
         type="target"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Urgency indicator */}
       {urgency === 'high' && (
         <div className="absolute -top-2 -right-2">
@@ -740,7 +745,7 @@ const CaseNode = ({ data, selected }) => {
           </div>
         </div>
       )}
-      
+
       <div className="flex items-center gap-2 mb-2">
         <div className="flex items-center gap-1">
           <Users size={16} className="text-blue-600" />
@@ -763,9 +768,9 @@ const CaseNode = ({ data, selected }) => {
           </button>
         )}
       </div>
-      
+
       <div className="text-xs text-gray-600 mb-2 truncate">{data.diagnosis}</div>
-      
+
       {/* Enhanced patient info */}
       <div className="space-y-1">
         {data.age && (
@@ -774,7 +779,7 @@ const CaseNode = ({ data, selected }) => {
             Age: {data.age}
           </div>
         )}
-        
+
         {/* Status badge */}
         {data.status && (
           <span className={`inline-block px-2 py-1 rounded-full text-xs border ${getStatusColor(data.status)}`}>
@@ -782,7 +787,7 @@ const CaseNode = ({ data, selected }) => {
           </span>
         )}
       </div>
-      
+
       {/* Progress indicators */}
       {data.tasks_count && data.tasks_count > 0 && (
         <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
@@ -790,7 +795,7 @@ const CaseNode = ({ data, selected }) => {
           {data.completed_tasks || 0}/{data.tasks_count} tasks
         </div>
       )}
-      
+
       {/* Last updated indicator */}
       {data.updated_at && (
         <div className="absolute bottom-1 right-1 opacity-30">
@@ -802,125 +807,124 @@ const CaseNode = ({ data, selected }) => {
 };
 
 const TaskNode = ({ data, selected }) => {
-  const statusColors = {
+  const statusClasses = {
     pending: 'bg-yellow-500',
-    in_progress: 'bg-blue-500',
-    completed: 'bg-green-500'
+    in_progress: 'bg-blue-600',
+    completed: 'bg-green-700 opacity-60'
   };
 
   return (
-    <div 
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[200px] text-white relative hover:shadow-2xl transform hover:scale-105 ${
-        selected 
-          ? 'border-yellow-400 shadow-xl scale-105 ring-4 ring-yellow-200' 
+    <div
+      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[200px] text-white relative hover:shadow-2xl transform hover:scale-105 ${selected
+          ? 'border-yellow-400 shadow-xl scale-105 ring-4 ring-yellow-200'
           : 'border-transparent hover:border-yellow-300 hover:ring-2 hover:ring-yellow-100'
-      } ${statusColors[data.status] || 'bg-gray-500'}`}
+        } ${statusClasses[data.status] || 'bg-gray-500'}`}
     >
       {/* Connection Hotspots - Stacked source and target handles for all four sides */}
       {/* Top handles */}
-      <Handle 
+      <Handle
         id="top"
         type="source"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="top"
         type="target"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Right handles */}
-      <Handle 
+      <Handle
         id="right"
         type="source"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="right"
         type="target"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Bottom handles */}
-      <Handle 
+      <Handle
         id="bottom"
         type="source"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="bottom"
         type="target"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Left handles */}
-      <Handle 
+      <Handle
         id="left"
         type="source"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="left"
         type="target"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       <div className="flex items-center gap-2 mb-1">
         <CheckSquare size={16} />
         <div className="font-semibold text-sm">{data.label}</div>
@@ -946,118 +950,117 @@ const TaskNode = ({ data, selected }) => {
 
 const LiteratureNode = ({ data, selected }) => {
   return (
-    <div 
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[200px] bg-purple-50 relative hover:shadow-2xl transform hover:scale-105 ${
-        selected 
-          ? 'border-purple-400 shadow-xl scale-105 ring-4 ring-purple-200' 
+    <div
+      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[200px] bg-purple-50 relative hover:shadow-2xl transform hover:scale-105 ${selected
+          ? 'border-purple-400 shadow-xl scale-105 ring-4 ring-purple-200'
           : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
-      }`}
+        }`}
     >
       {/* Connection Hotspots - Stacked source and target handles for all four sides */}
       {/* Top handles */}
-      <Handle 
+      <Handle
         id="top"
         type="source"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="top"
         type="target"
-        position={Position.Top} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Top}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Right handles */}
-      <Handle 
+      <Handle
         id="right"
         type="source"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="right"
         type="target"
-        position={Position.Right} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Right}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Bottom handles */}
-      <Handle 
+      <Handle
         id="bottom"
         type="source"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="bottom"
         type="target"
-        position={Position.Bottom} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          left: '50%', 
+        position={Position.Bottom}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       {/* Left handles */}
-      <Handle 
+      <Handle
         id="left"
         type="source"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 2
         }}
         isConnectable={true}
       />
-      <Handle 
+      <Handle
         id="left"
         type="target"
-        position={Position.Left} 
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100" 
-        style={{ 
-          top: '50%', 
+        position={Position.Left}
+        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+        style={{
+          top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
         }}
         isConnectable={true}
       />
-      
+
       <div className="flex items-center gap-2 mb-1">
         <BookOpen size={16} className="text-purple-600" />
         <div className="font-semibold text-sm text-gray-800">{data.label}</div>
@@ -1092,6 +1095,8 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   const [editData, setEditData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
   const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // PERFORMANCE FIX: Use useEffect with dependency array to prevent unnecessary updates
   useEffect(() => {
@@ -1112,43 +1117,86 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
     setEditData(prev => ({ ...prev, [field]: value }));
   }, []);
 
+  const handleAttachPdfClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      addToast('Please select a PDF file.', 'error');
+      return;
+    }
+
+    setIsUploading(true);
+    addToast('Uploading PDF...', 'saving');
+
+    const formData = new FormData();
+    formData.append('pdf', file);
+    // No longer sending literatureId, as the backend is now decoupled.
+
+    try {
+      const response = await axios.post(`${API}/upload-pdf`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const { filePath } = response.data;
+      updateField('pdf_path', filePath);
+      addToast('PDF attached successfully!', 'success');
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      addToast('Failed to attach PDF. Check server logs.', 'error');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   // PERFORMANCE FIX: Memoize save handler to prevent recreation on every render
   const handleSave = useCallback(async () => {
     if (isLoading || !data?.id) return; // Add null check here
-    
+
     setIsLoading(true);
     try {
       console.log(`Saving ${type} with ID:`, data.id, editData);
-      
+
       setIsEditing(false);
       setOriginalData(editData);
-      
+
       // Update mindMapData directly (no API call needed)
       setMindMapData(prevData => {
         const newData = { ...prevData };
         if (type === 'literature') {
-          newData.literature = newData.literature.map(item => 
+          newData.literature = newData.literature.map(item =>
             item.id === data.id ? { ...item, ...editData, updated_at: new Date() } : item
           );
         } else {
           const key = type + 's';
-          newData[key] = newData[key].map(item => 
+          newData[key] = newData[key].map(item =>
             item.id === data.id ? { ...item, ...editData, updated_at: new Date() } : item
           );
         }
-        
+
         console.log(`Updated mindMapData after saving ${type}:`, newData);
-        
+
         // Trigger auto-save asynchronously to prevent blocking
         if (onAutoSave) {
           setTimeout(() => onAutoSave(newData), 0);
         }
-        
+
         return newData;
       });
-      
+
       // No need to call loadMindMapData() as it resets positions
-      
+
     } catch (error) {
       console.error('Error saving data:', error);
       addToast(`Failed to save ${type}`, 'error');
@@ -1166,11 +1214,11 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   // PERFORMANCE FIX: Memoize delete handler
   const handleDelete = useCallback(async () => {
     if (isLoading || !data?.id) return; // Removed confirmation dialog as requested
-    
+
     setIsLoading(true);
     try {
       console.log(`Deleting ${type} with ID:`, data.id);
-      
+
       // Update mindMapData directly (no API call needed)
       setMindMapData(prevData => {
         const newData = { ...prevData };
@@ -1180,30 +1228,30 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
           const key = type + 's';
           newData[key] = newData[key].filter(item => item.id !== data.id);
         }
-        
+
         // Also remove any connections involving this node
         if (newData.connections) {
-          newData.connections = newData.connections.filter(conn => 
+          newData.connections = newData.connections.filter(conn =>
             !conn.source.includes(data.id) && !conn.target.includes(data.id)
           );
         }
-        
+
         console.log(`Updated mindMapData after deleting ${type}:`, newData);
-        
+
         // Trigger auto-save asynchronously
         if (onAutoSave) {
           setTimeout(() => onAutoSave(newData), 0);
         }
-        
+
         return newData;
       });
-      
+
       // PERFORMANCE FIX: Close subpage immediately for better UX
       onClose();
-      
+
       // No need to call loadMindMapData() as it resets positions
       // The data is already updated in mindMapData state above
-      
+
     } catch (error) {
       console.error('Error deleting data:', error);
     } finally {
@@ -1214,7 +1262,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   // PERFORMANCE FIX: Early return with loading state for better UX
   if (!data) {
     return (
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
@@ -1222,7 +1270,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
           }
         }}
       >
-        <div 
+        <div
           className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
@@ -1238,7 +1286,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   // Handle empty data object (error state)
   if (data && Object.keys(data).length === 0) {
     return (
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
@@ -1246,7 +1294,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
           }
         }}
       >
-        <div 
+        <div
           className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
@@ -1279,9 +1327,9 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   // PERFORMANCE FIX: Optimized field renderer without useCallback to avoid hook violations
   const renderEditableField = (label, field, type = 'text', options = {}) => {
     if (!editData) return null;
-    
+
     const fieldValue = editData[field] || '';
-    
+
     if (isEditing) {
       if (type === 'textarea') {
         return (
@@ -1342,15 +1390,15 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
       if (type === 'textarea') {
         const fieldContent = fieldValue || '';
         const isHtml = fieldContent.includes('<') && fieldContent.includes('>');
-        
+
         return (
           <div key={field}>
             <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
             {isHtml ? (
-              <div 
+              <div
                 className="text-gray-600 prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ 
-                  __html: fieldContent || `<p>No ${label.toLowerCase()} available.</p>` 
+                dangerouslySetInnerHTML={{
+                  __html: fieldContent || `<p>No ${label.toLowerCase()} available.</p>`
                 }}
               />
             ) : (
@@ -1361,7 +1409,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
           </div>
         );
       }
-      
+
       return (
         <div key={field}>
           <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
@@ -1374,13 +1422,13 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   // PERFORMANCE FIX: Regular content renderer without useMemo to avoid hook violations
   const renderContent = () => {
     if (!editData) return <div>Loading...</div>;
-    
+
     switch (type) {
       case 'topic':
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div 
+              <div
                 className="w-4 h-4 rounded-full transition-colors"
                 style={{ backgroundColor: editData.color || '#3B82F6' }}
               />
@@ -1403,7 +1451,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
                     <span>{editData.completed_flashcards || 0}/{editData.flashcard_count || 0}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-green-500 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${flashcardProgress}%` }}
                     />
@@ -1434,6 +1482,46 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
 
             {renderEditableField('Abstract', 'abstract', 'textarea', { rows: 4 })}
             {renderEditableField('Notes', 'notes', 'textarea', { rows: 3 })}
+
+            {isEditing && (
+              <div className="pt-4">
+                <h3 className="font-semibold text-gray-800 mb-2">Attachments</h3>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept=".pdf"
+                  style={{ display: 'none' }}
+                />
+                <LoadingButton
+                  onClick={handleAttachPdfClick}
+                  loading={isUploading}
+                  icon={Upload}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  {isUploading ? 'Uploading...' : 'Attach PDF'}
+                </LoadingButton>
+                {editData.pdf_path && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    Current file: <span className="font-medium text-purple-700">{editData.pdf_path.split('/').pop()}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isEditing && (
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-2">Attached File</h3>
+                {editData.pdf_path ? (
+                  <a href={`${BACKEND_URL}${editData.pdf_path}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-2">
+                    <FileText size={16} />
+                    {editData.pdf_path.split('/').pop()}
+                  </a>
+                ) : (
+                  <p className="text-gray-500 italic">No PDF attached.</p>
+                )}
+              </div>
+            )}
           </div>
         );
 
@@ -1451,11 +1539,11 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderEditableField('Gender', 'gender', 'select', { 
-                choices: ['Male', 'Female', 'Non-binary', 'Other'] 
+              {renderEditableField('Gender', 'gender', 'select', {
+                choices: ['Male', 'Female', 'Non-binary', 'Other']
               })}
-              {renderEditableField('Status', 'status', 'select', { 
-                choices: ['active', 'archived', 'follow_up'] 
+              {renderEditableField('Status', 'status', 'select', {
+                choices: ['active', 'archived', 'follow_up']
               })}
             </div>
 
@@ -1477,12 +1565,12 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
             {renderEditableField('Description', 'description', 'textarea', { rows: 3 })}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {renderEditableField('Status', 'status', 'select', { 
-                choices: ['pending', 'in_progress', 'completed'] 
+              {renderEditableField('Status', 'status', 'select', {
+                choices: ['pending', 'in_progress', 'completed']
               })}
-              
-              {renderEditableField('Priority', 'priority', 'select', { 
-                choices: ['low', 'medium', 'high'] 
+
+              {renderEditableField('Priority', 'priority', 'select', {
+                choices: ['low', 'medium', 'high']
               })}
 
               {renderEditableField('Due Date', 'due_date', 'date')}
@@ -1496,7 +1584,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm"
       onClick={(e) => {
         // Only close if clicking the backdrop, not the modal content
@@ -1505,7 +1593,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
         }
       }}
     >
-      <div 
+      <div
         className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden animate-in fade-in duration-300"
         onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside
       >
@@ -1539,7 +1627,7 @@ const SubpageWindow = React.memo(({ type, data, onClose, setMindMapData, loadMin
             </button>
           </div>
         </div>
-        
+
         <div className="p-6 overflow-y-auto max-h-[calc(80vh-160px)]">
           {renderContent()}
         </div>
@@ -1584,8 +1672,8 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    switch(type) {
+
+    switch (type) {
       case 'topic':
         if (!formData.title?.trim()) newErrors.title = 'Title is required';
         if (!formData.category?.trim()) newErrors.category = 'Category is required';
@@ -1602,14 +1690,14 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
         if (!formData.authors?.trim()) newErrors.authors = 'Authors are required';
         break;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     try {
       await onSave(formData);
@@ -1628,7 +1716,7 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
   };
 
   const renderBasicTab = () => {
-    switch(type) {
+    switch (type) {
       case 'topic':
         return (
           <div className="space-y-4">
@@ -1638,22 +1726,20 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => updateFormData('title', e.target.value)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                  errors.title ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.title ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Enter topic title"
               />
               {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
               <select
                 value={formData.category || ''}
                 onChange={(e) => updateFormData('category', e.target.value)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                  errors.category ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.category ? 'border-red-500' : 'border-gray-300'
+                  }`}
               >
                 <option value="">Select category</option>
                 <option value="Mood Disorders">Mood Disorders</option>
@@ -1673,9 +1759,8 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
                   <button
                     key={color}
                     onClick={() => updateFormData('color', color)}
-                    className={`w-8 h-8 rounded-full border-2 ${
-                      formData.color === color ? 'border-gray-800' : 'border-gray-300'
-                    }`}
+                    className={`w-8 h-8 rounded-full border-2 ${formData.color === color ? 'border-gray-800' : 'border-gray-300'
+                      }`}
                     style={{ backgroundColor: color }}
                   />
                 ))}
@@ -1683,7 +1768,7 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
             </div>
           </div>
         );
-      
+
       case 'case':
         return (
           <div className="space-y-4">
@@ -1694,14 +1779,13 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
                   type="text"
                   value={formData.case_id || ''}
                   onChange={(e) => updateFormData('case_id', e.target.value)}
-                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                    errors.case_id ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.case_id ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="CASE-001"
                 />
                 {errors.case_id && <p className="text-red-500 text-xs mt-1">{errors.case_id}</p>}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
                 <input
@@ -1721,9 +1805,8 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
                 type="text"
                 value={formData.primary_diagnosis || ''}
                 onChange={(e) => updateFormData('primary_diagnosis', e.target.value)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                  errors.primary_diagnosis ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.primary_diagnosis ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Enter primary diagnosis"
               />
               {errors.primary_diagnosis && <p className="text-red-500 text-xs mt-1">{errors.primary_diagnosis}</p>}
@@ -1745,7 +1828,7 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
             </div>
           </div>
         );
-      
+
       default:
         return <div>Basic form for {type}</div>;
     }
@@ -1777,11 +1860,10 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === key
+                className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === key
                     ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 {label}
               </button>
@@ -1810,7 +1892,7 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
               </LoadingButton>
             )}
           </div>
-          
+
           <div className="flex gap-2">
             <button
               onClick={onClose}
@@ -1948,11 +2030,11 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
                     </div>
                   </button>
                 ))}
-                
+
                 {filteredTemplates.length === 0 && (
-                   <div className="text-center text-sm text-gray-500 py-4">
-                     No templates found for this node type.
-                   </div>
+                  <div className="text-center text-sm text-gray-500 py-4">
+                    No templates found for this node type.
+                  </div>
                 )}
               </div>
             )}
@@ -1999,7 +2081,7 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
             <X size={20} />
           </button>
         </div>
-        
+
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Connection Label
@@ -2017,7 +2099,7 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
             Press Enter to save, Escape to cancel
           </p>
         </div>
-        
+
         <div className="flex items-center justify-end gap-3">
           <button
             onClick={onClose}
@@ -2039,47 +2121,40 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
 };
 
 // Enhanced Main Dashboard Component with improved visual effects
-const Dashboard = () => {
-  const { fitView, setCenter, zoomTo, getViewport, addEdges } = useReactFlow();
+const DashboardComponent = () => {
+  const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
+
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [mindMapData, setMindMapData] = useState({ 
-    // ... topics, cases, tasks, literature, templates, connections
-    topics: [], 
-    cases: [], 
-    tasks: [], 
+
+  const [mindMapData, setMindMapData] = useState({
+    topics: [],
+    cases: [],
+    tasks: [],
     literature: [],
-    templates: [
-      { id: 'test-template-1', name: 'My Test Template', nodeType: 'case', content: 'Hello World' }, 
-      { id: 'test-template-2', name: 'Another Test Template', nodeType: 'topic', content: 'Some topic content' }
-    ],
-    connections: [] // Store complete React Flow edge objects for proper persistence
+    connections: []
   });
+
   const [isEditing, setIsEditing] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(true);
   const [focusedCategory, setFocusedCategory] = useState(null);
   const [showNodeSelector, setShowNodeSelector] = useState(false);
-  const [openSubpage, setOpenSubpage] = useState(null); // { type, data }
+  const [openSubpage, setOpenSubpage] = useState(null);
   const [subpageData, setSubpageData] = useState(null);
   const [isReactFlowReady, setIsReactFlowReady] = useState(false);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(''); // Global search state
   const [isExportingCSV, setIsExportingCSV] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [edgeModal, setEdgeModal] = useState({ isOpen: false, edge: null });
+  const [templates, setTemplates] = useState([]);
   const [exportProgress, setExportProgress] = useState({ show: false, progress: 0, message: '' });
-  
-  // Toast notifications state
+
   const [toasts, setToasts] = useState([]);
-  
-  // Edge label editing state
-  const [editingEdge, setEditingEdge] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
-  
 
-
-  // Helper function to add toast notifications
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
@@ -2090,123 +2165,8 @@ const Dashboard = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
-  // Helper function to strip HTML tags from content for search
-  const stripHtml = useCallback((html) => {
-    if (!html || typeof html !== 'string') return '';
-    
-    // Check if it contains HTML tags
-    if (!html.includes('<') || !html.includes('>')) {
-      return html; // Already plain text
-    }
-    
-    // Create a temporary div to parse HTML and extract text
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent || div.innerText || '';
-  }, []);
-
-  // Global search filtering logic
-  const filteredNodeIds = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return []; // Return empty array when no search query
-    }
-
-    const query = searchQuery.toLowerCase();
-    const matchingIds = [];
-
-    // Search through topics
-    mindMapData.topics.forEach(topic => {
-      const searchableText = [
-        topic.title,
-        stripHtml(topic.description), // Strip HTML from description
-        topic.category,
-        ...(topic.resources?.map(r => r.title) || [])
-      ].join(' ').toLowerCase();
-      
-      if (searchableText.includes(query)) {
-        matchingIds.push(`topic-${topic.id}`);
-      }
-    });
-
-    // Search through literature
-    mindMapData.literature?.forEach(lit => {
-      const searchableText = [
-        lit.title,
-        lit.authors,
-        lit.publication,
-        stripHtml(lit.abstract), // Strip HTML from abstract
-        stripHtml(lit.notes), // Strip HTML from notes
-        lit.year?.toString()
-      ].join(' ').toLowerCase();
-      
-      if (searchableText.includes(query)) {
-        matchingIds.push(`literature-${lit.id}`);
-      }
-    });
-
-    // Search through cases
-    mindMapData.cases.forEach(caseItem => {
-      const searchableText = [
-        caseItem.case_id,
-        caseItem.primary_diagnosis,
-        stripHtml(caseItem.chief_complaint), // Strip HTML
-        stripHtml(caseItem.history_present_illness), // Strip HTML
-        stripHtml(caseItem.medical_history), // Strip HTML
-        stripHtml(caseItem.assessment_plan), // Strip HTML
-        stripHtml(caseItem.notes), // Strip HTML
-        caseItem.age?.toString(),
-        caseItem.gender,
-        ...(caseItem.secondary_diagnoses || []),
-        ...(caseItem.medications || [])
-      ].join(' ').toLowerCase();
-      
-      if (searchableText.includes(query)) {
-        matchingIds.push(`case-${caseItem.id}`);
-      }
-    });
-
-    // Search through tasks
-    mindMapData.tasks.forEach(task => {
-      const searchableText = [
-        task.title,
-        stripHtml(task.description), // Strip HTML from description
-        task.priority,
-        task.status
-      ].join(' ').toLowerCase();
-      
-      if (searchableText.includes(query)) {
-        matchingIds.push(`task-${task.id}`);
-      }
-    });
-
-    // Search through connection labels (NEW: Include edge labels in search)
-    mindMapData.connections?.forEach(conn => {
-      if (conn.label && conn.label.toLowerCase().includes(query)) {
-        // Add both connected nodes to matching results
-        const sourceNode = conn.source; // e.g., "topic-123"
-        const targetNode = conn.target; // e.g., "case-456"
-        
-        if (!matchingIds.includes(sourceNode)) {
-          matchingIds.push(sourceNode);
-        }
-        if (!matchingIds.includes(targetNode)) {
-          matchingIds.push(targetNode);
-        }
-        
-        console.log(`Found edge label match: "${conn.label}" connecting ${sourceNode} to ${targetNode}`);
-      }
-    });
-
-    console.log(`Search "${query}" found ${matchingIds.length} matching nodes:`, matchingIds);
-    return matchingIds;
-  }, [searchQuery, mindMapData, stripHtml]);
-
-  // Enhanced auto-save function with visual feedback
   const autoSaveMindMapData = useCallback((data) => {
-    const onSaveStart = () => {
-      setIsSaving(true);
-    };
-    
+    const onSaveStart = () => setIsSaving(true);
     const onSaveComplete = (success, error) => {
       setIsSaving(false);
       if (success) {
@@ -2218,1675 +2178,854 @@ const Dashboard = () => {
       }
     };
 
-    // Save to localStorage (primary)
     localStorageUtils.save(data, onSaveStart, onSaveComplete);
-    
-    // Also save to backend (secondary, for persistence)
     saveToBackend(data);
   }, [addToast]);
 
-  // Function to save data to the local backend
+const handleDeleteNode = useCallback((fullNodeId) => {
+  // fullNodeId is always in the format `${nodeType}-${id}`
+  console.log(`Deleting node with full ID:`, fullNodeId);
+
+  // Extract nodeType and id from fullNodeId
+  const [nodeType, ...idParts] = fullNodeId.split('-');
+  const nodeId = idParts.join('-');
+  const collectionKey = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
+
+  setMindMapData(prevData => {
+    // Remove the node from its collection
+    const updatedCollection = (prevData[collectionKey] || []).filter(item => String(item.id) !== nodeId);
+    // Remove any connections that are attached to the deleted node
+    const updatedConnections = (prevData.connections || []).filter(
+      conn => conn.source !== fullNodeId && conn.target !== fullNodeId
+    );
+    const newData = {
+      ...prevData,
+      [collectionKey]: updatedCollection,
+      connections: updatedConnections,
+    };
+    autoSaveMindMapData(newData);
+    addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} deleted.`, 'success');
+    return newData;
+  });
+  // Remove the node from the visual state
+  setNodes((nds) => nds.filter((node) => node.id !== fullNodeId));
+  // Remove edges referencing this node
+  setEdges((eds) => eds.filter((edge) => edge.source !== fullNodeId && edge.target !== fullNodeId));
+}, [setMindMapData, autoSaveMindMapData, addToast, setNodes, setEdges]);
+
+  const convertDataToReactFlow = useCallback((data) => {
+    const newNodes = [];
+    const newEdges = [];
+
+  // Process topics
+  data.topics.forEach(topic => {
+    const nodeId = `topic-${topic.id}`;
+    newNodes.push({
+      id: nodeId,
+      type: 'topic',
+      position: topic.position || { x: 0, y: 0 },
+      data: { ...topic, onDelete: () => handleDeleteNode(nodeId) },
+    });
+  });
+
+  // Process cases
+  data.cases.forEach(caseItem => {
+    const nodeId = `case-${caseItem.id}`;
+    newNodes.push({
+      id: nodeId,
+      type: 'case',
+      position: caseItem.position || { x: 0, y: 0 },
+      data: { ...caseItem, onDelete: () => handleDeleteNode(nodeId) },
+    });
+  });
+
+  // Process tasks
+  data.tasks.forEach(task => {
+    const nodeId = `task-${task.id}`;
+    newNodes.push({
+      id: nodeId,
+      type: 'task',
+      position: task.position || { x: 0, y: 0 },
+      data: { ...task, onDelete: () => handleDeleteNode(nodeId) },
+    });
+  });
+
+  // Process literature
+  data.literature.forEach(lit => {
+    const nodeId = `literature-${lit.id}`;
+    newNodes.push({
+      id: nodeId,
+      type: 'literature',
+      position: lit.position || { x: 0, y: 0 },
+      data: { ...lit, onDelete: () => handleDeleteNode(nodeId) },
+    });
+  });
+
+  // Only add edges if both source and target nodes exist
+  const nodeIdSet = new Set(newNodes.map(n => n.id));
+  data.connections.forEach(conn => {
+    if (nodeIdSet.has(conn.source) && nodeIdSet.has(conn.target)) {
+      newEdges.push({ 
+        id: conn.id, 
+        source: conn.source, 
+        target: conn.target, 
+        label: conn.label,
+        type: 'floating', // Use our optimized floating edge type
+        style: { 
+          strokeWidth: 2, 
+          stroke: '#64748b',
+          opacity: 0.85,
+          transition: 'none' // Disable CSS transitions
+        },
+        animated: false,
+        updatable: true,
+        // Add a timestamp to force re-render of the edge when source or target nodes move
+        data: { __forceUpdate: Date.now() },
+        interactionWidth: 20 // Wider area for interaction
+      });
+    }
+  });
+
+  setNodes(newNodes);
+  setEdges(newEdges);
+}, [setNodes, setEdges, handleDeleteNode]);
+
   const saveToBackend = useCallback(async (data) => {
     try {
-      console.log('Saving data to local backend...');
-      const response = await axios.put(`${API}/mindmap-data`, data, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log('Data successfully saved to backend:', response.data.message);
-    } catch (error) {
-      console.warn('Failed to save to backend (continuing with localStorage):', error);
-      // Don't show error toast since localStorage is primary
-    }
-  }, [API]);
-
-  // Function to clear the entire mind map
-  const handleClearMap = useCallback(async () => {
-    if (!window.confirm('Are you sure you want to clear the entire mind map? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      // Clear all data, including templates
-      const emptyData = { topics: [], cases: [], tasks: [], literature: [], templates: [], connections: [] };
-      setMindMapData(emptyData);
-      setNodes([]);
-      setEdges([]);
+      // Deep clone the data to avoid modifying the original
+      const cleanData = {
+        topics: JSON.parse(JSON.stringify(data.topics || [])),
+        cases: JSON.parse(JSON.stringify(data.cases || [])),
+        tasks: JSON.parse(JSON.stringify(data.tasks || [])),
+        literature: JSON.parse(JSON.stringify(data.literature || [])),
+        connections: JSON.parse(JSON.stringify(data.connections || []))
+      };
       
-      // Save empty state to localStorage
-      autoSaveMindMapData(emptyData);
+      // Current timestamp for created_at/updated_at fields
+      const now = new Date().toISOString();
       
-      // Show success message
-      addToast('Mind map cleared successfully', 'success');
-      
-      // Reset other states
-      setSelectedNode(null);
-      setOpenSubpage(null);
-      setSubpageData(null);
-      setFocusedCategory(null);
-      
-    } catch (error) {
-      console.error('Error clearing mind map:', error);
-      addToast('Failed to clear mind map', 'error');
-    }
-  }, [setMindMapData, setNodes, setEdges, autoSaveMindMapData, addToast]);
-
-  // Modified handleNodesChange to trigger auto-save
-  const handleNodesChange = useCallback((changes) => {
-    onNodesChange(changes);
-    
-    // Auto-save when nodes are moved
-    const moveChanges = changes.filter(change => change.type === 'position' && change.dragging === false);
-    if (moveChanges.length > 0) {
-      // Update mindMapData with new positions and trigger auto-save
-      setTimeout(() => {
-        const updatedData = { ...mindMapData };
-        
-        // Update positions in mindMapData
-        nodes.forEach(node => {
-          const [nodeType, nodeId] = node.id.split('-');
-          const collection = nodeType === 'literature' ? 'literature' : nodeType + 's';
-          
-          if (updatedData[collection]) {
-            const item = updatedData[collection].find(item => item.id === nodeId);
-            if (item) {
-              item.position = node.position;
-            }
-          }
-        });
-        
-        setMindMapData(updatedData);
-        autoSaveMindMapData(updatedData);
-        console.log('Node positions auto-saved to localStorage');
-      }, 100);
-    }
-  }, [onNodesChange, mindMapData, nodes, autoSaveMindMapData]);
-
-  useEffect(() => {
-    loadMindMapData();
-  }, []);
-
-  useEffect(() => {
-    // Refresh nodes when edit mode changes
-    if (mindMapData.topics.length > 0) {
-      // Add longer delay to ensure auto-save and state updates complete
-      setTimeout(() => {
-        console.log('Mode switching - refreshing nodes with current mindMapData:');
-        console.log('Literature connections:', mindMapData.literature?.map(lit => ({
-          id: lit.id,
-          title: lit.title,
-          linked_topics: lit.linked_topics
-        })));
-        console.log('Case connections:', mindMapData.cases?.map(c => ({
-          id: c.id,
-          case_id: c.case_id,
-          linked_topics: c.linked_topics
-        })));
-        console.log('Task connections:', mindMapData.tasks?.map(t => ({
-          id: t.id,
-          title: t.title,
-          linked_case_id: t.linked_case_id,
-          linked_topic_id: t.linked_topic_id
-        })));
-        
-        convertDataToReactFlow(mindMapData, true); // Preserve positions when toggling edit mode
-      }, 800); // Increased to 800ms to ensure localStorage save completes
-    }
-  }, [isEditing]);
-
-  // Effect to apply initial layout when both React Flow and data are ready
-  useEffect(() => {
-    if (isReactFlowReady && mindMapData.topics.length > 0 && !hasAppliedInitialLayout && !loading) {
-      // Only apply layout if nodes don't have saved positions
-      const hasNodePositions = mindMapData.topics.some(topic => topic.position) ||
-                               mindMapData.cases.some(caseItem => caseItem.position) ||
-                               mindMapData.tasks.some(task => task.position) ||
-                               (mindMapData.literature && mindMapData.literature.some(lit => lit.position));
-      
-      if (!hasNodePositions) {
-        setTimeout(() => {
-          console.log('Applying initial hierarchical layout from useEffect (no saved positions)...');
-          applyLayout();
-          setHasAppliedInitialLayout(true);
-        }, 1000);
-      } else {
-        console.log('Skipping layout from useEffect - using saved positions');
-        setHasAppliedInitialLayout(true);
-      }
-    }
-  }, [isReactFlowReady, mindMapData, hasAppliedInitialLayout, loading]);
-
-  // Effect to re-render nodes when search query changes
-  useEffect(() => {
-    if (mindMapData.topics.length > 0 || mindMapData.cases.length > 0 || 
-        mindMapData.tasks.length > 0 || mindMapData.literature?.length > 0) {
-      console.log('Search query changed, updating node visibility');
-      convertDataToReactFlow(mindMapData, true); // Preserve positions
-    }
-  }, [searchQuery, filteredNodeIds]);
-
-  const loadMindMapData = async () => {
-    try {
-      // First try to load from localStorage
-      const localData = localStorageUtils.load();
-      
-      if (localData) {
-        console.log('Loading data from localStorage');
-        
-        // Ensure connections array exists for backward compatibility
-        if (!localData.connections) {
-          localData.connections = [];
-        }
-        // Ensure templates array exists for backward compatibility
-        if (!localData.templates) {
-          localData.templates = [];
-        }
-        
-        setMindMapData(localData);
-        convertDataToReactFlow(localData);
-        setLoading(false);
-        
-        // Only apply initial layout if nodes don't have saved positions
-        const hasNodePositions = localData.topics.some(topic => topic.position) ||
-                                 localData.cases.some(caseItem => caseItem.position) ||
-                                 localData.tasks.some(task => task.position) ||
-                                 (localData.literature && localData.literature.some(lit => lit.position));
-        
-        if (isReactFlowReady && !hasAppliedInitialLayout && !hasNodePositions &&
-            (localData.topics.length > 0 || localData.cases.length > 0 || 
-             localData.tasks.length > 0 || localData.literature?.length > 0)) {
-          setTimeout(() => {
-            console.log('Applying initial layout from localStorage (no saved positions)...');
-            applyLayout();
-            setHasAppliedInitialLayout(true);
-          }, 100);
-        } else if (hasNodePositions) {
-          console.log('Skipping layout application - using saved node positions');
-          setHasAppliedInitialLayout(true); // Mark as applied since we're using saved positions
-        }
-        
-        // Optionally sync with backend in the background
-        setTimeout(() => {
-          syncWithBackend();
-        }, 2000);
-        
-        return;
-      }
-      
-      // Fallback to API if no localStorage data
-      console.log('No localStorage data found, loading from API');
-      const response = await axios.get(`${API}/mindmap-data`);
-      
-      // Ensure connections array exists for backend data too
-      if (!response.data.connections) {
-        response.data.connections = [];
-      }
-      // Ensure templates array exists for backend data too
-      if (!response.data.templates) {
-        response.data.templates = [];
-      }
-      
-      setMindMapData(response.data);
-      convertDataToReactFlow(response.data);
-      setLoading(false);
-      
-      // Save initial data to localStorage
-      autoSaveMindMapData(response.data);
-      
-      // Only apply initial layout if nodes don't have saved positions
-      const hasNodePositions = response.data.topics.some(topic => topic.position) ||
-                               response.data.cases.some(caseItem => caseItem.position) ||
-                               response.data.tasks.some(task => task.position) ||
-                               (response.data.literature && response.data.literature.some(lit => lit.position));
-      
-      if (isReactFlowReady && !hasAppliedInitialLayout && !hasNodePositions &&
-          (response.data.topics.length > 0 || response.data.cases.length > 0 || 
-           response.data.tasks.length > 0 || response.data.literature?.length > 0)) {
-        // Apply layout immediately to prevent jumping
-        console.log('Applying initial layout from API (no saved positions)...');
-        setTimeout(() => {
-          applyLayout();
-          setHasAppliedInitialLayout(true);
-        }, 100);
-      } else if (hasNodePositions) {
-        console.log('Skipping layout application - using saved node positions from API');
-        setHasAppliedInitialLayout(true); // Mark as applied since we're using saved positions
-      }
-    } catch (error) {
-      console.error('Error loading mind map data:', error);
-      setLoading(false);
-    }
-  };
-
-  // Background sync with backend (optional)
-  const syncWithBackend = async () => {
-    try {
-      const response = await axios.get(`${API}/mindmap-data`);
-      const backendData = response.data;
-      
-      // Simple comparison - in a real app you might want more sophisticated sync logic
-      const localData = localStorageUtils.load();
-      if (localData && JSON.stringify(localData) !== JSON.stringify(backendData)) {
-        console.log('Backend data differs from localStorage, keeping localStorage version');
-        // Optionally show a notification to user about data differences
-      }
-    } catch (error) {
-      console.warn('Background sync with backend failed:', error);
-    }
-  };
-
-  const onReactFlowInit = useCallback(() => {
-    console.log('React Flow initialized');
-    setIsReactFlowReady(true);
-    
-    // Only apply initial layout if data is loaded AND nodes don't have saved positions
-    if (mindMapData.topics.length > 0 && !hasAppliedInitialLayout) {
-      const hasNodePositions = mindMapData.topics.some(topic => topic.position) ||
-                               mindMapData.cases.some(caseItem => caseItem.position) ||
-                               mindMapData.tasks.some(task => task.position) ||
-                               (mindMapData.literature && mindMapData.literature.some(lit => lit.position));
-      
-      if (!hasNodePositions) {
-        setTimeout(() => {
-          console.log('Applying initial layout after React Flow init (no saved positions)...');
-          applyLayout();
-          setHasAppliedInitialLayout(true);
-        }, 100);
-      } else {
-        console.log('Skipping layout after React Flow init - using saved positions');
-        setHasAppliedInitialLayout(true);
-      }
-    }
-  }, [mindMapData, hasAppliedInitialLayout]);
-  const deleteNode = useCallback(async (nodeId, nodeType) => {
-    try {
-      console.log(`Deleting ${nodeType} with ID:`, nodeId);
-      
-      // Remove from React Flow visually
-      setNodes((nds) => nds.filter(n => n.id !== `${nodeType}-${nodeId}`));
-      setEdges((eds) => eds.filter(e => 
-        !e.id.includes(`${nodeType}-${nodeId}`)
-      ));
-      
-      // Update mindMapData and trigger auto-save
-      setMindMapData(prevData => {
-        const updatedData = { ...prevData };
-        const collection = nodeType === 'literature' ? 'literature' : nodeType + 's';
-        
-        if (updatedData[collection]) {
-          updatedData[collection] = updatedData[collection].filter(item => item.id !== nodeId);
-        }
-        
-        // Also remove any connections involving this node
-        if (updatedData.connections) {
-          updatedData.connections = updatedData.connections.filter(conn => 
-            !conn.source.includes(nodeId) && !conn.target.includes(nodeId)
-          );
-        }
-        
-        console.log(`Updated mindMapData after deleting ${nodeType}:`, updatedData);
-        
-        // Trigger auto-save to both localStorage and backend
-        autoSaveMindMapData(updatedData);
-        
-        return updatedData;
-      });
-      
-      // Show success message
-      addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} deleted successfully`, 'success');
-      
-    } catch (error) {
-      console.error('Error deleting node:', error);
-      addToast(`Failed to delete ${nodeType}`, 'error');
-    }
-  }, [setNodes, setEdges, setMindMapData, autoSaveMindMapData, addToast]);
-
-  // Enhanced function to filter and center category nodes using fitView
-  const filterAndCenterCategory = (category) => {
-    // Filter nodes by category
-    let categoryNodes = [];
-    switch(category) {
-      case 'topics':
-        categoryNodes = nodes.filter(node => node.type === 'topic');
-        break;
-      case 'literature':
-        categoryNodes = nodes.filter(node => node.type === 'literature');
-        break;
-      case 'cases':
-        categoryNodes = nodes.filter(node => node.type === 'case');
-        break;
-      case 'tasks':
-        categoryNodes = nodes.filter(node => node.type === 'task');
-        break;
-    }
-
-    // Set focused category state
-    setFocusedCategory(category);
-
-    // Only center view if not in editing mode and we have nodes to show
-    if (!isEditing && categoryNodes.length > 0) {
-      // Small delay to ensure any state updates are processed
-      setTimeout(() => {
-        fitView({ 
-          nodes: categoryNodes.map(node => ({ id: node.id })),
-          duration: 800,
-          padding: 0.2,
-          minZoom: 0.5,
-          maxZoom: 1.5
-        });
-      }, 300);
-    }
-
-    // Add toast notification for user feedback
-    addToast(`Showing ${categoryNodes.length} ${category}`, 'info', 2000);
-  };
-
-  const arrangeNodesInCategory = (category) => {
-    // Get current viewport information
-    const viewport = getViewport();
-    const { x, y, zoom } = viewport;
-    
-    // Calculate visible area based on current zoom and pan
-    const viewportWidth = window.innerWidth - 320; // Subtract sidebar width
-    const viewportHeight = window.innerHeight;
-    
-    // Convert screen coordinates to flow coordinates
-    const visibleWidth = viewportWidth / zoom;
-    const visibleHeight = viewportHeight / zoom;
-    const centerX = -x / zoom;
-    const centerY = -y / zoom;
-    
-    // Calculate arrangement area within visible bounds
-    const padding = 50 / zoom; // Scale padding with zoom
-    const arrangeWidth = visibleWidth - (padding * 2);
-    
-    const categoryNodeSpacing = Math.min(280, arrangeWidth / Math.max(1, nodes.filter(n => {
-      switch(category) {
-        case 'topics': return n.type === 'topic';
-        case 'literature': return n.type === 'literature';
-        case 'cases': return n.type === 'case';
-        case 'tasks': return n.type === 'task';
-        default: return false;
-      }
-    }).length));
-    
-    const baseY = centerY; // Use center of current view
-    
-    let arrangedNodes = [...nodes];
-    let categoryNodes = [];
-    
-    // Filter nodes by category
-    switch(category) {
-      case 'topics':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'topic');
-        break;
-      case 'literature':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'literature');
-        break;
-      case 'cases':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'case');
-        break;
-      case 'tasks':
-        categoryNodes = arrangedNodes.filter(node => node.type === 'task');
-        break;
-    }
-
-    // Arrange selected category nodes horizontally within current view
-    categoryNodes.forEach((node, index) => {
-      const nodeIndex = arrangedNodes.findIndex(n => n.id === node.id);
-      if (nodeIndex !== -1) {
-        const totalWidth = Math.max(0, (categoryNodes.length - 1) * categoryNodeSpacing);
-        const startX = centerX - totalWidth / 2;
-        
-        arrangedNodes[nodeIndex] = {
-          ...arrangedNodes[nodeIndex],
+      // Clean and validate topics
+      cleanData.topics = cleanData.topics.map(topic => {
+        // Ensure all required fields exist
+        return {
+          id: String(topic.id || Date.now()),
+          title: topic.title || "Untitled Topic",
+          description: topic.description || "",
+          category: topic.category || "Uncategorized",
+          color: topic.color || "#3B82F6",
           position: {
-            x: startX + (index * categoryNodeSpacing),
-            y: baseY
-          }
+            x: Number(topic.position?.x) || 0,
+            y: Number(topic.position?.y) || 0
+          },
+          flashcard_count: Number(topic.flashcard_count) || 0,
+          completed_flashcards: Number(topic.completed_flashcards) || 0,
+          resources: Array.isArray(topic.resources) ? topic.resources : [],
+          created_at: topic.created_at || now,
+          updated_at: now
         };
-      }
-    });
-
-    setNodes(arrangedNodes);
-    setFocusedCategory(category);
-
-    // Gently adjust view to ensure all nodes are visible
-    if (categoryNodes.length > 0) {
-      setTimeout(() => {
-        const totalWidth = Math.max(0, (categoryNodes.length - 1) * categoryNodeSpacing);
-        const bounds = {
-          x: centerX - totalWidth / 2 - 100,
-          y: baseY - 100,
-          width: totalWidth + 200,
-          height: 200
+      });
+      
+      // Clean and validate cases
+      cleanData.cases = cleanData.cases.map(caseItem => {
+        // Ensure all required fields exist
+        return {
+          id: String(caseItem.id || Date.now()),
+          case_id: caseItem.case_id || `CASE-${Date.now()}`,
+          encounter_date: caseItem.encounter_date || now,
+          primary_diagnosis: caseItem.primary_diagnosis || "Unspecified",
+          secondary_diagnoses: Array.isArray(caseItem.secondary_diagnoses) ? caseItem.secondary_diagnoses : [],
+          age: caseItem.age !== undefined ? Number(caseItem.age) : null,
+          gender: caseItem.gender || null,
+          chief_complaint: caseItem.chief_complaint || "Unspecified",
+          history_present_illness: caseItem.history_present_illness || null,
+          medical_history: caseItem.medical_history || null,
+          medications: Array.isArray(caseItem.medications) ? caseItem.medications : [],
+          mental_status_exam: caseItem.mental_status_exam || null,
+          assessment_plan: caseItem.assessment_plan || null,
+          notes: caseItem.notes || null,
+          status: caseItem.status || "active",
+          linked_topics: Array.isArray(caseItem.linked_topics) ? caseItem.linked_topics : [],
+          position: {
+            x: Number(caseItem.position?.x) || 0,
+            y: Number(caseItem.position?.y) || 0
+          },
+          created_at: caseItem.created_at || now,
+          updated_at: now
         };
+      });
+      
+      // Clean and validate tasks
+      cleanData.tasks = cleanData.tasks.map(task => {
+        // Ensure all required fields exist
+        return {
+          id: String(task.id || Date.now()),
+          title: task.title || "Untitled Task",
+          description: task.description || null,
+          status: task.status || "pending",
+          priority: task.priority || "medium",
+          due_date: task.due_date || null,
+          linked_case_id: task.linked_case_id || null,
+          linked_topic_id: task.linked_topic_id || null,
+          position: {
+            x: Number(task.position?.x) || 0,
+            y: Number(task.position?.y) || 0
+          },
+          created_at: task.created_at || now,
+          updated_at: now
+        };
+      });
+      
+      // Clean and validate literature
+      cleanData.literature = cleanData.literature.map(lit => {
+        // Ensure all required fields exist
+        return {
+          id: String(lit.id || Date.now()),
+          title: lit.title || "Untitled Literature",
+          authors: lit.authors || null,
+          publication: lit.publication || null,
+          year: lit.year !== undefined ? Number(lit.year) : null,
+          doi: lit.doi || null,
+          abstract: lit.abstract || null,
+          notes: lit.notes || null,
+          pdf_path: lit.pdf_path || null,
+          linked_topics: Array.isArray(lit.linked_topics) ? lit.linked_topics : [],
+          position: {
+            x: Number(lit.position?.x) || 0,
+            y: Number(lit.position?.y) || 0
+          },
+          created_at: lit.created_at || now,
+          updated_at: now
+        };
+      });
+      
+      // Clean and validate connections
+      cleanData.connections = cleanData.connections.map(conn => {
+        // For connections, we only need these basic properties
+        return {
+          id: String(conn.id || Date.now()),
+          source: conn.source || "",
+          target: conn.target || "",
+          label: conn.label || ""
+        };
+      });
+      
+      // Filter out any items with empty or invalid source/target
+      cleanData.connections = cleanData.connections.filter(conn => 
+        conn.source && conn.target && 
+        typeof conn.source === 'string' && 
+        typeof conn.target === 'string' && 
+        conn.source.length > 0 && 
+        conn.target.length > 0
+      );
+      
+      console.log('Sending cleaned data to backend:', cleanData);
+      
+      const response = await axios.put(`${API}/mindmap-data`, cleanData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      console.log('Backend save successful:', response.data);
+    } catch (err) {
+      console.error('Failed to save to backend:', err.response?.data || err.message);
+      
+      // Log detailed validation errors
+      if (err.response?.status === 422 && err.response?.data?.detail) {
+        console.error('Validation errors:');
+        console.error(JSON.stringify(err.response.data.detail, null, 2));
         
-        // Only adjust view if nodes would be outside current viewport
-        const nodesFitInView = bounds.width <= visibleWidth && 
-                              bounds.x >= centerX - visibleWidth/2 && 
-                              bounds.x + bounds.width <= centerX + visibleWidth/2;
-        
-        if (!nodesFitInView) {
-          fitView({ 
-            padding: 0.1, 
-            duration: 800,
-            nodes: categoryNodes.map(node => ({ id: node.id }))
-          });
-        }
-      }, 100);
-    }
-  };
-
-  const resetToMindMapView = () => {
-    // Restore original positions
-    convertDataToReactFlow(mindMapData);
-    setFocusedCategory(null);
-    
-    // Fit all nodes in view
-    setTimeout(() => {
-      fitView({ duration: 800, padding: 0.1 });
-    }, 100);
-  };
-
-
-
-  // Memoized function to convert data to React Flow format
-  const convertDataToReactFlow = (data, preserveCurrentPositions = false) => {
-    const flowNodes = [];
-
-    // Create a map of current node positions if preserving
-    const currentPositions = {};
-    if (preserveCurrentPositions && nodes.length > 0) {
-      nodes.forEach(node => {
-        currentPositions[node.id] = node.position;
-      });
-    }
-
-    // Helper function to determine if a node should be dimmed based on search
-    const getNodeStyle = (nodeId) => {
-      if (!searchQuery.trim()) {
-        return {}; // No search active, normal style
+        // Log the request data that caused the error
+        console.error('Request data that caused validation error:');
+        console.error(JSON.stringify(cleanData, null, 2));
       }
       
-      const isMatch = filteredNodeIds.includes(nodeId);
-      if (isMatch) {
-        return {}; // Matching node, normal style
-      } else {
-        return { 
-          opacity: 0.2, // Dim non-matching nodes
-        };
-      }
-    };
-
-    // Convert topics to nodes
-    data.topics.forEach(topic => {
-      const nodeId = `topic-${topic.id}`;
-      const currentPosition = currentPositions[nodeId];
-      
-      flowNodes.push({
-        id: nodeId,
-        type: 'topic',
-        position: currentPosition || topic.position || { x: 0, y: 0 },
-        style: getNodeStyle(nodeId), // Apply search highlighting
-        data: {
-          label: topic.title,
-          category: topic.category,
-          color: topic.color,
-          flashcard_count: topic.flashcard_count,
-          completed_flashcards: topic.completed_flashcards,
-          originalData: topic,
-          onDelete: () => deleteNode(topic.id, 'topic'), // Always available, not just in edit mode
-          nodeId: nodeId // Add full node ID for reference
-        }
-      });
-    });
-
-    // Convert literature to nodes
-    data.literature && data.literature.forEach(lit => {
-      const nodeId = `literature-${lit.id}`;
-      const currentPosition = currentPositions[nodeId];
-      
-      flowNodes.push({
-        id: nodeId,
-        type: 'literature',
-        position: currentPosition || lit.position || { x: 0, y: 0 },
-        style: getNodeStyle(nodeId), // Apply search highlighting
-        data: {
-          label: lit.title,
-          authors: lit.authors,
-          year: lit.year,
-          originalData: lit,
-          onDelete: () => deleteNode(lit.id, 'literature'), // Always available, not just in edit mode
-          nodeId: nodeId // Add full node ID for reference
-        }
-      });
-    });
-
-    // Convert cases to nodes  
-    data.cases.forEach(caseItem => {
-      const nodeId = `case-${caseItem.id}`;
-      const currentPosition = currentPositions[nodeId];
-      
-      flowNodes.push({
-        id: nodeId,
-        type: 'case',
-        position: currentPosition || caseItem.position || { x: 0, y: 0 },
-        style: getNodeStyle(nodeId), // Apply search highlighting
-        data: {
-          label: caseItem.case_id,
-          diagnosis: caseItem.primary_diagnosis,
-          age: caseItem.age,
-          originalData: caseItem,
-          onDelete: () => deleteNode(caseItem.id, 'case'), // Always available, not just in edit mode
-          nodeId: nodeId // Add full node ID for reference
-        }
-      });
-    });
-
-    // Convert tasks to nodes
-    data.tasks.forEach(task => {
-      const nodeId = `task-${task.id}`;
-      const currentPosition = currentPositions[nodeId];
-      
-      flowNodes.push({
-        id: nodeId,
-        type: 'task',
-        position: currentPosition || task.position || { x: 0, y: 0 },
-        style: getNodeStyle(nodeId), // Apply search highlighting
-        data: {
-          label: task.title,
-          priority: task.priority,
-          status: task.status,
-          due_date: task.due_date,
-          originalData: task,
-          onDelete: () => deleteNode(task.id, 'task'), // Always available, not just in edit mode
-          nodeId: nodeId // Add full node ID for reference
-        }
-      });
-    });
-
-    console.log(`convertDataToReactFlow completed: ${flowNodes.length} nodes`);
-    
-    // Set only nodes - edges will be handled by the useEffect watching mindMapData.connections
-    setNodes(flowNodes);
-  };
+      // Don't throw the error to prevent breaking the app
+    }
+  }, []);
 
   const onConnect = useCallback((params) => {
-    console.log('Creating new connection with full edge data:', params);
-    
-    // Create a complete edge object with all React Flow properties
-    const newEdge = {
-      id: `${params.source}-${params.target}-${Date.now()}`, // Ensure unique ID
-      source: params.source,
-      target: params.target,
-      sourceHandle: params.sourceHandle || 'connection-hotspot', // Default to hotspot if not provided
-      targetHandle: params.targetHandle || 'connection-hotspot', // Default to hotspot if not provided
-      type: 'smoothstep',
-      style: { stroke: '#2563eb', strokeWidth: 3 }, // Changed to blue and thicker for better visibility
-      label: '', // NEW: Add label property for edge labeling
-      labelStyle: { fill: '#374151', fontWeight: 500 }, // Add label styling
-      labelBgStyle: { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 }, // Add label background
-      labelBgPadding: [8, 4], // Add padding around label
-      labelShowBg: true, // Show background for label
-      labelBgBorderRadius: 4, // Rounded corners for label background
+    const edgeId = `conn-${Date.now()}`;
+    const newEdge = { 
+      ...params, 
+      id: edgeId,
+      type: 'floating', // Use our high-performance floating edge type
+      style: { 
+        strokeWidth: 2, 
+        stroke: '#64748b',
+        opacity: 0.85,
+        transition: 'none' // Critical: disable transitions for immediate updates
+      },
       animated: false,
-      selectable: true,
-      focusable: true,
-      deletable: true
+      updatable: true,
+      // Add a unique timestamp to force React to re-render this edge when source or target nodes move
+      data: { __forceUpdate: Date.now() },
+      interactionWidth: 20 // Wider area for interaction
     };
-    
-    console.log('Complete edge object created:', newEdge);
-    
-    // SINGLE SOURCE OF TRUTH: Only update mindMapData.connections
-    // The visual edges will be updated by the useEffect hook
-    setMindMapData(prevData => {
-      const newData = { ...prevData };
-      
-      // Ensure connections array exists (for backward compatibility)
-      if (!newData.connections) {
-        newData.connections = [];
-      }
-      
-      // Check if connection already exists (prevent duplicates)
-      const connectionExists = newData.connections.some(conn => 
-        conn.source === newEdge.source && 
-        conn.target === newEdge.target &&
-        conn.sourceHandle === newEdge.sourceHandle &&
-        conn.targetHandle === newEdge.targetHandle
-      );
-      
-      if (!connectionExists) {
-        // Add the complete edge object to connections array
-        newData.connections = [...newData.connections, newEdge];
-        
-        console.log('Edge added to mindMapData.connections:', newEdge);
-        console.log('Total connections now:', newData.connections.length);
-        
-        // Trigger auto-save
-        autoSaveMindMapData(newData);
-        addToast('Connection created and saved', 'success', 2000);
-      } else {
-        console.log('Connection already exists, skipping duplicate');
-      }
-      
+    setEdges((eds) => addEdge(newEdge, eds));
+    setMindMapData(prev => {
+      const newConnections = [...prev.connections, { 
+        id: newEdge.id, 
+        source: params.source, 
+        target: params.target, 
+        label: '' 
+      }];
+      const newData = { ...prev, connections: newConnections };
+      autoSaveMindMapData(newData);
       return newData;
     });
-  }, [setMindMapData, autoSaveMindMapData, addToast]);
+  }, [setEdges, setMindMapData, autoSaveMindMapData]);
 
-  // SINGLE SOURCE OF TRUTH: Watch for changes in mindMapData.connections
-  // and update visual edges accordingly
-  useEffect(() => {
-    if (!mindMapData.connections) return;
-    
-    console.log('Updating visual edges from mindMapData.connections:', mindMapData.connections.length);
-    
-    // Convert connections to React Flow edges
-    const visualEdges = mindMapData.connections.map(connection => {
-      return {
-        id: connection.id,
-        source: connection.source,
-        target: connection.target,
-        sourceHandle: connection.sourceHandle,
-        targetHandle: connection.targetHandle,
-        type: connection.type || 'smoothstep',
-        style: connection.style || { stroke: '#2563eb', strokeWidth: 3 },
-        label: connection.label || '',
-        labelStyle: connection.labelStyle || { fill: '#374151', fontWeight: 500 },
-        labelBgStyle: connection.labelBgStyle || { fill: '#f9fafb', stroke: '#d1d5db', strokeWidth: 1 },
-        labelBgPadding: connection.labelBgPadding || [8, 4],
-        labelShowBg: connection.labelShowBg !== undefined ? connection.labelShowBg : true,
-        labelBgBorderRadius: connection.labelBgBorderRadius || 4,
-        animated: connection.animated || false,
-        selectable: connection.selectable !== undefined ? connection.selectable : true,
-        focusable: connection.focusable !== undefined ? connection.focusable : true,
-        deletable: connection.deletable !== undefined ? connection.deletable : true
-      };
-    });
-    
-    console.log('Setting visual edges:', visualEdges);
-    setEdges(visualEdges);
-  }, [mindMapData.connections, setEdges]);
-
-  // Clean up existing function declaration reference
-  // (This useEffect hook ensures connections in mindMapData are always reflected visually)
-
-  const onNodeClick = (event, node) => {
+  const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
-    console.log('Node clicked:', node);
-  };
+    // Visual feedback - highlight selected node
+    setNodes(currentNodes => currentNodes.map(n => ({
+      ...n,
+      selected: n.id === node.id
+    })));
+  }, [setNodes]);
 
-  // PERFORMANCE FIX: Optimized data loading from local state instead of API calls
-  const loadSubpageData = useCallback(async (nodeType, nodeId) => {
-    try {
-      console.log('Loading subpage data for:', nodeType, nodeId);
-      
-      // Get data from local mindMapData state instead of API call
-      let nodeData = null;
-      
-      switch (nodeType) {
-        case 'topic':
-          nodeData = mindMapData.topics.find(topic => topic.id === nodeId);
-          break;
-        case 'case':
-          nodeData = mindMapData.cases.find(caseItem => caseItem.id === nodeId);
-          break;
-        case 'task':
-          nodeData = mindMapData.tasks.find(task => task.id === nodeId);
-          break;
-        case 'literature':
-          nodeData = mindMapData.literature?.find(lit => lit.id === nodeId);
-          break;
-        default:
-          throw new Error(`Unknown node type: ${nodeType}`);
-      }
-      
-      if (!nodeData) {
-        throw new Error(`${nodeType} with ID ${nodeId} not found in local data`);
-      }
-      
-      console.log('Successfully loaded subpage data from local state:', nodeData);
-      
-      // Update state asynchronously to prevent blocking
-      requestAnimationFrame(() => {
-        setSubpageData(nodeData);
-      });
-      
-    } catch (error) {
-      console.error('Error loading subpage data:', error);
-      
-      // Show user-friendly error message
-      addToast(`Failed to load ${nodeType} data`, 'error', 4000);
-      
-      // Set error state to show fallback UI
-      requestAnimationFrame(() => {
-        setSubpageData({ error: `Failed to load ${nodeType} data: ${error.message}` });
-      });
-    }
-  }, [mindMapData, addToast]);
-
-  // PERFORMANCE FIX: Optimized node double-click handler with debouncing
   const onNodeDoubleClick = useCallback((event, node) => {
-    console.log('=== DEBUGGING SUBPAGE OPENING ===');
-    console.log('Double-clicking node:', node);
-    console.log('Node ID:', node.id);
-    console.log('Current openSubpage state:', openSubpage);
-    
-    // Prevent multiple rapid clicks that could cause performance issues
-    if (openSubpage) {
-      console.log('Subpage already open, ignoring click');
-      return;
+    const [type, id] = node.id.split('-');
+    const key = type === 'literature' ? 'literature' : `${type}s`;
+    const dataItem = mindMapData[key].find(item => String(item.id) === id);
+    if (dataItem) {
+      setSubpageData(dataItem);
+      setOpenSubpage(type);
     }
-    
-    // Extract the node type and full ID
-    const nodeType = node.id.split('-')[0];
-    const nodeId = node.id.substring(nodeType.length + 1);
-    console.log('Extracted nodeType:', nodeType, 'nodeId:', nodeId);
-    
-    // Validate that we have the required data
-    if (!nodeType || !nodeId) {
-      console.error('Invalid node data:', { nodeType, nodeId });
-      addToast('Invalid node data', 'error');
-      return;
-    }
-    
-    // PERFORMANCE FIX: Open subpage immediately for better UX, load data asynchronously
-    console.log('Setting openSubpage state...');
-    setOpenSubpage({ type: nodeType, id: nodeId });
-    setSubpageData(null); // Clear previous data immediately
-    
-    // Load data asynchronously to prevent blocking
-    console.log('Triggering async data load...');
-    requestAnimationFrame(() => {
-      loadSubpageData(nodeType, nodeId);
-    });
-  }, [openSubpage, addToast, loadSubpageData]);
+  }, [mindMapData]);
 
-  // PERFORMANCE FIX: Optimized close handler with immediate state cleanup
-  const closeSubpage = useCallback(() => {
-    // Immediate cleanup for responsive UX
-    setOpenSubpage(null);
-    setSubpageData(null);
-  }, []);
-
-  // Edge double-click handler for deletion (no conflict with right-click)
   const onEdgeDoubleClick = useCallback((event, edge) => {
-    console.log('Edge double-clicked:', edge);
-    
-    // Close any open modal first
-    setEditingEdge(null);
-    
-    console.log('Deleting edge:', edge);
-    
-    // Remove edge from React Flow state
-    setEdges((edges) => edges.filter((e) => e.id !== edge.id));
-    
-    // CRITICAL FIX: Remove the connection from mindMapData.connections array
-    setMindMapData(prevData => {
-      const newData = { ...prevData };
-      
-      // Ensure connections array exists
-      if (!newData.connections) {
-        newData.connections = [];
-      }
-      
-      // Remove the connection from the connections array
-      const initialLength = newData.connections.length;
-      newData.connections = newData.connections.filter(conn => 
-        conn.id !== edge.id
-      );
-      
-      if (newData.connections.length !== initialLength) {
-        console.log('Successfully removed connection from mindMapData.connections');
-        autoSaveMindMapData(newData);
-        addToast('Connection deleted and saved', 'success', 2000);
-      } else {
-        console.log('Connection not found in mindMapData.connections, but removed from visual state');
-        addToast('Connection deleted', 'success', 2000);
-      }
-      
+    // Double-click to delete edge immediately
+    setEdges(eds => eds.filter(e => e.id !== edge.id));
+    setMindMapData(prev => {
+      const newConnections = prev.connections.filter(conn => conn.id !== edge.id);
+      const newData = { ...prev, connections: newConnections };
+      autoSaveMindMapData(newData);
+      addToast('Connection deleted', 'success');
       return newData;
     });
   }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Edge right-click handler for opening label editing modal (no conflict with double-click delete)
   const onEdgeContextMenu = useCallback((event, edge) => {
-    event.preventDefault(); // Prevent browser context menu
-    console.log('Edge right-clicked:', edge);
-    setEditingEdge(edge);
+    // Right-click to edit edge label
+    event.preventDefault();
+    setEdgeModal({ isOpen: true, edge: edge });
   }, []);
 
-  // Function to save edge label with improved state synchronization
-  const saveEdgeLabel = useCallback((edgeId, newLabel) => {
-    console.log('Saving edge label:', edgeId, newLabel);
-    
-    // Update mindMapData first, then React Flow edges in sequence
-    setMindMapData(prevData => {
-      const newData = { ...prevData };
-      
-      // Ensure connections array exists
-      if (!newData.connections) {
-        newData.connections = [];
-      }
-      
-      // Find and update the connection
-      newData.connections = newData.connections.map(conn => 
-        conn.id === edgeId ? { ...conn, label: newLabel } : conn
+  const handleSaveEdgeLabel = useCallback((edgeId, label) => {
+    setEdges(eds =>
+      eds.map(edge =>
+        edge.id === edgeId ? { ...edge, label: label } : edge
+      )
+    );
+    setMindMapData(prev => {
+      const newConnections = prev.connections.map(conn =>
+        conn.id === edgeId ? { ...conn, label: label } : conn
       );
-      
-      console.log('Updated connection label in mindMapData');
-      
-      // Update React Flow edges immediately after mindMapData update
-      requestAnimationFrame(() => {
-        setEdges(prev => prev.map(edge => 
-          edge.id === edgeId ? { ...edge, label: newLabel } : edge
-        ));
-        console.log('Updated edge label in React Flow state');
-      });
-      
-      // Trigger auto-save
+      const newData = { ...prev, connections: newConnections };
       autoSaveMindMapData(newData);
-      addToast('Connection label updated', 'success', 2000);
-      
       return newData;
     });
-  }, [setMindMapData, setEdges, autoSaveMindMapData, addToast]);
+  }, [setEdges, setMindMapData, autoSaveMindMapData]);
 
-  // Placeholder handlers for Template Manager
-  const handleCreateTemplate = useCallback((newTemplate) => {
-    const generateId = () => {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    };
+  // Edge hover handlers for highlighting
+  const onEdgeMouseEnter = useCallback((event, edge) => {
+    setEdges(eds =>
+      eds.map(e =>
+        e.id === edge.id ? { ...e, className: 'highlighted' } : e
+      )
+    );
+  }, [setEdges]);
 
-    const completeNewTemplate = {
-      ...newTemplate,
-      id: generateId(),
-    };
+  const onEdgeMouseLeave = useCallback((event, edge) => {
+    setEdges(eds =>
+      eds.map(e =>
+        e.id === edge.id ? { ...e, className: '' } : e
+      )
+    );
+  }, [setEdges]);
 
-    setMindMapData(prevData => {
-      const updatedData = {
-        ...prevData,
-        templates: [...(prevData.templates || []), completeNewTemplate]
-      };
-      autoSaveMindMapData(updatedData);
-      addToast('Template created successfully', 'success');
-      return updatedData;
-    });
-  }, [setMindMapData, autoSaveMindMapData, addToast]);
+  // Force-directed layout (defined early to avoid initialization issues)
+  const forceLayout = useCallback(() => {
+    if (nodes.length === 0) return;
 
-  const handleDeleteTemplate = useCallback((templateId) => {
-    setMindMapData(prevData => {
-      const updatedData = {
-        ...prevData,
-        templates: prevData.templates.filter(template => template.id !== templateId)
-      };
-      autoSaveMindMapData(updatedData);
-      addToast('Template deleted', 'success');
-      return updatedData;
-        });
-  }, [setMindMapData, autoSaveMindMapData, addToast]);
-
-  const handleUpdateTemplate = useCallback((updatedTemplate) => {
-    setMindMapData(prevData => {
-      const updatedTemplates = prevData.templates.map(t => 
-        t.id === updatedTemplate.id ? { ...t, ...updatedTemplate } : t
-      );
-      const updatedData = {
-        ...prevData,
-        templates: updatedTemplates
-      };
-      autoSaveMindMapData(updatedData);
-      addToast('Template updated successfully', 'success');
-      return updatedData;
-    });
-  }, [setMindMapData, autoSaveMindMapData, addToast]);
-
-  // Dagre layout configuration
-  const getLayoutedElements = (nodes, edges, direction = 'TB') => {
-    const dagreGraph = new dagre.graphlib.Graph();
-    dagreGraph.setDefaultEdgeLabel(() => ({}));
+    // Preserve the current edges before layout
+    const currentEdges = [...edges];
     
-    const isHorizontal = direction === 'LR';
+    // Create a set of valid node IDs for fast lookup
+    const nodeIdSet = new Set(nodes.map(node => node.id));
     
-    // Configure layout with better spacing for mind map
-    dagreGraph.setGraph({ 
-      rankdir: direction, 
-      nodesep: 80,      // Horizontal spacing between nodes
-      ranksep: 120,     // Vertical spacing between ranks
-      edgesep: 20,      // Spacing between edges
-      marginx: 50,      // Margin around the graph
-      marginy: 50
-    });
+    // Filter edges to only include those with both source and target nodes present
+    const validEdges = currentEdges.filter(edge => 
+      nodeIdSet.has(edge.source) && nodeIdSet.has(edge.target)
+    );
 
-    // Define node dimensions based on type
-    const getNodeDimensions = (node) => {
-      switch (node.type) {
-        case 'topic':
-          return { width: 240, height: 120 };
-        case 'literature':
-          return { width: 220, height: 110 };
-        case 'case':
-          return { width: 220, height: 110 };
-        case 'task':
-          return { width: 200, height: 100 };
-        default:
-          return { width: 220, height: 100 };
-      }
-    };
+    // Create D3-compatible edge objects for the force simulation
+    const d3Edges = validEdges.map(edge => ({
+      source: edge.source,
+      target: edge.target,
+      id: edge.id
+    }));
 
-    // Add nodes to dagre graph
-    nodes.forEach((node) => {
-      const dimensions = getNodeDimensions(node);
-      dagreGraph.setNode(node.id, dimensions);
-    });
+    // Create a copy of nodes for simulation (D3 mutates the objects)
+    const simulationNodes = nodes.map(node => ({ 
+      id: node.id,
+      x: node.position.x, 
+      y: node.position.y,
+      fx: null, // Remove any fixed positions
+      fy: null
+    }));
 
-    // Add edges to dagre graph
-    edges.forEach((edge) => {
-      dagreGraph.setEdge(edge.source, edge.target);
-    });
+    // Create simulation with optimized forces for mind map layout
+    const simulation = forceSimulation(simulationNodes)
+      .force('link', forceLink(d3Edges).id(d => d.id).distance(200).strength(0.5))
+      .force('charge', forceManyBody().strength(-800).distanceMax(400))
+      .force('center', forceCenter(window.innerWidth / 3, window.innerHeight / 2))
+      .force('collision', forceCollide().radius(80))
+      .stop();
 
-    // Apply layout
-    dagre.layout(dagreGraph);
+    // Run simulation for optimal positioning
+    simulation.tick(400);
 
-    // Update node positions
-    const layoutedNodes = nodes.map((node) => {
-      const nodeWithPosition = dagreGraph.node(node.id);
-      const dimensions = getNodeDimensions(node);
-      
+    // Update nodes with new positions
+    const updatedNodes = simulationNodes.map(simNode => {
+      const originalNode = nodes.find(n => n.id === simNode.id);
       return {
-        ...node,
-        targetPosition: isHorizontal ? 'left' : 'top',
-        sourcePosition: isHorizontal ? 'right' : 'bottom',
-        position: {
-          x: nodeWithPosition.x - dimensions.width / 2,
-          y: nodeWithPosition.y - dimensions.height / 2,
-        },
+        ...originalNode,
+        position: { x: simNode.x, y: simNode.y },
       };
     });
+    
+    // Update both nodes and edges in a single batch
+    setNodes(updatedNodes);
+    setEdges(validEdges); // Restore the original edges with their styling
 
-    return { nodes: layoutedNodes, edges };
-  };
+    // Update mindMapData with new positions
+    setMindMapData(currentData => {
+      const updatedData = { ...currentData };
+      
+      updatedNodes.forEach(node => {
+        const [type, id] = node.id.split('-');
+        const key = type === 'literature' ? 'literature' : `${type}s`;
+        const item = updatedData[key]?.find(i => String(i.id) === id);
+        if (item) {
+          item.position = node.position;
+        }
+      });
+      
+      return updatedData;
+    });
 
-  const applyLayout = () => {
-    // Edge case: No nodes to layout
-    if (!nodes || nodes.length === 0) {
-      console.log('No nodes to realign');
-      return;
-    }
+    // Smooth camera transition to fit the new layout
+    setTimeout(() => {
+      fitView({ duration: 800, padding: 0.2 });
+    }, 200);
+  }, [nodes, edges, setNodes, setEdges, setMindMapData, fitView]);
 
+  // applyForceLayout wrapper function (defined after forceLayout)
+  const applyForceLayout = useCallback(() => {
     try {
-      console.log(`Applying category-based column layout to ${nodes.length} nodes`);
+      forceLayout();
+      addToast('Nodes realigned successfully', 'success');
+    } catch (error) {
+      console.error('Force layout error:', error);
+      addToast('Failed to realign nodes', 'error');
+    }
+  }, [forceLayout, addToast]);
+
+  const handleClearMap = useCallback(() => {
+    if (!window.confirm('Are you sure you want to clear the entire mind map?')) return;
+
+    const empty = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
+    setMindMapData(empty);
+    setNodes([]);
+    setEdges([]);
+    setSelectedNode(null);
+    setOpenSubpage(null);
+    setSubpageData(null);
+    setFocusedCategory(null);
+    autoSaveMindMapData(empty);
+    addToast('Mind map cleared successfully', 'success');
+  }, [setNodes, setEdges, autoSaveMindMapData, addToast]);
+
+  const handleNodesChange = useCallback((changes) => {
+    // Apply the node changes to React Flow state immediately
+    onNodesChange(changes);
+    
+    // Now process position changes for edge updates
+    const positionChanges = changes.filter(change => 
+      change.type === 'position' && change.position
+    );
+    
+    if (positionChanges.length > 0) {
+      // Create a map of changed node IDs for quick lookup
+      const changedNodeIds = new Set(positionChanges.map(change => change.id));
       
-      // Get current viewport information
-      const viewport = getViewport();
-      const { x, y, zoom } = viewport;
-      
-      // Calculate visible area center
-      const viewportWidth = window.innerWidth - 320; // Subtract sidebar width
-      const viewportHeight = window.innerHeight;
-      
-      // Convert screen coordinates to flow coordinates
-      const centerX = -x / zoom + (viewportWidth / 2) / zoom;
-      const centerY = -y / zoom + (viewportHeight / 2) / zoom;
-      
-      // Group nodes by category
-      const nodesByCategory = {
-        topics: nodes.filter(n => n.type === 'topic'),
-        literature: nodes.filter(n => n.type === 'literature'),
-        cases: nodes.filter(n => n.type === 'case'),
-        tasks: nodes.filter(n => n.type === 'task')
-      };
-      
-      // Calculate column layout
-      const categories = Object.keys(nodesByCategory).filter(cat => nodesByCategory[cat].length > 0);
-      const columnWidth = 300;
-      const totalWidth = categories.length * columnWidth;
-      const startX = centerX - totalWidth / 2;
-      
-      let layoutedNodes = [...nodes];
-      
-      categories.forEach((category, columnIndex) => {
-        const categoryNodes = nodesByCategory[category];
-        const columnX = startX + (columnIndex * columnWidth);
-        
-        // Arrange nodes vertically in the column
-        const nodeSpacing = 150;
-        const columnHeight = Math.max(0, (categoryNodes.length - 1) * nodeSpacing);
-        const startY = centerY - columnHeight / 2;
-        
-        categoryNodes.forEach((node, nodeIndex) => {
-          const layoutedNodeIndex = layoutedNodes.findIndex(n => n.id === node.id);
-          if (layoutedNodeIndex !== -1) {
-            layoutedNodes[layoutedNodeIndex] = {
-              ...layoutedNodes[layoutedNodeIndex],
-              position: {
-                x: columnX,
-                y: startY + (nodeIndex * nodeSpacing)
+      // Update edges that connect to any of the moved nodes
+      setEdges(currentEdges => {
+        // Only update edges that are connected to nodes that moved
+        return currentEdges.map(edge => {
+          if (changedNodeIds.has(edge.source) || changedNodeIds.has(edge.target)) {
+            // Add a timestamp to force re-render of the edge
+            return {
+              ...edge,
+              data: {
+                ...(edge.data || {}),
+                __forceUpdate: Date.now() // Use timestamp for unique updates
               }
             };
           }
+          return edge;
         });
       });
-
-      // Update node positions with smooth transition
-      setNodes(layoutedNodes);
-
-      // Auto-save positions
-      setTimeout(() => {
-        console.log('Auto-saving realigned positions...');
-        // Update mindMapData with new positions
-        setMindMapData(prevData => {
-          const newData = { ...prevData };
-          layoutedNodes.forEach(node => {
-            const [nodeType, nodeId] = node.id.split('-');
-            const collection = nodeType === 'literature' ? 'literature' : nodeType + 's';
-            if (newData[collection]) {
-              const item = newData[collection].find(item => item.id === nodeId);
-              if (item) {
-                item.position = node.position;
-              }
+      
+      // Update mindMapData for position persistence
+      setMindMapData(currentData => {
+        const updatedData = { ...currentData };
+        
+        positionChanges.forEach(change => {
+          if (change.position) {
+            const [type, id] = change.id.split('-');
+            const key = type === 'literature' ? 'literature' : `${type}s`;
+            const item = updatedData[key]?.find(i => String(i.id) === id);
+            
+            if (item) {
+              item.position = { ...change.position };
             }
-          });
-          autoSaveMindMapData(newData);
-          return newData;
-        });
-      }, 200);
-
-      // Adjust viewport to show all realigned nodes
-      setTimeout(() => {
-        try {
-          fitView({ 
-            duration: 1000, 
-            padding: 0.25,
-            includeHiddenNodes: false,
-            minZoom: 0.5,
-            maxZoom: 1.5
-          });
-          console.log('Viewport adjusted to center realigned nodes');
-        } catch (error) {
-          console.error('Error adjusting viewport:', error);
-        }
-      }, 500);
-
-      console.log('Category-based column layout applied successfully');
-      addToast('Nodes arranged by category', 'success', 2000);
-      
-    } catch (error) {
-      console.error('Error applying layout:', error);
-      addToast('Layout failed', 'error', 3000);
-    }
-  };
-
-  const initSampleData = async () => {
-    try {
-      await axios.post(`${API}/init-sample-data`);
-      loadMindMapData();
-    } catch (error) {
-      console.error('Error initializing sample data:', error);
-    }
-  };
-
-  const saveLayout = async () => {
-    try {
-      // Update positions in backend
-      const updates = nodes.map(node => {
-        const [nodeType, nodeId] = node.id.split('-');
-        return {
-          type: nodeType,
-          id: nodeId,
-          position: node.position
-        };
-      });
-
-      console.log('Saving layout:', updates);
-      setIsEditing(false);
-      
-      // Refresh data after a small delay to ensure state is updated
-      setTimeout(() => {
-        convertDataToReactFlow(mindMapData);
-      }, 100);
-    } catch (error) {
-      console.error('Error saving layout:', error);
-    }
-  };
-
-  const addNewNode = async (nodeType, templateId) => {
-    try {
-      // Find a free position in the center of the current view
-      const findFreePosition = () => {
-        const existingPositions = nodes.map(node => node.position);
-        
-        // Get current viewport information
-        const viewport = getViewport();
-        const { x, y, zoom } = viewport;
-        
-        // Calculate visible area center
-        const viewportWidth = window.innerWidth - 320; // Subtract sidebar width
-        const viewportHeight = window.innerHeight;
-        
-        // Convert screen coordinates to flow coordinates
-        const centerX = -x / zoom + (viewportWidth / 2) / zoom;
-        const centerY = -y / zoom + (viewportHeight / 2) / zoom;
-        
-        // Try positions in a spiral pattern around the center
-        const spiralRadius = 150;
-        const maxAttempts = 20;
-        
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-          const angle = (attempt * 2 * Math.PI) / 8; // 8 positions per ring
-          const radius = spiralRadius * (1 + Math.floor(attempt / 8));
-          
-          const testPosition = {
-            x: centerX + Math.cos(angle) * radius,
-            y: centerY + Math.sin(angle) * radius
-          };
-          
-          const tooClose = existingPositions.some(pos => 
-            Math.abs(pos.x - testPosition.x) < 250 && 
-            Math.abs(pos.y - testPosition.y) < 150
-          );
-          
-          if (!tooClose) {
-            return testPosition;
           }
-        }
-        
-        // Fallback to center position with random offset
-        return { 
-          x: centerX + (Math.random() - 0.5) * 200, 
-          y: centerY + (Math.random() - 0.5) * 200 
-        };
-      };
-
-      const newPosition = findFreePosition();
-      
-      // Generate unique ID using uuid-like approach
-      const generateId = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          const r = Math.random() * 16 | 0;
-          const v = c === 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
         });
-      };
-      
-      const newId = generateId();
-      const now = new Date();
-      
-      // Find the template data if a templateId is provided
-      let templateData = {};
-      if (templateId) {
-        const template = mindMapData.templates.find(t => t.id === templateId);
-        if (template) {
-          templateData = template.data || {};
-        }
-      }
-      
-      // Create new node data based on type
-      let newNodeData = {
-        id: newId,
-        position: newPosition,
-        created_at: now,
-        updated_at: now
-      };
-      
-      switch(nodeType) {
-        case 'topic':
-          newNodeData = {
-            ...newNodeData,
-            title: 'New Topic',
-            description: 'New topic description',
-            category: 'New Category',
-            color: '#3B82F6',
-            flashcard_count: 0,
-            completed_flashcards: 0,
-            resources: []
-          };
-          break;
-        case 'case':
-          newNodeData = {
-            ...newNodeData,
-            case_id: `CASE-${Date.now()}`, // Keep ID unique
-            encounter_date: now,
-            primary_diagnosis: 'New Diagnosis',
-            secondary_diagnoses: [],
-            age: null,
-            gender: null,
-            chief_complaint: 'New complaint', // Template content is better for assessment/plan
-            history_present_illness: null,
-            medical_history: null,
-            medications: [],
-            mental_status_exam: null,
-            assessment_plan: null,
-            notes: null, // Or here, but assessment_plan seems more appropriate for a template
-            status: 'active',
-            linked_topics: []
-          };
-          break;
-        case 'task':
-          newNodeData = {
-            ...newNodeData,
-            title: 'New Task',
-            description: 'New task description',
-            status: 'pending',
-            priority: 'medium',
-            due_date: null,
-            linked_case_id: null,
-            linked_topic_id: null
-          };
-          break;
-        case 'literature':
-          newNodeData = {
-            ...newNodeData,
-            title: 'New Literature',
-            authors: 'New Author',
-            publication: 'New Publication',
-            year: new Date().getFullYear(),
-            doi: null,
-            abstract: null,
-            notes: null,
-            linked_topics: []
-          };
-          break;
-                default:
-          throw new Error(`Unknown node type: ${nodeType}`);
-      }
-
-      // Apply template data over defaults
-      Object.assign(newNodeData, templateData);
-
-      console.log('Creating new node:', nodeType, newNodeData);
-      
-      
-      // Create React Flow node
-      const newNode = {
-        id: `${nodeType}-${newNodeData.id}`,
-        type: nodeType,
-        position: newPosition,
-        data: {
-          label: nodeType === 'case' ? newNodeData.case_id : newNodeData.title,
-          ...(nodeType === 'topic' && { 
-            category: newNodeData.category, 
-            color: newNodeData.color,
-            flashcard_count: newNodeData.flashcard_count || 0,
-            completed_flashcards: newNodeData.completed_flashcards || 0
-          }),
-          ...(nodeType === 'case' && { 
-            diagnosis: newNodeData.primary_diagnosis,
-            age: newNodeData.age
-          }),
-          ...(nodeType === 'task' && { 
-            priority: newNodeData.priority,
-            status: newNodeData.status,
-            due_date: newNodeData.due_date
-          }),
-          ...(nodeType === 'literature' && { 
-            authors: newNodeData.authors,
-            year: newNodeData.year
-          }),
-          originalData: newNodeData,
-          onDelete: () => deleteNode(newNodeData.id, nodeType) // Always available, not just in edit mode
-        }
-      };
-
-      // Add to existing nodes array
-      setNodes((nds) => [...nds, newNode]);
-      
-      // Update mindMapData state to include the new node
-      setMindMapData(prevData => {
-        const collectionName = nodeType === 'literature' ? 'literature' : nodeType + 's';
-        const updatedData = {
-          ...prevData,
-          [collectionName]: [
-            ...prevData[collectionName],
-            newNodeData
-          ]
-        };
-        
-        console.log('Updated mindMapData with new node:', updatedData);
-        
-        // Trigger auto-save to both localStorage and backend
-        autoSaveMindMapData(updatedData);
         
         return updatedData;
       });
-      
-      addToast(`New ${nodeType} created successfully`, 'success', 2000);
-      
-    } catch (error) {
-      console.error('Error adding new node:', error);
-      addToast(`Failed to create new ${nodeType}`, 'error', 3000);
     }
-  };
+  }, [onNodesChange, setEdges, setMindMapData]);
 
-  // Enhanced CSV Export functionality with progress tracking
-  const handleExportPatientCases = async () => {
-    try {
-      setIsExportingCSV(true);
-      setExportProgress({ show: true, progress: 0, message: 'Initializing export...' });
-      
-      if (!mindMapData.cases || mindMapData.cases.length === 0) {
-        addToast('No patient cases found to export.', 'error');
-        return;
-      }
-      
-      console.log('Exporting', mindMapData.cases.length, 'patient cases...');
-      addToast('Starting export...', 'info', 2000);
-      
-      // Generate CSV content with progress tracking
-      const csvContent = csvUtils.generatePatientCasesCSV(mindMapData.cases, (progress, message) => {
-        setExportProgress({ show: true, progress, message });
+  const handleNodeDragStop = useCallback((event, node) => {
+    // Debounce the auto-save to prevent excessive backend calls
+    // Position updates are already handled in handleNodesChange during dragging
+    clearTimeout(window.dragSaveTimeout);
+    window.dragSaveTimeout = setTimeout(() => {
+      setMindMapData(currentData => {
+        autoSaveMindMapData(currentData);
+        return currentData;
       });
-      
-      if (!csvContent) {
-        addToast('Error generating CSV content.', 'error');
+    }, 500);
+  }, [autoSaveMindMapData]);
+
+  const loadMindMapData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const local = localStorageUtils.load();
+      if (local) {
+        if (!local.connections) local.connections = [];
+        setMindMapData(local);
+        convertDataToReactFlow(local);
+        setLoading(false);
         return;
       }
-      
-      // Generate filename with current date and time
-      const currentDate = new Date().toISOString().split('T')[0];
-      const currentTime = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
-      const filename = `patient_cases_${currentDate}_${currentTime}.csv`;
-      
-      setExportProgress({ show: true, progress: 95, message: 'Downloading file...' });
-      
-      // Download the CSV file
-      csvUtils.downloadCSV(csvContent, filename);
-      
-      console.log(`Successfully exported ${mindMapData.cases.length} patient cases to ${filename}`);
-      
-      // Show enhanced success feedback with statistics
-      const summary = csvUtils.generateCasesSummary(mindMapData.cases);
-      const successMessage = `Successfully exported ${mindMapData.cases.length} patient cases! 
-        Primary diagnoses: ${Object.keys(summary.diagnoses).length}`;
-      
-      setTimeout(() => {
-        addToast(successMessage, 'success', 5000);
-        setExportProgress({ show: true, progress: 100, message: 'Export complete!' });
-        
-        // Hide progress after delay
-        setTimeout(() => {
-          setExportProgress({ show: false, progress: 0, message: '' });
-        }, 2000);
-      }, 500);
-      
-    } catch (error) {
-      console.error('Error exporting patient cases:', error);
-      addToast('Error exporting patient cases. Please try again.', 'error');
-      setExportProgress({ show: false, progress: 0, message: '' });
-    } finally {
-      setTimeout(() => {
-        setIsExportingCSV(false);
-      }, 2000);
+
+      const response = await axios.get(`${API}/mindmap-data`);
+      if (!response.data.connections) response.data.connections = [];
+      setMindMapData(response.data);
+      convertDataToReactFlow(response.data);
+      autoSaveMindMapData(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error loading mind map:', err);
+      addToast('Failed to load mind map', 'error');
+      setLoading(false);
     }
-  };
+  }, [addToast, autoSaveMindMapData, convertDataToReactFlow]);
 
-  // PERFORMANCE FIX: Memoize ReactFlow event handlers to prevent re-renders
-  const reactFlowEventHandlers = useMemo(() => ({
-    onNodesChange: handleNodesChange,
-    onEdgesChange: onEdgesChange,
-    onConnect: onConnect,
-    onNodeClick: onNodeClick,
-    onNodeDoubleClick: onNodeDoubleClick,
-    onInit: onReactFlowInit
-  }), [handleNodesChange, onEdgesChange, onConnect, onNodeClick, onNodeDoubleClick, onReactFlowInit]);
+  useEffect(() => {
+    // EMERGENCY PATCH: Force clear all mind map data on every load
+    const empty = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
+    localStorageUtils.save(empty);
+    setMindMapData(empty);
+    setNodes([]);
+    setEdges([]);
+    // Optionally, also clear backend data if needed:
+    // saveToBackend(empty);
 
+    // Continue with normal load (will be empty)
+    loadMindMapData();
+    // Load templates from a source (e.g., API or localStorage)
+    // For now, using mock data
+    setTemplates([
+      { id: 'template1', name: 'Schizophrenia Workup', nodeType: 'case', data: { primary_diagnosis: 'Schizophrenia', chief_complaint: 'Auditory hallucinations' } },
+      { id: 'template2', name: 'MDD Follow-up', nodeType: 'case', data: { primary_diagnosis: 'Major Depressive Disorder', status: 'follow_up' } },
+      { id: 'template3', name: 'CBT for Anxiety', nodeType: 'topic', data: { title: 'CBT for Anxiety', category: 'Anxiety Disorders' } }
+    ]);
+  }, []); // Run only once on mount
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Only trigger shortcuts when not typing in input fields
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+      
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key) {
+          case 'n':
+            event.preventDefault();
+            setShowNodeSelector(true);
+            break;
+          case 'e':
+            event.preventDefault();
+            setIsEditing(!isEditing);
+            break;
+          case 'r':
+            event.preventDefault();
+            applyForceLayout();
+            break;
+          default:
+            break;
+        }
+      }
+      
+      if (event.key === 'Escape') {
+        setSelectedNode(null);
+        setOpenSubpage(null);
+        setShowNodeSelector(false);
+        setIsTemplateManagerOpen(false);
+      }
+    };
 
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditing, applyForceLayout]);
 
+  useEffect(() => {
+    if (isReactFlowReady && !hasAppliedInitialLayout && nodes.length > 0) {
+      // Add a delay to ensure React Flow is fully ready
+      setTimeout(() => {
+        try {
+          forceLayout();
+          setHasAppliedInitialLayout(true);
+        } catch (error) {
+          console.warn('Force layout failed, skipping initial layout:', error);
+          setHasAppliedInitialLayout(true);
+        }
+      }, 500);
+    }
+  }, [isReactFlowReady, hasAppliedInitialLayout, nodes, forceLayout]);
 
-  return (
+  // Category filtering effect
+  useEffect(() => {
+    if (focusedCategory) {
+      setNodes(currentNodes => {
+        const filteredNodes = currentNodes.map(node => ({
+          ...node,
+          hidden: !node.id.startsWith(focusedCategory)
+        }));
+        
+        // Also filter edges based on visible nodes
+        const visibleNodeIds = new Set(filteredNodes.filter(n => !n.hidden).map(n => n.id));
+        setEdges(currentEdges => currentEdges.map(edge => ({
+          ...edge,
+          hidden: !visibleNodeIds.has(edge.source) || !visibleNodeIds.has(edge.target)
+        })));
+        
+        return filteredNodes;
+      });
+    } else {
+      setNodes(currentNodes => currentNodes.map(node => ({
+        ...node,
+        hidden: false
+      })));
+      setEdges(currentEdges => currentEdges.map(edge => ({
+        ...edge,
+        hidden: false
+      })));
+    }
+  }, [focusedCategory, setNodes, setEdges]);
+
+  // Optionally: handle layout setup on first render if needed
+
+return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Left Sidebar */}
-      <div className="w-80 bg-gradient-to-b from-slate-800 to-slate-900 text-white p-6 shadow-2xl">
+      {/* --- Left Sidebar --- */}
+      <div className="w-80 bg-gradient-to-b from-slate-800 to-slate-900 text-white p-6 shadow-2xl flex flex-col">
         <div className="mb-8">
-          <div className="text-3xl font-thin tracking-wide text-white mb-1">PGY-3</div>
-          <div className="text-3xl font-bold tracking-wide text-white">HQ</div>
+          <div className="text-3xl font-bold tracking-wide text-white">PGY-3 HQ</div>
           <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
         </div>
 
-        {/* Global Search */}
+        {/* --- Search --- */}
         <div className="mb-6">
           <div className="relative">
-            <Search 
-              size={18} 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" 
-            />
+            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search nodes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-700 bg-opacity-50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-2 bg-slate-700 bg-opacity-50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-              >
-                <X size={16} />
-              </button>
+          </div>
+        </div>
+
+        {/* --- Category Filters --- */}
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">Filter by Category</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setFocusedCategory(null)}
+              className={`px-3 py-2 rounded-lg text-xs transition-all ${
+                focusedCategory === null
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFocusedCategory('topic')}
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                focusedCategory === 'topic'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              <Brain size={12} />
+              Topics
+            </button>
+            <button
+              onClick={() => setFocusedCategory('case')}
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                focusedCategory === 'case'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              <Users size={12} />
+              Cases
+            </button>
+            <button
+              onClick={() => setFocusedCategory('task')}
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                focusedCategory === 'task'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              <CheckSquare size={12} />
+              Tasks
+            </button>
+            <button
+              onClick={() => setFocusedCategory('literature')}
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                focusedCategory === 'literature'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              <BookOpen size={12} />
+              Literature
+            </button>
+          </div>
+        </div>
+
+        {/* --- Auto-save Status --- */}
+        <div className="mb-4 p-3 bg-slate-700 bg-opacity-50 rounded-lg">
+          <div className="flex items-center gap-2 text-xs">
+            {isSaving ? (
+              <>
+                <Loader2 size={12} className="animate-spin" />
+                <span className="text-amber-300">Saving...</span>
+              </>
+            ) : lastSaved ? (
+              <>
+                <CheckCircle size={12} className="text-green-400" />
+                <span className="text-slate-300">
+                  Last saved: {lastSaved.toLocaleTimeString()}
+                </span>
+              </>
+            ) : (
+              <>
+                <Cloud size={12} className="text-slate-400" />
+                <span className="text-slate-400">Auto-save enabled</span>
+              </>
             )}
           </div>
-          {searchQuery && (
-            <div className="mt-2 text-xs text-slate-400">
-              Search active - non-matching nodes are dimmed
-            </div>
-          )}
         </div>
 
-        <div className="space-y-4">
-          <div 
-            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('topics')}
-            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
-              focusedCategory === 'topics' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
-            }`}
-          >
-            <Brain size={16} />
-            Topics ({mindMapData.topics.length})
-          </div>
-          <div 
-            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('literature')}
-            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
-              focusedCategory === 'literature' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
-            }`}
-          >
-            <BookOpen size={16} />
-            Literature ({mindMapData.literature?.length || 0})
-          </div>
-          <div 
-            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('cases')}
-            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
-              focusedCategory === 'cases' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
-            }`}
-          >
-            <Users size={16} />
-            Cases ({mindMapData.cases.length})
-          </div>
-          <div 
-            onClick={() => openSubpage ? closeSubpage() : filterAndCenterCategory('tasks')}
-            className={`bg-slate-700 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-slate-600 transition-colors cursor-pointer flex items-center gap-2 ${
-              focusedCategory === 'tasks' ? 'ring-2 ring-teal-400 bg-slate-600' : ''
-            }`}
-          >
-            <CheckSquare size={16} />
-            Tasks ({mindMapData.tasks.length})
-          </div>
-          
-          {focusedCategory && !openSubpage && (
-            <button
-              onClick={resetToMindMapView}
-              className="w-full bg-teal-600 bg-opacity-50 rounded-full px-4 py-2 text-sm hover:bg-teal-700 transition-colors cursor-pointer flex items-center gap-2 justify-center"
-            >
-              <Target size={16} />
-              Reset View
-            </button>
-          )}
-        </div>
-
-        {/* Mind Map Controls */}
-        <div className="mt-8 space-y-3">
-          <div className="text-sm font-semibold text-slate-300 mb-3">Mind Map Controls</div>
-          
-          <LoadingButton
-            onClick={applyLayout}
-            icon={Shuffle}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm"
-          >
+        {/* --- Controls --- */}
+        <div className="space-y-3 mb-6">
+          <LoadingButton onClick={applyForceLayout} icon={Shuffle} className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm">
             Realign Nodes
           </LoadingButton>
-
-          <LoadingButton
-            onClick={() => setIsTemplateManagerOpen(true)}
-            icon={Bookmark}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm"
-          >
+          <LoadingButton onClick={() => setIsTemplateManagerOpen(true)} icon={Bookmark} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">
             Manage Templates
           </LoadingButton>
-
-          <LoadingButton
-            onClick={handleExportPatientCases}
-            loading={isExportingCSV}
-            disabled={mindMapData.cases.length === 0}
-            icon={isExportingCSV ? Loader2 : Download}
-            className={`w-full text-white px-4 py-2 rounded-md text-sm ${
-              mindMapData.cases.length === 0
-                ? 'bg-gray-500 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700'
-            }`}
-          >
-            {isExportingCSV ? 'Exporting...' : `Export Patient Cases (${mindMapData.cases.length})`}
-          </LoadingButton>
-          
-          <LoadingButton
-            onClick={() => {
-              const newEditMode = !isEditing;
-              setIsEditing(newEditMode);
-              convertDataToReactFlow(mindMapData, true);
-              addToast(newEditMode ? 'Edit mode enabled' : 'Edit mode disabled', 'info', 2000);
-            }}
-            icon={isEditing ? Save : Edit3}
-            className={`w-full px-4 py-2 rounded-md text-sm ${
-              isEditing 
-                ? 'bg-teal-600 hover:bg-teal-700 text-white' 
-                : 'bg-slate-600 hover:bg-slate-500 text-white'
-            }`}
-          >
+          <LoadingButton onClick={() => setIsEditing(!isEditing)} icon={isEditing ? Save : Edit3} className={`w-full px-4 py-2 rounded-md text-sm ${isEditing ? 'bg-teal-600' : 'bg-slate-600'}`}>
             {isEditing ? 'Exit Edit Mode' : 'Edit Mind Map'}
           </LoadingButton>
-
-          {/* Add New Node button - always available */}
-          <button
-            onClick={() => setShowNodeSelector(true)}
-            className="w-full flex items-center gap-2 px-4 py-2 rounded-md text-sm bg-blue-600 hover:bg-blue-700 transition-colors"
-          >
-            <Plus size={16} />
+          <LoadingButton onClick={() => setShowNodeSelector(true)} icon={Plus} className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
             Add New Node
-          </button>
-
-          {isEditing && (
-            <>
-              <LoadingButton
-                onClick={handleClearMap}
-                icon={Trash2}
-                className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
-              >
-                Clear Entire Map
-              </LoadingButton>
-
-              <div className="text-xs text-slate-400 mt-4">
-                <div className="mb-2">Hierarchy:</div>
-                <div className="space-y-1">
-                  <div>• Topics → Literature</div>
-                  <div>• Topics → Cases</div>
-                  <div>• Cases → Tasks</div>
-                </div>
-                <div className="mt-3 text-xs text-slate-300">
-                  💡 Node positions auto-save when moved
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Enhanced Auto-save status indicator */}
-          <div className="mt-4 p-3 bg-slate-700 bg-opacity-30 rounded-lg border border-slate-600">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-300">
-                {isSaving ? (
-                  <>
-                    <Loader2 size={12} className="animate-spin text-purple-400" />
-                    <span className="text-purple-400">Saving...</span>
-                  </>
-                ) : lastSaved ? (
-                  <>
-                    <CheckCircle2 size={12} className="text-green-400" />
-                    <span className="text-green-400">Auto-saved</span>
-                  </>
-                ) : (
-                  <>
-                    <Cloud size={12} className="text-slate-400" />
-                    <span>Ready</span>
-                  </>
-                )}
-              </div>
-              {lastSaved && (
-                <div className="text-xs text-slate-400">
-                  {lastSaved.toLocaleTimeString()}
-                </div>
-              )}
-            </div>
-            
-            {/* Storage info */}
-            <div className="mt-2 text-xs text-slate-500">
-              <div className="flex items-center gap-1">
-                <Eye size={10} />
-                <span>Local storage active</span>
-              </div>
-            </div>
-          </div>
+          </LoadingButton>
+          <LoadingButton onClick={handleClearMap} icon={Trash2} className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+            Clear All Data
+          </LoadingButton>
         </div>
 
-        {mindMapData.topics.length === 0 && (
-          <div className="mt-8 p-4 bg-slate-700 bg-opacity-50 rounded-lg">
-            <p className="text-sm text-slate-300 mb-3">
-              No data found. Initialize with sample data to get started.
-            </p>
-            <button
-              onClick={initSampleData}
-              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm transition-colors"
-            >
-              Initialize Sample Data
-            </button>
+        {/* --- Selected Node Panel --- */}
+        {selectedNode && (
+          <div className="mt-auto p-4 bg-slate-700 bg-opacity-50 rounded-lg">
+            <h3 className="text-sm font-semibold text-slate-300 mb-2">Selected Node</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                {selectedNode.type === 'topic' && <Brain size={14} className="text-blue-400" />}
+                {selectedNode.type === 'case' && <Users size={14} className="text-indigo-400" />}
+                {selectedNode.type === 'task' && <CheckSquare size={14} className="text-amber-400" />}
+                {selectedNode.type === 'literature' && <BookOpen size={14} className="text-purple-400" />}
+                <span className="text-sm text-white font-medium truncate">
+                  {selectedNode.data.label}
+                </span>
+              </div>
+              {selectedNode.data.category && (
+                <div className="text-xs text-slate-400">
+                  Category: {selectedNode.data.category}
+                </div>
+              )}
+              {selectedNode.data.status && (
+                <div className="text-xs text-slate-400">
+                  Status: {selectedNode.data.status}
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  const [type, id] = selectedNode.id.split('-');
+                  const key = type === 'literature' ? 'literature' : `${type}s`;
+                  const dataItem = mindMapData[key].find(item => String(item.id) === id);
+                  if (dataItem) {
+                    setSubpageData(dataItem);
+                    setOpenSubpage(type);
+                  }
+                }}
+                className="w-full mt-2 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-xs rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Eye size={12} />
+                View Details
+              </button>
+            </div>
           </div>
         )}
 
-        {selectedNode && !openSubpage && (
-          <div className="mt-8 p-4 bg-slate-700 bg-opacity-50 rounded-lg border border-teal-500">
-            <h3 className="font-semibold mb-2 text-teal-300">Selected Node</h3>
-            <p className="text-sm text-slate-300 capitalize">
-              <span className="font-medium">{selectedNode.type}</span>: {selectedNode.data.label}
-            </p>
-            <button
-              onClick={() => {
-                const nodeType = selectedNode.id.split('-')[0];
-                const nodeId = selectedNode.id.substring(nodeType.length + 1); // Get everything after the first hyphen
-                console.log('Opening subpage from sidebar for:', nodeType, nodeId);
-                setOpenSubpage({ type: nodeType, id: nodeId });
-                loadSubpageData(nodeType, nodeId);
-              }}
-              className="mt-3 text-xs text-teal-400 hover:text-teal-300 underline"
-            >
-              View Details →
-            </button>
+        {/* --- Keyboard Shortcuts Help --- */}
+        {!selectedNode && (
+          <div className="mt-auto p-3 bg-slate-700 bg-opacity-30 rounded-lg">
+            <h4 className="text-xs font-semibold text-slate-300 mb-2">Keyboard Shortcuts</h4>
+            <div className="space-y-1 text-xs text-slate-400">
+              <div>Ctrl+N - Add Node</div>
+              <div>Ctrl+E - Toggle Edit Mode</div>
+              <div>Ctrl+R - Realign Nodes</div>
+              <div>Esc - Clear Selection</div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Main Mind Map Workspace */}
+      {/* --- Main Mind Map Workspace --- */}
       <div className="flex-1 relative">
         <ReactFlow
           nodes={nodes}
@@ -3896,73 +3035,97 @@ const Dashboard = () => {
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
-          onEdgeContextMenu={onEdgeContextMenu} // NEW: Add edge right-click handler
+          onNodeDragStop={handleNodeDragStop}
           onEdgeDoubleClick={onEdgeDoubleClick}
-          onInit={onReactFlowInit}
+          onEdgeContextMenu={onEdgeContextMenu}
+          onEdgeMouseEnter={onEdgeMouseEnter}
+          onEdgeMouseLeave={onEdgeMouseLeave}
           nodeTypes={nodeTypes}
+          edgeTypes={{ floating: FloatingEdge }}
+          onInit={() => setIsReactFlowReady(true)}
           fitView
+          nodesConnectable={isEditing}
           nodesDraggable={true}
-          nodesConnectable={true} // Enable default drag connections
-          edgesReconnectable={false} // Disable edge reconnection to avoid conflicts
-          edgesFocusable={true} // Always allow edge interaction for labeling
-          elementsSelectable={true}
-          selectNodesOnDrag={false} // Improve connection creation experience
-          deleteKeyCode={['Delete', 'Backspace']} // Allow deletion with keyboard
-          multiSelectionKeyCode={['Control', 'Meta']} // Allow multi-selection
-          className="bg-gradient-to-br from-slate-50 to-slate-100"
-          defaultEdgeOptions={{
-            type: 'smoothstep',
-            style: { strokeWidth: 3, stroke: '#2563eb' }, // Changed to blue and thicker for better visibility
-            markerEnd: {
-              type: 'arrowclosed',
-              width: 15,
-              height: 15,
-              color: '#2563eb', // Changed to blue for consistency
-            },
-            focusable: true,
-            selectable: true,
-            deletable: true
+          snapToGrid={false}
+          snapGrid={[15, 15]}
+          elevateEdgesOnSelect={false}
+          connectionLineType="straight"
+          connectionLineStyle={{
+            stroke: '#3b82f6',
+            strokeWidth: 3,
+            opacity: 1,
+            strokeLinecap: 'round',
+            strokeDasharray: '8,4',
+            filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))'
           }}
+          defaultEdgeOptions={{
+            type: 'floating',
+            style: { 
+              strokeWidth: 2.5, 
+              stroke: '#64748b',
+              opacity: 0.9,
+              strokeLinecap: 'round',
+              transition: 'none'
+            },
+            animated: false,
+            updatable: true,
+            focusable: true
+          }}
+          className="bg-gradient-to-br from-blue-50 to-indigo-100"
         >
           <Background color="#aaa" gap={16} />
           <Controls />
-          <MiniMap 
-            nodeColor={(node) => {
-              switch (node.type) {
-                case 'topic': return node.data.color || '#3B82F6';
-                case 'case': return '#6B7280';
-                case 'task': return '#F59E0B';
-                case 'literature': return '#8B5CF6';
-                default: return '#9CA3AF';
-              }
-            }}
-            maskColor="rgba(0, 0, 0, 0.2)"
-            className="bg-white rounded-lg shadow-lg border"
-          />
-          
-          <Panel position="top-right" className="bg-white rounded-lg shadow-lg p-4 m-4">
-            <div className="text-sm font-semibold text-gray-700 mb-2">Instructions</div>
-            <div className="text-xs text-gray-500 space-y-1">
-              <div>• Click to select nodes</div>
-              <div>• Double-click nodes to view details</div>
-              <div>• Hover and drag to reposition</div>
-              <div>• Click connection handles to create connections</div>
-              <div>• Right-click connections to edit labels</div>
-              <div>• Double-click connections to delete</div>
-              <div>• Click empty space to cancel connection</div>
-              <div>• Use "Realign Nodes" for auto layout</div>
-              <div>• Zoom with mouse wheel</div>
-            </div>
-          </Panel>
+          <MiniMap />
         </ReactFlow>
       </div>
+      
+      {/* --- Modals --- */}
+      {isTemplateManagerOpen && (
+        <TemplateManager
+          isOpen={isTemplateManagerOpen}
+          onClose={() => setIsTemplateManagerOpen(false)}
+          templates={templates}
+          setTemplates={setTemplates}
+        />
+      )}
+      {showNodeSelector && (
+        <NodeSelector
+          isOpen={showNodeSelector}
+          onClose={() => setShowNodeSelector(false)}
+          onSelect={(nodeType, templateId) => {
+            setShowNodeSelector(false);
+            const dataId = Date.now();
+            const id = `${nodeType}-${dataId}`;
+            const newNode = {
+              id,
+              type: nodeType,
+              position: { x: window.innerWidth / 3, y: window.innerHeight / 2 },
+              data: { id: dataId, label: `New ${nodeType}`, onDelete: () => handleDeleteNode(id) }
+            };
 
-      {/* Subpage Window */}
+            setMindMapData(d => {
+              const key = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
+              const dataToAdd = { ...newNode.data, position: newNode.position };
+              delete dataToAdd.onDelete;
+              const updatedData = {
+                ...d,
+                [key]: [...(d[key] || []), dataToAdd]
+              };
+              autoSaveMindMapData(updatedData);
+              return updatedData;
+            });
+
+            setNodes(n => n.concat(newNode));
+          }}
+          templates={templates}
+        />
+      )}
+
       {openSubpage && (
-        <SubpageWindow 
-          type={openSubpage.type}
+        <SubpageWindow
+          type={openSubpage}
           data={subpageData}
-          onClose={closeSubpage}
+          onClose={() => setOpenSubpage(null)}
           setMindMapData={setMindMapData}
           loadMindMapData={loadMindMapData}
           onAutoSave={autoSaveMindMapData}
@@ -3970,94 +3133,47 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Node Selector Modal */}
-      <NodeSelector
-        isOpen={showNodeSelector}
-        onClose={() => setShowNodeSelector(false)}
-        onSelect={addNewNode}
-        templates={mindMapData.templates || []}
+      <EdgeLabelModal 
+        isOpen={edgeModal.isOpen} 
+        edge={edgeModal.edge} 
+        onClose={() => setEdgeModal({ isOpen: false, edge: null })} 
+        onSave={handleSaveEdgeLabel} 
       />
 
-      {/* Toast Notifications */}
-      {toasts.map((toast) => (
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+          <Loader2 size={48} className="animate-spin text-blue-600" />
+        </div>
+      )}
+      
+      {toasts.map(toast => (
         <Toast
           key={toast.id}
           message={toast.message}
           type={toast.type}
-          onClose={() => removeToast(toast.id)}
           duration={toast.duration}
+          onClose={() => removeToast(toast.id)}
         />
       ))}
-
-      {/* Export Progress Modal */}
-      {exportProgress.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
-            <div className="text-center">
-              <div className="mb-4">
-                <Loader2 size={40} className="mx-auto text-blue-600 animate-spin" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Exporting Patient Cases</h3>
-              <p className="text-sm text-gray-600 mb-4">{exportProgress.message}</p>
-              
-              {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-                <div 
-                  className="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${exportProgress.progress}%` }}
-                />
-              </div>
-              
-              <div className="text-sm font-medium text-blue-600">
-                {Math.round(exportProgress.progress)}% Complete
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edge Label Modal - Only render when needed for performance */}
-      {editingEdge && (
-        <EdgeLabelModal 
-          edge={editingEdge}
-          isOpen={true}
-          onClose={() => setEditingEdge(null)}
-          onSave={saveEdgeLabel}
-        />
-      )}
-
-      {/* Template Manager Modal */}
-      {isTemplateManagerOpen && (
-        <TemplateManager
-          isOpen={isTemplateManagerOpen}
-          onClose={() => setIsTemplateManagerOpen(false)}
-          onCreate={handleCreateTemplate}
-          onUpdate={handleUpdateTemplate}
-          onDelete={handleDeleteTemplate} 
-          templates={mindMapData.templates}
-        />
-      )}
-
-      {/* Enhanced Auto-save Indicator */}
-      {isSaving && (
-        <div className="fixed bottom-4 left-4 z-40">
-          <div className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-pulse">
-            <Loader2 size={16} className="animate-spin" />
-            <span className="text-sm font-medium">Saving...</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-// Main App Component
+
+
+
+
+
+
+
+const Dashboard = () => (
+  <ReactFlowProvider>
+    <DashboardComponent />
+  </ReactFlowProvider>
+);
+
 function App() {
-  return (
-    <ReactFlowProvider>
-      <Dashboard />
-    </ReactFlowProvider>
-  );
+  return <Dashboard />;
 }
 
 export default App;
