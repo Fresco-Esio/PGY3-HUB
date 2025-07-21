@@ -76,6 +76,8 @@ class PsychiatricTopic(BaseModel):
     flashcard_count: int = 0
     completed_flashcards: int = 0
     resources: List[Dict[str, str]] = Field(default_factory=list)  # [{"title": "", "url": "", "type": ""}]
+    notes: Optional[str] = None  # Additional notes and resources
+    tags: Optional[str] = None   # Comma-separated tags
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -88,6 +90,14 @@ class PatientCase(BaseModel):
     age: Optional[int] = None
     gender: Optional[str] = None
     chief_complaint: str
+    # New structured case fields for psychiatric training
+    initial_presentation: Optional[str] = None  # What symptoms led to intake/referral
+    current_presentation: Optional[str] = None  # How case looks now
+    medication_history: Optional[str] = None    # Timeline of trials, responses, side effects
+    therapy_progress: Optional[str] = None      # Interventions, ruptures, breakthroughs
+    defense_patterns: Optional[str] = None      # e.g., projection, denial, intellectualization
+    clinical_reflection: Optional[str] = None   # Trainee thoughts/questions about the case
+    # Legacy fields (for backward compatibility)
     history_present_illness: Optional[str] = None
     medical_history: Optional[str] = None
     medications: List[str] = Field(default_factory=list)
@@ -109,6 +119,7 @@ class Task(BaseModel):
     due_date: Optional[datetime] = None
     linked_case_id: Optional[str] = None
     linked_topic_id: Optional[str] = None
+    notes: Optional[str] = None  # Additional notes
     position: Dict[str, float] = Field(default_factory=lambda: {"x": 0, "y": 0})
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -130,6 +141,8 @@ class PsychiatricTopicCreate(BaseModel):
     category: str
     color: str = "#3B82F6"
     flashcard_count: int = 0
+    notes: Optional[str] = None
+    tags: Optional[str] = None
 
 class PatientCaseCreate(BaseModel):
     case_id: str
@@ -139,6 +152,14 @@ class PatientCaseCreate(BaseModel):
     age: Optional[int] = None
     gender: Optional[str] = None
     chief_complaint: str
+    # New structured case fields for psychiatric training
+    initial_presentation: Optional[str] = None
+    current_presentation: Optional[str] = None
+    medication_history: Optional[str] = None
+    therapy_progress: Optional[str] = None
+    defense_patterns: Optional[str] = None
+    clinical_reflection: Optional[str] = None
+    # Legacy fields (for backward compatibility)
     history_present_illness: Optional[str] = None
     medical_history: Optional[str] = None
     medications: List[str] = Field(default_factory=list)
@@ -154,6 +175,7 @@ class TaskCreate(BaseModel):
     due_date: Optional[datetime] = None
     linked_case_id: Optional[str] = None
     linked_topic_id: Optional[str] = None
+    notes: Optional[str] = None
 
 class MindMapData(BaseModel):
     topics: List[PsychiatricTopic] = Field(default_factory=list)

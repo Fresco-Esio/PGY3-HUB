@@ -65,6 +65,8 @@ import {
 // Lazy load components for better initial load time
 import { RichTextEditor, TemplateManager, LiteratureModal } from './components/LazyComponents';
 import FloatingEdge from './components/FloatingEdge'; // Import the custom FloatingEdge component
+import NodeModalWrapper from './components/NodeModalWrapper';
+import NodeSelector from './components/NodeSelector'; // Import the animated modal wrapper
 import EnhancedEdge from './components/EnhancedEdge'; // Import the enhanced edge component
 import ConnectionLine from './components/ConnectionLine'; // Import the custom connection line for previews
 import OptimizedLoadingScreen from './components/OptimizedLoadingScreen';
@@ -1178,7 +1180,9 @@ const TabbedModal = React.memo(({
   loadMindMapData, 
   onAutoSave, 
   addToast,
-  isFullscreen = false // New prop to control modal size
+  isFullscreen = false, // New prop to control modal size
+  onAnimationStart,
+  onAnimationEnd
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(data);
@@ -1186,15 +1190,8 @@ const TabbedModal = React.memo(({
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic'); // Tab state
   const [tabData, setTabData] = useState({}); // Persistent tab data
-  const [isVisible, setIsVisible] = useState(false); // Animation state
-  const [isClosing, setIsClosing] = useState(false); // Closing animation state
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
-
-  // Entry animation
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
 
   // PERFORMANCE FIX: Use useEffect with dependency array to prevent unnecessary updates
   useEffect(() => {
@@ -1878,115 +1875,112 @@ const TabbedModal = React.memo(({
   const tabs = getTabsForType(type);
 
   return (
-    <div
-      className={`fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm transition-all duration-300 ${isClosing ? 'opacity-0' : isVisible ? 'opacity-100' : 'opacity-0'}`}
-      onClick={(e) => {
-        // Only close if clicking the backdrop, not the modal content
-        if (e.target === e.currentTarget) {
-          handleClose();
-        }
-      }}
-    >
-      <div
-        className={`bg-white rounded-xl shadow-2xl ${isFullscreen ? 'w-full h-full mx-0 my-0 rounded-none' : 'max-w-5xl w-full mx-4 max-h-[85vh]'} overflow-hidden transform transition-all duration-300 ${isClosing ? 'scale-95 translate-y-4 opacity-0' : isVisible ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'}`}
-        onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {type === 'case' && <Users size={24} />}
-            {type === 'topic' && <Brain size={24} />}
-            {type === 'literature' && <BookOpen size={24} />}
-            {type === 'task' && <CheckSquare size={24} />}
-            <h2 className="text-xl font-semibold capitalize">{type} Details</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            {!isEditing && !isLoading && (
-              <>
-                <LoadingButton
-                  onClick={() => setIsEditing(true)}
-                  icon={Edit3}
-                  className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-                  title="Edit"
-                />
-                <LoadingButton
-                  onClick={handleDelete}
-                  loading={isLoading}
-                  icon={Trash2}
-                  className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
-                  title="Delete"
-                />
-              </>
-            )}
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {type === 'case' && <MessageCircle size={24} />}
+          {type === 'topic' && <Brain size={24} />}
+          {type === 'literature' && <BookOpen size={24} />}
+          {type === 'task' && <CheckCircle size={24} />}
+          <h2 className="text-xl font-semibold capitalize">{type} Details</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {!isEditing && !isLoading && (
+            <>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                title="Edit"
+              >
+                <Edit3 size={20} />
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
+                title="Delete"
+              >
+                <Delete size={20} />
+              </button>
+            </>
+          )}
+          <button
+            onClick={onClose}
+            className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+            disabled={isLoading}
+            title="Close"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="flex overflow-x-auto">
+          {Object.entries(tabs).map(([key, { label, icon: Icon }]) => (
             <button
-              onClick={handleClose}
-              className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-              disabled={isLoading}
-              title="Close"
+              key={key}
+              onClick={() => handleTabSwitch(key)}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all min-w-max ${
+                activeTab === key
+                  ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
             >
-              <X size={20} />
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab Content with Animation */}
+      <div className="relative overflow-hidden flex-grow">
+        <div 
+          className={`p-6 overflow-y-auto h-full transition-all duration-200 ease-in-out`}
+          key={activeTab} // Force re-render for animation
+        >
+          <div className="animate-in fade-in slide-in-from-right-2 duration-200">
+            {renderTabContent(activeTab)}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Actions */}
+      {isEditing && (
+        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="text-sm text-gray-500">
+            All changes are saved per tab
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleCancel}
+              disabled={isLoading}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save All Changes
+                </>
+              )}
             </button>
           </div>
         </div>
-
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200 bg-white">
-          <div className="flex overflow-x-auto">
-            {Object.entries(tabs).map(([key, { label, icon: Icon }]) => (
-              <button
-                key={key}
-                onClick={() => handleTabSwitch(key)}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all min-w-max ${
-                  activeTab === key
-                    ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Icon size={16} />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab Content with Animation */}
-        <div className="relative overflow-hidden">
-          <div 
-            className={`p-6 overflow-y-auto transition-all duration-200 ease-in-out ${isFullscreen ? 'max-h-[calc(100vh-180px)]' : 'max-h-[calc(85vh-180px)]'}`}
-            key={activeTab} // Force re-render for animation
-          >
-            <div className="animate-in fade-in slide-in-from-right-2 duration-200">
-              {renderTabContent(activeTab)}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        {isEditing && (
-          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-              All changes are saved per tab
-            </div>
-            <div className="flex items-center gap-3">
-              <LoadingButton
-                onClick={handleCancel}
-                disabled={isLoading}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </LoadingButton>
-              <LoadingButton
-                onClick={handleSave}
-                loading={isLoading}
-                icon={Save}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {isLoading ? 'Saving...' : 'Save All Changes'}
-              </LoadingButton>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 });
@@ -2386,7 +2380,10 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
     </div>
   );
 };
-const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
+
+/*
+// Old Node Selector component - now replaced by imported NodeSelector
+const NodeSelectorOld = ({ isOpen, onClose, onSelect, templates }) => {
   const [selectedNodeType, setSelectedNodeType] = useState(null);
 
   // When the modal is closed, reset the internal state
@@ -2421,7 +2418,6 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm animate-in fade-in-25 duration-300">
       <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 ease-out">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             {selectedNodeType && (
@@ -2444,6 +2440,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
           </button>
         </div>
 
+        {/* Content */}
         <div className="relative overflow-hidden" style={{ minHeight: '200px' }}>
           {/* View 1: Node Type Selection */}
           <div className={`transition-transform duration-300 ease-in-out ${selectedNodeType ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}>
@@ -2515,6 +2512,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
     </div>
   );
 };
+*/
 
 // Edge Label Modal Component
 const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
@@ -2541,17 +2539,16 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
   if (!isOpen || !edge) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">Edit Connection Label</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1 transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
+    <div className="p-6 max-w-md w-full mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold text-gray-800">Edit Connection Label</h3>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 p-1 transition-colors"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2586,7 +2583,6 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
             Save Label
           </button>
         </div>
-      </div>
     </div>
   );
 };
@@ -2712,10 +2708,8 @@ const handleDeleteNode = useCallback((fullNodeId) => {
 
 // Handle literature node click to open modal
 const handleLiteratureClick = useCallback((literatureData) => {
-  setIsAnimating(true); // Set animation state
   setLiteratureModal({ isOpen: true, data: literatureData });
-  // Clear animation state after modal animation completes
-  setTimeout(() => setIsAnimating(false), 700); // 600ms modal animation + 100ms buffer
+  // Animation state is now handled by NodeModalWrapper's callbacks
 }, []);
 
   const convertDataToReactFlow = useCallback(async (data) => {
@@ -3699,32 +3693,39 @@ return (
       
       {/* Literature Modal */}
       {literatureModal.isOpen && (
-        <LiteratureModal
+        <NodeModalWrapper
           isOpen={literatureModal.isOpen}
-          onClose={() => {
-            setIsAnimating(true); // Set animation state for closing
-            setLiteratureModal({ isOpen: false, data: null });
-            // Clear animation state after modal close animation completes
-            setTimeout(() => setIsAnimating(false), 500); // 400ms close animation + 100ms buffer
-          }}
+          onClose={() => setLiteratureModal({ isOpen: false, data: null })}
           onAnimationStart={() => setIsAnimating(true)}
           onAnimationEnd={() => setIsAnimating(false)}
-          literatureData={literatureModal.data}
-          allNodes={nodes}
-          connections={mindMapData.connections || []}
-        />
+          modalKey={`lit-modal-${literatureModal.data?.id || 'default'}-${Date.now()}`}
+          fullscreen={false}
+        >
+          <LiteratureModal
+            isOpen={true} /* Always true when rendered inside NodeModalWrapper */
+            onClose={() => {}} /* Empty function as NodeModalWrapper handles closing */
+            literatureData={literatureModal.data}
+            allNodes={nodes}
+            connections={mindMapData.connections || []}
+          />
+        </NodeModalWrapper>
       )}
       {showNodeSelector && (
-        <NodeSelector
+        <NodeModalWrapper
           isOpen={showNodeSelector}
           onClose={() => setShowNodeSelector(false)}
-          onSelect={(nodeType, templateId) => {
-            setShowNodeSelector(false);
-            const dataId = Date.now();
-            const id = `${nodeType}-${dataId}`;
-            
-            // Create node data object with appropriate fields based on type
-            let nodeData = { id: dataId, label: `New ${nodeType}` };
+          onAnimationStart={() => setIsAnimating(true)}
+          onAnimationEnd={() => setIsAnimating(false)}
+          modalKey={`node-selector-${Date.now()}`}
+        >
+          <NodeSelector
+            onSelect={(nodeType) => {
+              setShowNodeSelector(false);
+              const dataId = Date.now();
+              const id = `${nodeType}-${dataId}`;
+              
+              // Create node data object with appropriate fields based on type
+              let nodeData = { id: dataId, label: `New ${nodeType}` };
             
             // For case nodes, add structured fields
             if (nodeType === 'case') {
@@ -3763,26 +3764,56 @@ return (
           }}
           templates={templates}
         />
+        </NodeModalWrapper>
       )}
 
       {openSubpage && (
-        <TabbedModal
-          type={openSubpage}
-          data={subpageData}
+        <NodeModalWrapper
+          isOpen={!!openSubpage}
           onClose={() => setOpenSubpage(null)}
-          setMindMapData={setMindMapData}
-          loadMindMapData={loadMindMapData}
-          onAutoSave={autoSaveMindMapData}
-          addToast={addToast}
-        />
+          onAnimationStart={() => setIsAnimating(true)}
+          onAnimationEnd={() => setIsAnimating(false)}
+          modalKey={`subpage-${openSubpage}-${subpageData?.id || 'default'}-${Date.now()}`}
+          fullscreen={false}
+        >
+          {openSubpage === 'literature' ? (
+            <LiteratureModal
+              literatureData={subpageData}
+              allNodes={nodes}
+              connections={edges}
+            />
+          ) : (
+            <TabbedModal
+              type={openSubpage}
+              data={subpageData}
+              onClose={() => setOpenSubpage(null)}
+              setMindMapData={setMindMapData}
+              loadMindMapData={loadMindMapData}
+              onAutoSave={autoSaveMindMapData}
+              addToast={addToast}
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationEnd={() => setIsAnimating(false)}
+            />
+          )}
+        </NodeModalWrapper>
       )}
 
-      <EdgeLabelModal 
-        isOpen={edgeModal.isOpen} 
-        edge={edgeModal.edge} 
-        onClose={() => setEdgeModal({ isOpen: false, edge: null })} 
-        onSave={handleSaveEdgeLabel} 
-      />
+      {edgeModal.isOpen && (
+        <NodeModalWrapper
+          isOpen={edgeModal.isOpen}
+          onClose={() => setEdgeModal({ isOpen: false, edge: null })}
+          onAnimationStart={() => setIsAnimating(true)}
+          onAnimationEnd={() => setIsAnimating(false)}
+          modalKey={`edge-${edgeModal.edge?.id || 'default'}-${Date.now()}`}
+        >
+          <EdgeLabelModal 
+            isOpen={edgeModal.isOpen} 
+            edge={edgeModal.edge} 
+            onClose={() => setEdgeModal({ isOpen: false, edge: null })} 
+            onSave={handleSaveEdgeLabel} 
+          />
+        </NodeModalWrapper>
+      )}
 
       {loading && (
         <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">

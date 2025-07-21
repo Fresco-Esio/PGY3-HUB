@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Bookmark, Plus, Save, Edit3 } from 'lucide-react';
+import { X, Bookmark, Plus, Save, Edit3, ChevronDown, ChevronRight } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
 
 const NODE_TYPE_FIELDS = {
@@ -10,8 +10,14 @@ const NODE_TYPE_FIELDS = {
   ],
   case: [
     { name: 'primary_diagnosis', label: 'Primary Diagnosis', type: 'text', placeholder: 'e.g., Bipolar I Disorder' },
+    { name: 'chiefComplaint', label: 'Chief Complaint', type: 'text', placeholder: 'e.g., "I feel down all the time."' },
+    { name: 'initialPresentation', label: 'Initial Presentation', type: 'textarea', placeholder: 'What symptoms led to intake or referral?' },
+    { name: 'currentPresentation', label: 'Current Presentation', type: 'textarea', placeholder: 'What symptoms or behaviors are prominent now?' },
+    { name: 'medicationHistory', label: 'Medication History', type: 'textarea', placeholder: 'Timeline of trials, responses, and side effects' },
+    { name: 'therapyProgress', label: 'Therapy History & Progress', type: 'textarea', placeholder: 'Interventions, ruptures, breakthroughs' },
+    { name: 'defensePatterns', label: 'Defense Patterns', type: 'text', placeholder: 'e.g., projection, denial, intellectualization' },
+    { name: 'clinicalReflection', label: 'Your Clinical Reflection', type: 'textarea', placeholder: 'What stands out to you? What are you learning?' },
     { name: 'assessment_plan', label: 'Assessment & Plan', type: 'textarea', placeholder: 'Enter assessment and plan details...' },
-    { name: 'chief_complaint', label: 'Chief Complaint', type: 'text', placeholder: 'e.g., "I feel down all the time."' },
   ],
   task: [
     { name: 'title', label: 'Title', type: 'text', placeholder: 'e.g., Prepare presentation on SSRIs' },
@@ -165,30 +171,47 @@ const TemplateManager = ({ isOpen, onClose, onCreate, onUpdate, templates, onDel
                 </select>
               </div>
               {/* Dynamically rendered fields */}
-              {NODE_TYPE_FIELDS[selectedType].map(field => (
-                <div key={field.name}>
-                  <label htmlFor={`template-${field.name}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    {field.label}
-                  </label>
-                  {field.type === 'textarea' ? (
-                    <RichTextEditor
-                      content={templateData[field.name] || ''}
-                      onChange={(value) => handleDataChange(field.name, value)}
-                      placeholder={field.placeholder}
-                      rows={5}
+              {NODE_TYPE_FIELDS[selectedType].map(field => {
+                // Only add collapsible functionality for case node type
+                if (selectedType === 'case') {
+                  // Create a state variable for each field to track collapse state
+                  // Using a component to have isolated state for each field
+                  return (
+                    <CollapsibleField 
+                      key={field.name} 
+                      field={field} 
+                      value={templateData[field.name] || ''} 
+                      onChange={(value) => handleDataChange(field.name, value)} 
                     />
-                  ) : (
-                    <input
-                      type={field.type}
-                      id={`template-${field.name}`}
-                      value={templateData[field.name] || ''}
-                      onChange={(e) => handleDataChange(field.name, e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={field.placeholder}
-                    />
-                  )}
-                </div>
-              ))}
+                  );
+                }
+                
+                // For other node types, render normally
+                return (
+                  <div key={field.name}>
+                    <label htmlFor={`template-${field.name}`} className="block text-sm font-medium text-gray-700 mb-1">
+                      {field.label}
+                    </label>
+                    {field.type === 'textarea' ? (
+                      <RichTextEditor
+                        content={templateData[field.name] || ''}
+                        onChange={(value) => handleDataChange(field.name, value)}
+                        placeholder={field.placeholder}
+                        rows={5}
+                      />
+                    ) : (
+                      <input
+                        type={field.type}
+                        id={`template-${field.name}`}
+                        value={templateData[field.name] || ''}
+                        onChange={(e) => handleDataChange(field.name, e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={field.placeholder}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <>
@@ -258,6 +281,60 @@ const TemplateManager = ({ isOpen, onClose, onCreate, onUpdate, templates, onDel
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+// Collapsible field component for case node type
+const CollapsibleField = ({ field, value, onChange }) => {
+  // Initialize collapsed state based on whether there's content
+  // If there's content, the section should start expanded
+  const hasContent = value && value.trim().length > 0;
+  const [isCollapsed, setIsCollapsed] = useState(!hasContent);
+  
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+  
+  return (
+    <div key={field.name} className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
+      <div 
+        className="flex items-center justify-between bg-gray-50 px-3 py-2 cursor-pointer"
+        onClick={toggleCollapse}
+      >
+        <label 
+          htmlFor={`template-${field.name}`} 
+          className="block text-sm font-medium text-gray-700 cursor-pointer select-none"
+        >
+          {field.label}
+        </label>
+        {isCollapsed ? 
+          <ChevronRight size={18} className="text-gray-500" /> : 
+          <ChevronDown size={18} className="text-gray-500" />
+        }
+      </div>
+      
+      {!isCollapsed && (
+        <div className="p-3">
+          {field.type === 'textarea' ? (
+            <RichTextEditor
+              content={value}
+              onChange={onChange}
+              placeholder={field.placeholder}
+              rows={5}
+            />
+          ) : (
+            <input
+              type={field.type}
+              id={`template-${field.name}`}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder={field.placeholder}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

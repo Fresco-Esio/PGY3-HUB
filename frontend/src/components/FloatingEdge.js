@@ -33,43 +33,28 @@ const FloatingEdge = memo(({
 }) => {
   const { getNode } = useReactFlow();
   
-  // Get source and target nodes
-  const sourceNode = getNode(source);
-  const targetNode = getNode(target);
-
-  // Enhanced debugging for dimension issues
-  useEffect(() => {
-    if (sourceNode && (!sourceNode.width && !sourceNode.dimensions)) {
-      // Log comprehensive node info to understand what's available
-      console.warn('Source node missing dimensions:', {
-        nodeId: sourceNode.id,
-        nodeType: sourceNode.type,
-        position: sourceNode.position,
-        positionAbsolute: sourceNode.positionAbsolute,
-        width: sourceNode.width,
-        height: sourceNode.height,
-        data: sourceNode.data,
-        dimensions: sourceNode.dimensions,
-        style: sourceNode.style
-      });
-    }
-    if (targetNode && (!targetNode.width && !targetNode.dimensions)) {
-      console.warn('Target node missing dimensions:', {
-        nodeId: targetNode.id,
-        nodeType: targetNode.type,
-        position: targetNode.position,
-        positionAbsolute: targetNode.positionAbsolute,
-        width: targetNode.width,
-        height: targetNode.height,
-        data: targetNode.data,
-        dimensions: targetNode.dimensions,
-        style: targetNode.style
-      });
-    }
-  }, [sourceNode, targetNode]);
-
+  // Safely get nodes outside of useMemo to avoid scope issues
+  let sourceNode, targetNode;
+  try {
+    sourceNode = getNode(source);
+    targetNode = getNode(target);
+  } catch (error) {
+    // Nodes not available, will use fallback
+    sourceNode = null;
+    targetNode = null;
+  }
+  
   // Memoize the edge path calculation for better performance
   const { edgePath, labelX, labelY } = useMemo(() => {
+    // During animations or rapid updates, use simple direct paths
+    if (data?.__isAnimating || data?.__forceUpdate) {
+      return {
+        edgePath: `M${sourceX},${sourceY} L${targetX},${targetY}`,
+        labelX: (sourceX + targetX) / 2,
+        labelY: (sourceY + targetY) / 2
+      };
+    }
+
     // Default fallback if nodes aren't available
     if (!sourceNode || !targetNode) {
       return {
@@ -80,14 +65,23 @@ const FloatingEdge = memo(({
     }
 
     try {
-      // Check if we have enough information to calculate an accurate path
-      const hasDimensions = 
-        (sourceNode.width || sourceNode.dimensions?.width) && 
-        (targetNode.width || targetNode.dimensions?.width);
+      // Safely check if we have enough information to calculate an accurate path
+      const sourceHasDimensions = Boolean(
+        sourceNode.width || 
+        sourceNode.dimensions?.width || 
+        sourceNode.data?.width || 
+        sourceNode.style?.width
+      );
+      
+      const targetHasDimensions = Boolean(
+        targetNode.width || 
+        targetNode.dimensions?.width || 
+        targetNode.data?.width || 
+        targetNode.style?.width
+      );
       
       // If we don't have dimensions, use the provided coordinates directly
-      if (!hasDimensions) {
-        // Use directly the coordinates provided by React Flow
+      if (!sourceHasDimensions || !targetHasDimensions) {
         return {
           edgePath: `M${sourceX},${sourceY} L${targetX},${targetY}`,
           labelX: (sourceX + targetX) / 2,
@@ -95,36 +89,26 @@ const FloatingEdge = memo(({
         };
       }
 
-      // Handle node dimensions by trying multiple sources
-      // Start with actual values, then try to infer from various properties
-      const sourceNodeWidth = 
-        sourceNode.width || 
-        (sourceNode.dimensions?.width) || 
-        sourceNode.data?.width || 
-        sourceNode.style?.width || 
-        (sourceNode.type === 'topic' ? 180 : 200);
+      // Safe dimension extraction with fallbacks
+      const getNodeDimensions = (node) => {
+        const defaultWidth = node.type === 'topic' ? 180 : 200;
+        const defaultHeight = node.type === 'topic' ? 50 : 100;
         
-      const sourceNodeHeight = 
-        sourceNode.height || 
-        (sourceNode.dimensions?.height) || 
-        sourceNode.data?.height || 
-        sourceNode.style?.height || 
-        (sourceNode.type === 'topic' ? 50 : 100);
-        
-      const targetNodeWidth = 
-        targetNode.width || 
-        (targetNode.dimensions?.width) || 
-        targetNode.data?.width || 
-        targetNode.style?.width || 
-        (targetNode.type === 'topic' ? 180 : 200);
-        
-      const targetNodeHeight = 
-        targetNode.height || 
-        (targetNode.dimensions?.height) || 
-        targetNode.data?.height || 
-        targetNode.style?.height || 
-        (targetNode.type === 'topic' ? 50 : 100);
+        return {
+          width: node.width || 
+                 node.dimensions?.width || 
+                 node.data?.width || 
+                 defaultWidth,
+          height: node.height || 
+                  node.dimensions?.height || 
+                  node.data?.height || 
+                  defaultHeight
+        };
+      };
       
+      const sourceDims = getNodeDimensions(sourceNode);
+      const targetDims = getNodeDimensions(targetNode);
+
       // Calculate floating edge with proper intersections
       const floatingEdgeData = getFloatingEdgePath(
         sourceNode,
@@ -144,10 +128,10 @@ const FloatingEdge = memo(({
           sourceY: sourceY,
           targetX: targetX,
           targetY: targetY,
-          sourceWidth: sourceNodeWidth,
-          sourceHeight: sourceNodeHeight,
-          targetWidth: targetNodeWidth,
-          targetHeight: targetNodeHeight,
+          sourceWidth: sourceDims.width,
+          sourceHeight: sourceDims.height,
+          targetWidth: targetDims.width,
+          targetHeight: targetDims.height,
           debug: false // Set to true to debug connection issues
         }
       );
@@ -174,21 +158,21 @@ const FloatingEdge = memo(({
       };
     }
   }, [
-    sourceNode, 
-    targetNode, 
+    source,
+    target,
     sourceX, 
     sourceY, 
     targetX, 
     targetY,
-    // Include these to ensure edge updates when dimensions change
+    data?.__forceUpdate,
+    data?.__isAnimating,
+    // Safe node dimension tracking
+    sourceNode?.id,
+    targetNode?.id,
     sourceNode?.width,
     sourceNode?.height,
     targetNode?.width,
-    targetNode?.height,
-    sourceNode?.dimensions?.width,
-    sourceNode?.dimensions?.height,
-    targetNode?.dimensions?.width,
-    targetNode?.dimensions?.height
+    targetNode?.height
   ]);
 
   return (

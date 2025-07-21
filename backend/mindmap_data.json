@@ -1,64 +1,58 @@
 {
   "topics": [
     {
-      "id": "1752879667798",
+      "id": "1753041314272",
       "title": "Untitled Topic",
       "description": "",
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 427.9230247704141,
-        "y": 489.1906646050563
+        "x": 492.2483455650616,
+        "y": 170.60574754308843
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
       "resources": [],
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     },
     {
-      "id": "1752879672652",
-      "title": "Untitled Topic",
+      "id": "201",
+      "title": "Diagnostic Criteria",
       "description": "",
-      "category": "Uncategorized",
+      "category": "Assessment",
       "color": "#3B82F6",
       "position": {
-        "x": 1319.7533076466916,
-        "y": 599.2987009698712
+        "x": 667.782793708698,
+        "y": 557.4044366991219
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
       "resources": [],
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
-    },
-    {
-      "id": "1752881076121",
-      "title": "Generalized Anxiety Disorder",
-      "description": "<p></p>",
-      "category": "Anxiety Disorder",
-      "color": "#3B82F6",
-      "position": {
-        "x": 1028.2690279099513,
-        "y": 5.019692153245893
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     }
   ],
   "cases": [
     {
-      "id": "1752879872662",
-      "case_id": "CASE-1752881447809",
-      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
+      "id": "1753041330552",
+      "case_id": "CASE-1753041393157-0",
+      "encounter_date": "2025-07-20T19:56:33.157000+00:00",
       "primary_diagnosis": "Unspecified",
       "secondary_diagnoses": [],
-      "age": null,
+      "age": 0,
       "gender": null,
-      "chief_complaint": "Unspecified",
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
       "history_present_illness": null,
       "medical_history": null,
       "medications": [],
@@ -68,21 +62,30 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 1355.814438394425,
-        "y": 811.1426185963802
+        "x": 919.6326839734743,
+        "y": 125.95334036631886
       },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     },
     {
-      "id": "1752881237876",
-      "case_id": "CASE-1752881447809",
-      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
-      "primary_diagnosis": "Unspecified",
-      "secondary_diagnoses": [],
-      "age": null,
+      "id": "101",
+      "case_id": "CASE-1753041393157-1",
+      "encounter_date": "2025-07-20T19:56:33.157000+00:00",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Anxiety",
+        "Insomnia"
+      ],
+      "age": 0,
       "gender": null,
-      "chief_complaint": "Unspecified",
+      "chief_complaint": "Persistent sadness and loss of interest",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
       "history_present_illness": null,
       "medical_history": null,
       "medications": [],
@@ -92,21 +95,27 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 246.56704305107257,
-        "y": 621.7968303205199
+        "x": 1329.2530058802693,
+        "y": 295.03485739500286
       },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     },
     {
-      "id": "1752881297886",
-      "case_id": "CASE-1752881447809",
-      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
-      "primary_diagnosis": "Unspecified",
+      "id": "102",
+      "case_id": "CASE-1753041393157-2",
+      "encounter_date": "2025-07-20T19:56:33.157000+00:00",
+      "primary_diagnosis": "Bipolar I Disorder",
       "secondary_diagnoses": [],
-      "age": null,
+      "age": 0,
       "gender": null,
-      "chief_complaint": "Unspecified",
+      "chief_complaint": "Mood swings and impulsivity",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
       "history_present_illness": null,
       "medical_history": null,
       "medications": [],
@@ -116,21 +125,27 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 574.939439395754,
-        "y": 644.5092383701416
+        "x": 490.6675929033284,
+        "y": 570.6025667571669
       },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     },
     {
-      "id": "1752881325676",
-      "case_id": "CASE-1752881447809",
-      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
-      "primary_diagnosis": "Unspecified",
+      "id": "104",
+      "case_id": "CASE-1753041393157-4",
+      "encounter_date": "2025-07-20T19:56:33.157000+00:00",
+      "primary_diagnosis": "Schizophrenia",
       "secondary_diagnoses": [],
-      "age": null,
+      "age": 0,
       "gender": null,
-      "chief_complaint": "Unspecified",
+      "chief_complaint": "Auditory hallucinations and delusions",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
       "history_present_illness": null,
       "medical_history": null,
       "medications": [],
@@ -140,185 +155,184 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 1219.743562727844,
-        "y": 108.98013132204537
+        "x": 1045.5280048885654,
+        "y": 742.1900386699219
       },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
-    },
-    {
-      "id": "1752881340119",
-      "case_id": "CASE-1752881447809",
-      "encounter_date": "2025-07-18T23:30:47.809000+00:00",
-      "primary_diagnosis": "Unspecified",
-      "secondary_diagnoses": [],
-      "age": null,
-      "gender": null,
-      "chief_complaint": "Unspecified",
-      "history_present_illness": null,
-      "medical_history": null,
-      "medications": [],
-      "mental_status_exam": null,
-      "assessment_plan": null,
-      "notes": null,
-      "status": "active",
-      "linked_topics": [],
-      "position": {
-        "x": 862.3339768610148,
-        "y": 146.17404426875606
-      },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     }
   ],
-  "tasks": [
-    {
-      "id": "1752881268566",
-      "title": "Untitled Task",
-      "description": null,
-      "status": "in_progress",
-      "priority": "medium",
-      "due_date": null,
-      "linked_case_id": null,
-      "linked_topic_id": null,
-      "position": {
-        "x": 63.61544830615688,
-        "y": 750.3513216195591
-      },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
-    },
-    {
-      "id": "1752881381247",
-      "title": "Untitled Task",
-      "description": null,
-      "status": "pending",
-      "priority": "medium",
-      "due_date": null,
-      "linked_case_id": null,
-      "linked_topic_id": null,
-      "position": {
-        "x": 62.338543956841335,
-        "y": 505.40279123187304
-      },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
-    },
-    {
-      "id": "1752881384028",
-      "title": "Untitled Task",
-      "description": null,
-      "status": "pending",
-      "priority": "medium",
-      "due_date": null,
-      "linked_case_id": null,
-      "linked_topic_id": null,
-      "position": {
-        "x": 293.3554647824197,
-        "y": 831.9470573481938
-      },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
-    }
-  ],
+  "tasks": [],
   "literature": [
     {
-      "id": "1752879687757",
+      "id": "1753037727809",
       "title": "Untitled Literature",
       "authors": null,
       "publication": null,
-      "year": null,
+      "year": 0,
       "doi": null,
       "abstract": null,
       "notes": null,
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": -69.92772265642435,
-        "y": -35.330132352090004
+        "x": 975.419663712083,
+        "y": 481.58751804109505
       },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "created_at": "2025-07-20T18:55:27.854000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     },
     {
-      "id": "1752879695806",
+      "id": "1",
+      "title": "Efficacy of Cognitive Behavioral Therapy for Depression: A Meta-Analysis",
+      "authors": "Smith, J.A., Johnson, B.K., Williams, C.D.",
+      "publication": null,
+      "year": 2023,
+      "doi": "10.1002/jclp.23456",
+      "abstract": "This meta-analysis examines the efficacy of cognitive behavioral therapy (CBT) for treating major depressive disorder across 45 randomized controlled trials involving 3,242 participants. Results indicate that CBT shows significant effectiveness with a large effect size (d = 0.85) compared to control conditions. The analysis also reveals that individual CBT may be more effective than group CBT for severe depression cases.",
+      "notes": null,
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1431.186343976164,
+        "y": 482.75473701158313
+      },
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
+    },
+    {
+      "id": "2",
+      "title": "DSM-5-TR Clinical Cases",
+      "authors": "American Psychiatric Association",
+      "publication": null,
+      "year": 2022,
+      "doi": null,
+      "abstract": "A comprehensive collection of clinical cases that illustrate the diagnostic criteria and clinical features of mental disorders as defined in the DSM-5-TR. Each case includes detailed patient presentations, differential diagnoses, and treatment considerations.",
+      "notes": "Essential reference for diagnostic clarity",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 500.9882102579782,
+        "y": 730.2693432843448
+      },
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
+    },
+    {
+      "id": "3",
+      "title": "Pharmacological Treatment of Bipolar Disorder: Current Evidence",
+      "authors": "Rodriguez, M.L., Chen, K.H., Anderson, P.R.",
+      "publication": null,
+      "year": 2023,
+      "doi": "10.1111/bdi.13289",
+      "abstract": "This comprehensive review examines current evidence for pharmacological treatments of bipolar disorder, including mood stabilizers, antipsychotics, and adjunctive therapies. The review covers efficacy, safety profiles, and treatment-resistant cases.",
+      "notes": "Important for medication management decisions",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 660.675124922018,
+        "y": 740.2738065415633
+      },
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
+    },
+    {
+      "id": "4",
+      "title": "Mindfulness-Based Interventions for Anxiety Disorders: A Systematic Review",
+      "authors": "Taylor, S.M., Brown, A.J., Davis, L.K.",
+      "publication": null,
+      "year": 2023,
+      "doi": null,
+      "abstract": "Systematic review of mindfulness-based interventions for treating various anxiety disorders. Analysis of 28 studies shows moderate to large effect sizes for reducing anxiety symptoms, with particular effectiveness for generalized anxiety disorder.",
+      "notes": "Good evidence for mindfulness approaches",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 993.742522692334,
+        "y": 1065.210446429143
+      },
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
+    },
+    {
+      "id": "5",
+      "title": "Case Study: Treatment-Resistant Schizophrenia with Clozapine",
+      "authors": "Wilson, K.R., Martinez, E.S.",
+      "publication": null,
+      "year": 2022,
+      "doi": null,
+      "abstract": "Detailed case study of a 28-year-old male with treatment-resistant schizophrenia who showed significant improvement after clozapine initiation. The case discusses monitoring protocols, side effect management, and long-term outcomes.",
+      "notes": "Useful for understanding clozapine protocols",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1239.10424193799,
+        "y": 833.6171435892031
+      },
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
+    },
+    {
+      "id": "1753041422620",
       "title": "Untitled Literature",
       "authors": null,
       "publication": null,
-      "year": null,
+      "year": 0,
       "doi": null,
       "abstract": null,
       "notes": null,
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 563.1461824980031,
-        "y": 314.5783842513915
+        "x": 409.9844108074606,
+        "y": 1108.0164555589126
       },
-      "created_at": "2025-07-18T23:30:47.809000+00:00",
-      "updated_at": "2025-07-18T23:30:47.809000+00:00"
+      "created_at": "2025-07-20T19:57:07.916000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
+    },
+    {
+      "id": "1753041468791",
+      "title": "Untitled Literature",
+      "authors": null,
+      "publication": null,
+      "year": 0,
+      "doi": null,
+      "abstract": null,
+      "notes": null,
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 790.4538543536149,
+        "y": 1231.4791554785147
+      },
+      "created_at": "2025-07-20T19:57:48.964000+00:00",
+      "updated_at": "2025-07-21T01:30:09.747000+00:00"
     }
   ],
   "connections": [
     {
-      "id": "conn-1752880678059",
-      "source": "literature-1752879695806",
-      "target": "topic-1752879667798",
-      "label": ""
+      "id": "conn-1",
+      "source": "literature-1",
+      "target": "case-101",
+      "label": "Treatment approach"
     },
     {
-      "id": "conn-1752881106553",
-      "source": "topic-1752879667798",
-      "target": "literature-1752879687757",
-      "label": ""
+      "id": "conn-2",
+      "source": "literature-2",
+      "target": "topic-201",
+      "label": "Reference guide"
     },
     {
-      "id": "conn-1752881121386",
-      "source": "topic-1752879672652",
-      "target": "case-1752879872662",
-      "label": ""
+      "id": "conn-3",
+      "source": "literature-3",
+      "target": "case-102",
+      "label": "Medication guidance"
     },
     {
-      "id": "conn-1752881241050",
-      "source": "topic-1752879667798",
-      "target": "case-1752881237876",
-      "label": ""
-    },
-    {
-      "id": "conn-1752881282991",
-      "source": "task-1752881268566",
-      "target": "case-1752881237876",
-      "label": ""
-    },
-    {
-      "id": "conn-1752881302913",
-      "source": "topic-1752879667798",
-      "target": "case-1752881297886",
-      "label": ""
-    },
-    {
-      "id": "conn-1752881333197",
-      "source": "topic-1752881076121",
-      "target": "case-1752881325676",
-      "label": ""
-    },
-    {
-      "id": "conn-1752881343505",
-      "source": "topic-1752881076121",
-      "target": "case-1752881340119",
-      "label": ""
-    },
-    {
-      "id": "conn-1752881389251",
-      "source": "task-1752881384028",
-      "target": "case-1752881237876",
-      "label": ""
-    },
-    {
-      "id": "conn-1752881394124",
-      "source": "task-1752881381247",
-      "target": "case-1752881237876",
-      "label": ""
+      "id": "conn-5",
+      "source": "literature-5",
+      "target": "case-104",
+      "label": "Treatment protocol"
     }
   ]
 }
