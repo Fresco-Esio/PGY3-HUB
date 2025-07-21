@@ -1168,828 +1168,7 @@ const nodeTypes = {
   literature: LiteratureNode,
 };
 
-// Optimized Subpage Window Component with performance enhancements
-// Enhanced Tabbed Modal Component with animations and persistent state
-const TabbedModal = React.memo(({ 
-  type, 
-  data, 
-  onClose, 
-  setMindMapData, 
-  loadMindMapData, 
-  onAutoSave, 
-  addToast,
-  isFullscreen = false // New prop to control modal size
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState(data);
-  const [originalData, setOriginalData] = useState(data);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic'); // Tab state
-  const [tabData, setTabData] = useState({}); // Persistent tab data
-  const [isVisible, setIsVisible] = useState(false); // Animation state
-  const [isClosing, setIsClosing] = useState(false); // Closing animation state
-  const fileInputRef = useRef(null);
-  const [isUploading, setIsUploading] = useState(false);
 
-  // Entry animation
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  // PERFORMANCE FIX: Use useEffect with dependency array to prevent unnecessary updates
-  useEffect(() => {
-    if (data && data !== originalData) {
-      setEditData(data);
-      setOriginalData(data);
-      // Initialize tab data for the first time
-      if (Object.keys(tabData).length === 0) {
-        initializeTabData(data);
-      }
-    }
-  }, [data]); // Only depend on data, not originalData to prevent infinite loops
-
-  // Initialize tab data structure to preserve input states
-  const initializeTabData = useCallback((currentData) => {
-    const initialTabData = {
-      basic: { ...currentData },
-      clinical: { ...currentData },
-      assessment: { ...currentData },
-      notes: { ...currentData }
-    };
-    setTabData(initialTabData);
-  }, []);
-
-  // Update tab data when switching tabs
-  const updateTabData = useCallback((tabKey, newData) => {
-    setTabData(prev => ({
-      ...prev,
-      [tabKey]: { ...prev[tabKey], ...newData }
-    }));
-    // Also update editData for immediate UI feedback
-    setEditData(prev => ({ ...prev, ...newData }));
-  }, []);
-
-  // Handle tab switching with animation
-  const handleTabSwitch = useCallback((newTab) => {
-    if (newTab === activeTab) return;
-    
-    // Save current tab data
-    setTabData(prev => ({
-      ...prev,
-      [activeTab]: { ...editData }
-    }));
-    
-    // Switch to new tab
-    setActiveTab(newTab);
-    
-    // Load new tab data if it exists
-    if (tabData[newTab]) {
-      setEditData(tabData[newTab]);
-    }
-  }, [activeTab, editData, tabData]);
-
-  // Enhanced close handler with exit animation
-  const handleClose = useCallback(() => {
-    setIsClosing(true);
-    setTimeout(() => {
-      onClose();
-    }, 200); // Match animation duration
-  }, [onClose]);
-
-  // PERFORMANCE FIX: Memoize expensive calculations
-  const flashcardProgress = useMemo(() => {
-    if (!editData || !editData.flashcard_count) return 0;
-    return ((editData.completed_flashcards || 0) / editData.flashcard_count) * 100;
-  }, [editData?.completed_flashcards, editData?.flashcard_count]);
-
-  // PERFORMANCE FIX: Optimize field update handler with useCallback
-  const updateField = useCallback((field, value) => {
-    const newData = { ...editData, [field]: value };
-    setEditData(newData);
-    // Update current tab data
-    updateTabData(activeTab, { [field]: value });
-  }, [editData, activeTab, updateTabData]);
-
-  // Tab configuration based on node type
-  const getTabsForType = useCallback((nodeType) => {
-    switch (nodeType) {
-      case 'case':
-        return {
-          basic: { label: 'Basic Info', icon: User },
-          clinical: { label: 'Clinical', icon: Heart },
-          assessment: { label: 'Assessment', icon: Clipboard },
-          notes: { label: 'Notes', icon: FileText }
-        };
-      case 'topic':
-        return {
-          basic: { label: 'Basic Info', icon: Brain },
-          details: { label: 'Details', icon: Info },
-          progress: { label: 'Progress', icon: Target },
-          notes: { label: 'Notes', icon: FileText }
-        };
-      case 'literature':
-        return {
-          basic: { label: 'Basic Info', icon: BookOpen },
-          content: { label: 'Content', icon: FileText },
-          notes: { label: 'Notes', icon: StickyNote },
-          attachments: { label: 'Files', icon: Paperclip }
-        };
-      case 'task':
-        return {
-          basic: { label: 'Basic Info', icon: CheckSquare },
-          details: { label: 'Details', icon: Info },
-          tracking: { label: 'Tracking', icon: Clock },
-          notes: { label: 'Notes', icon: FileText }
-        };
-      default:
-        return {
-          basic: { label: 'Basic Info', icon: Info }
-        };
-    }
-  }, []);
-
-  const handleAttachPdfClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (file.type !== 'application/pdf') {
-      addToast('Please select a PDF file.', 'error');
-      return;
-    }
-
-    setIsUploading(true);
-    addToast('Uploading PDF...', 'saving');
-
-    const formData = new FormData();
-    formData.append('pdf', file);
-    // No longer sending literatureId, as the backend is now decoupled.
-
-    try {
-      const response = await axios.post(`${API}/upload-pdf`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      const { filePath } = response.data;
-      updateField('pdf_path', filePath);
-      addToast('PDF attached successfully!', 'success');
-    } catch (error) {
-      console.error('Error uploading PDF:', error);
-      addToast('Failed to attach PDF. Check server logs.', 'error');
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  // PERFORMANCE FIX: Memoize save handler to prevent recreation on every render
-  const handleSave = useCallback(async () => {
-    if (isLoading || !data?.id) return; // Add null check here
-
-    setIsLoading(true);
-    try {
-      console.log(`Saving ${type} with ID:`, data.id, editData);
-
-      // Merge all tab data for complete save
-      const mergedData = Object.values(tabData).reduce((acc, tab) => ({ ...acc, ...tab }), editData);
-
-      setIsEditing(false);
-      setOriginalData(mergedData);
-
-      // Update mindMapData directly (no API call needed)
-      setMindMapData(prevData => {
-        const newData = { ...prevData };
-        if (type === 'literature') {
-          newData.literature = newData.literature.map(item =>
-            item.id === data.id ? { ...item, ...mergedData, updated_at: new Date() } : item
-          );
-        } else {
-          const key = type + 's';
-          newData[key] = newData[key].map(item =>
-            item.id === data.id ? { ...item, ...mergedData, updated_at: new Date() } : item
-          );
-        }
-
-        console.log(`Updated mindMapData after saving ${type}:`, newData);
-
-        // Trigger auto-save asynchronously to prevent blocking
-        if (onAutoSave) {
-          setTimeout(() => onAutoSave(newData), 0);
-        }
-
-        return newData;
-      });
-
-      addToast(`${type} saved successfully`, 'success');
-
-    } catch (error) {
-      console.error('Error saving data:', error);
-      addToast(`Failed to save ${type}`, 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [type, data?.id, editData, tabData, setMindMapData, onAutoSave, isLoading, addToast]);
-
-  // PERFORMANCE FIX: Memoize cancel handler
-  const handleCancel = useCallback(() => {
-    setEditData(originalData);
-    setIsEditing(false);
-    // Reset tab data
-    initializeTabData(originalData);
-  }, [originalData, initializeTabData]);
-
-  // PERFORMANCE FIX: Memoize delete handler
-  const handleDelete = useCallback(async () => {
-    if (isLoading || !data?.id) return; // Removed confirmation dialog as requested
-
-    setIsLoading(true);
-    try {
-      console.log(`Deleting ${type} with ID:`, data.id);
-
-      // Update mindMapData directly (no API call needed)
-      setMindMapData(prevData => {
-        const newData = { ...prevData };
-        if (type === 'literature') {
-          newData.literature = newData.literature.filter(item => item.id !== data.id);
-        } else {
-          const key = type + 's';
-          newData[key] = newData[key].filter(item => item.id !== data.id);
-        }
-
-        // Also remove any connections involving this node
-        if (newData.connections) {
-          newData.connections = newData.connections.filter(conn =>
-            !conn.source.includes(data.id) && !conn.target.includes(data.id)
-          );
-        }
-
-        console.log(`Updated mindMapData after deleting ${type}:`, newData);
-
-        // Trigger auto-save asynchronously
-        if (onAutoSave) {
-          setTimeout(() => onAutoSave(newData), 0);
-        }
-
-        return newData;
-      });
-
-      // PERFORMANCE FIX: Close subpage immediately for better UX
-      handleClose();
-
-      addToast(`${type} deleted successfully`, 'success');
-
-    } catch (error) {
-      console.error('Error deleting data:', error);
-      addToast(`Failed to delete ${type}`, 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [type, data?.id, setMindMapData, onAutoSave, handleClose, isLoading, addToast]);
-
-  // PERFORMANCE FIX: Early return with loading state for better UX
-  if (!data) {
-    return (
-      <div className={`fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-        <div className={`bg-white rounded-xl shadow-2xl p-6 ${isFullscreen ? 'w-full h-full mx-0 my-0 rounded-none' : 'max-w-4xl w-full mx-4 max-h-[80vh]'} overflow-y-auto transform transition-all duration-300 ${isVisible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 size={24} className="animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-500">Loading...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle empty data object (error state)
-  if (data && Object.keys(data).length === 0) {
-    return (
-      <div className={`fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-        <div className={`bg-white rounded-xl shadow-2xl p-6 ${isFullscreen ? 'w-full h-full mx-0 my-0 rounded-none' : 'max-w-4xl w-full mx-4 max-h-[80vh]'} overflow-y-auto transform transition-all duration-300 ${isVisible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Error Loading Data</h2>
-            <button
-              onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <X size={20} />
-            </button>
-          </div>
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
-              <p className="text-gray-600">Failed to load data. Please try again.</p>
-              <button
-                onClick={handleClose}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // PERFORMANCE FIX: Optimized field renderer without useCallback to avoid hook violations
-  const renderEditableField = (label, field, type = 'text', options = {}) => {
-    if (!editData) return null;
-
-    const fieldValue = editData[field] || '';
-
-    if (isEditing) {
-      if (type === 'textarea') {
-        return (
-          <div key={field}>
-            <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-            <RichTextEditor
-              content={fieldValue}
-              onChange={(htmlContent) => updateField(field, htmlContent)}
-              placeholder={`Enter ${label.toLowerCase()}...`}
-              rows={options.rows || 3}
-            />
-          </div>
-        );
-      } else if (type === 'select') {
-        return (
-          <div key={field}>
-            <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-            <select
-              value={fieldValue}
-              onChange={(e) => updateField(field, e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-            >
-              {options.choices?.map(choice => (
-                <option key={choice} value={choice}>{choice}</option>
-              ))}
-            </select>
-          </div>
-        );
-      } else {
-        // Special handling for date fields to format correctly
-        let inputValue = fieldValue;
-        if (type === 'date' && fieldValue) {
-          // Convert to YYYY-MM-DD format if it's a date
-          try {
-            const date = new Date(fieldValue);
-            if (!isNaN(date.getTime())) {
-              inputValue = date.toISOString().split('T')[0];
-            }
-          } catch (error) {
-            console.warn('Error formatting date:', fieldValue);
-          }
-        }
-
-        return (
-          <div key={field}>
-            <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-            <input
-              type={type}
-              value={inputValue}
-              onChange={(e) => updateField(field, e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-            />
-          </div>
-        );
-      }
-    } else {
-      // For textarea fields, handle both HTML and plain text content
-      if (type === 'textarea') {
-        const fieldContent = fieldValue || '';
-        const isHtml = fieldContent.includes('<') && fieldContent.includes('>');
-
-        return (
-          <div key={field}>
-            <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-            {isHtml ? (
-              <div
-                className="text-gray-600 prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: fieldContent || `<p>No ${label.toLowerCase()} available.</p>`
-                }}
-              />
-            ) : (
-              <p className="text-gray-600 whitespace-pre-wrap">
-                {fieldContent || `No ${label.toLowerCase()} available.`}
-              </p>
-            )}
-          </div>
-        );
-      }
-
-      return (
-        <div key={field}>
-          <h3 className="font-semibold text-gray-800 mb-2">{label}</h3>
-          <p className="text-gray-600">{fieldValue || `No ${label.toLowerCase()} available.`}</p>
-        </div>
-      );
-    }
-  };
-
-  // Tab content renderers for different node types
-  const renderTabContent = useCallback((tabKey) => {
-    if (!editData) return <div>Loading...</div>;
-
-    const currentData = tabData[tabKey] || editData;
-
-    switch (type) {
-      case 'case':
-        return renderCaseTabContent(tabKey, currentData);
-      case 'topic':
-        return renderTopicTabContent(tabKey, currentData);
-      case 'literature':
-        return renderLiteratureTabContent(tabKey, currentData);
-      case 'task':
-        return renderTaskTabContent(tabKey, currentData);
-      default:
-        return <div>Unknown node type</div>;
-    }
-  }, [type, editData, tabData]);
-
-  const renderCaseTabContent = (tabKey, currentData) => {
-    switch (tabKey) {
-      case 'basic':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Users className="text-blue-600" size={24} />
-              {renderEditableField('Case ID', 'case_id')}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderEditableField('Primary Diagnosis', 'primary_diagnosis')}
-              {renderEditableField('Age', 'age', 'number')}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderEditableField('Gender', 'gender', 'select', {
-                choices: ['Male', 'Female', 'Non-binary', 'Other']
-              })}
-              {renderEditableField('Status', 'status', 'select', {
-                choices: ['active', 'archived', 'follow_up']
-              })}
-            </div>
-            {renderEditableField('Chief Complaint', 'chiefComplaint', 'textarea', { rows: 3 })}
-          </div>
-        );
-      case 'clinical':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Heart className="text-red-500" size={20} />
-              Clinical Presentation
-            </h3>
-            {renderEditableField('Initial Presentation', 'initialPresentation', 'textarea', { rows: 4 })}
-            {renderEditableField('Current Presentation', 'currentPresentation', 'textarea', { rows: 4 })}
-            {renderEditableField('Defense Patterns', 'defensePatterns', 'textarea', { rows: 3 })}
-          </div>
-        );
-      case 'assessment':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Clipboard className="text-blue-500" size={20} />
-              Treatment & Assessment
-            </h3>
-            {renderEditableField('Medication History', 'medicationHistory', 'textarea', { rows: 4 })}
-            {renderEditableField('Therapy Progress', 'therapyProgress', 'textarea', { rows: 4 })}
-            {renderEditableField('Clinical Reflection', 'clinicalReflection', 'textarea', { rows: 4 })}
-          </div>
-        );
-      case 'notes':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <FileText className="text-gray-500" size={20} />
-              Additional Notes
-            </h3>
-            {renderEditableField('Additional Notes', 'notes', 'textarea', { rows: 6 })}
-            {renderEditableField('Tags', 'tags')}
-          </div>
-        );
-      default:
-        return <div>Tab content not found</div>;
-    }
-  };
-
-  const renderTopicTabContent = (tabKey, currentData) => {
-    switch (tabKey) {
-      case 'basic':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div
-                className="w-4 h-4 rounded-full transition-colors"
-                style={{ backgroundColor: currentData.color || '#3B82F6' }}
-              />
-              {renderEditableField('Title', 'title')}
-            </div>
-            {renderEditableField('Category', 'category')}
-            {renderEditableField('Description', 'description', 'textarea', { rows: 4 })}
-          </div>
-        );
-      case 'details':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Topic Details</h3>
-            {renderEditableField('Color', 'color', 'color')}
-            {renderEditableField('Tags', 'tags')}
-          </div>
-        );
-      case 'progress':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Target className="text-green-500" size={20} />
-              Learning Progress
-            </h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="space-y-4">
-                {renderEditableField('Flashcard Count', 'flashcard_count', 'number')}
-                {renderEditableField('Completed Flashcards', 'completed_flashcards', 'number')}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Progress</span>
-                    <span>{Math.round(flashcardProgress)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${flashcardProgress}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case 'notes':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Notes & Resources</h3>
-            {renderEditableField('Notes', 'notes', 'textarea', { rows: 6 })}
-          </div>
-        );
-      default:
-        return <div>Tab content not found</div>;
-    }
-  };
-
-  const renderLiteratureTabContent = (tabKey, currentData) => {
-    switch (tabKey) {
-      case 'basic':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <BookOpen className="text-purple-600" size={24} />
-              {renderEditableField('Title', 'title')}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderEditableField('Authors', 'authors')}
-              {renderEditableField('Publication', 'publication')}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderEditableField('Year', 'year', 'number')}
-              {renderEditableField('DOI', 'doi')}
-            </div>
-          </div>
-        );
-      case 'content':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Content</h3>
-            {renderEditableField('Abstract', 'abstract', 'textarea', { rows: 6 })}
-          </div>
-        );
-      case 'notes':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Notes & Analysis</h3>
-            {renderEditableField('Notes', 'notes', 'textarea', { rows: 6 })}
-          </div>
-        );
-      case 'attachments':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Paperclip className="text-gray-500" size={20} />
-              Attachments
-            </h3>
-            {isEditing && (
-              <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept=".pdf"
-                  style={{ display: 'none' }}
-                />
-                <LoadingButton
-                  onClick={handleAttachPdfClick}
-                  loading={isUploading}
-                  icon={Upload}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                >
-                  {isUploading ? 'Uploading...' : 'Attach PDF'}
-                </LoadingButton>
-                {currentData.pdf_path && (
-                  <div className="mt-2 text-sm text-gray-600">
-                    Current file: <span className="font-medium text-purple-700">{currentData.pdf_path.split('/').pop()}</span>
-                  </div>
-                )}
-              </div>
-            )}
-            {!isEditing && (
-              <div>
-                {currentData.pdf_path ? (
-                  <a href={`${BACKEND_URL}${currentData.pdf_path}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-2">
-                    <FileText size={16} />
-                    {currentData.pdf_path.split('/').pop()}
-                  </a>
-                ) : (
-                  <p className="text-gray-500 italic">No PDF attached.</p>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      default:
-        return <div>Tab content not found</div>;
-    }
-  };
-
-  const renderTaskTabContent = (tabKey, currentData) => {
-    switch (tabKey) {
-      case 'basic':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <CheckSquare className="text-amber-600" size={24} />
-              {renderEditableField('Title', 'title')}
-            </div>
-            {renderEditableField('Description', 'description', 'textarea', { rows: 3 })}
-          </div>
-        );
-      case 'details':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Task Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderEditableField('Status', 'status', 'select', {
-                choices: ['pending', 'in_progress', 'completed']
-              })}
-              {renderEditableField('Priority', 'priority', 'select', {
-                choices: ['low', 'medium', 'high']
-              })}
-            </div>
-          </div>
-        );
-      case 'tracking':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Clock className="text-blue-500" size={20} />
-              Time Tracking
-            </h3>
-            {renderEditableField('Due Date', 'due_date', 'date')}
-            {renderEditableField('Linked Case ID', 'linked_case_id')}
-            {renderEditableField('Linked Topic ID', 'linked_topic_id')}
-          </div>
-        );
-      case 'notes':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Additional Notes</h3>
-            {renderEditableField('Notes', 'notes', 'textarea', { rows: 6 })}
-          </div>
-        );
-      default:
-        return <div>Tab content not found</div>;
-    }
-  };
-
-  const tabs = getTabsForType(type);
-
-  return (
-    <div
-      className={`fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 backdrop-blur-sm transition-all duration-300 ${isClosing ? 'opacity-0' : isVisible ? 'opacity-100' : 'opacity-0'}`}
-      onClick={(e) => {
-        // Only close if clicking the backdrop, not the modal content
-        if (e.target === e.currentTarget) {
-          handleClose();
-        }
-      }}
-    >
-      <div
-        className={`bg-white rounded-xl shadow-2xl ${isFullscreen ? 'w-full h-full mx-0 my-0 rounded-none' : 'max-w-5xl w-full mx-4 max-h-[85vh]'} overflow-hidden transform transition-all duration-300 ${isClosing ? 'scale-95 translate-y-4 opacity-0' : isVisible ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'}`}
-        onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {type === 'case' && <Users size={24} />}
-            {type === 'topic' && <Brain size={24} />}
-            {type === 'literature' && <BookOpen size={24} />}
-            {type === 'task' && <CheckSquare size={24} />}
-            <h2 className="text-xl font-semibold capitalize">{type} Details</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            {!isEditing && !isLoading && (
-              <>
-                <LoadingButton
-                  onClick={() => setIsEditing(true)}
-                  icon={Edit3}
-                  className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-                  title="Edit"
-                />
-                <LoadingButton
-                  onClick={handleDelete}
-                  loading={isLoading}
-                  icon={Trash2}
-                  className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
-                  title="Delete"
-                />
-              </>
-            )}
-            <button
-              onClick={handleClose}
-              className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-              disabled={isLoading}
-              title="Close"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200 bg-white">
-          <div className="flex overflow-x-auto">
-            {Object.entries(tabs).map(([key, { label, icon: Icon }]) => (
-              <button
-                key={key}
-                onClick={() => handleTabSwitch(key)}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all min-w-max ${
-                  activeTab === key
-                    ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Icon size={16} />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab Content with Animation */}
-        <div className="relative overflow-hidden">
-          <div 
-            className={`p-6 overflow-y-auto transition-all duration-200 ease-in-out ${isFullscreen ? 'max-h-[calc(100vh-180px)]' : 'max-h-[calc(85vh-180px)]'}`}
-            key={activeTab} // Force re-render for animation
-          >
-            <div className="animate-in fade-in slide-in-from-right-2 duration-200">
-              {renderTabContent(activeTab)}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        {isEditing && (
-          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-              All changes are saved per tab
-            </div>
-            <div className="flex items-center gap-3">
-              <LoadingButton
-                onClick={handleCancel}
-                disabled={isLoading}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </LoadingButton>
-              <LoadingButton
-                onClick={handleSave}
-                loading={isLoading}
-                icon={Save}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {isLoading ? 'Saving...' : 'Save All Changes'}
-              </LoadingButton>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-});
 
 // Enhanced Dedicated Editing Form Component
 const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
@@ -2614,8 +1793,10 @@ const DashboardComponent = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [focusedCategory, setFocusedCategory] = useState(null);
   const [showNodeSelector, setShowNodeSelector] = useState(false);
-  const [openSubpage, setOpenSubpage] = useState(null);
-  const [subpageData, setSubpageData] = useState(null);
+  // Specialized modal state for each node type
+  const [caseModal, setCaseModal] = useState({ isOpen: false, data: null });
+  const [topicModal, setTopicModal] = useState({ isOpen: false, data: null });
+  const [taskModal, setTaskModal] = useState({ isOpen: false, data: null });
   const [isReactFlowReady, setIsReactFlowReady] = useState(false);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
   const [isExportingCSV, setIsExportingCSV] = useState(false);
@@ -2967,13 +2148,46 @@ const handleLiteratureClick = useCallback((literatureData) => {
 
   const onNodeDoubleClick = useCallback((event, node) => {
     const [type, id] = node.id.split('-');
-    const key = type === 'literature' ? 'literature' : `${type}s`;
-    const dataItem = mindMapData[key].find(item => String(item.id) === id);
-    if (dataItem) {
-      setSubpageData(dataItem);
-      setOpenSubpage(type);
+    
+    // Prevent multiple rapid clicks by checking if modal is already open
+    if (type === 'case' && caseModal.isOpen) return;
+    if (type === 'topic' && topicModal.isOpen) return;
+    if (type === 'task' && taskModal.isOpen) return;
+    if (type === 'literature' && literatureModal.isOpen) return;
+    
+    // Route to appropriate specialized modal based on node type
+    if (type === 'literature') {
+      const dataItem = mindMapData.literature.find(item => String(item.id) === id);
+      if (dataItem) {
+        handleLiteratureClick(dataItem);
+      }
+      return;
     }
-  }, [mindMapData]);
+    
+    if (type === 'case') {
+      const dataItem = mindMapData.cases.find(item => String(item.id) === id);
+      if (dataItem) {
+        setCaseModal({ isOpen: true, data: dataItem });
+      }
+      return;
+    }
+    
+    if (type === 'topic') {
+      const dataItem = mindMapData.topics.find(item => String(item.id) === id);
+      if (dataItem) {
+        setTopicModal({ isOpen: true, data: dataItem });
+      }
+      return;
+    }
+    
+    if (type === 'task') {
+      const dataItem = mindMapData.tasks.find(item => String(item.id) === id);
+      if (dataItem) {
+        setTaskModal({ isOpen: true, data: dataItem });
+      }
+      return;
+    }
+  }, [mindMapData, handleLiteratureClick, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
 
   const onEdgeDoubleClick = useCallback((event, edge) => {
     // Double-click to delete edge immediately
@@ -3153,8 +2367,11 @@ const handleLiteratureClick = useCallback((literatureData) => {
     setNodes([]);
     setEdges([]);
     setSelectedNode(null);
-    setOpenSubpage(null);
-    setSubpageData(null);
+    // Clear all modal states
+    setCaseModal({ isOpen: false, data: null });
+    setTopicModal({ isOpen: false, data: null });
+    setTaskModal({ isOpen: false, data: null });
+    setLiteratureModal({ isOpen: false, data: null });
     setFocusedCategory(null);
     autoSaveMindMapData(empty);
     addToast('Mind map cleared successfully', 'success');
@@ -3364,7 +2581,11 @@ const handleLiteratureClick = useCallback((literatureData) => {
       
       if (event.key === 'Escape') {
         setSelectedNode(null);
-        setOpenSubpage(null);
+        // Close all modals
+        setCaseModal({ isOpen: false, data: null });
+        setTopicModal({ isOpen: false, data: null });
+        setTaskModal({ isOpen: false, data: null });
+        setLiteratureModal({ isOpen: false, data: null });
         setShowNodeSelector(false);
         setIsTemplateManagerOpen(false);
       }
@@ -3425,6 +2646,843 @@ const handleLiteratureClick = useCallback((literatureData) => {
   if (loading) {
     return <OptimizedLoadingScreen message={loadingMessage} progress={loadingProgress} />;
   }
+
+  // Specialized Modal Components with Enhanced Animations and Full Editing Capabilities
+  const CaseModal = React.memo(({ isOpen, data, onClose }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasInitialized, setHasInitialized] = useState(false);
+
+    useEffect(() => {
+      if (isOpen && data && !hasInitialized) {
+        setIsVisible(true);
+        setEditData({ ...data });
+        setHasInitialized(true);
+      } else if (!isOpen && hasInitialized) {
+        setIsVisible(false);
+        setIsClosing(false);
+        setIsEditing(false);
+        setHasInitialized(false);
+      }
+    }, [isOpen, hasInitialized]); // Remove data dependency completely
+
+    // Separate effect for data updates when modal is already open
+    useEffect(() => {
+      if (isOpen && data && hasInitialized) {
+        setEditData({ ...data });
+      }
+    }, [data?.id, isOpen, hasInitialized]);
+
+    const handleClose = useCallback(() => {
+      setIsClosing(true);
+      setTimeout(() => {
+        onClose();
+        setIsClosing(false);
+        setIsVisible(false);
+        setIsEditing(false);
+      }, 300);
+    }, [onClose]);
+
+    const handleSave = useCallback(async () => {
+      if (isLoading || !data?.id) return;
+
+      setIsLoading(true);
+      try {
+        // Update mindMapData directly
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          newData.cases = newData.cases.map(item =>
+            item.id === data.id ? { ...item, ...editData, updated_at: new Date() } : item
+          );
+
+          console.log('Updated case data:', newData);
+          // Trigger auto-save
+          if (autoSaveMindMapData) {
+            setTimeout(() => autoSaveMindMapData(newData), 0);
+          }
+          return newData;
+        });
+
+        addToast('Case saved successfully', 'success');
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error saving case:', error);
+        addToast('Failed to save case', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }, [data?.id, editData, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
+    const handleDelete = useCallback(async () => {
+      if (isLoading || !data?.id) return;
+
+      setIsLoading(true);
+      try {
+        // Update mindMapData directly
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          newData.cases = newData.cases.filter(item => item.id !== data.id);
+          
+          // Remove connections involving this node
+          if (newData.connections) {
+            newData.connections = newData.connections.filter(conn =>
+              !conn.source.includes(data.id) && !conn.target.includes(data.id)
+            );
+          }
+
+          console.log('Deleted case data:', newData);
+          if (autoSaveMindMapData) {
+            setTimeout(() => autoSaveMindMapData(newData), 0);
+          }
+          return newData;
+        });
+
+        handleClose();
+        addToast('Case deleted successfully', 'success');
+      } catch (error) {
+        console.error('Error deleting case:', error);
+        addToast('Failed to delete case', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
+
+    const updateField = useCallback((field, value) => {
+      setEditData(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const renderField = (label, field, type = 'text', options = {}) => {
+      const fieldValue = editData[field] || '';
+
+      if (isEditing) {
+        if (type === 'textarea') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <textarea
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                rows={options.rows || 3}
+                placeholder={`Enter ${label.toLowerCase()}...`}
+              />
+            </div>
+          );
+        } else if (type === 'select') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <select
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              >
+                <option value="">Select {label.toLowerCase()}</option>
+                {options.choices?.map(choice => (
+                  <option key={choice} value={choice}>{choice}</option>
+                ))}
+              </select>
+            </div>
+          );
+        } else {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <input
+                type={type}
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                placeholder={`Enter ${label.toLowerCase()}...`}
+              />
+            </div>
+          );
+        }
+      } else {
+        return (
+          <div key={field} className="space-y-2">
+            <h3 className="font-semibold text-gray-800">{label}</h3>
+            <p className="text-gray-600">{fieldValue || `No ${label.toLowerCase()} available.`}</p>
+          </div>
+        );
+      }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
+        onClick={(e) => e.target === e.currentTarget && handleClose()}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Users size={24} />
+              <h2 className="text-xl font-semibold">Case Details</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              {!isEditing && !isLoading && (
+                <>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                    title="Edit"
+                  >
+                    <Edit3 size={20} />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
+                    title="Delete"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </>
+              )}
+              <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6 overflow-y-auto max-h-[calc(85vh-140px)]">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {renderField('Case ID', 'case_id')}
+                {renderField('Primary Diagnosis', 'primary_diagnosis')}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {renderField('Age', 'age', 'number')}
+                {renderField('Gender', 'gender', 'select', {
+                  choices: ['Male', 'Female', 'Non-binary', 'Other']
+                })}
+              </div>
+              {renderField('Chief Complaint', 'chiefComplaint', 'textarea', { rows: 3 })}
+              {renderField('Initial Presentation', 'initialPresentation', 'textarea', { rows: 4 })}
+              {renderField('Current Presentation', 'currentPresentation', 'textarea', { rows: 4 })}
+              {renderField('Medication History', 'medicationHistory', 'textarea', { rows: 3 })}
+              {renderField('Therapy Progress', 'therapyProgress', 'textarea', { rows: 3 })}
+              {renderField('Defense Patterns', 'defensePatterns', 'textarea', { rows: 3 })}
+              {renderField('Clinical Reflection', 'clinicalReflection', 'textarea', { rows: 4 })}
+            </div>
+          </div>
+
+          {isEditing && (
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Changes will be auto-saved
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditData(data || {});
+                  }}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    );
+  });
+
+  const TopicModal = React.memo(({ isOpen, data, onClose }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasInitialized, setHasInitialized] = useState(false);
+
+    useEffect(() => {
+      if (isOpen && data && !hasInitialized) {
+        setIsVisible(true);
+        setEditData({ ...data });
+        setHasInitialized(true);
+      } else if (!isOpen && hasInitialized) {
+        setIsVisible(false);
+        setIsEditing(false);
+        setHasInitialized(false);
+      }
+    }, [isOpen, hasInitialized]); // Remove data dependency completely
+
+    // Separate effect for data updates when modal is already open
+    useEffect(() => {
+      if (isOpen && data && hasInitialized) {
+        setEditData({ ...data });
+      }
+    }, [data?.id, isOpen, hasInitialized]);
+
+    const handleClose = useCallback(() => {
+      setTimeout(() => {
+        onClose();
+        setIsVisible(false);
+        setIsEditing(false);
+      }, 300);
+    }, [onClose]);
+
+    const handleSave = useCallback(async () => {
+      if (isLoading || !data?.id) return;
+
+      setIsLoading(true);
+      try {
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          newData.topics = newData.topics.map(item =>
+            item.id === data.id ? { ...item, ...editData, updated_at: new Date() } : item
+          );
+
+          console.log('Updated topic data:', newData);
+          if (autoSaveMindMapData) {
+            setTimeout(() => autoSaveMindMapData(newData), 0);
+          }
+          return newData;
+        });
+
+        addToast('Topic saved successfully', 'success');
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error saving topic:', error);
+        addToast('Failed to save topic', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }, [data?.id, editData, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
+    const handleDelete = useCallback(async () => {
+      if (isLoading || !data?.id) return;
+
+      setIsLoading(true);
+      try {
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          newData.topics = newData.topics.filter(item => item.id !== data.id);
+          
+          if (newData.connections) {
+            newData.connections = newData.connections.filter(conn =>
+              !conn.source.includes(data.id) && !conn.target.includes(data.id)
+            );
+          }
+
+          console.log('Deleted topic data:', newData);
+          if (autoSaveMindMapData) {
+            setTimeout(() => autoSaveMindMapData(newData), 0);
+          }
+          return newData;
+        });
+
+        handleClose();
+        addToast('Topic deleted successfully', 'success');
+      } catch (error) {
+        console.error('Error deleting topic:', error);
+        addToast('Failed to delete topic', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
+
+    const updateField = useCallback((field, value) => {
+      setEditData(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const renderField = (label, field, type = 'text', options = {}) => {
+      const fieldValue = editData[field] || '';
+
+      if (isEditing) {
+        if (type === 'textarea') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <textarea
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                rows={options.rows || 3}
+                placeholder={`Enter ${label.toLowerCase()}...`}
+              />
+            </div>
+          );
+        } else if (type === 'select') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <select
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              >
+                <option value="">Select {label.toLowerCase()}</option>
+                {options.choices?.map(choice => (
+                  <option key={choice} value={choice}>{choice}</option>
+                ))}
+              </select>
+            </div>
+          );
+        } else if (type === 'color') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <div className="flex gap-2">
+                {['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'].map(color => (
+                  <button
+                    key={color}
+                    onClick={() => updateField(field, color)}
+                    className={`w-8 h-8 rounded-full border-2 ${editData[field] === color ? 'border-gray-800' : 'border-gray-300'}`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        } else {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <input
+                type={type}
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                placeholder={`Enter ${label.toLowerCase()}...`}
+              />
+            </div>
+          );
+        }
+      } else {
+        return (
+          <div key={field} className="space-y-2">
+            <h3 className="font-semibold text-gray-800">{label}</h3>
+            <p className="text-gray-600">{fieldValue || `No ${label.toLowerCase()} available.`}</p>
+          </div>
+        );
+      }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <motion.div
+        key="topic-modal" // Add stable key
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }} // Shorter, more stable animation
+        className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
+        onClick={(e) => e.target === e.currentTarget && handleClose()}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          transition={{ type: "spring", stiffness: 400, damping: 35, duration: 0.3 }} // More controlled spring
+          className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Brain size={24} />
+              <h2 className="text-xl font-semibold">Topic Details</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              {!isEditing && !isLoading && (
+                <>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                    title="Edit"
+                  >
+                    <Edit3 size={20} />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
+                    title="Delete"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </>
+              )}
+              <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6 overflow-y-auto max-h-[calc(85vh-140px)]">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-6 h-6 rounded-full"
+                  style={{ backgroundColor: editData?.color || '#3B82F6' }}
+                />
+                {renderField('Title', 'title')}
+              </div>
+              {renderField('Category', 'category', 'select', {
+                choices: ['Mood Disorders', 'Anxiety Disorders', 'Psychotic Disorders', 'Personality Disorders', 'Substance Use Disorders', 'Other']
+              })}
+              {renderField('Color', 'color', 'color')}
+              {renderField('Description', 'description', 'textarea', { rows: 4 })}
+              {renderField('Notes', 'notes', 'textarea', { rows: 4 })}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {renderField('Flashcard Count', 'flashcard_count', 'number')}
+                {renderField('Completed Flashcards', 'completed_flashcards', 'number')}
+              </div>
+            </div>
+          </div>
+
+          {isEditing && (
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Changes will be auto-saved
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditData(data || {});
+                  }}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    );
+  });
+
+  const TaskModal = React.memo(({ isOpen, data, onClose }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasInitialized, setHasInitialized] = useState(false);
+
+    useEffect(() => {
+      if (isOpen && data && !hasInitialized) {
+        setIsVisible(true);
+        setEditData({ ...data });
+        setHasInitialized(true);
+      } else if (!isOpen && hasInitialized) {
+        setIsVisible(false);
+        setIsEditing(false);
+        setHasInitialized(false);
+      }
+    }, [isOpen, hasInitialized]); // Remove data dependency completely
+
+    // Separate effect for data updates when modal is already open
+    useEffect(() => {
+      if (isOpen && data && hasInitialized) {
+        setEditData({ ...data });
+      }
+    }, [data?.id, isOpen, hasInitialized]);
+
+    const handleClose = useCallback(() => {
+      setTimeout(() => {
+        onClose();
+        setIsVisible(false);
+        setIsEditing(false);
+      }, 300);
+    }, [onClose]);
+
+    const handleSave = useCallback(async () => {
+      if (isLoading || !data?.id) return;
+
+      setIsLoading(true);
+      try {
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          newData.tasks = newData.tasks.map(item =>
+            item.id === data.id ? { ...item, ...editData, updated_at: new Date() } : item
+          );
+
+          console.log('Updated task data:', newData);
+          if (autoSaveMindMapData) {
+            setTimeout(() => autoSaveMindMapData(newData), 0);
+          }
+          return newData;
+        });
+
+        addToast('Task saved successfully', 'success');
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error saving task:', error);
+        addToast('Failed to save task', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }, [data?.id, editData, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
+    const handleDelete = useCallback(async () => {
+      if (isLoading || !data?.id) return;
+
+      setIsLoading(true);
+      try {
+        setMindMapData(prevData => {
+          const newData = { ...prevData };
+          newData.tasks = newData.tasks.filter(item => item.id !== data.id);
+          
+          if (newData.connections) {
+            newData.connections = newData.connections.filter(conn =>
+              !conn.source.includes(data.id) && !conn.target.includes(data.id)
+            );
+          }
+
+          console.log('Deleted task data:', newData);
+          if (autoSaveMindMapData) {
+            setTimeout(() => autoSaveMindMapData(newData), 0);
+          }
+          return newData;
+        });
+
+        handleClose();
+        addToast('Task deleted successfully', 'success');
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        addToast('Failed to delete task', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
+
+    const updateField = useCallback((field, value) => {
+      setEditData(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const renderField = (label, field, type = 'text', options = {}) => {
+      const fieldValue = editData[field] || '';
+
+      if (isEditing) {
+        if (type === 'textarea') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <textarea
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                rows={options.rows || 3}
+                placeholder={`Enter ${label.toLowerCase()}...`}
+              />
+            </div>
+          );
+        } else if (type === 'select') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <select
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              >
+                <option value="">Select {label.toLowerCase()}</option>
+                {options.choices?.map(choice => (
+                  <option key={choice} value={choice}>{choice}</option>
+                ))}
+              </select>
+            </div>
+          );
+        } else if (type === 'date') {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <input
+                type="date"
+                value={fieldValue ? new Date(fieldValue).toISOString().split('T')[0] : ''}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              />
+            </div>
+          );
+        } else {
+          return (
+            <div key={field} className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <input
+                type={type}
+                value={fieldValue}
+                onChange={(e) => updateField(field, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                placeholder={`Enter ${label.toLowerCase()}...`}
+              />
+            </div>
+          );
+        }
+      } else {
+        if (field === 'status' || field === 'priority') {
+          const statusColors = {
+            completed: 'bg-green-100 text-green-800',
+            in_progress: 'bg-blue-100 text-blue-800',
+            pending: 'bg-gray-100 text-gray-800'
+          };
+          const priorityColors = {
+            high: 'bg-red-100 text-red-800',
+            medium: 'bg-yellow-100 text-yellow-800',
+            low: 'bg-green-100 text-green-800'
+          };
+          const colorClass = field === 'status' ? statusColors[fieldValue] : priorityColors[fieldValue];
+          
+          return (
+            <div key={field} className="space-y-2">
+              <h3 className="font-semibold text-gray-800">{label}</h3>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${colorClass || 'bg-gray-100 text-gray-800'}`}>
+                {fieldValue || (field === 'priority' ? 'medium' : 'pending')}
+              </span>
+            </div>
+          );
+        } else if (field === 'due_date' && fieldValue) {
+          return (
+            <div key={field} className="space-y-2">
+              <h3 className="font-semibold text-gray-800">{label}</h3>
+              <p className="text-gray-600">{new Date(fieldValue).toLocaleDateString()}</p>
+            </div>
+          );
+        } else {
+          return (
+            <div key={field} className="space-y-2">
+              <h3 className="font-semibold text-gray-800">{label}</h3>
+              <p className="text-gray-600">{fieldValue || `No ${label.toLowerCase()} available.`}</p>
+            </div>
+          );
+        }
+      }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
+        onClick={(e) => e.target === e.currentTarget && handleClose()}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckSquare size={24} />
+              <h2 className="text-xl font-semibold">Task Details</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              {!isEditing && !isLoading && (
+                <>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                    title="Edit"
+                  >
+                    <Edit3 size={20} />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
+                    title="Delete"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </>
+              )}
+              <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6 overflow-y-auto max-h-[calc(85vh-140px)]">
+            <div className="space-y-6">
+              {renderField('Title', 'title')}
+              {renderField('Description', 'description', 'textarea', { rows: 4 })}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {renderField('Status', 'status', 'select', {
+                  choices: ['pending', 'in_progress', 'completed']
+                })}
+                {renderField('Priority', 'priority', 'select', {
+                  choices: ['low', 'medium', 'high']
+                })}
+              </div>
+              {renderField('Due Date', 'due_date', 'date')}
+              {renderField('Linked Case ID', 'linked_case_id')}
+              {renderField('Linked Topic ID', 'linked_topic_id')}
+              {renderField('Notes', 'notes', 'textarea', { rows: 4 })}
+            </div>
+          </div>
+
+          {isEditing && (
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Changes will be auto-saved
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditData(data || {});
+                  }}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    );
+  });
 
 return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -3590,8 +3648,16 @@ return (
                   const key = type === 'literature' ? 'literature' : `${type}s`;
                   const dataItem = mindMapData[key].find(item => String(item.id) === id);
                   if (dataItem) {
-                    setSubpageData(dataItem);
-                    setOpenSubpage(type);
+                    // Route to appropriate specialized modal
+                    if (type === 'case') {
+                      setCaseModal({ isOpen: true, data: dataItem });
+                    } else if (type === 'topic') {
+                      setTopicModal({ isOpen: true, data: dataItem });
+                    } else if (type === 'task') {
+                      setTaskModal({ isOpen: true, data: dataItem });
+                    } else if (type === 'literature') {
+                      handleLiteratureClick(dataItem);
+                    }
                   }
                 }}
                 className="w-full mt-2 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-xs rounded-lg transition-colors flex items-center gap-2"
@@ -3664,19 +3730,15 @@ return (
             animation: 'flowingDash 1s linear infinite' // Add flowing animation
           }}
           defaultEdgeOptions={{
-            type: 'enhanced',
+            type: 'enhanced', // Use our enhanced edge with proper prop handling
             style: { 
               strokeWidth: 2.5, 
               stroke: '#64748b',
               opacity: 0.9,
               strokeLinecap: 'round',
               transition: 'none'
-            },
-            pathOptions: {
-              borderRadius: 5,
-              offset: 15,
-              curvature: 0.25
             }
+            // Remove pathOptions - this is not a standard React Flow prop
           }}
           className="bg-gradient-to-br from-blue-50 to-indigo-100"
         >
@@ -3765,17 +3827,39 @@ return (
         />
       )}
 
-      {openSubpage && (
-        <TabbedModal
-          type={openSubpage}
-          data={subpageData}
-          onClose={() => setOpenSubpage(null)}
-          setMindMapData={setMindMapData}
-          loadMindMapData={loadMindMapData}
-          onAutoSave={autoSaveMindMapData}
-          addToast={addToast}
-        />
-      )}
+      {/* Specialized Modals */}
+      <AnimatePresence mode="wait">
+        {caseModal.isOpen && (
+          <CaseModal 
+            key="case-modal"
+            isOpen={caseModal.isOpen} 
+            data={caseModal.data} 
+            onClose={() => setCaseModal({ isOpen: false, data: null })} 
+          />
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence mode="wait">
+        {topicModal.isOpen && (
+          <TopicModal 
+            key="topic-modal"
+            isOpen={topicModal.isOpen} 
+            data={topicModal.data} 
+            onClose={() => setTopicModal({ isOpen: false, data: null })} 
+          />
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence mode="wait">
+        {taskModal.isOpen && (
+          <TaskModal 
+            key="task-modal"
+            isOpen={taskModal.isOpen} 
+            data={taskModal.data} 
+            onClose={() => setTaskModal({ isOpen: false, data: null })} 
+          />
+        )}
+      </AnimatePresence>
 
       <EdgeLabelModal 
         isOpen={edgeModal.isOpen} 

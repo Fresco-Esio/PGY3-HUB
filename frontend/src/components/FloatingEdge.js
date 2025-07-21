@@ -191,7 +191,7 @@ const FloatingEdge = memo(({
       }}
       markerEnd={markerEnd}
       markerStart={markerStart}
-      {...props}
+      // Remove {...props} to prevent React Flow-specific props from reaching DOM
     />
   );
 }, (prevProps, nextProps) => {
