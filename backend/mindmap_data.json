@@ -1,40 +1,40 @@
 {
   "topics": [
     {
-      "id": "1753041314272",
+      "id": "201",
+      "title": "Major Depressive Disorder",
+      "description": "2 week period of sad mood or anhedonia along with 5 of 8 other symptoms:",
+      "category": "Mood Disorders",
+      "color": "#3B82F6",
+      "position": {
+        "x": 617.6475126756462,
+        "y": 429.8662338541274
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-20T19:56:33.157000+00:00",
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
+    },
+    {
+      "id": "1753187174878",
       "title": "Untitled Topic",
       "description": "",
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 492.2483455650616,
-        "y": 170.60574754308843
+        "x": 720.2412491101903,
+        "y": 52.47320340031428
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
       "resources": [],
       "notes": null,
       "tags": null,
-      "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
-    },
-    {
-      "id": "201",
-      "title": "Diagnostic Criteria",
-      "description": "",
-      "category": "Assessment",
-      "color": "#3B82F6",
-      "position": {
-        "x": 28.75542147588618,
-        "y": 612.3629459468006
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "notes": null,
-      "tags": null,
-      "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "created_at": "2025-07-22T12:29:03.700000+00:00",
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     }
   ],
   "cases": [
@@ -62,11 +62,11 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 919.6326839734743,
-        "y": 125.95334036631886
+        "x": 797.2996440460173,
+        "y": 319.37396376746347
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "101",
@@ -95,41 +95,11 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 1329.2530058802693,
-        "y": 295.03485739500286
+        "x": 1413.9246482274484,
+        "y": 444.86110484461614
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
-    },
-    {
-      "id": "102",
-      "case_id": "CASE-1753041393157-2",
-      "encounter_date": "2025-07-20T19:56:33.157000+00:00",
-      "primary_diagnosis": "Bipolar I Disorder",
-      "secondary_diagnoses": [],
-      "age": 0,
-      "gender": null,
-      "chief_complaint": "Mood swings and impulsivity",
-      "initial_presentation": "",
-      "current_presentation": "",
-      "medication_history": "",
-      "therapy_progress": "",
-      "defense_patterns": "",
-      "clinical_reflection": "",
-      "history_present_illness": null,
-      "medical_history": null,
-      "medications": [],
-      "mental_status_exam": null,
-      "assessment_plan": null,
-      "notes": null,
-      "status": "active",
-      "linked_topics": [],
-      "position": {
-        "x": 490.6675929033284,
-        "y": 570.6025667571669
-      },
-      "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "104",
@@ -155,14 +125,32 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 1045.5280048885654,
-        "y": 742.1900386699219
+        "x": 401.2659351821974,
+        "y": 393.79812095482845
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     }
   ],
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "1753138715157",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": 731.1838905224465,
+        "y": 551.04764160054
+      },
+      "created_at": "2025-07-21T22:58:40.048000+00:00",
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
+    }
+  ],
   "literature": [
     {
       "id": "1753037727809",
@@ -176,11 +164,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 975.419663712083,
-        "y": 481.58751804109505
+        "x": 1116.6141725522612,
+        "y": 669.3518246699416
       },
       "created_at": "2025-07-20T18:55:27.854000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "1",
@@ -194,11 +182,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 1431.186343976164,
-        "y": 482.75473701158313
+        "x": 1458.7698779562606,
+        "y": 657.6234215092713
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "2",
@@ -212,11 +200,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 500.9882102579782,
-        "y": 730.2693432843448
+        "x": 516.0361454653349,
+        "y": 633.5158043793127
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "3",
@@ -230,11 +218,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 660.675124922018,
-        "y": 740.2738065415633
+        "x": 788.1499110898383,
+        "y": 945.1547516528938
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "4",
@@ -248,11 +236,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 993.742522692334,
-        "y": 1065.210446429143
+        "x": 1194.2382193991139,
+        "y": 1058.6152145890287
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "5",
@@ -266,11 +254,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 1239.10424193799,
-        "y": 833.6171435892031
+        "x": 865.5032044972744,
+        "y": 464.10903168948863
       },
       "created_at": "2025-07-20T19:56:33.157000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "1753041422620",
@@ -284,11 +272,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 409.9844108074606,
-        "y": 1108.0164555589126
+        "x": 454.49355729731445,
+        "y": 1175.6281899614285
       },
       "created_at": "2025-07-20T19:57:07.916000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     },
     {
       "id": "1753041468791",
@@ -302,11 +290,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 790.4538543536149,
-        "y": 1231.4791554785147
+        "x": 871.2982755663295,
+        "y": 1339.5798246296447
       },
       "created_at": "2025-07-20T19:57:48.964000+00:00",
-      "updated_at": "2025-07-21T22:24:31.923000+00:00"
+      "updated_at": "2025-07-22T12:43:54.092000+00:00"
     }
   ],
   "connections": [
@@ -317,22 +305,34 @@
       "label": "Treatment approach"
     },
     {
-      "id": "conn-2",
+      "id": "conn-1753146470627",
       "source": "literature-2",
       "target": "topic-201",
-      "label": "Reference guide"
+      "label": ""
     },
     {
-      "id": "conn-3",
-      "source": "literature-3",
-      "target": "case-102",
-      "label": "Medication guidance"
+      "id": "conn-1753146491599",
+      "source": "topic-201",
+      "target": "case-1753041330552",
+      "label": ""
     },
     {
-      "id": "conn-5",
+      "id": "conn-1753146704240",
       "source": "literature-5",
+      "target": "topic-201",
+      "label": ""
+    },
+    {
+      "id": "conn-1753146796212",
+      "source": "topic-201",
       "target": "case-104",
-      "label": "Treatment protocol"
+      "label": ""
+    },
+    {
+      "id": "conn-1753146813500",
+      "source": "task-1753138715157",
+      "target": "case-1753041330552",
+      "label": ""
     }
   ]
 }

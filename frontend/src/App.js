@@ -59,7 +59,10 @@ import {
   User,
   Clipboard,
   StickyNote,
-  Paperclip
+  Paperclip,
+  ChevronDown,
+  ChevronUp,
+  ArrowDown
 } from 'lucide-react';
 
 // Lazy load components for better initial load time
@@ -1793,10 +1796,13 @@ const DashboardComponent = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [focusedCategory, setFocusedCategory] = useState(null);
   const [showNodeSelector, setShowNodeSelector] = useState(false);
-  // Specialized modal state for each node type
+  // Specialized modal state for each node type with stable data references
   const [caseModal, setCaseModal] = useState({ isOpen: false, data: null });
   const [topicModal, setTopicModal] = useState({ isOpen: false, data: null });
   const [taskModal, setTaskModal] = useState({ isOpen: false, data: null });
+  const caseModalStableData = useRef(null);
+  const topicModalStableData = useRef(null);
+  const taskModalStableData = useRef(null);
   const [isReactFlowReady, setIsReactFlowReady] = useState(false);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
   const [isExportingCSV, setIsExportingCSV] = useState(false);
@@ -1811,6 +1817,12 @@ const DashboardComponent = () => {
   const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
+  const [modalAnimationStates, setModalAnimationStates] = useState({
+    case: false,
+    topic: false,
+    task: false,
+    literature: false
+  });
 
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
@@ -1823,10 +1835,18 @@ const DashboardComponent = () => {
   }, []);
 
   const autoSaveMindMapData = useCallback((data) => {
-    // If animations are running, defer the save operation
-    if (isAnimating) {
-      console.log('Deferring auto-save during animation');
-      setTimeout(() => autoSaveMindMapData(data), 1000); // Retry after animation
+    // Enhanced animation and modal state checking
+    const anyModalOpen = caseModal.isOpen || topicModal.isOpen || taskModal.isOpen || literatureModal.isOpen;
+    const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
+    const anyModalTransitioning = (caseModal.isOpen && caseModal.data?.isTabTransitioning) || 
+                                  (topicModal.isOpen && topicModal.data?.isTabTransitioning) ||
+                                  (taskModal.isOpen && taskModal.data?.isTabTransitioning);
+    
+    if (isAnimating || anyModalOpen || anyModalTransitioning || anyModalAnimating) {
+      console.log('Deferring auto-save during animation, modal interaction, or tab transition');
+      // Use a longer delay and exponential backoff for persistent animation states
+      const delay = anyModalTransitioning || anyModalAnimating ? 2000 : 1000;
+      setTimeout(() => autoSaveMindMapData(data), delay);
       return;
     }
 
@@ -1835,7 +1855,8 @@ const DashboardComponent = () => {
       setIsSaving(false);
       if (success) {
         setLastSaved(new Date());
-        addToast('Data auto-saved', 'saving', 2000);
+        // Reduce toast frequency during auto-save to prevent UI distractions
+        // addToast('Data auto-saved', 'saving', 1000);
       } else {
         addToast('Auto-save failed', 'error', 4000);
         console.error('Auto-save error:', error);
@@ -1845,20 +1866,60 @@ const DashboardComponent = () => {
     localStorageUtils.save(data, onSaveStart, onSaveComplete, isAnimating);
     // Use requestIdleCallback for backend saves to avoid blocking animations
     if (window.requestIdleCallback) {
-      window.requestIdleCallback(() => saveToBackend(data));
+      window.requestIdleCallback(() => {
+        // Double-check animation state before backend save
+        const stillAnimating = isAnimating || Object.values(modalAnimationStates).some(state => state);
+        if (!stillAnimating) {
+          saveToBackend(data);
+        }
+      }, { timeout: 5000 });
     } else {
-      setTimeout(() => saveToBackend(data), 16); // Fallback: next frame
+      setTimeout(() => {
+        const stillAnimating = isAnimating || Object.values(modalAnimationStates).some(state => state);
+        if (!stillAnimating) {
+          saveToBackend(data);
+        }
+      }, 100); // Longer delay fallback
     }
-  }, [addToast, isAnimating]);
+  }, [addToast, isAnimating, modalAnimationStates, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
 
   // Separate function for position-only updates (more frequent, less critical)
   const autoSavePositionData = useCallback((data) => {
-    // Skip position saves during animations
-    if (isAnimating) return;
+    // Enhanced checks for animation states
+    const anyModalOpen = caseModal.isOpen || topicModal.isOpen || taskModal.isOpen || literatureModal.isOpen;
+    const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
+    if (isAnimating || anyModalOpen || anyModalAnimating) return;
     
     // Only save to localStorage for position updates, skip backend
     localStorageUtils.save(data, null, null, isAnimating);
-  }, [isAnimating]);
+  }, [isAnimating, modalAnimationStates, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
+
+  // Stable data effects to prevent modal re-renders during auto-save
+  useEffect(() => {
+    if (caseModal.isOpen && caseModal.data) {
+      // Store stable reference when modal opens
+      caseModalStableData.current = { ...caseModal.data };
+    } else if (!caseModal.isOpen) {
+      // Clear reference when modal closes
+      caseModalStableData.current = null;
+    }
+  }, [caseModal.isOpen, caseModal.data?.id]);
+
+  useEffect(() => {
+    if (topicModal.isOpen && topicModal.data) {
+      topicModalStableData.current = { ...topicModal.data };
+    } else if (!topicModal.isOpen) {
+      topicModalStableData.current = null;
+    }
+  }, [topicModal.isOpen, topicModal.data?.id]);
+
+  useEffect(() => {
+    if (taskModal.isOpen && taskModal.data) {
+      taskModalStableData.current = { ...taskModal.data };
+    } else if (!taskModal.isOpen) {
+      taskModalStableData.current = null;
+    }
+  }, [taskModal.isOpen, taskModal.data?.id]);
 
 const handleDeleteNode = useCallback((fullNodeId) => {
   // fullNodeId is always in the format `${nodeType}-${id}`
@@ -2159,7 +2220,7 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (type === 'literature') {
       const dataItem = mindMapData.literature.find(item => String(item.id) === id);
       if (dataItem) {
-        handleLiteratureClick(dataItem);
+        setLiteratureModal({ isOpen: true, data: dataItem });
       }
       return;
     }
@@ -2167,7 +2228,12 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (type === 'case') {
       const dataItem = mindMapData.cases.find(item => String(item.id) === id);
       if (dataItem) {
+        setModalAnimationStates(prev => ({ ...prev, case: true }));
         setCaseModal({ isOpen: true, data: dataItem });
+        // Clear animation state after modal animation completes
+        setTimeout(() => {
+          setModalAnimationStates(prev => ({ ...prev, case: false }));
+        }, 800);
       }
       return;
     }
@@ -2175,7 +2241,12 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (type === 'topic') {
       const dataItem = mindMapData.topics.find(item => String(item.id) === id);
       if (dataItem) {
+        setModalAnimationStates(prev => ({ ...prev, topic: true }));
         setTopicModal({ isOpen: true, data: dataItem });
+        // Clear animation state after modal animation completes
+        setTimeout(() => {
+          setModalAnimationStates(prev => ({ ...prev, topic: false }));
+        }, 800);
       }
       return;
     }
@@ -2183,11 +2254,16 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (type === 'task') {
       const dataItem = mindMapData.tasks.find(item => String(item.id) === id);
       if (dataItem) {
+        setModalAnimationStates(prev => ({ ...prev, task: true }));
         setTaskModal({ isOpen: true, data: dataItem });
+        // Clear animation state after modal animation completes
+        setTimeout(() => {
+          setModalAnimationStates(prev => ({ ...prev, task: false }));
+        }, 800);
       }
       return;
     }
-  }, [mindMapData, handleLiteratureClick, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
+  }, [mindMapData, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
 
   const onEdgeDoubleClick = useCallback((event, edge) => {
     // Double-click to delete edge immediately
@@ -2647,6 +2723,98 @@ const handleLiteratureClick = useCallback((literatureData) => {
     return <OptimizedLoadingScreen message={loadingMessage} progress={loadingProgress} />;
   }
 
+  // Sophisticated Animation Variants (matching Literature modal quality)
+  const modalVariants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.3,
+      y: 50,
+      rotate: -5,
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      rotate: 0,
+      transition: {
+        type: "spring",
+        damping: 25,
+        stiffness: 300,
+        duration: 0.6,
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.7,
+      y: 30,
+      rotate: -3,
+      transition: {
+        type: "easeInOut",
+        duration: 0.4,
+      }
+    }
+  };
+
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    exit: { 
+      opacity: 0,
+      transition: { duration: 0.4 }
+    }
+  };
+
+  const contentVariants = {
+    hidden: {
+      opacity: 0,
+      y: 20,
+      scale: 0.95,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "easeOut",
+        duration: 0.3,
+        delay: 0.1,
+      }
+    },
+    exit: {
+      opacity: 0,
+      y: -10,
+      scale: 1.02,
+      transition: {
+        type: "easeIn",
+        duration: 0.2,
+      }
+    }
+  };
+
+  const buttonVariants = {
+    inactive: {
+      scale: 1,
+    },
+    active: {
+      scale: 1.05,
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 300,
+      }
+    },
+    hover: {
+      scale: 1.03,
+      transition: {
+        type: "easeOut",
+        duration: 0.2,
+      }
+    }
+  };
+
   // Specialized Modal Components with Enhanced Animations and Full Editing Capabilities
   const CaseModal = React.memo(({ isOpen, data, onClose }) => {
     const [isVisible, setIsVisible] = useState(false);
@@ -2655,6 +2823,10 @@ const handleLiteratureClick = useCallback((literatureData) => {
     const [editData, setEditData] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [hasInitialized, setHasInitialized] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
+    const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+    const [expandedTimelineEntry, setExpandedTimelineEntry] = useState(null);
+    const timelineScrollRef = useRef(null);
 
     useEffect(() => {
       if (isOpen && data && !hasInitialized) {
@@ -2671,23 +2843,88 @@ const handleLiteratureClick = useCallback((literatureData) => {
 
     // Separate effect for data updates when modal is already open
     useEffect(() => {
-      if (isOpen && data && hasInitialized) {
+      // Enhanced animation state checking
+      const isModalAnimating = modalAnimationStates?.case || isTabTransitioning;
+      if (isOpen && data && hasInitialized && !isEditing && !isLoading && !isTabTransitioning && !isModalAnimating) {
         setEditData({ ...data });
       }
-    }, [data?.id, isOpen, hasInitialized]);
+    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, isTabTransitioning, modalAnimationStates?.case]);
+
+    // Mock timeline data - in real app this would come from data
+    const timelineEntries = useMemo(() => [
+      {
+        id: 1,
+        date: '2024-01-15',
+        time: '09:30 AM',
+        type: 'assessment',
+        title: 'Initial Assessment',
+        summary: 'Patient presented with symptoms of anxiety and depression.',
+        details: 'Comprehensive psychiatric evaluation completed. Patient reports increased anxiety over the past 3 months, difficulty sleeping, and decreased appetite. MSE reveals anxious mood, intact cognition, no psychotic features. PHQ-9 score: 14 (moderate depression). GAD-7 score: 12 (moderate anxiety).',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 2,
+        date: '2024-01-22',
+        time: '02:15 PM',
+        type: 'medication',
+        title: 'Medication Adjustment',
+        summary: 'Started on Sertraline 50mg daily.',
+        details: 'After discussion of treatment options, patient agreed to trial of SSRI. Started Sertraline 50mg daily. Reviewed potential side effects including initial activation, GI upset. Plan to follow up in 2 weeks. Provided crisis resources and encouraged to call if any concerns.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 3,
+        date: '2024-02-05',
+        time: '11:00 AM',
+        type: 'followup',
+        title: 'Follow-up Visit',
+        summary: 'Patient reports mild improvement in mood.',
+        details: 'Patient tolerated medication well with minimal side effects. Reports improved energy and slightly better sleep. Still experiencing some anxiety symptoms. PHQ-9 score decreased to 10. Continue current medication, discussed therapy referral.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 4,
+        date: '2024-02-19',
+        time: '03:45 PM',
+        type: 'therapy',
+        title: 'Therapy Session',
+        summary: 'First CBT session completed.',
+        details: 'Initial therapy session with focus on psychoeducation about anxiety and depression. Introduced basic CBT concepts and breathing exercises. Patient engaged well and expressed motivation for therapy. Homework assigned: daily mood tracking and breathing practice.',
+        author: 'Sarah Johnson, LCSW',
+        isNew: true
+      }
+    ], []);
+
+    const scrollToLatest = useCallback(() => {
+      if (timelineScrollRef.current) {
+        timelineScrollRef.current.scrollTo({
+          top: timelineScrollRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, []);
+
+    const toggleTimelineEntry = useCallback((entryId) => {
+      setExpandedTimelineEntry(prev => prev === entryId ? null : entryId);
+    }, []);
 
     const handleClose = useCallback(() => {
-      setIsClosing(true);
+      setIsVisible(false);
+      // Clear any pending save operations
+      clearTimeout(window.modalSaveTimeout);
+      // Call onClose after exit animation completes
       setTimeout(() => {
         onClose();
         setIsClosing(false);
-        setIsVisible(false);
         setIsEditing(false);
-      }, 300);
+      }, 400); // Match exit animation duration
     }, [onClose]);
 
     const handleSave = useCallback(async () => {
-      if (isLoading || !data?.id) return;
+      if (isLoading || !data?.id || isTabTransitioning) return;
 
       setIsLoading(true);
       try {
@@ -2699,9 +2936,11 @@ const handleLiteratureClick = useCallback((literatureData) => {
           );
 
           console.log('Updated case data:', newData);
-          // Trigger auto-save
+          // Trigger auto-save with debouncing
           if (autoSaveMindMapData) {
-            setTimeout(() => autoSaveMindMapData(newData), 0);
+            // Use debounced save to prevent rapid consecutive operations
+            clearTimeout(window.modalSaveTimeout);
+            window.modalSaveTimeout = setTimeout(() => autoSaveMindMapData(newData), 300);
           }
           return newData;
         });
@@ -2814,72 +3053,515 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (!isOpen) return null;
 
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
-        onClick={(e) => e.target === e.currentTarget && handleClose()}
-      >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Users size={24} />
-              <h2 className="text-xl font-semibold">Case Details</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              {!isEditing && !isLoading && (
-                <>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-                    title="Edit"
-                  >
-                    <Edit3 size={20} />
+      <AnimatePresence mode="wait" onExitComplete={() => setHasInitialized(false)}>
+        {isVisible && (
+          <motion.div
+            key={`case-modal-${data?.id || 'default'}`}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={backdropVariants}
+            className="fixed inset-0 bg-black flex items-center justify-center z-50"
+            onClick={(e) => e.target === e.currentTarget && handleClose()}
+          >
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={modalVariants}
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.div 
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={contentVariants}
+                className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Users size={24} />
+                  <h2 className="text-xl font-semibold">Case Details</h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!isEditing && !isLoading && (
+                    <>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                        title="Edit"
+                      >
+                        <Edit3 size={20} />
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
+                        title="Delete"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </>
+                  )}
+                  <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
+                    <X size={20} />
                   </button>
-                  <button
-                    onClick={handleDelete}
-                    className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
-                    title="Delete"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </>
-              )}
-              <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
-                <X size={20} />
-              </button>
-            </div>
+                </div>
+              </motion.div>
+
+          {/* Enhanced Tab Navigation with Dark Theme */}
+          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-600">
+            <nav className="flex flex-wrap gap-2 px-6 py-4">
+              {[
+                { key: 'overview', label: 'Overview', icon: Users },
+                { key: 'narrative', label: 'Narrative', icon: FileText },
+                { key: 'medications', label: 'Medications', icon: Clipboard },
+                { key: 'therapy', label: 'Therapy', icon: Heart },
+                { key: 'timeline', label: 'Timeline', icon: Clock },
+                { key: 'insights', label: 'Insights', icon: Sparkles },
+                { key: 'related', label: 'Related', icon: Target }
+              ].map(({ key, label, icon: Icon }) => (
+                <motion.button
+                  key={key}
+                  onClick={() => {
+                    if (activeTab !== key) {
+                      setIsTabTransitioning(true);
+                      setActiveTab(key);
+                      // Clear transition state after animation completes
+                      setTimeout(() => setIsTabTransitioning(false), 500);
+                    }
+                  }}
+                  className={`relative flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+                    activeTab === key
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-md'
+                  }`}
+                  whileHover={{ scale: activeTab === key ? 1 : 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={false}
+                  animate={{
+                    scale: activeTab === key ? 1.05 : 1,
+                    boxShadow: activeTab === key 
+                      ? '0 8px 25px rgba(59, 130, 246, 0.3), 0 0 20px rgba(99, 102, 241, 0.2)' 
+                      : '0 2px 8px rgba(0, 0, 0, 0.1)'
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <Icon size={16} className={activeTab === key ? 'drop-shadow-sm' : ''} />
+                  {label}
+                  {/* Timeline notification badge */}
+                  {key === 'timeline' && timelineEntries.some(entry => entry.isNew) && (
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+                      !
+                    </span>
+                  )}
+                  {/* Active tab glow effect */}
+                  {activeTab === key && (
+                    <motion.div
+                      layoutId="tabGlow"
+                      className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-500/20 rounded-xl blur-sm"
+                      initial={false}
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </motion.button>
+              ))}
+            </nav>
           </div>
           
-          <div className="p-6 overflow-y-auto max-h-[calc(85vh-140px)]">
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {renderField('Case ID', 'case_id')}
-                {renderField('Primary Diagnosis', 'primary_diagnosis')}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {renderField('Age', 'age', 'number')}
-                {renderField('Gender', 'gender', 'select', {
-                  choices: ['Male', 'Female', 'Non-binary', 'Other']
-                })}
-              </div>
-              {renderField('Chief Complaint', 'chiefComplaint', 'textarea', { rows: 3 })}
-              {renderField('Initial Presentation', 'initialPresentation', 'textarea', { rows: 4 })}
-              {renderField('Current Presentation', 'currentPresentation', 'textarea', { rows: 4 })}
-              {renderField('Medication History', 'medicationHistory', 'textarea', { rows: 3 })}
-              {renderField('Therapy Progress', 'therapyProgress', 'textarea', { rows: 3 })}
-              {renderField('Defense Patterns', 'defensePatterns', 'textarea', { rows: 3 })}
-              {renderField('Clinical Reflection', 'clinicalReflection', 'textarea', { rows: 4 })}
-            </div>
-          </div>
+          {/* Enhanced Tab Content with Cinematic Animations */}
+          <motion.div 
+            className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100"
+            layout="position"
+            layoutRoot
+            transition={{ 
+              layout: { duration: 0.4, ease: "easeInOut" },
+              height: { duration: 0.4, ease: "easeInOut" }
+            }}
+          >
+            <AnimatePresence mode="wait" initial={false} onExitComplete={() => {
+              setIsTabTransitioning(false);
+            }}>
+              {/* Overview Tab */}
+              {activeTab === 'overview' && (
+                <motion.div
+                  key="overview"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  layout="position"
+                  layoutId="tabContent"
+                  className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                >
+                  <div className="space-y-6">
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Users size={20} className="text-blue-600" />
+                        Demographics & Basic Info
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {renderField('Case ID', 'case_id')}
+                        {renderField('Primary Diagnosis', 'primary_diagnosis')}
+                        {renderField('Age', 'age', 'number')}
+                        {renderField('Gender', 'gender', 'select', {
+                          choices: ['Male', 'Female', 'Non-binary', 'Other']
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <AlertCircle size={20} className="text-amber-600" />
+                        Initial Impressions
+                      </h3>
+                      <div className="space-y-4">
+                        {renderField('Chief Complaint', 'chiefComplaint', 'textarea', { rows: 3 })}
+                        {renderField('Initial Presentation', 'initialPresentation', 'textarea', { rows: 4 })}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Narrative Tab */}
+              {activeTab === 'narrative' && (
+                <motion.div
+                  key="narrative"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  layout="position"
+                  layoutId="tabContent"
+                  className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                >
+                  <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <FileText size={20} className="text-green-600" />
+                      Patient Story & Narrative
+                    </h3>
+                    <div className="space-y-6">
+                      {renderField('Current Presentation', 'currentPresentation', 'textarea', { rows: 8 })}
+                      <div className="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg">
+                        <p className="italic">Use this space to tell the patient's story in your own words. Include context, progression, and your narrative understanding of their journey.</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Medications Tab */}
+              {activeTab === 'medications' && (
+                <motion.div
+                  key="medications"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  layout="position"
+                  layoutId="tabContent"
+                  className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                >
+                  <div className="space-y-6">
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Clipboard size={20} className="text-blue-600" />
+                        Medication History
+                      </h3>
+                      {renderField('Medication History', 'medicationHistory', 'textarea', { rows: 6 })}
+                    </div>
+                    
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Target size={20} className="text-green-600" />
+                        Treatment Response & Notes
+                      </h3>
+                      <div className="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg mb-4">
+                        <p className="italic">Document medication effectiveness, side effects, and treatment responses</p>
+                      </div>
+                      <textarea
+                        placeholder="Document medication responses, side effects, dosage changes, etc..."
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        rows="4"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Therapy Tab */}
+              {activeTab === 'therapy' && (
+                <motion.div
+                  key="therapy"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  layout="position"
+                  layoutId="tabContent"
+                  className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                >
+                  <div className="space-y-6">
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Heart size={20} className="text-pink-600" />
+                        Therapy Progress
+                      </h3>
+                      {renderField('Therapy Progress', 'therapyProgress', 'textarea', { rows: 5 })}
+                    </div>
+                    
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <StickyNote size={20} className="text-yellow-600" />
+                        Defense Patterns
+                      </h3>
+                      {renderField('Defense Patterns', 'defensePatterns', 'textarea', { rows: 4 })}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Timeline Tab - keeping existing timeline implementation */}
+              {activeTab === 'timeline' && (
+                <motion.div
+                  key="timeline"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  layout="position"
+                  layoutId="tabContent"
+                  className="p-6 h-[calc(85vh-200px)]"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Case Timeline</h3>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={scrollToLatest}
+                      className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      <ArrowDown size={16} />
+                      Scroll to Latest
+                    </motion.button>
+                  </div>
+                  
+                  {/* Timeline Container with Fade Overlays */}
+                  <div className="relative">
+                    {/* Top Fade Overlay */}
+                    <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+                    
+                    {/* Timeline Content */}
+                    <div
+                      ref={timelineScrollRef}
+                      className="max-h-96 overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800"
+                      style={{
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#475569 #1e293b'
+                      }}
+                    >
+                      {timelineEntries.map((entry, index) => (
+                        <motion.div
+                          key={entry.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ delay: index * 0.1, duration: 0.4 }}
+                          className={`relative ${entry.isNew ? 'animate-pulse' : ''}`}
+                        >
+                          {/* Timeline Line */}
+                          {index < timelineEntries.length - 1 && (
+                            <div className="absolute left-6 top-12 w-0.5 h-16 bg-gradient-to-b from-blue-400 to-purple-500" />
+                          )}
+                          
+                          {/* Timeline Entry */}
+                          <motion.div
+                            whileHover={{ 
+                              scale: 1.02,
+                              boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15)'
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => toggleTimelineEntry(entry.id)}
+                            className={`relative bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg p-4 cursor-pointer border-l-4 transition-all duration-300 ${
+                              entry.type === 'assessment' ? 'border-green-400' :
+                              entry.type === 'medication' ? 'border-blue-400' :
+                              entry.type === 'therapy' ? 'border-purple-400' :
+                              'border-orange-400'
+                            } ${entry.isNew ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
+                          >
+                            {/* Entry Header */}
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                {/* Type Icon */}
+                                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                  entry.type === 'assessment' ? 'bg-green-500' :
+                                  entry.type === 'medication' ? 'bg-blue-500' :
+                                  entry.type === 'therapy' ? 'bg-purple-500' :
+                                  'bg-orange-500'
+                                }`}>
+                                  {entry.type === 'assessment' && <Clipboard size={16} className="text-white" />}
+                                  {entry.type === 'medication' && <Heart size={16} className="text-white" />}
+                                  {entry.type === 'therapy' && <Brain size={16} className="text-white" />}
+                                  {entry.type === 'followup' && <Calendar size={16} className="text-white" />}
+                                </div>
+                                
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-white font-semibold text-sm">{entry.title}</h4>
+                                    {entry.isNew && (
+                                      <motion.span
+                                        animate={{ 
+                                          scale: [1, 1.2, 1],
+                                          opacity: [0.7, 1, 0.7]
+                                        }}
+                                        transition={{ 
+                                          duration: 2, 
+                                          repeat: Infinity,
+                                          ease: "easeInOut"
+                                        }}
+                                        className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded-full"
+                                      >
+                                        New
+                                      </motion.span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-4 text-xs text-slate-300 mb-2">
+                                    <span className="flex items-center gap-1">
+                                      <Calendar size={12} />
+                                      {entry.date}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Clock size={12} />
+                                      {entry.time}
+                                    </span>
+                                    <span>by {entry.author}</span>
+                                  </div>
+                                  <p className="text-slate-200 text-sm">{entry.summary}</p>
+                                </div>
+                              </div>
+                              
+                              <motion.div
+                                animate={{ rotate: expandedTimelineEntry === entry.id ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <ChevronDown size={20} className="text-slate-400" />
+                              </motion.div>
+                            </div>
+                            
+                            {/* Expanded Details */}
+                            <AnimatePresence>
+                              {expandedTimelineEntry === entry.id && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="mt-4 pt-4 border-t border-slate-600">
+                                    <h5 className="text-white font-medium text-sm mb-2">Detailed Notes:</h5>
+                                    <p className="text-slate-300 text-sm leading-relaxed">{entry.details}</p>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                        </motion.div>
+                      ))}
+                    </div>
+                    
+                    {/* Bottom Fade Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Insights Tab */}
+              {activeTab === 'insights' && (
+                <motion.div
+                  key="insights"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  layout="position"
+                  layoutId="tabContent"
+                  className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                >
+                  <div className="space-y-6">
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Sparkles size={20} className="text-indigo-600" />
+                        Clinical Interpretations
+                      </h3>
+                      {renderField('Clinical Reflection', 'clinicalReflection', 'textarea', { rows: 6 })}
+                    </div>
+                    
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Eye size={20} className="text-purple-600" />
+                        Key Learning Points
+                      </h3>
+                      <div className="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg mb-4">
+                        <p className="italic">Document patterns noticed, formulation summaries, and insights gained from this case</p>
+                      </div>
+                      <textarea
+                        placeholder="What patterns have you noticed? What insights have you gained from this case?"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        rows="5"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Related Tab */}
+              {activeTab === 'related' && (
+                <motion.div
+                  key="related"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  layout="position"
+                  layoutId="tabContent"
+                  className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                >
+                  <div className="space-y-6">
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Target size={20} className="text-blue-600" />
+                        Linked Topics & Cases
+                      </h3>
+                      <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg mb-4">
+                        <p className="italic">Topics and other cases from your mind map that connect to this patient</p>
+                      </div>
+                      <textarea
+                        placeholder="Link related topics, similar cases, or relevant mind map connections..."
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        rows="4"
+                      />
+                    </div>
+                    
+                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <BookOpen size={20} className="text-green-600" />
+                        Related Literature & Resources
+                      </h3>
+                      <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg mb-4">
+                        <p className="italic">Research papers, studies, or external resources relevant to this case</p>
+                      </div>
+                      <textarea
+                        placeholder="Document relevant literature, research papers, guidelines, or external resources..."
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        rows="4"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
           {isEditing && (
             <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -2910,7 +3592,18 @@ const handleLiteratureClick = useCallback((literatureData) => {
           )}
         </motion.div>
       </motion.div>
+      )}
+      </AnimatePresence>
     );
+  }, (prevProps, nextProps) => {
+    // Custom comparison to prevent re-renders during auto-save
+    // If modal is open, only re-render if isOpen changes or if data.id changes (new item)
+    if (prevProps.isOpen && nextProps.isOpen) {
+      return prevProps.isOpen === nextProps.isOpen && 
+             prevProps.data?.id === nextProps.data?.id;
+    }
+    // If modal state changes (open/close), always re-render
+    return prevProps.isOpen === nextProps.isOpen;
   });
 
   const TopicModal = React.memo(({ isOpen, data, onClose }) => {
@@ -2934,17 +3627,18 @@ const handleLiteratureClick = useCallback((literatureData) => {
 
     // Separate effect for data updates when modal is already open
     useEffect(() => {
-      if (isOpen && data && hasInitialized) {
+      if (isOpen && data && hasInitialized && !isEditing && !isLoading) {
         setEditData({ ...data });
       }
-    }, [data?.id, isOpen, hasInitialized]);
+    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading]);
 
     const handleClose = useCallback(() => {
+      setIsVisible(false);
+      // Call onClose after exit animation completes
       setTimeout(() => {
         onClose();
-        setIsVisible(false);
         setIsEditing(false);
-      }, 300);
+      }, 400); // Match exit animation duration
     }, [onClose]);
 
     const handleSave = useCallback(async () => {
@@ -3087,45 +3781,55 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (!isOpen) return null;
 
     return (
-      <motion.div
-        key="topic-modal" // Add stable key
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }} // Shorter, more stable animation
-        className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
-        onClick={(e) => e.target === e.currentTarget && handleClose()}
-      >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ type: "spring", stiffness: 400, damping: 35, duration: 0.3 }} // More controlled spring
-          className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Brain size={24} />
-              <h2 className="text-xl font-semibold">Topic Details</h2>
-            </div>
-            <div className="flex items-center gap-2">
+      <AnimatePresence mode="wait" onExitComplete={() => setHasInitialized(false)}>
+        {isVisible && (
+          <motion.div
+            key={`topic-modal-${data?.id || 'default'}`}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={backdropVariants}
+            className="fixed inset-0 bg-black flex items-center justify-center z-50"
+            onClick={(e) => e.target === e.currentTarget && handleClose()}
+          >
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={modalVariants}
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Brain size={24} />
+                  <h2 className="text-xl font-semibold">Topic Details</h2>
+                </div>
+                <div className="flex items-center gap-2">
               {!isEditing && !isLoading && (
                 <>
-                  <button
+                  <motion.button
+                    variants={buttonVariants}
+                    initial="inactive"
+                    whileHover="hover"
+                    whileTap="active"
                     onClick={() => setIsEditing(true)}
-                    className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                    className="text-white p-2 rounded-full transition-all"
                     title="Edit"
                   >
                     <Edit3 size={20} />
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    variants={buttonVariants}
+                    initial="inactive"
+                    whileHover="hover"
+                    whileTap="active"
                     onClick={handleDelete}
-                    className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
+                    className="text-white p-2 rounded-full transition-all"
                     title="Delete"
                   >
                     <Trash2 size={20} />
-                  </button>
+                  </motion.button>
                 </>
               )}
               <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
@@ -3185,7 +3889,18 @@ const handleLiteratureClick = useCallback((literatureData) => {
           )}
         </motion.div>
       </motion.div>
+      )}
+      </AnimatePresence>
     );
+  }, (prevProps, nextProps) => {
+    // Custom comparison to prevent re-renders during auto-save
+    // If modal is open, only re-render if isOpen changes or if data.id changes (new item)
+    if (prevProps.isOpen && nextProps.isOpen) {
+      return prevProps.isOpen === nextProps.isOpen && 
+             prevProps.data?.id === nextProps.data?.id;
+    }
+    // If modal state changes (open/close), always re-render
+    return prevProps.isOpen === nextProps.isOpen;
   });
 
   const TaskModal = React.memo(({ isOpen, data, onClose }) => {
@@ -3209,17 +3924,18 @@ const handleLiteratureClick = useCallback((literatureData) => {
 
     // Separate effect for data updates when modal is already open
     useEffect(() => {
-      if (isOpen && data && hasInitialized) {
+      if (isOpen && data && hasInitialized && !isEditing && !isLoading) {
         setEditData({ ...data });
       }
-    }, [data?.id, isOpen, hasInitialized]);
+    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading]);
 
     const handleClose = useCallback(() => {
+      setIsVisible(false);
+      // Call onClose after exit animation completes
       setTimeout(() => {
         onClose();
-        setIsVisible(false);
         setIsEditing(false);
-      }, 300);
+      }, 400); // Match exit animation duration
     }, [onClose]);
 
     const handleSave = useCallback(async () => {
@@ -3388,21 +4104,25 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (!isOpen) return null;
 
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
-        onClick={(e) => e.target === e.currentTarget && handleClose()}
-      >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <AnimatePresence mode="wait" onExitComplete={() => setHasInitialized(false)}>
+        {isVisible && (
+          <motion.div
+            key={`task-modal-${data?.id || 'default'}`}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={backdropVariants}
+            className="fixed inset-0 bg-black flex items-center justify-center z-50"
+            onClick={(e) => e.target === e.currentTarget && handleClose()}
+          >
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={modalVariants}
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
           <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CheckSquare size={24} />
@@ -3481,7 +4201,18 @@ const handleLiteratureClick = useCallback((literatureData) => {
           )}
         </motion.div>
       </motion.div>
+        )}
+      </AnimatePresence>
     );
+  }, (prevProps, nextProps) => {
+    // Custom comparison to prevent re-renders during auto-save
+    // If modal is open, only re-render if isOpen changes or if data.id changes (new item)
+    if (prevProps.isOpen && nextProps.isOpen) {
+      return prevProps.isOpen === nextProps.isOpen && 
+             prevProps.data?.id === nextProps.data?.id;
+    }
+    // If modal state changes (open/close), always re-render
+    return prevProps.isOpen === nextProps.isOpen;
   });
 
 return (
@@ -3833,7 +4564,7 @@ return (
           <CaseModal 
             key="case-modal"
             isOpen={caseModal.isOpen} 
-            data={caseModal.data} 
+            data={caseModalStableData.current || caseModal.data} 
             onClose={() => setCaseModal({ isOpen: false, data: null })} 
           />
         )}
@@ -3844,7 +4575,7 @@ return (
           <TopicModal 
             key="topic-modal"
             isOpen={topicModal.isOpen} 
-            data={topicModal.data} 
+            data={topicModalStableData.current || topicModal.data} 
             onClose={() => setTopicModal({ isOpen: false, data: null })} 
           />
         )}
@@ -3855,7 +4586,7 @@ return (
           <TaskModal 
             key="task-modal"
             isOpen={taskModal.isOpen} 
-            data={taskModal.data} 
+            data={taskModalStableData.current || taskModal.data} 
             onClose={() => setTaskModal({ isOpen: false, data: null })} 
           />
         )}
@@ -3886,13 +4617,6 @@ return (
     </div>
   );
 };
-
-
-
-
-
-
-
 
 // Error Boundary for React Flow
 class ReactFlowErrorBoundary extends React.Component {
