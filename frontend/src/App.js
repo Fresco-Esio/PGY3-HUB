@@ -1844,9 +1844,16 @@ const DashboardComponent = () => {
     
     if (isAnimating || anyModalOpen || anyModalTransitioning || anyModalAnimating) {
       console.log('Deferring auto-save during animation, modal interaction, or tab transition');
-      // Use a longer delay and exponential backoff for persistent animation states
-      const delay = anyModalTransitioning || anyModalAnimating ? 2000 : 1000;
-      setTimeout(() => autoSaveMindMapData(data), delay);
+      
+      // Use a flag to prevent infinite recursion
+      if (!autoSaveMindMapData._deferring) {
+        autoSaveMindMapData._deferring = true;
+        const delay = anyModalTransitioning || anyModalAnimating ? 2000 : 1000;
+        setTimeout(() => {
+          autoSaveMindMapData._deferring = false;
+          autoSaveMindMapData(data);
+        }, delay);
+      }
       return;
     }
 
@@ -1888,7 +1895,17 @@ const DashboardComponent = () => {
     // Enhanced checks for animation states
     const anyModalOpen = caseModal.isOpen || topicModal.isOpen || taskModal.isOpen || literatureModal.isOpen;
     const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
-    if (isAnimating || anyModalOpen || anyModalAnimating) return;
+    if (isAnimating || anyModalOpen || anyModalAnimating) {
+      // Use flag to prevent infinite recursion for position saves too
+      if (!autoSavePositionData._deferring) {
+        autoSavePositionData._deferring = true;
+        setTimeout(() => {
+          autoSavePositionData._deferring = false;
+          autoSavePositionData(data);
+        }, 500); // Shorter delay for position updates
+      }
+      return;
+    }
     
     // Only save to localStorage for position updates, skip backend
     localStorageUtils.save(data, null, null, isAnimating);
@@ -1954,10 +1971,7 @@ const handleDeleteNode = useCallback((fullNodeId) => {
 
 // Handle literature node click to open modal
 const handleLiteratureClick = useCallback((literatureData) => {
-  setIsAnimating(true); // Set animation state
   setLiteratureModal({ isOpen: true, data: literatureData });
-  // Clear animation state after modal animation completes
-  setTimeout(() => setIsAnimating(false), 700); // 600ms modal animation + 100ms buffer
 }, []);
 
   const convertDataToReactFlow = useCallback(async (data) => {
@@ -2228,12 +2242,7 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (type === 'case') {
       const dataItem = mindMapData.cases.find(item => String(item.id) === id);
       if (dataItem) {
-        setModalAnimationStates(prev => ({ ...prev, case: true }));
         setCaseModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
-        setTimeout(() => {
-          setModalAnimationStates(prev => ({ ...prev, case: false }));
-        }, 800);
       }
       return;
     }
@@ -2241,12 +2250,7 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (type === 'topic') {
       const dataItem = mindMapData.topics.find(item => String(item.id) === id);
       if (dataItem) {
-        setModalAnimationStates(prev => ({ ...prev, topic: true }));
         setTopicModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
-        setTimeout(() => {
-          setModalAnimationStates(prev => ({ ...prev, topic: false }));
-        }, 800);
       }
       return;
     }
@@ -2254,12 +2258,7 @@ const handleLiteratureClick = useCallback((literatureData) => {
     if (type === 'task') {
       const dataItem = mindMapData.tasks.find(item => String(item.id) === id);
       if (dataItem) {
-        setModalAnimationStates(prev => ({ ...prev, task: true }));
         setTaskModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
-        setTimeout(() => {
-          setModalAnimationStates(prev => ({ ...prev, task: false }));
-        }, 800);
       }
       return;
     }
@@ -2815,8 +2814,205 @@ const handleLiteratureClick = useCallback((literatureData) => {
     }
   };
 
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* --- Left Sidebar --- */}
+      <div className="w-80 bg-gradient-to-b from-slate-800 to-slate-900 text-white p-6 shadow-2xl flex flex-col">
+        <div className="mb-8">
+          <div className="text-3xl font-bold tracking-wide text-white">PGY-3 HQ</div>
+          <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
+        </div>
+        
+        <Toolbar
+          focusedCategory={focusedCategory}
+          setFocusedCategory={setFocusedCategory}
+          showNodeSelector={showNodeSelector}
+          setShowNodeSelector={setShowNodeSelector}
+          isTemplateManagerOpen={isTemplateManagerOpen}
+          setIsTemplateManagerOpen={setIsTemplateManagerOpen}
+          onClearMap={handleClearMap}
+          onApplyForceLayout={applyForceLayout}
+          isExportingCSV={isExportingCSV}
+          exportProgress={exportProgress}
+          onExportCSV={() => {}}
+          onImportCSV={() => {}}
+        />
+      </div>
+      
+      {/* --- Main Content Area --- */}
+      <div className="flex-1 relative">
+        <ErrorBoundary>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={handleNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            onNodeDoubleClick={onNodeDoubleClick}
+            onEdgeDoubleClick={onEdgeDoubleClick}
+            onEdgeContextMenu={onEdgeContextMenu}
+            onEdgeMouseEnter={onEdgeMouseEnter}
+            onEdgeMouseLeave={onEdgeMouseLeave}
+            onNodeDragStop={handleNodeDragStop}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            connectionLineType={ConnectionLineType.SmoothStep}
+            defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+            minZoom={0.1}
+            maxZoom={2}
+            onInit={() => setIsReactFlowReady(true)}
+            fitView={false}
+            className="bg-gradient-to-br from-gray-50 to-blue-50"
+          >
+            <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e2e8f0" />
+            <Controls position="top-right" />
+            <MiniMap 
+              position="bottom-right" 
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid #e2e8f0'
+              }}
+            />
+          </ReactFlow>
+        </ErrorBoundary>
+        
+        {/* Toast notifications */}
+        <div className="fixed top-4 right-4 z-50 space-y-2">
+          {toasts.map(toast => (
+            <Toast key={toast.id} toast={toast} onRemove={removeToast} />
+          ))}
+        </div>
+      </div>
+
+      {/* Literature Modal */}
+      {literatureModal.isOpen && (
+        <LiteratureModal
+          isOpen={literatureModal.isOpen}
+          onClose={() => setLiteratureModal({ isOpen: false, data: null })}
+          onAnimationStart={() => {
+            setIsAnimating(true);
+            setModalAnimationStates(prev => ({ ...prev, literature: true }));
+          }}
+          onAnimationEnd={() => {
+            setIsAnimating(false);
+            setModalAnimationStates(prev => ({ ...prev, literature: false }));
+          }}
+          literatureData={literatureModal.data}
+          allNodes={nodes}
+          connections={mindMapData.connections || []}
+        />
+      )}
+      {showNodeSelector && (
+        <NodeSelector
+          isOpen={showNodeSelector}
+          onClose={() => setShowNodeSelector(false)}
+          onAddNode={(nodeData) => {
+            const newNodeId = `${nodeData.type}-${Date.now()}`;
+            const newNode = {
+              id: newNodeId,
+              type: nodeData.type,
+              position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+              data: { ...nodeData, id: Date.now() },
+            };
+            
+            setNodes(nodes => [...nodes, newNode]);
+            setMindMapData(prev => ({
+              ...prev,
+              [nodeData.type + 's']: [...prev[nodeData.type + 's'], { ...nodeData, id: Date.now() }]
+            }));
+            setShowNodeSelector(false);
+          }}
+          mindMapData={mindMapData}
+          setMindMapData={setMindMapData}
+          autoSaveMindMapData={autoSaveMindMapData}
+          addToast={addToast}
+        />
+      )}
+      {isTemplateManagerOpen && (
+        <TemplateManager
+          isOpen={isTemplateManagerOpen}
+          onClose={() => setIsTemplateManagerOpen(false)}
+          templates={templates}
+          setTemplates={setTemplates}
+        />
+      )}
+
+      {/* Specialized Modals */}
+      <AnimatePresence mode="wait">
+        {caseModal.isOpen && (
+          <CaseModal 
+            key="case-modal"
+            isOpen={caseModal.isOpen} 
+            data={caseModalStableData.current || caseModal.data} 
+            onClose={() => setCaseModal({ isOpen: false, data: null })}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, case: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, case: false }));
+            }}
+          />
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence mode="wait">
+        {topicModal.isOpen && (
+          <TopicModal 
+            key="topic-modal"
+            isOpen={topicModal.isOpen} 
+            data={topicModalStableData.current || topicModal.data} 
+            onClose={() => setTopicModal({ isOpen: false, data: null })}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, topic: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, topic: false }));
+            }}
+          />
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence mode="wait">
+        {taskModal.isOpen && (
+          <TaskModal 
+            key="task-modal"
+            isOpen={taskModal.isOpen} 
+            data={taskModalStableData.current || taskModal.data} 
+            onClose={() => setTaskModal({ isOpen: false, data: null })}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, task: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, task: false }));
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <EdgeLabelModal 
+        isOpen={edgeModal.isOpen} 
+        edge={edgeModal.edge} 
+        onClose={() => setEdgeModal({ isOpen: false, edge: null })} 
+        onSave={handleSaveEdgeLabel} 
+      />
+
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <OptimizedLoadingScreen message={loadingMessage} progress={loadingProgress} />
+        </div>
+      )}
+    </div>
+  );
+
   // Specialized Modal Components with Enhanced Animations and Full Editing Capabilities
-  const CaseModal = React.memo(({ isOpen, data, onClose }) => {
+  const CaseModal = React.memo(({ isOpen, data, onClose, onAnimationStart, onAnimationEnd }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -2825,30 +3021,37 @@ const handleLiteratureClick = useCallback((literatureData) => {
     const [hasInitialized, setHasInitialized] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
     const [expandedTimelineEntry, setExpandedTimelineEntry] = useState(null);
     const timelineScrollRef = useRef(null);
 
     useEffect(() => {
       if (isOpen && data && !hasInitialized) {
-        setIsVisible(true);
-        setEditData({ ...data });
-        setHasInitialized(true);
+        setIsAnimating(true);
+        if (onAnimationStart) onAnimationStart();
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+          setEditData({ ...data });
+          setHasInitialized(true);
+        });
       } else if (!isOpen && hasInitialized) {
         setIsVisible(false);
         setIsClosing(false);
         setIsEditing(false);
         setHasInitialized(false);
+        setIsAnimating(false);
       }
-    }, [isOpen, hasInitialized]); // Remove data dependency completely
+    }, [isOpen, hasInitialized, onAnimationStart]); // Remove data dependency completely
 
     // Separate effect for data updates when modal is already open
     useEffect(() => {
       // Enhanced animation state checking
-      const isModalAnimating = modalAnimationStates?.case || isTabTransitioning;
+      const isModalAnimating = modalAnimationStates?.case || isTabTransitioning || isAnimating;
       if (isOpen && data && hasInitialized && !isEditing && !isLoading && !isTabTransitioning && !isModalAnimating) {
         setEditData({ ...data });
       }
-    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, isTabTransitioning, modalAnimationStates?.case]);
+    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, isTabTransitioning, modalAnimationStates?.case, isAnimating]);
 
     // Mock timeline data - in real app this would come from data
     const timelineEntries = useMemo(() => [
@@ -2911,8 +3114,30 @@ const handleLiteratureClick = useCallback((literatureData) => {
       setExpandedTimelineEntry(prev => prev === entryId ? null : entryId);
     }, []);
 
+    // Enhanced tab switching with smooth animation like Literature modal
+    const handleTabSwitch = useCallback((newTab) => {
+      if (newTab === activeTab || isAnimating || isTabTransitioning) return;
+      
+      setIsAnimating(true);
+      setIsTabTransitioning(true);
+      if (onAnimationStart) onAnimationStart();
+      
+      // Brief pause for exit animation, then switch
+      setTimeout(() => {
+        setActiveTab(newTab);
+        // Animation completes after content loads
+        setTimeout(() => {
+          setIsAnimating(false);
+          setIsTabTransitioning(false);
+          if (onAnimationEnd) onAnimationEnd();
+        }, 350); // Total animation duration
+      }, 50);
+    }, [activeTab, isAnimating, isTabTransitioning, onAnimationStart, onAnimationEnd]);
+
     const handleClose = useCallback(() => {
+      if (onAnimationStart) onAnimationStart();
       setIsVisible(false);
+      setIsAnimating(true);
       // Clear any pending save operations
       clearTimeout(window.modalSaveTimeout);
       // Call onClose after exit animation completes
@@ -2920,8 +3145,10 @@ const handleLiteratureClick = useCallback((literatureData) => {
         onClose();
         setIsClosing(false);
         setIsEditing(false);
+        if (onAnimationEnd) onAnimationEnd();
+        setIsAnimating(false);
       }, 400); // Match exit animation duration
-    }, [onClose]);
+    }, [onClose, onAnimationStart, onAnimationEnd]);
 
     const handleSave = useCallback(async () => {
       if (isLoading || !data?.id || isTabTransitioning) return;
@@ -3063,6 +3290,14 @@ const handleLiteratureClick = useCallback((literatureData) => {
             variants={backdropVariants}
             className="fixed inset-0 bg-black flex items-center justify-center z-50"
             onClick={(e) => e.target === e.currentTarget && handleClose()}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              if (onAnimationStart) onAnimationStart();
+            }}
+            onAnimationComplete={() => {
+              setIsAnimating(false);
+              if (onAnimationEnd) onAnimationEnd();
+            }}
           >
             <motion.div
               initial="hidden"
@@ -3071,6 +3306,14 @@ const handleLiteratureClick = useCallback((literatureData) => {
               variants={modalVariants}
               className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
+              onAnimationStart={() => {
+                setIsAnimating(true);
+                if (onAnimationStart) onAnimationStart();
+              }}
+              onAnimationComplete={() => {
+                setIsAnimating(false);
+                if (onAnimationEnd) onAnimationEnd();
+              }}
             >
               <motion.div 
                 initial="hidden"
@@ -3122,14 +3365,7 @@ const handleLiteratureClick = useCallback((literatureData) => {
               ].map(({ key, label, icon: Icon }) => (
                 <motion.button
                   key={key}
-                  onClick={() => {
-                    if (activeTab !== key) {
-                      setIsTabTransitioning(true);
-                      setActiveTab(key);
-                      // Clear transition state after animation completes
-                      setTimeout(() => setIsTabTransitioning(false), 500);
-                    }
-                  }}
+                  onClick={() => handleTabSwitch(key)}
                   className={`relative flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
                     activeTab === key
                       ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
@@ -3606,40 +3842,52 @@ const handleLiteratureClick = useCallback((literatureData) => {
     return prevProps.isOpen === nextProps.isOpen;
   });
 
-  const TopicModal = React.memo(({ isOpen, data, onClose }) => {
+  const TopicModal = React.memo(({ isOpen, data, onClose, onAnimationStart, onAnimationEnd }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [hasInitialized, setHasInitialized] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
 
     useEffect(() => {
       if (isOpen && data && !hasInitialized) {
-        setIsVisible(true);
-        setEditData({ ...data });
-        setHasInitialized(true);
+        setIsAnimating(true);
+        if (onAnimationStart) onAnimationStart();
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+          setEditData({ ...data });
+          setHasInitialized(true);
+        });
       } else if (!isOpen && hasInitialized) {
         setIsVisible(false);
         setIsEditing(false);
         setHasInitialized(false);
+        setIsAnimating(false);
       }
-    }, [isOpen, hasInitialized]); // Remove data dependency completely
+    }, [isOpen, hasInitialized, onAnimationStart]); // Remove data dependency completely
 
     // Separate effect for data updates when modal is already open
     useEffect(() => {
-      if (isOpen && data && hasInitialized && !isEditing && !isLoading) {
+      const isModalAnimating = modalAnimationStates?.topic || isAnimating;
+      if (isOpen && data && hasInitialized && !isEditing && !isLoading && !isModalAnimating) {
         setEditData({ ...data });
       }
-    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading]);
+    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, modalAnimationStates?.topic, isAnimating]);
 
     const handleClose = useCallback(() => {
+      if (onAnimationStart) onAnimationStart();
       setIsVisible(false);
+      setIsAnimating(true);
       // Call onClose after exit animation completes
       setTimeout(() => {
         onClose();
         setIsEditing(false);
+        if (onAnimationEnd) onAnimationEnd();
+        setIsAnimating(false);
       }, 400); // Match exit animation duration
-    }, [onClose]);
+    }, [onClose, onAnimationStart, onAnimationEnd]);
 
     const handleSave = useCallback(async () => {
       if (isLoading || !data?.id) return;
@@ -3791,6 +4039,14 @@ const handleLiteratureClick = useCallback((literatureData) => {
             variants={backdropVariants}
             className="fixed inset-0 bg-black flex items-center justify-center z-50"
             onClick={(e) => e.target === e.currentTarget && handleClose()}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              if (onAnimationStart) onAnimationStart();
+            }}
+            onAnimationComplete={() => {
+              setIsAnimating(false);
+              if (onAnimationEnd) onAnimationEnd();
+            }}
           >
             <motion.div
               initial="hidden"
@@ -3799,6 +4055,14 @@ const handleLiteratureClick = useCallback((literatureData) => {
               variants={modalVariants}
               className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
+              onAnimationStart={() => {
+                setIsAnimating(true);
+                if (onAnimationStart) onAnimationStart();
+              }}
+              onAnimationComplete={() => {
+                setIsAnimating(false);
+                if (onAnimationEnd) onAnimationEnd();
+              }}
             >
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -3903,40 +4167,52 @@ const handleLiteratureClick = useCallback((literatureData) => {
     return prevProps.isOpen === nextProps.isOpen;
   });
 
-  const TaskModal = React.memo(({ isOpen, data, onClose }) => {
+  const TaskModal = React.memo(({ isOpen, data, onClose, onAnimationStart, onAnimationEnd }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [hasInitialized, setHasInitialized] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
 
     useEffect(() => {
       if (isOpen && data && !hasInitialized) {
-        setIsVisible(true);
-        setEditData({ ...data });
-        setHasInitialized(true);
+        setIsAnimating(true);
+        if (onAnimationStart) onAnimationStart();
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+          setEditData({ ...data });
+          setHasInitialized(true);
+        });
       } else if (!isOpen && hasInitialized) {
         setIsVisible(false);
         setIsEditing(false);
         setHasInitialized(false);
+        setIsAnimating(false);
       }
-    }, [isOpen, hasInitialized]); // Remove data dependency completely
+    }, [isOpen, hasInitialized, onAnimationStart]); // Remove data dependency completely
 
     // Separate effect for data updates when modal is already open
     useEffect(() => {
-      if (isOpen && data && hasInitialized && !isEditing && !isLoading) {
+      const isModalAnimating = modalAnimationStates?.task || isAnimating;
+      if (isOpen && data && hasInitialized && !isEditing && !isLoading && !isModalAnimating) {
         setEditData({ ...data });
       }
-    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading]);
+    }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, modalAnimationStates?.task, isAnimating]);
 
     const handleClose = useCallback(() => {
+      if (onAnimationStart) onAnimationStart();
       setIsVisible(false);
+      setIsAnimating(true);
       // Call onClose after exit animation completes
       setTimeout(() => {
         onClose();
         setIsEditing(false);
+        if (onAnimationEnd) onAnimationEnd();
+        setIsAnimating(false);
       }, 400); // Match exit animation duration
-    }, [onClose]);
+    }, [onClose, onAnimationStart, onAnimationEnd]);
 
     const handleSave = useCallback(async () => {
       if (isLoading || !data?.id) return;
@@ -4114,6 +4390,14 @@ const handleLiteratureClick = useCallback((literatureData) => {
             variants={backdropVariants}
             className="fixed inset-0 bg-black flex items-center justify-center z-50"
             onClick={(e) => e.target === e.currentTarget && handleClose()}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              if (onAnimationStart) onAnimationStart();
+            }}
+            onAnimationComplete={() => {
+              setIsAnimating(false);
+              if (onAnimationEnd) onAnimationEnd();
+            }}
           >
             <motion.div
               initial="hidden"
@@ -4122,6 +4406,14 @@ const handleLiteratureClick = useCallback((literatureData) => {
               variants={modalVariants}
               className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
+              onAnimationStart={() => {
+                setIsAnimating(true);
+                if (onAnimationStart) onAnimationStart();
+              }}
+              onAnimationComplete={() => {
+                setIsAnimating(false);
+                if (onAnimationEnd) onAnimationEnd();
+              }}
             >
           <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -4201,21 +4493,21 @@ const handleLiteratureClick = useCallback((literatureData) => {
           )}
         </motion.div>
       </motion.div>
-        )}
-      </AnimatePresence>
-    );
-  }, (prevProps, nextProps) => {
-    // Custom comparison to prevent re-renders during auto-save
-    // If modal is open, only re-render if isOpen changes or if data.id changes (new item)
-    if (prevProps.isOpen && nextProps.isOpen) {
-      return prevProps.isOpen === nextProps.isOpen && 
-             prevProps.data?.id === nextProps.data?.id;
-    }
-    // If modal state changes (open/close), always re-render
-    return prevProps.isOpen === nextProps.isOpen;
-  });
+    )}
+    </AnimatePresence>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent re-renders during auto-save
+  // If modal is open, only re-render if isOpen changes or if data.id changes (new item)
+  if (prevProps.isOpen && nextProps.isOpen) {
+    return prevProps.isOpen === nextProps.isOpen && 
+           prevProps.data?.id === nextProps.data?.id;
+  }
+  // If modal state changes (open/close), always re-render
+  return prevProps.isOpen === nextProps.isOpen;
+});
 
-return (
+  return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* --- Left Sidebar --- */}
       <div className="w-80 bg-gradient-to-b from-slate-800 to-slate-900 text-white p-6 shadow-2xl flex flex-col">
@@ -4495,13 +4787,16 @@ return (
         <LiteratureModal
           isOpen={literatureModal.isOpen}
           onClose={() => {
-            setIsAnimating(true); // Set animation state for closing
             setLiteratureModal({ isOpen: false, data: null });
-            // Clear animation state after modal close animation completes
-            setTimeout(() => setIsAnimating(false), 500); // 400ms close animation + 100ms buffer
           }}
-          onAnimationStart={() => setIsAnimating(true)}
-          onAnimationEnd={() => setIsAnimating(false)}
+          onAnimationStart={() => {
+            setIsAnimating(true);
+            setModalAnimationStates(prev => ({ ...prev, literature: true }));
+          }}
+          onAnimationEnd={() => {
+            setIsAnimating(false);
+            setModalAnimationStates(prev => ({ ...prev, literature: false }));
+          }}
           literatureData={literatureModal.data}
           allNodes={nodes}
           connections={mindMapData.connections || []}
@@ -4539,22 +4834,26 @@ return (
               position: { x: window.innerWidth / 3, y: window.innerHeight / 2 },
               data: { ...nodeData, onDelete: () => handleDeleteNode(id) }
             };
-
+            
+            // Update nodes and mind map data
+            setNodes(n => n.concat(newNode));
             setMindMapData(d => {
               const key = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
-              const dataToAdd = { ...newNode.data, position: newNode.position };
-              delete dataToAdd.onDelete;
-              const updatedData = {
-                ...d,
-                [key]: [...(d[key] || []), dataToAdd]
-              };
-              autoSaveMindMapData(updatedData);
-              return updatedData;
+              return { ...d, [key]: [...(d[key] || []), nodeData] };
             });
-
-            setNodes(n => n.concat(newNode));
           }}
+          mindMapData={mindMapData}
+          setMindMapData={setMindMapData}
+          autoSaveMindMapData={autoSaveMindMapData}
+          addToast={addToast}
+        />
+      )}
+      {isTemplateManagerOpen && (
+        <TemplateManager
+          isOpen={isTemplateManagerOpen}
+          onClose={() => setIsTemplateManagerOpen(false)}
           templates={templates}
+          setTemplates={setTemplates}
         />
       )}
 
@@ -4565,7 +4864,15 @@ return (
             key="case-modal"
             isOpen={caseModal.isOpen} 
             data={caseModalStableData.current || caseModal.data} 
-            onClose={() => setCaseModal({ isOpen: false, data: null })} 
+            onClose={() => setCaseModal({ isOpen: false, data: null })}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, case: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, case: false }));
+            }}
           />
         )}
       </AnimatePresence>
@@ -4576,7 +4883,15 @@ return (
             key="topic-modal"
             isOpen={topicModal.isOpen} 
             data={topicModalStableData.current || topicModal.data} 
-            onClose={() => setTopicModal({ isOpen: false, data: null })} 
+            onClose={() => setTopicModal({ isOpen: false, data: null })}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, topic: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, topic: false }));
+            }}
           />
         )}
       </AnimatePresence>
@@ -4587,7 +4902,15 @@ return (
             key="task-modal"
             isOpen={taskModal.isOpen} 
             data={taskModalStableData.current || taskModal.data} 
-            onClose={() => setTaskModal({ isOpen: false, data: null })} 
+            onClose={() => setTaskModal({ isOpen: false, data: null })}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, task: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, task: false }));
+            }}
           />
         )}
       </AnimatePresence>
@@ -4600,20 +4923,10 @@ return (
       />
 
       {loading && (
-        <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-          <Loader2 size={48} className="animate-spin text-blue-600" />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <OptimizedLoadingScreen message={loadingMessage} progress={loadingProgress} />
         </div>
       )}
-      
-      {toasts.map(toast => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          duration={toast.duration}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
     </div>
   );
 };
