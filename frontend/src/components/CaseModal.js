@@ -308,7 +308,7 @@ const CaseModal = ({
 
   // Create a new blank timeline entry for inline editing
   const createNewTimelineEntry = useCallback(() => {
-    if (isCreatingEntry || editingEntryId) return; // Prevent multiple new entries
+    if (editingEntryId) return; // Prevent multiple entries being edited simultaneously
     
     const newEntry = {
       id: `new-${Date.now()}`, // Temporary ID for new entries
@@ -335,72 +335,50 @@ const CaseModal = ({
     setEditData(prev => ({ ...prev, timeline: updatedTimeline }));
     setEditingEntryId(newEntry.id);
     setEditingEntryData({ ...newEntry });
-    setIsCreatingEntry(true);
+    setExpandedTimelineEntry(newEntry.id);
     
-    // Scroll to show the full editing form after it expands
-    scrollToShowEditingEntry();
-  }, [editData?.timeline, isCreatingEntry, editingEntryId, scrollToShowEditingEntry]);
+    // Scroll to show the new entry after it's rendered
+    setTimeout(() => {
+      scrollToShowEntry(newEntry.id);
+    }, 200);
+  }, [editData?.timeline, editingEntryId, scrollToShowEntry]);
 
-  // Start editing an existing entry
-  const startEditingEntry = useCallback((entry) => {
-    if (editingEntryId === entry.id) return; // Already editing this entry
+  // Toggle entry expansion and start editing if needed
+  const toggleTimelineEntry = useCallback((entry) => {
+    const entryId = entry.id;
     
-    setEditingEntryId(entry.id);
-    setEditingEntryData({ ...entry });
-    setExpandedTimelineEntry(entry.id);
+    // If currently editing this entry, close it
+    if (editingEntryId === entryId) {
+      setEditingEntryId(null);
+      setEditingEntryData({});
+      setExpandedTimelineEntry(null);
+      return;
+    }
     
-    // For existing entries, ensure the full editing form is visible
-    setTimeout(() => {
-      if (timelineScrollRef.current) {
-        const container = timelineScrollRef.current;
-        const entryElement = container.querySelector(`[data-entry-id="${entry.id}"]`);
-        
-        if (entryElement) {
-          const containerRect = container.getBoundingClientRect();
-          const entryRect = entryElement.getBoundingClientRect();
-          
-          // Calculate if the expanded form would be cut off
-          const estimatedExpandedHeight = 300; // Approximate height of editing form
-          const entryTop = entryRect.top - containerRect.top;
-          const entryCurrentHeight = entryRect.height;
-          const entryBottomAfterExpansion = entryTop + entryCurrentHeight + estimatedExpandedHeight;
-          
-          // If the expanded form would extend beyond the container, scroll it into view
-          if (entryBottomAfterExpansion > container.clientHeight - 20) { // 20px safety margin
-            const scrollAmount = entryBottomAfterExpansion - container.clientHeight + 80; // Extra 80px padding
-            container.scrollTo({
-              top: container.scrollTop + scrollAmount,
-              behavior: 'smooth'
-            });
-          }
-        }
-      }
-    }, 100); // Initial scroll calculation
+    // If editing another entry, don't allow switching
+    if (editingEntryId && editingEntryId !== entryId) {
+      addToast('Please save or cancel the current entry first', 'warning');
+      return;
+    }
     
-    // Double-check after form fully expands
-    setTimeout(() => {
-      if (timelineScrollRef.current) {
-        const container = timelineScrollRef.current;
-        const entryElement = container.querySelector(`[data-entry-id="${entry.id}"]`);
-        
-        if (entryElement) {
-          const containerRect = container.getBoundingClientRect();
-          const entryRect = entryElement.getBoundingClientRect();
-          const entryBottom = entryRect.bottom;
-          const containerBottom = containerRect.bottom;
-          
-          // Final check - if still cut off, scroll more
-          if (entryBottom > containerBottom - 20) {
-            const additionalScroll = entryBottom - containerBottom + 60; // Additional padding
-            container.scrollTo({
-              top: container.scrollTop + additionalScroll,
-              behavior: 'smooth'
-            });
-          }
-        }
-      }
-    }, 400); // After animation completes
-  }, [editingEntryId]);
+    // Toggle expansion
+    const isCurrentlyExpanded = expandedTimelineEntry === entryId;
+    
+    if (isCurrentlyExpanded) {
+      // Collapse the entry
+      setExpandedTimelineEntry(null);
+    } else {
+      // Expand and start editing
+      setExpandedTimelineEntry(entryId);
+      setEditingEntryId(entryId);
+      setEditingEntryData({ ...entry });
+      
+      // Scroll to show the expanded entry
+      setTimeout(() => {
+        scrollToShowEntry(entryId);
+      }, 100);
+    }
+  }, [editingEntryId, expandedTimelineEntry, addToast, scrollToShowEntry]);
 
   // Save the currently editing entry
   const saveEditingEntry = useCallback(() => {
