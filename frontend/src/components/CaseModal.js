@@ -345,15 +345,6 @@ const CaseModal = ({
     }
   }, []);
 
-  const scrollToLatest = useCallback(() => {
-    if (timelineScrollRef.current) {
-      timelineScrollRef.current.scrollTo({
-        top: timelineScrollRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
-
   // Auto-save timeline changes with debounce
   const saveTimelineChange = useCallback((newTimeline) => {
     const timeoutId = setTimeout(() => {
