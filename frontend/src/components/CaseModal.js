@@ -211,6 +211,78 @@ const CaseModal = ({
         content: 'First CBT session completed.',
         details: 'Initial therapy session with focus on psychoeducation about anxiety and depression. Introduced basic CBT concepts and breathing exercises. Patient engaged well and expressed motivation for therapy. Homework assigned: daily mood tracking and breathing practice.',
         author: 'Sarah Johnson, LCSW',
+        isNew: false
+      },
+      {
+        id: 5,
+        timestamp: '2024-03-05T10:30:00.000Z',
+        date: '2024-03-05',
+        time: '10:30 AM',
+        type: 'followup',
+        title: 'Follow-up Visit',
+        content: 'Continued progress with therapy.',
+        details: 'Patient showing continued improvement. Engaging well with CBT techniques. Sleep patterns have normalized. PHQ-9 score now 7. Discussed potential reduction in session frequency.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 6,
+        timestamp: '2024-03-19T14:00:00.000Z',
+        date: '2024-03-19',
+        time: '02:00 PM',
+        type: 'therapy',
+        title: 'CBT Session',
+        content: 'Worked on cognitive restructuring.',
+        details: 'Focused session on identifying and challenging negative thought patterns. Patient demonstrated good understanding of CBT principles. Practiced thought records. Homework: daily thought monitoring.',
+        author: 'Sarah Johnson, LCSW',
+        isNew: false
+      },
+      {
+        id: 7,
+        timestamp: '2024-04-02T09:15:00.000Z',
+        date: '2024-04-02',
+        time: '09:15 AM',
+        type: 'assessment',
+        title: 'Progress Assessment',
+        content: 'Quarterly progress review.',
+        details: 'Comprehensive review of treatment progress. Patient reports significant improvement in mood and anxiety levels. PHQ-9 score: 4 (minimal symptoms). GAD-7 score: 3. Discussed maintenance plan.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 8,
+        timestamp: '2024-04-16T11:30:00.000Z',
+        date: '2024-04-16',
+        time: '11:30 AM',
+        type: 'medication',
+        title: 'Medication Review',
+        content: 'Medication adjustment discussion.',
+        details: 'Reviewed current medication effectiveness. Patient tolerating Sertraline well with no side effects. Discussed tapering plan for future. Continue current dose for now.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 9,
+        timestamp: '2024-05-01T13:45:00.000Z',
+        date: '2024-05-01',
+        time: '01:45 PM',
+        type: 'note',
+        title: 'Clinical Note',
+        content: 'Patient doing well, stable mood.',
+        details: 'Brief check-in. Patient reports continued stability. No new concerns. Maintaining progress with therapy techniques. Next appointment in 6 weeks.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 10,
+        timestamp: '2024-05-15T16:00:00.000Z',
+        date: '2024-05-15',
+        time: '04:00 PM',
+        type: 'therapy',
+        title: 'Therapy Session',
+        content: 'Relapse prevention planning.',
+        details: 'Focused on developing comprehensive relapse prevention plan. Identified triggers and coping strategies. Created crisis plan. Patient demonstrates excellent insight and motivation.',
+        author: 'Sarah Johnson, LCSW',
         isNew: true
       }
     ];
