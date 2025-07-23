@@ -2054,7 +2054,13 @@ useEffect(() => {
 
     // If we have data and need immediate layout, apply force layout to positions
     let layoutNodes;
-    if (allItems.length > 0 && applyLayoutImmediately) {
+    
+    // Check if nodes already have positions - if they do, don't override with force layout
+    const hasExistingPositions = allItems.some(item => 
+      item.position && typeof item.position.x === 'number' && typeof item.position.y === 'number'
+    );
+    
+    if (allItems.length > 0 && applyLayoutImmediately && !hasExistingPositions) {
       try {
         // Lazy load D3 force simulation for initial positioning
         const { 
