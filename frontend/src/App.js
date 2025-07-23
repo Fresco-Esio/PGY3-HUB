@@ -3127,7 +3127,8 @@ useEffect(() => {
             return {
               ...node,
               hidden: targetHidden,
-              style: targetStyle
+              style: targetStyle,
+              position: node.position // Explicitly preserve position to prevent race condition
             };
           }
           
