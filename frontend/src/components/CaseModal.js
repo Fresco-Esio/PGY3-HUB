@@ -288,66 +288,60 @@ const CaseModal = ({
     ];
   }, [editData?.timeline]);
 
-  // Enhanced scroll function with true simultaneous expansion and scroll
-  const scrollToShowEntry = useCallback((entryId, isExpanding = false) => {
+  // Enhanced scroll function to ensure expanded entries are fully visible
+  const scrollToShowEntry = useCallback((entryId) => {
     if (!timelineScrollRef.current || !entryId) return;
     
-    const container = timelineScrollRef.current;
-    const entryElement = container.querySelector(`[data-entry-id="${entryId}"]`);
-    
-    if (!entryElement || !container) return;
-    
-    // Calculate scroll position immediately, before any delays
-    const containerHeight = container.clientHeight;
-    const currentScrollTop = container.scrollTop;
-    const entryTop = entryElement.offsetTop;
-    const currentEntryHeight = entryElement.offsetHeight;
-    
-    let targetScrollTop;
-    
-    if (isExpanding) {
-      // For expanding entries, calculate based on where the expanded entry should be positioned
-      const estimatedExpandedHeight = 350; // Height of editing form + padding
-      const totalExpandedHeight = currentEntryHeight + estimatedExpandedHeight;
+    // Wait for DOM to update after expansion
+    setTimeout(() => {
+      const container = timelineScrollRef.current;
+      const entryElement = container.querySelector(`[data-entry-id="${entryId}"]`);
       
-      // Position the expanded entry optimally in the container
-      const idealTop = Math.max(20, (containerHeight - totalExpandedHeight) / 3); // Upper third
-      targetScrollTop = entryTop - idealTop;
+      if (!entryElement || !container) return;
       
-      // Ensure we don't scroll beyond bounds
-      const maxScroll = container.scrollHeight - containerHeight + estimatedExpandedHeight;
-      targetScrollTop = Math.max(0, Math.min(targetScrollTop, maxScroll));
+      const containerHeight = container.clientHeight;
+      const containerTop = container.scrollTop;
+      const containerBottom = containerTop + containerHeight;
       
-      // Execute scroll immediately with no delay
-      if (Math.abs(targetScrollTop - currentScrollTop) > 15) {
-        container.scrollTo({
-          top: targetScrollTop,
-          behavior: 'smooth'
-        });
-      }
-    } else {
-      // For non-expanding, use standard positioning
-      const entryBottom = entryTop + entryElement.offsetHeight;
+      // Get entry bounds
+      const entryTop = entryElement.offsetTop;
+      const entryHeight = entryElement.offsetHeight;
+      const entryBottom = entryTop + entryHeight;
+      
+      // Calculate if we need to scroll
       const padding = 40;
+      let newScrollTop = containerTop;
       
-      targetScrollTop = currentScrollTop;
-      
-      if (entryBottom > currentScrollTop + containerHeight - padding) {
-        targetScrollTop = entryBottom - containerHeight + padding;
+      // If entry extends below visible area, scroll down
+      if (entryBottom > containerBottom - padding) {
+        newScrollTop = entryBottom - containerHeight + padding;
       }
       
-      if (entryTop < currentScrollTop + padding) {
-        targetScrollTop = entryTop - padding;
+      // If entry is above visible area, scroll up
+      if (entryTop < containerTop + padding) {
+        newScrollTop = entryTop - padding;
       }
       
-      targetScrollTop = Math.max(0, Math.min(targetScrollTop, container.scrollHeight - containerHeight));
+      // Clamp scroll position
+      const maxScroll = container.scrollHeight - containerHeight;
+      newScrollTop = Math.max(0, Math.min(newScrollTop, maxScroll));
       
-      if (Math.abs(targetScrollTop - currentScrollTop) > 10) {
+      // Only scroll if needed
+      if (Math.abs(newScrollTop - containerTop) > 10) {
         container.scrollTo({
-          top: targetScrollTop,
+          top: newScrollTop,
           behavior: 'smooth'
         });
       }
+    }, 350); // Wait for expansion animation to complete
+  }, []);
+
+  const scrollToLatest = useCallback(() => {
+    if (timelineScrollRef.current) {
+      timelineScrollRef.current.scrollTo({
+        top: timelineScrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   }, []);
 
