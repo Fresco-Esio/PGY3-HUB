@@ -1906,9 +1906,15 @@ const DashboardComponent = () => {
     const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
     if (isAnimating || anyModalOpen || anyModalAnimating) return;
     
-    // Only save to localStorage for position updates, skip backend
+    // Save to both localStorage and backend for position updates
     localStorageUtils.save(data, null, null, isAnimating);
-  }, [isAnimating, modalAnimationStates, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
+    
+    // Also save to backend with a small delay to batch updates
+    clearTimeout(window.positionBackendSaveTimeout);
+    window.positionBackendSaveTimeout = setTimeout(() => {
+      saveToBackend(data);
+    }, 800); // 800ms delay to batch multiple position changes
+  }, [isAnimating, modalAnimationStates, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen, saveToBackend]);
 
   // Stable data effects to prevent modal re-renders during auto-save
   useEffect(() => {
