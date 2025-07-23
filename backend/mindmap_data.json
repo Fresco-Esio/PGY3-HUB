@@ -1,7 +1,350 @@
 {
-  "topics": [],
-  "cases": [],
-  "tasks": [],
-  "literature": [],
-  "connections": []
+  "topics": [
+    {
+      "id": "1753270126528",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 1103.9269609899652,
+        "y": 188.0926959138053
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T11:28:46.714000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753272294792",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 2748.856340250844,
+        "y": 1285.205978686982
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T12:05:03.904000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753272410622",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 672.9448251978149,
+        "y": 21.3336310531854
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T12:07:00.113000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753272597897",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": -77.16095421021822,
+        "y": -79.96350093895929
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T12:10:07.339000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753273703302",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 876.9653405208109,
+        "y": 1502.7330285087667
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T12:28:34.565000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753273825897",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 1088.9577304106874,
+        "y": 408.53319514231134
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T12:30:37.503000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753275097111",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 452.12952840767593,
+        "y": 533.0317840309475
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T12:51:50.978000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    }
+  ],
+  "cases": [
+    {
+      "id": "1753272299141",
+      "case_id": "CASE-1753272303904-0",
+      "encounter_date": "2025-07-23T12:05:03.904000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": -501.16960964869486,
+        "y": 2295.985645504608
+      },
+      "created_at": "2025-07-23T12:05:03.904000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753272602329",
+      "case_id": "CASE-1753272607339-2",
+      "encounter_date": "2025-07-23T12:10:07.339000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 92.04029344310653,
+        "y": 61.02083138571249
+      },
+      "created_at": "2025-07-23T12:10:07.339000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753275101354",
+      "case_id": "CASE-1753275110978-3",
+      "encounter_date": "2025-07-23T12:51:50.978000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": -256.3639661196108,
+        "y": 36.043140527656725
+      },
+      "created_at": "2025-07-23T12:51:50.978000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1753272303491",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": -1231.1917984412767,
+        "y": -1165.275768591902
+      },
+      "created_at": "2025-07-23T12:05:03.904000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753272419586",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": 305.11053379686655,
+        "y": 108.95053108368926
+      },
+      "created_at": "2025-07-23T12:07:00.113000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753272606796",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": 198.59539767506368,
+        "y": -129.11205382259305
+      },
+      "created_at": "2025-07-23T12:10:07.339000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    },
+    {
+      "id": "1753275105974",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": 61.95010156994235,
+        "y": 278.27450536290735
+      },
+      "created_at": "2025-07-23T12:51:50.978000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    }
+  ],
+  "literature": [
+    {
+      "id": "1753269525678",
+      "title": "Untitled Literature",
+      "authors": null,
+      "publication": null,
+      "year": 0,
+      "doi": null,
+      "abstract": null,
+      "notes": null,
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 916.6589049804553,
+        "y": -167.85394091508783
+      },
+      "created_at": "2025-07-23T11:18:49.016000+00:00",
+      "updated_at": "2025-07-23T14:21:22.558000+00:00"
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1753280429296",
+      "source": "case-1753272602329",
+      "target": "task-1753272606796",
+      "label": ""
+    },
+    {
+      "id": "conn-1753280435749",
+      "source": "case-1753272602329",
+      "target": "task-1753272419586",
+      "label": ""
+    },
+    {
+      "id": "conn-1753280441323",
+      "source": "case-1753272602329",
+      "target": "task-1753275105974",
+      "label": ""
+    },
+    {
+      "id": "conn-1753280454067",
+      "source": "topic-1753272597897",
+      "target": "case-1753272602329",
+      "label": ""
+    },
+    {
+      "id": "conn-1753280461991",
+      "source": "topic-1753272597897",
+      "target": "case-1753275101354",
+      "label": ""
+    },
+    {
+      "id": "conn-1753280475595",
+      "source": "literature-1753269525678",
+      "target": "topic-1753272410622",
+      "label": ""
+    }
+  ]
 }
