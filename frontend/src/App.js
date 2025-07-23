@@ -3033,53 +3033,6 @@ useEffect(() => {
     });
   }, [selectedNode, isReactFlowReady]);
 
-  // Initialize nodeVisibility when nodes are added or removed (not when className changes)
-  useEffect(() => {
-    // Skip if no nodes
-    if (nodes.length === 0) return;
-    
-    // Use a timeout to break potential render cycles
-    const updateVisibility = () => {
-      // Create stable references to avoid memory issues
-      const currentVisibility = {...visibilityRef.current};
-      const currentNodeIds = new Set(nodes.map(node => node.id));
-      const existingIds = new Set(Object.keys(currentVisibility));
-      
-      // Quick checks to avoid unnecessary work
-      const hasNewNodes = nodes.some(node => !existingIds.has(node.id));
-      const hasRemovedNodes = Array.from(existingIds).some(id => !currentNodeIds.has(id));
-      
-      // Only update if there are new nodes or removed nodes
-      if (hasNewNodes || hasRemovedNodes) {
-        console.log("Initializing node visibility - nodes added or removed");
-        
-        // Create new visibility state with defaults
-        const initialVisibility = {};
-        
-        // Process each node
-        for (let i = 0; i < nodes.length; i++) {
-          const nodeId = nodes[i].id;
-          
-          // Determine visibility status (preserve existing or default to true)
-          initialVisibility[nodeId] = existingIds.has(nodeId) 
-            ? currentVisibility[nodeId] 
-            : true;
-        }
-        
-        // Update ref first to avoid circular updates
-        visibilityRef.current = {...initialVisibility};
-        
-        // Use another timeout to break the update cycle
-        setTimeout(() => {
-          setNodeVisibility(initialVisibility);
-        }, 0);
-      }
-    };
-    
-    const timeoutId = setTimeout(updateVisibility, 0);
-    return () => clearTimeout(timeoutId);
-  }, [nodes.length]); // Only depend on node count changes, not individual node changes
-
   // Optionally: handle layout setup on first render if needed
 
   // Show optimized loading screen during initial load
