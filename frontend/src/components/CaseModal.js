@@ -228,6 +228,123 @@ const CaseModal = ({
     setExpandedTimelineEntry(prev => prev === entryId ? null : entryId);
   }, []);
 
+  // Auto-save timeline changes with debounce
+  const saveTimelineChange = useCallback((newTimeline) => {
+    const timeoutId = setTimeout(() => {
+      setMindMapData(prevData => {
+        const updatedCases = prevData.cases.map(caseItem =>
+          String(caseItem.id) === String(data?.id) 
+            ? { ...caseItem, timeline: newTimeline, updated_at: new Date().toISOString() }
+            : caseItem
+        );
+        const newData = { ...prevData, cases: updatedCases };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      // Update local edit data as well
+      setEditData(prev => ({ ...prev, timeline: newTimeline }));
+    }, 800); // 800ms debounce
+
+    return timeoutId;
+  }, [data?.id, setMindMapData, autoSaveMindMapData]);
+
+  const addTimelineEntry = useCallback(() => {
+    if (!newTimelineEntry.trim()) return;
+    
+    setIsAddingEntry(true);
+    
+    // Create timestamp - use custom if provided, otherwise current time
+    const timestamp = customTimestamp 
+      ? new Date(customTimestamp).toISOString()
+      : new Date().toISOString();
+    
+    const dateObj = new Date(timestamp);
+    const date = dateObj.toISOString().split('T')[0];
+    const time = dateObj.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true 
+    });
+
+    const newEntry = {
+      id: Date.now(), // Simple ID generation
+      timestamp,
+      date,
+      time,
+      type: newTimelineType,
+      title: getEntryTitle(newTimelineType),
+      content: newTimelineEntry.trim(),
+      details: newTimelineEntry.trim(), // Use same content for details initially
+      author: 'Current User', // TODO: Get from user context
+      isNew: true
+    };
+
+    // Add to existing timeline entries
+    const currentTimeline = editData?.timeline || [];
+    const updatedTimeline = [...currentTimeline, newEntry].sort((a, b) => 
+      new Date(a.timestamp) - new Date(b.timestamp)
+    );
+
+    // Save changes
+    saveTimelineChange(updatedTimeline);
+    
+    // Reset form
+    setNewTimelineEntry('');
+    setCustomTimestamp('');
+    setIsAddingEntry(false);
+    
+    // Auto-scroll to latest after a short delay to allow for animation
+    setTimeout(() => {
+      scrollToLatest();
+    }, 300);
+    
+    addToast('Timeline entry added successfully', 'success');
+  }, [
+    newTimelineEntry, 
+    customTimestamp, 
+    newTimelineType, 
+    editData?.timeline, 
+    saveTimelineChange, 
+    scrollToLatest, 
+    addToast
+  ]);
+
+  const getEntryTitle = useCallback((type) => {
+    const titles = {
+      assessment: 'Clinical Assessment',
+      medication: 'Medication Update',
+      therapy: 'Therapy Session',
+      followup: 'Follow-up Visit',
+      note: 'Clinical Note'
+    };
+    return titles[type] || 'Clinical Entry';
+  }, []);
+
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      addTimelineEntry();
+    }
+  }, [addTimelineEntry]);
+
+  // Clear isNew flag after a delay for entries that were just added
+  useEffect(() => {
+    const newEntries = timelineEntries.filter(entry => entry.isNew);
+    if (newEntries.length > 0) {
+      const timeout = setTimeout(() => {
+        const updatedTimeline = timelineEntries.map(entry => 
+          entry.isNew ? { ...entry, isNew: false } : entry
+        );
+        if (editData?.timeline) {
+          saveTimelineChange(updatedTimeline);
+        }
+      }, 5000); // Remove isNew flag after 5 seconds
+
+      return () => clearTimeout(timeout);
+    }
+  }, [timelineEntries, editData?.timeline, saveTimelineChange]);
+
   const handleClose = useCallback(() => {
     if (isAnimating || isClosing) return;
     
