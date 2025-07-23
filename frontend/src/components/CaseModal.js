@@ -1144,16 +1144,27 @@ const CaseModal = ({
                                             height: "auto", 
                                             opacity: 1,
                                             transition: { 
-                                              height: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
-                                              opacity: { duration: 0.2, delay: 0.1 }
+                                              height: { 
+                                                duration: 0.35, 
+                                                ease: [0.25, 0.46, 0.45, 0.94] 
+                                              },
+                                              opacity: { 
+                                                duration: 0.2, 
+                                                delay: 0.1 
+                                              }
                                             }
                                           }}
                                           exit={{ 
                                             height: 0, 
                                             opacity: 0,
                                             transition: { 
-                                              height: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] },
-                                              opacity: { duration: 0.15 }
+                                              height: { 
+                                                duration: 0.25, 
+                                                ease: [0.25, 0.46, 0.45, 0.94] 
+                                              },
+                                              opacity: { 
+                                                duration: 0.15 
+                                              }
                                             }
                                           }}
                                           style={{ 
