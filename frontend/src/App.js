@@ -2504,19 +2504,14 @@ useEffect(() => {
     }
     
     if (type === 'topic') {
-      console.log('🔍 Topic node clicked:', { nodeId: node.id, type, id });
       const dataItem = mindMapData.topics.find(item => String(item.id) === id);
-      console.log('📋 Topic data lookup result:', { dataItem });
       if (dataItem) {
-        console.log('✅ Opening TopicModal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, topic: true }));
         setTopicModal({ isOpen: true, data: dataItem });
         // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, topic: false }));
         }, 800);
-      } else {
-        console.log('❌ Topic data not found for id:', id);
       }
       return;
     }
