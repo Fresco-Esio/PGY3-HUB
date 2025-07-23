@@ -2853,16 +2853,6 @@ useEffect(() => {
     }
   }, []);
 
-  // Reset search and filters
-  const clearSearch = useCallback(() => {
-    console.log("Clearing search and resetting visibility");
-    
-    // First update the simpler states
-    setFocusedCategory(null);
-    
-    // Then reset node visibility (more complex operation)
-  }, [nodes]);
-
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
