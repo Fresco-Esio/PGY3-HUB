@@ -3752,15 +3752,20 @@ useEffect(() => {
             }
             
             // Calculate grid-based position for new nodes to avoid clustering
-            const existingNodeCount = nodes.length;
-            const gridSize = Math.ceil(Math.sqrt(existingNodeCount + 1));
-            const nodeSpacing = 250;
-            const offsetX = 350; // Offset from left sidebar
-            const offsetY = 200; // Offset from top
+            // Use current data count instead of nodes.length for more accurate positioning
+            const currentDataCount = (mindMapData.topics?.length || 0) + 
+                                   (mindMapData.cases?.length || 0) + 
+                                   (mindMapData.tasks?.length || 0) + 
+                                   (mindMapData.literature?.length || 0);
+            
+            const gridSize = Math.ceil(Math.sqrt(currentDataCount + 1));
+            const nodeSpacing = 280;
+            const offsetX = 400; // Offset from left sidebar
+            const offsetY = 150; // Offset from top
             
             const gridPosition = {
-              x: (existingNodeCount % gridSize) * nodeSpacing + offsetX,
-              y: Math.floor(existingNodeCount / gridSize) * nodeSpacing + offsetY
+              x: (currentDataCount % gridSize) * nodeSpacing + offsetX,
+              y: Math.floor(currentDataCount / gridSize) * nodeSpacing + offsetY
             };
             
             const newNode = {
