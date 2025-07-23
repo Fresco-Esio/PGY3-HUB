@@ -883,7 +883,7 @@ const CaseModal = ({
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={createNewTimelineEntry}
-                          disabled={isCreatingEntry || editingEntryId}
+                          disabled={editingEntryId}
                           className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
                         >
                           <Plus size={16} />
@@ -907,7 +907,7 @@ const CaseModal = ({
                       
                       <div
                         ref={timelineScrollRef}
-                        className="h-full overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 space-y-3 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800"
+                        className="h-full overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 space-y-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800"
                         style={{
                           scrollbarWidth: 'thin',
                           scrollbarColor: '#475569 #1e293b'
@@ -919,26 +919,26 @@ const CaseModal = ({
                         <AnimatePresence mode="popLayout">
                           {timelineEntries.map((entry, index) => {
                             const isEditing = editingEntryId === entry.id;
-                            const isExpanded = expandedTimelineEntry === entry.id || isEditing;
+                            const isExpanded = expandedTimelineEntry === entry.id;
                             
                             return (
                               <motion.div
                                 key={entry.id}
-                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                data-entry-id={entry.id}
+                                layout
+                                initial={{ opacity: 0, y: 20 }}
                                 animate={{ 
                                   opacity: 1, 
-                                  y: 0, 
-                                  scale: 1,
+                                  y: 0,
                                   transition: { 
-                                    delay: entry.isNew && !entry.isEditing ? 0 : index * 0.05, 
-                                    duration: 0.4,
+                                    delay: entry.isNew && !entry.isEditing ? 0 : index * 0.03, 
+                                    duration: 0.3,
                                     type: "spring",
-                                    stiffness: 500,
-                                    damping: 30
+                                    stiffness: 400,
+                                    damping: 25
                                   }
                                 }}
                                 exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                                layout
                                 className={`relative z-10 ${entry.isNew && !isEditing ? 'animate-pulse' : ''}`}
                               >
                                 {/* Timeline dot */}
@@ -952,12 +952,12 @@ const CaseModal = ({
                                 
                                 <motion.div
                                   layout
-                                  data-entry-id={entry.id}
                                   whileHover={!isEditing ? { 
-                                    scale: 1.01,
-                                    boxShadow: '0 8px 20px rgba(59, 130, 246, 0.12)'
+                                    scale: 1.005,
+                                    boxShadow: '0 8px 25px rgba(59, 130, 246, 0.15)',
+                                    transition: { duration: 0.2 }
                                   } : {}}
-                                  className={`ml-12 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border-l-3 transition-all duration-300 ${
+                                  className={`ml-12 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border-l-3 transition-all duration-300 cursor-pointer ${
                                     entry.type === 'assessment' ? 'border-green-400' :
                                     entry.type === 'medication' ? 'border-blue-400' :
                                     entry.type === 'therapy' ? 'border-purple-400' :
@@ -966,23 +966,15 @@ const CaseModal = ({
                                   } ${entry.isNew && !isEditing ? 'ring-1 ring-blue-400 ring-opacity-50' : ''} ${
                                     isEditing ? 'ring-2 ring-green-400 ring-opacity-70' : ''
                                   }`}
+                                  onClick={() => !isEditing && toggleTimelineEntry(entry)}
                                 >
                                   {/* Entry Header - Always Visible */}
-                                  <div 
-                                    className={`p-4 ${!isEditing ? 'cursor-pointer' : ''}`}
-                                    onClick={!isEditing ? () => {
-                                      if (expandedTimelineEntry === entry.id) {
-                                        setExpandedTimelineEntry(null);
-                                      } else {
-                                        startEditingEntry(entry);
-                                      }
-                                    } : undefined}
-                                  >
+                                  <div className="p-4">
                                     <div className="flex items-start justify-between">
                                       <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                           <h4 className="text-white font-semibold text-sm">
-                                            {isEditing ? editingEntryData.title : entry.title}
+                                            {entry.title}
                                           </h4>
                                           {entry.isNew && !isEditing && (
                                             <motion.span
@@ -1009,23 +1001,22 @@ const CaseModal = ({
                                         <div className="flex items-center gap-4 text-xs text-slate-300 mb-2">
                                           <span className="flex items-center gap-1">
                                             <Calendar size={12} />
-                                            {isEditing ? editingEntryData.date : entry.date}
+                                            {entry.date}
                                           </span>
                                           <span className="flex items-center gap-1">
                                             <Clock size={12} />
-                                            {isEditing ? editingEntryData.time : entry.time}
+                                            {entry.time}
                                           </span>
-                                          <span>by {isEditing ? editingEntryData.author : entry.author}</span>
+                                          <span>by {entry.author}</span>
                                         </div>
-                                        <p className="text-slate-200 text-sm">
-                                          {isEditing ? (
-                                            editingEntryData.content || 'No content...'
-                                          ) : (
-                                            entry.content?.length > 100 
+                                        
+                                        {!isExpanded && (
+                                          <p className="text-slate-200 text-sm">
+                                            {entry.content?.length > 100 
                                               ? `${entry.content.substring(0, 100)}...` 
-                                              : entry.content || 'No content...'
-                                          )}
-                                        </p>
+                                              : entry.content || 'Click to edit...'}
+                                          </p>
+                                        )}
                                       </div>
                                       
                                       {!isEditing && (
@@ -1041,26 +1032,40 @@ const CaseModal = ({
                                   
                                   {/* Inline Editing Form */}
                                   <AnimatePresence>
-                                    {isEditing && (
+                                    {isExpanded && (
                                       <motion.div
+                                        layout
                                         initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: "auto", opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                                        animate={{ 
+                                          height: "auto", 
+                                          opacity: 1,
+                                          transition: { 
+                                            duration: 0.4, 
+                                            ease: "easeOut"
+                                          }
+                                        }}
+                                        exit={{ 
+                                          height: 0, 
+                                          opacity: 0,
+                                          transition: { 
+                                            duration: 0.3, 
+                                            ease: "easeIn"
+                                          }
+                                        }}
                                         className="overflow-hidden"
                                       >
-                                        <div className="px-4 pb-4 pt-0 border-t border-slate-600">
-                                          <div className="space-y-3 mt-3">
+                                        <div className="px-4 pb-4 border-t border-slate-600">
+                                          <div className="space-y-4 mt-4">
                                             {/* Type and Timestamp Row */}
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-2 gap-4">
                                               <div>
-                                                <label className="block text-xs font-medium text-slate-300 mb-1">
+                                                <label className="block text-xs font-medium text-slate-300 mb-2">
                                                   Entry Type
                                                 </label>
                                                 <select
                                                   value={editingEntryData.type || 'followup'}
                                                   onChange={(e) => updateEditingEntry('type', e.target.value)}
-                                                  className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                                 >
                                                   <option value="assessment">Assessment</option>
                                                   <option value="medication">Medication</option>
@@ -1071,7 +1076,7 @@ const CaseModal = ({
                                               </div>
                                               
                                               <div>
-                                                <label className="block text-xs font-medium text-slate-300 mb-1">
+                                                <label className="block text-xs font-medium text-slate-300 mb-2">
                                                   Timestamp
                                                 </label>
                                                 <input
@@ -1081,14 +1086,14 @@ const CaseModal = ({
                                                     new Date().toISOString().slice(0, -1)
                                                   }
                                                   onChange={(e) => updateEditingEntry('timestamp', new Date(e.target.value).toISOString())}
-                                                  className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                                 />
                                               </div>
                                             </div>
                                             
                                             {/* Content */}
                                             <div>
-                                              <label className="block text-xs font-medium text-slate-300 mb-1">
+                                              <label className="block text-xs font-medium text-slate-300 mb-2">
                                                 Content
                                               </label>
                                               <textarea
@@ -1097,7 +1102,7 @@ const CaseModal = ({
                                                 onKeyPress={handleEditingKeyPress}
                                                 placeholder="Enter clinical notes, observations, or updates..."
                                                 rows={4}
-                                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all"
                                               />
                                               <p className="text-xs text-slate-400 mt-1">
                                                 Press Shift+Enter to save, Escape to cancel
@@ -1110,7 +1115,7 @@ const CaseModal = ({
                                                 whileHover={{ scale: 1.02 }}
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={cancelEditingEntry}
-                                                className="px-3 py-1 bg-slate-600 text-white rounded hover:bg-slate-500 transition-colors text-sm"
+                                                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm"
                                               >
                                                 Cancel
                                               </motion.button>
@@ -1119,31 +1124,13 @@ const CaseModal = ({
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={saveEditingEntry}
                                                 disabled={!editingEntryData.content?.trim()}
-                                                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-1"
+                                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-2"
                                               >
                                                 <Save size={14} />
                                                 Save
                                               </motion.button>
                                             </div>
                                           </div>
-                                        </div>
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
-                                  
-                                  {/* Expanded View for Non-Editing */}
-                                  <AnimatePresence>
-                                    {isExpanded && !isEditing && entry.details && entry.details !== entry.content && (
-                                      <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: "auto", opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                                        className="overflow-hidden"
-                                      >
-                                        <div className="px-4 pb-4 border-t border-slate-600">
-                                          <h5 className="text-white font-medium text-sm mb-2 mt-3">Detailed Notes:</h5>
-                                          <p className="text-slate-300 text-sm leading-relaxed">{entry.details}</p>
                                         </div>
                                       </motion.div>
                                     )}
