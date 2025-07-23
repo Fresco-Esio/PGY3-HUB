@@ -2966,85 +2966,42 @@ useEffect(() => {
     }
   }, [isReactFlowReady, hasAppliedInitialLayout, nodes, isInitialLoad]); // Removed forceLayout from dependencies
 
-  // Enhanced search and category filtering effect - completely redesigned to use visibility state
+  // Simplified search and category filtering - no style interference
   useEffect(() => {
-    // Skip if no nodes are available
     if (nodes.length === 0) return;
     
-    // Skip search updates during animations
+    // Skip during animations to prevent interference
     const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
-    if (isAnimating || anyModalAnimating) {
-      console.log("Skipping search filter during animation");
-      return;
-    }
+    if (isAnimating || anyModalAnimating) return;
     
-    // Create a new function to handle the visibility calculation with a timeout
-    // This prevents the effect from running synchronously within the current render cycle
-    const calculateVisibility = () => {
-      // Shallow copy of current visibility state for comparison
-      const currentVisibility = {...visibilityRef.current};
-      const newVisibility = {};
-      let visibilityChanged = false;
-      let visibleCount = 0;
+    const newVisibility = {};
+    let visibleCount = 0;
+    
+    // Calculate visibility without competing with React Flow
+    nodes.forEach(node => {
+      let shouldShow = true;
       
-      // First pass: determine node visibility
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
-        let shouldShow = true;
-        
-        // Apply category filter first
-        if (focusedCategory && !node.id.startsWith(focusedCategory)) {
-          shouldShow = false;
-        }
-        
-        // Apply search filter if there's a search query
-        if (shouldShow && searchQuery.trim()) {
-          shouldShow = nodeMatchesSearch(node, searchQuery);
-        }
-        
-        // Track visible count
-        if (shouldShow) {
-          visibleCount++;
-        }
-        
-        // Store in visibility state
-        newVisibility[node.id] = shouldShow;
-        
-        // Check if visibility has changed for this node
-        if (currentVisibility[node.id] !== shouldShow) {
-          visibilityChanged = true;
-        }
+      // Category filter
+      if (focusedCategory && !node.id.startsWith(focusedCategory)) {
+        shouldShow = false;
       }
       
-      // Only update state if changes were detected or node count changed
-      const currentKeys = Object.keys(currentVisibility);
-      const newKeys = Object.keys(newVisibility);
-      
-      const differentNodeCount = currentKeys.length !== newKeys.length;
-      const nodesChanged = currentKeys.some(key => !newKeys.includes(key)) || 
-                           newKeys.some(key => !currentKeys.includes(key));
-      
-      if (visibilityChanged || differentNodeCount || nodesChanged) {
-        console.log("Updating visibility state from search filter");
-        // Update the ref first to break circular dependency
-        visibilityRef.current = {...newVisibility};
-        
-        // Then update the state in a separate cycle to prevent immediate re-renders
-        setTimeout(() => {
-          setSearchResultsCount(visibleCount);
-          setNodeVisibility(newVisibility);
-        }, 0);
-      } else if (visibleCount !== searchResultsCount) {
-        // Just update the count if only that changed
-        setTimeout(() => {
-          setSearchResultsCount(visibleCount);
-        }, 0);
+      // Search filter
+      if (shouldShow && searchQuery.trim()) {
+        shouldShow = nodeMatchesSearch(node, searchQuery);
       }
-    };
+      
+      if (shouldShow) visibleCount++;
+      newVisibility[node.id] = shouldShow;
+    });
     
-    // Use timeout to break potential render cycles
-    const timeoutId = setTimeout(calculateVisibility, 0);
-    return () => clearTimeout(timeoutId);
+    // Update visibility state - no setTimeout needed
+    setNodeVisibility(newVisibility);
+    setSearchResultsCount(visibleCount);
+    
+    // Update ref for other components
+    nodeVisibilityRef.current = newVisibility;
+    
   }, [focusedCategory, searchQuery, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
   
   // CSS-based search filtering - no direct style manipulation
