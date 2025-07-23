@@ -3142,7 +3142,7 @@ useEffect(() => {
     
     const timeoutId = setTimeout(updateNodeStyles, 0);
     return () => clearTimeout(timeoutId);
-  }, [selectedNode, nodeVisibility, isReactFlowReady, nodes]);
+  }, [selectedNode, nodeVisibility, isReactFlowReady]); // REMOVED 'nodes' to prevent race condition with dragging
 
   // Update edge visibility based on node visibility - separate from node styling
   useEffect(() => {
