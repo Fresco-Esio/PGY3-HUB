@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 
 # Use the public endpoint for testing
-BASE_URL = "https://f9b1b745-e821-4898-8303-063793a296fe.preview.emergentagent.com/api"
+BASE_URL = "https://13037a06-6e34-48e2-8130-7e83b77c780f.preview.emergentagent.com/api"
 
 class MindMapAPITester:
     def __init__(self, base_url):
