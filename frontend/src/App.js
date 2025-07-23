@@ -2946,34 +2946,6 @@ useEffect(() => {
     const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
     if (isAnimating || anyModalAnimating) return;
     
-    const newVisibility = {};
-    let visibleCount = 0;
-    
-    // Calculate visibility without competing with React Flow
-    nodes.forEach(node => {
-      let shouldShow = true;
-      
-      // Category filter
-      if (focusedCategory && !node.id.startsWith(focusedCategory)) {
-        shouldShow = false;
-      }
-      
-      // Search filter
-      if (shouldShow && searchQuery.trim()) {
-        shouldShow = nodeMatchesSearch(node, searchQuery);
-      }
-      
-      if (shouldShow) visibleCount++;
-      newVisibility[node.id] = shouldShow;
-    });
-    
-    // Update visibility state - no setTimeout needed
-    setNodeVisibility(newVisibility);
-    setSearchResultsCount(visibleCount);
-    
-    // Update ref for other components
-    visibilityRef.current = newVisibility;
-    
   }, [focusedCategory, searchQuery, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
   
   // CSS-based search filtering - no direct style manipulation
