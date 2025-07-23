@@ -7,16 +7,34 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 682.6666666666667,
-        "y": 994.0
+        "x": 342.66666666666674,
+        "y": 1042.0
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
       "resources": [],
       "notes": null,
       "tags": null,
-      "created_at": "2025-07-23T11:16:03.349000+00:00",
-      "updated_at": "2025-07-23T11:16:45.904000+00:00"
+      "created_at": "2025-07-23T11:17:13.226000+00:00",
+      "updated_at": "2025-07-23T11:17:13.226000+00:00"
+    },
+    {
+      "id": "1753269428829",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 426.6666666666667,
+        "y": 564.0
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T11:17:13.226000+00:00",
+      "updated_at": "2025-07-23T11:17:13.226000+00:00"
     }
   ],
   "cases": [],
