@@ -2674,7 +2674,7 @@ useEffect(() => {
         autoSaveMindMapData(mindMapData);
       }, 500);
     }
-  }, [onNodesChange, setMindMapData, isAnimating, setNodeVisibility, autoSaveMindMapData, mindMapData]);
+  }, [onNodesChange, setMindMapData, isAnimating, autoSaveMindMapData, mindMapData]);
 
   const handleNodeDragStop = useCallback((event, node) => {
     // Debounce the auto-save to prevent excessive backend calls
