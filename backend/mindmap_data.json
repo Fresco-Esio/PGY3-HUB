@@ -1,42 +1,5 @@
 {
-  "topics": [
-    {
-      "id": "1753269226559",
-      "title": "Untitled Topic",
-      "description": "",
-      "category": "Uncategorized",
-      "color": "#3B82F6",
-      "position": {
-        "x": 542.0,
-        "y": 908.0
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "notes": null,
-      "tags": null,
-      "created_at": "2025-07-23T11:17:14.987000+00:00",
-      "updated_at": "2025-07-23T11:18:31.868000+00:00"
-    },
-    {
-      "id": "1753269428829",
-      "title": "Untitled Topic",
-      "description": "",
-      "category": "Uncategorized",
-      "color": "#3B82F6",
-      "position": {
-        "x": 998.3,
-        "y": 22.150000000000006
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "notes": null,
-      "tags": null,
-      "created_at": "2025-07-23T11:17:14.987000+00:00",
-      "updated_at": "2025-07-23T11:18:31.868000+00:00"
-    }
-  ],
+  "topics": [],
   "cases": [],
   "tasks": [],
   "literature": [],
