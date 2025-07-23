@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 # Use the production backend URL for testing (from frontend/.env)
-BASE_URL = "https://13037a06-6e34-48e2-8130-7e83b77c780f.preview.emergentagent.com/api"
+BASE_URL = "https://0d877e72-99c8-407d-9e49-011eb53a336a.preview.emergentagent.com/api"
 
 def test_review_requirements():
     """Test all specific requirements from the review request"""
