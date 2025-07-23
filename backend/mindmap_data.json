@@ -1,37 +1,25 @@
 {
-  "topics": [],
-  "cases": [
+  "topics": [
     {
-      "id": "1753240146885",
-      "case_id": "CASE-1753240151471-0",
-      "encounter_date": "2025-07-23T03:09:11.471000+00:00",
-      "primary_diagnosis": "Unspecified",
-      "secondary_diagnoses": [],
-      "age": 0,
-      "gender": null,
-      "chief_complaint": "",
-      "initial_presentation": "",
-      "current_presentation": "",
-      "medication_history": "",
-      "therapy_progress": "",
-      "defense_patterns": "",
-      "clinical_reflection": "",
-      "history_present_illness": null,
-      "medical_history": null,
-      "medications": [],
-      "mental_status_exam": null,
-      "assessment_plan": null,
-      "notes": null,
-      "status": "active",
-      "linked_topics": [],
+      "id": "1753269226559",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
       "position": {
-        "x": 517.0042262130745,
-        "y": 489.48812288394566
+        "x": 872.6666666666667,
+        "y": 772.0
       },
-      "created_at": "2025-07-23T03:09:11.471000+00:00",
-      "updated_at": "2025-07-23T03:21:50.469000+00:00"
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "created_at": "2025-07-23T11:13:48.957000+00:00",
+      "updated_at": "2025-07-23T11:13:48.957000+00:00"
     }
   ],
+  "cases": [],
   "tasks": [],
   "literature": [],
   "connections": []
