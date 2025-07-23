@@ -2631,7 +2631,7 @@ useEffect(() => {
   }, [setNodes, setEdges, autoSaveMindMapData, addToast]);
 
   const handleNodesChange = useCallback((changes) => {
-    // Apply the node changes to React Flow state immediately
+    // Apply the node changes to React Flow state immediately - this is critical!
     onNodesChange(changes);
     
     // Skip heavy operations during animations to prevent interference
@@ -2652,63 +2652,43 @@ useEffect(() => {
       });
     }
     
-    // Now process position changes for edge updates
+    // Process position changes for data persistence - SIMPLIFIED
     const positionChanges = changes.filter(change => 
       change.type === 'position' && change.position
     );
     
     if (positionChanges.length > 0) {
-      // Use requestAnimationFrame to ensure DOM updates don't conflict
-      requestAnimationFrame(() => {
-        // Create a map of changed node IDs for quick lookup
-        const changedNodeIds = new Set(positionChanges.map(change => change.id));
+      console.log('Processing position changes:', positionChanges);
+      
+      // Update mindMapData immediately without complex debouncing
+      setMindMapData(currentData => {
+        const updatedData = { ...currentData };
         
-        // Update edges that connect to any of the moved nodes
-        setEdges(currentEdges => {
-          // Only update edges that are connected to nodes that moved
-          return currentEdges.map(edge => {
-            if (changedNodeIds.has(edge.source) || changedNodeIds.has(edge.target)) {
-              // Add a timestamp to force re-render of the edge
-              return {
-                ...edge,
-                data: {
-                  ...(edge.data || {}),
-                  __forceUpdate: Date.now(), // Use timestamp for unique updates
-                  __isAnimating: isAnimating // Pass animation state to edge
-                }
-              };
+        positionChanges.forEach(change => {
+          if (change.position) {
+            const [type, id] = change.id.split('-');
+            const key = type === 'literature' ? 'literature' : `${type}s`;
+            const item = updatedData[key]?.find(i => String(i.id) === id);
+            
+            if (item) {
+              item.position = { ...change.position };
+              console.log(`Updated ${type} ${id} position to:`, change.position);
             }
-            return edge;
-          });
+          }
         });
         
-        // Update mindMapData for position persistence with debouncing
-        clearTimeout(window.positionUpdateTimeout);
-        window.positionUpdateTimeout = setTimeout(() => {
-          setMindMapData(currentData => {
-            const updatedData = { ...currentData };
-            
-            positionChanges.forEach(change => {
-              if (change.position) {
-                const [type, id] = change.id.split('-');
-                const key = type === 'literature' ? 'literature' : `${type}s`;
-                const item = updatedData[key]?.find(i => String(i.id) === id);
-                
-                if (item) {
-                  item.position = { ...change.position };
-                }
-              }
-            });
-            
-            // Use the lighter position-only auto-save
-            autoSavePositionData(updatedData);
-            
-            return updatedData;
-          });
-        }, 100); // Debounce position updates
+        // Save to localStorage immediately
+        localStorageUtils.save(updatedData, null, null, false);
+        
+        return updatedData;
       });
+      
+      // Simple auto-save without complex timeouts
+      setTimeout(() => {
+        autoSaveMindMapData(mindMapData);
+      }, 500);
     }
-  }, [onNodesChange, setEdges, setMindMapData, isAnimating, autoSavePositionData, setNodeVisibility]);
+  }, [onNodesChange, setMindMapData, isAnimating, setNodeVisibility, autoSaveMindMapData, mindMapData]);
 
   const handleNodeDragStop = useCallback((event, node) => {
     // Debounce the auto-save to prevent excessive backend calls
