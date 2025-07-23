@@ -1201,19 +1201,30 @@ const LiteratureNode = ({ data, selected }) => {
       <div 
         className="flex items-center gap-2 mb-1 cursor-pointer"
         onClick={(e) => {
-          // Only stop propagation if this is a single click, not part of a double-click
-          if (e.detail === 1) {
-            e.stopPropagation();
-            setTimeout(() => {
-              if (data.onLiteratureClick) {
-                data.onLiteratureClick(data);
-              }
-            }, 200);
-          }
+          // Don't stop propagation immediately - delay the action to allow double-clicks
+          e.preventDefault(); // Prevent any default behavior but allow bubbling
+          
+          // Use a longer timeout to distinguish between single click and double-click
+          const clickTimeout = setTimeout(() => {
+            // Only execute click if this wasn't part of a double-click sequence
+            e.stopPropagation(); // Stop propagation only when actually handling the click
+            if (data.onLiteratureClick) {
+              data.onLiteratureClick(data);
+            }
+          }, 300); // Increased timeout
+          
+          // Store timeout ID on the element to cancel it if double-click occurs
+          e.currentTarget.clickTimeout = clickTimeout;
         }}
         onDoubleClick={(e) => {
-          // Allow double-click to bubble up for modal opening
-          e.preventDefault();
+          // Cancel the pending click action
+          if (e.currentTarget.clickTimeout) {
+            clearTimeout(e.currentTarget.clickTimeout);
+            e.currentTarget.clickTimeout = null;
+          }
+          
+          // Don't prevent default - allow the double-click to bubble up for modal opening
+          // The parent node will handle the double-click to open the modal
         }}
       >
         <BookOpen size={16} className="text-purple-600" />
