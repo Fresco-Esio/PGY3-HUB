@@ -216,49 +216,60 @@ const CaseModal = ({
     ];
   }, [editData?.timeline]);
 
-  // Enhanced scroll function to ensure expanded entries are fully visible
+  // Enhanced scroll function to ensure expanded entries are fully visible within container
   const scrollToShowEntry = useCallback((entryId) => {
-    if (timelineScrollRef.current && entryId) {
-      // Use requestAnimationFrame to ensure DOM has updated
+    if (!timelineScrollRef.current || !entryId) return;
+    
+    // Use multiple RAF calls to ensure DOM has fully updated
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        const container = timelineScrollRef.current;
+        const entryElement = container.querySelector(`[data-entry-id="${entryId}"]`);
+        
+        if (!entryElement || !container) return;
+        
+        // Wait a bit more for expansion animation to complete
         setTimeout(() => {
-          const container = timelineScrollRef.current;
-          const entryElement = container.querySelector(`[data-entry-id="${entryId}"]`);
+          const containerRect = container.getBoundingClientRect();
+          const entryRect = entryElement.getBoundingClientRect();
           
-          if (entryElement && container) {
-            const containerRect = container.getBoundingClientRect();
-            const entryRect = entryElement.getBoundingClientRect();
-            
-            // Calculate the position relative to the scrollable container
-            const entryTop = entryRect.top - containerRect.top + container.scrollTop;
-            const entryBottom = entryTop + entryRect.height;
-            const containerHeight = container.clientHeight;
-            const currentScrollTop = container.scrollTop;
-            
-            // Determine if we need to scroll
-            let targetScrollTop = currentScrollTop;
-            
-            // If entry extends below visible area, scroll to show the bottom with padding
-            if (entryBottom > currentScrollTop + containerHeight) {
-              targetScrollTop = entryBottom - containerHeight + 60; // 60px bottom padding
-            }
-            
-            // If entry is above visible area, scroll to show the top
-            if (entryTop < currentScrollTop) {
-              targetScrollTop = entryTop - 20; // 20px top padding
-            }
-            
-            // Only scroll if necessary
-            if (targetScrollTop !== currentScrollTop) {
-              container.scrollTo({
-                top: Math.max(0, targetScrollTop),
-                behavior: 'smooth'
-              });
-            }
+          // Calculate relative positions within the scrollable container
+          const containerTop = container.scrollTop;
+          const containerHeight = container.clientHeight;
+          const containerBottom = containerTop + containerHeight;
+          
+          // Get entry position relative to container's scroll area
+          const entryRelativeTop = entryElement.offsetTop;
+          const entryHeight = entryElement.offsetHeight;
+          const entryRelativeBottom = entryRelativeTop + entryHeight;
+          
+          // Determine if we need to scroll to fit the entry
+          let newScrollTop = containerTop;
+          const padding = 40; // Padding from edges
+          
+          // If entry bottom is below visible area, scroll down
+          if (entryRelativeBottom > containerBottom) {
+            newScrollTop = entryRelativeBottom - containerHeight + padding;
           }
-        }, 100); // Wait for animation to start
+          
+          // If entry top is above visible area, scroll up  
+          if (entryRelativeTop < containerTop + padding) {
+            newScrollTop = entryRelativeTop - padding;
+          }
+          
+          // Ensure we don't scroll beyond bounds
+          newScrollTop = Math.max(0, Math.min(newScrollTop, container.scrollHeight - containerHeight));
+          
+          // Only scroll if we need to change position significantly
+          if (Math.abs(newScrollTop - containerTop) > 10) {
+            container.scrollTo({
+              top: newScrollTop,
+              behavior: 'smooth'
+            });
+          }
+        }, 200); // Increased delay to ensure expansion is complete
       });
-    }
+    });
   }, []);
 
   const scrollToLatest = useCallback(() => {
