@@ -393,17 +393,6 @@ const CaseModal = ({
     setExpandedTimelineEntry(null);
   }, [editingEntryId, editingEntryData, editData?.timeline]);
 
-  const getEntryTitle = useCallback((type) => {
-    const titles = {
-      assessment: 'Clinical Assessment',
-      medication: 'Medication Update',
-      therapy: 'Therapy Session',
-      followup: 'Follow-up Visit',
-      note: 'Clinical Note'
-    };
-    return titles[type] || 'Clinical Entry';
-  }, []);
-
   // Handle keyboard shortcuts for editing
   const handleEditingKeyPress = useCallback((e) => {
     if (e.key === 'Enter' && e.shiftKey) {
