@@ -288,7 +288,7 @@ const CaseModal = ({
     ];
   }, [editData?.timeline]);
 
-  // Enhanced scroll function with simultaneous expansion and scroll
+  // Enhanced scroll function with true simultaneous expansion and scroll
   const scrollToShowEntry = useCallback((entryId, isExpanding = false) => {
     if (!timelineScrollRef.current || !entryId) return;
     
@@ -297,62 +297,57 @@ const CaseModal = ({
     
     if (!entryElement || !container) return;
     
-    // If expanding, calculate scroll immediately based on estimated expanded height
+    // Calculate scroll position immediately, before any delays
+    const containerHeight = container.clientHeight;
+    const currentScrollTop = container.scrollTop;
+    const entryTop = entryElement.offsetTop;
+    const currentEntryHeight = entryElement.offsetHeight;
+    
+    let targetScrollTop;
+    
     if (isExpanding) {
-      const containerHeight = container.clientHeight;
-      const currentScrollTop = container.scrollTop;
-      
-      // Get current entry position
-      const entryTop = entryElement.offsetTop;
-      const currentEntryHeight = entryElement.offsetHeight;
-      
-      // Estimate expanded height (form fields + padding)
-      const estimatedExpandedHeight = 320; // Height of editing form
+      // For expanding entries, calculate based on where the expanded entry should be positioned
+      const estimatedExpandedHeight = 350; // Height of editing form + padding
       const totalExpandedHeight = currentEntryHeight + estimatedExpandedHeight;
       
-      // Calculate ideal scroll position to center the expanded entry
-      const idealScrollTop = entryTop - (containerHeight - totalExpandedHeight) / 2;
+      // Position the expanded entry optimally in the container
+      const idealTop = Math.max(20, (containerHeight - totalExpandedHeight) / 3); // Upper third
+      targetScrollTop = entryTop - idealTop;
       
       // Ensure we don't scroll beyond bounds
-      const maxScrollTop = container.scrollHeight - containerHeight;
-      const targetScrollTop = Math.max(0, Math.min(idealScrollTop, maxScrollTop));
+      const maxScroll = container.scrollHeight - containerHeight + estimatedExpandedHeight;
+      targetScrollTop = Math.max(0, Math.min(targetScrollTop, maxScroll));
       
-      // Start scroll immediately with same duration as expansion (0.3s)
-      if (Math.abs(targetScrollTop - currentScrollTop) > 10) {
+      // Execute scroll immediately with no delay
+      if (Math.abs(targetScrollTop - currentScrollTop) > 15) {
         container.scrollTo({
           top: targetScrollTop,
           behavior: 'smooth'
         });
       }
     } else {
-      // For non-expanding scenarios, use the original logic
-      requestAnimationFrame(() => {
-        const containerHeight = container.clientHeight;
-        const currentScrollTop = container.scrollTop;
-        const entryTop = entryElement.offsetTop;
-        const entryHeight = entryElement.offsetHeight;
-        const entryBottom = entryTop + entryHeight;
-        
-        let targetScrollTop = currentScrollTop;
-        const padding = 40;
-        
-        if (entryBottom > currentScrollTop + containerHeight - padding) {
-          targetScrollTop = entryBottom - containerHeight + padding;
-        }
-        
-        if (entryTop < currentScrollTop + padding) {
-          targetScrollTop = entryTop - padding;
-        }
-        
-        targetScrollTop = Math.max(0, Math.min(targetScrollTop, container.scrollHeight - containerHeight));
-        
-        if (Math.abs(targetScrollTop - currentScrollTop) > 10) {
-          container.scrollTo({
-            top: targetScrollTop,
-            behavior: 'smooth'
-          });
-        }
-      });
+      // For non-expanding, use standard positioning
+      const entryBottom = entryTop + entryElement.offsetHeight;
+      const padding = 40;
+      
+      targetScrollTop = currentScrollTop;
+      
+      if (entryBottom > currentScrollTop + containerHeight - padding) {
+        targetScrollTop = entryBottom - containerHeight + padding;
+      }
+      
+      if (entryTop < currentScrollTop + padding) {
+        targetScrollTop = entryTop - padding;
+      }
+      
+      targetScrollTop = Math.max(0, Math.min(targetScrollTop, container.scrollHeight - containerHeight));
+      
+      if (Math.abs(targetScrollTop - currentScrollTop) > 10) {
+        container.scrollTo({
+          top: targetScrollTop,
+          behavior: 'smooth'
+        });
+      }
     }
   }, []);
 
