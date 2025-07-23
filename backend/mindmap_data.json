@@ -7,7 +7,7 @@
       "encounter_date": "2025-07-23T03:09:11.471000+00:00",
       "primary_diagnosis": "Unspecified",
       "secondary_diagnoses": [],
-      "age": null,
+      "age": 0,
       "gender": null,
       "chief_complaint": "",
       "initial_presentation": "",
@@ -29,7 +29,7 @@
         "y": 489.48812288394566
       },
       "created_at": "2025-07-23T03:09:11.471000+00:00",
-      "updated_at": "2025-07-23T03:09:11.471000+00:00"
+      "updated_at": "2025-07-23T03:20:42.787000+00:00"
     }
   ],
   "tasks": [],
