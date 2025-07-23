@@ -21,7 +21,9 @@ import {
   ChevronDown,
   ArrowDown,
   Calendar,
-  Brain
+  Brain,
+  Plus,
+  Send
 } from 'lucide-react';
 
 // Animation variants for Framer Motion
