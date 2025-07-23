@@ -3000,7 +3000,7 @@ useEffect(() => {
     setSearchResultsCount(visibleCount);
     
     // Update ref for other components
-    nodeVisibilityRef.current = newVisibility;
+    visibilityRef.current = newVisibility;
     
   }, [focusedCategory, searchQuery, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
   
