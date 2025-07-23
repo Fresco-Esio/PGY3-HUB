@@ -913,21 +913,39 @@ const CaseModal = ({
                     </div>
                     
                     {/* Timeline implementation with inline editing */}
-                    <div className="relative flex-1">
+                    <div className="relative flex-1 min-h-0">
                       <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
                       
                       <div
                         ref={timelineScrollRef}
-                        className="h-full overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800"
+                        className="h-full max-h-full overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4"
                         style={{
-                          scrollbarWidth: 'thin',
-                          scrollbarColor: '#475569 #1e293b'
+                          scrollbarWidth: 'auto',
+                          scrollbarColor: '#64748b #334155'
                         }}
                       >
+                        {/* Custom scrollbar styles */}
+                        <style jsx>{`
+                          div::-webkit-scrollbar {
+                            width: 12px;
+                          }
+                          div::-webkit-scrollbar-track {
+                            background: #334155;
+                            border-radius: 6px;
+                          }
+                          div::-webkit-scrollbar-thumb {
+                            background: #64748b;
+                            border-radius: 6px;
+                          }
+                          div::-webkit-scrollbar-thumb:hover {
+                            background: #94a3b8;
+                          }
+                        `}</style>
+                        
                         {/* Vertical timeline bar */}
                         <div className="absolute left-7 top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-400 via-purple-500 to-blue-400 opacity-30" />
                         
-                        <div className="space-y-1">
+                        <div className="space-y-1 min-h-full">
                           <AnimatePresence mode="wait">
                             {timelineEntries.map((entry, index) => {
                               const isEditing = editingEntryId === entry.id;
