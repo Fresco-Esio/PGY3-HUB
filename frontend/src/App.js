@@ -3633,6 +3633,9 @@ useEffect(() => {
             onEdgeMouseLeave={onEdgeMouseLeave}
             nodeTypes={nodeTypes}
             edgeTypes={{ floating: FloatingEdge, enhanced: EnhancedEdge }}
+            nodesDraggable={true}
+            nodesConnectable={true}
+            elementsSelectable={true}
             onInit={(reactFlowInstance) => {
               setIsReactFlowReady(true);
               // Store reference for error recovery
