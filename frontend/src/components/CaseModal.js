@@ -223,6 +223,26 @@ const CaseModal = ({
     }
   }, []);
 
+  // Enhanced scroll function for new entries in editing mode
+  const scrollToShowEditingEntry = useCallback(() => {
+    if (timelineScrollRef.current && editingEntryId) {
+      // Wait for DOM to update and form to fully expand
+      setTimeout(() => {
+        const container = timelineScrollRef.current;
+        const containerHeight = container.clientHeight;
+        const scrollHeight = container.scrollHeight;
+        
+        // Scroll to bottom with extra padding to ensure form is fully visible
+        const targetScroll = scrollHeight - containerHeight + 100; // Extra 100px padding
+        
+        container.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: 'smooth'
+        });
+      }, 300); // Wait for animation to complete
+    }
+  }, [editingEntryId]);
+
   const toggleTimelineEntry = useCallback((entryId) => {
     setExpandedTimelineEntry(prev => prev === entryId ? null : entryId);
   }, []);
