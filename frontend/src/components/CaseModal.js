@@ -232,14 +232,44 @@ const CaseModal = ({
         const containerHeight = container.clientHeight;
         const scrollHeight = container.scrollHeight;
         
-        // Scroll to bottom with extra padding to ensure form is fully visible
-        const targetScroll = scrollHeight - containerHeight + 100; // Extra 100px padding
+        // Estimate the height of an expanded editing form (approximately 300-350px)
+        const estimatedFormHeight = 350;
+        
+        // Calculate how much space we need from the bottom
+        const requiredBottomSpace = estimatedFormHeight + 50; // Extra 50px padding
+        
+        // Calculate target scroll to ensure full form visibility
+        const targetScroll = scrollHeight - containerHeight + requiredBottomSpace;
         
         container.scrollTo({
           top: Math.max(0, targetScroll),
           behavior: 'smooth'
         });
-      }, 300); // Wait for animation to complete
+      }, 100); // Reduced delay for immediate scroll
+      
+      // Additional scroll check after form fully expands
+      setTimeout(() => {
+        const container = timelineScrollRef.current;
+        if (container) {
+          const containerRect = container.getBoundingClientRect();
+          const editingElement = container.querySelector(`[data-entry-id="${editingEntryId}"]`);
+          
+          if (editingElement) {
+            const elementRect = editingElement.getBoundingClientRect();
+            const elementBottom = elementRect.bottom;
+            const containerBottom = containerRect.bottom;
+            
+            // If element extends beyond container, scroll more
+            if (elementBottom > containerBottom - 20) { // 20px safety margin
+              const additionalScroll = elementBottom - containerBottom + 80; // Extra space
+              container.scrollTo({
+                top: container.scrollTop + additionalScroll,
+                behavior: 'smooth'
+              });
+            }
+          }
+        }
+      }, 400); // After animation completes
     }
   }, [editingEntryId]);
 
