@@ -344,10 +344,10 @@ const CaseModal = ({
     setEditingEntryData({ ...newEntry });
     setExpandedTimelineEntry(newEntry.id);
     
-    // Scroll to show the new entry after it's rendered
+    // Scroll to show the new entry after DOM updates and animations complete
     setTimeout(() => {
       scrollToShowEntry(newEntry.id);
-    }, 200);
+    }, 400); // Increased delay for better reliability
   }, [editData?.timeline, editingEntryId, scrollToShowEntry]);
 
   // Toggle entry expansion and start editing if needed
@@ -380,10 +380,10 @@ const CaseModal = ({
       setEditingEntryId(entryId);
       setEditingEntryData({ ...entry });
       
-      // Scroll to show the expanded entry
+      // Scroll to show the expanded entry with better timing
       setTimeout(() => {
         scrollToShowEntry(entryId);
-      }, 100);
+      }, 300); // Delay for expansion animation
     }
   }, [editingEntryId, expandedTimelineEntry, addToast, scrollToShowEntry]);
 
