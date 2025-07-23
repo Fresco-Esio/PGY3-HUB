@@ -2958,24 +2958,16 @@ useEffect(() => {
   }, [isEditing, applyForceLayout, clearSearch, caseModal, topicModal, taskModal, literatureModal, showNodeSelector, isTemplateManagerOpen]);
 
   useEffect(() => {
-    // Only apply force layout if it hasn't been applied during initial load
-    // and we have nodes that need positioning
-    if (isReactFlowReady && !hasAppliedInitialLayout && nodes.length > 0 && !isInitialLoad) {
-      // Add a delay to ensure React Flow is fully ready
-      setTimeout(() => {
-        try {
-          forceLayout();
-          setHasAppliedInitialLayout(true);
-        } catch (error) {
-          console.warn('Force layout failed, skipping initial layout:', error);
-          setHasAppliedInitialLayout(true);
-        }
-      }, 500);
+    // DISABLED automatic force layout to prevent overriding individual node positions
+    // Force layout should only be applied manually via "Realign Nodes" button
+    if (isReactFlowReady && !hasAppliedInitialLayout && nodes.length > 0) {
+      // Just mark as applied without applying force layout 
+      setHasAppliedInitialLayout(true);
     } else if (isInitialLoad && nodes.length > 0) {
       // For initial load, just mark as applied since layout was already done in convertDataToReactFlow
       setHasAppliedInitialLayout(true);
     }
-  }, [isReactFlowReady, hasAppliedInitialLayout, nodes, forceLayout, isInitialLoad]);
+  }, [isReactFlowReady, hasAppliedInitialLayout, nodes, isInitialLoad]); // Removed forceLayout from dependencies
 
   // Enhanced search and category filtering effect - completely redesigned to use visibility state
   useEffect(() => {
