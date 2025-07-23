@@ -3089,84 +3089,48 @@ useEffect(() => {
     
   }, [isReactFlowReady]);
 
-  // Update edge visibility based on node visibility - separate from node styling
+  // Apply CSS classes to nodes based on search and selection
   useEffect(() => {
-    if (!isReactFlowReady || Object.keys(nodeVisibility).length === 0) return;
+    if (!isReactFlowReady) return;
     
-    // Create stable references to the current states
-    const currentVisibility = visibilityRef.current;
+    const currentVisibility = nodeVisibilityRef.current;
     const currentSelectedId = selectedNode?.id;
     
-    // Use a timeout to break potential render cycles
-    const updateEdgeStyles = () => {
-      setEdges(prevEdges => {
-        // Check if we actually need to update
-        let needsUpdate = false;
+    setNodes(prevNodes => {
+      return prevNodes.map(node => {
+        const isVisible = currentVisibility[node.id] !== false;
+        const isSelected = currentSelectedId === node.id;
         
-        const updatedEdges = prevEdges.map(edge => {
-          const isSourceVisible = currentVisibility[edge.source] !== false;
-          const isTargetVisible = currentVisibility[edge.target] !== false;
-          const isVisible = isSourceVisible && isTargetVisible;
-          const isSelected = currentSelectedId && 
-                            (currentSelectedId === edge.source || currentSelectedId === edge.target);
-          
-          // Create target style based on visibility and selection
-          let targetStyle = {
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        // Build className instead of modifying styles
+        let className = node.className || '';
+        
+        // Remove existing search classes
+        className = className.replace(/\s*(search-dimmed|search-selected)\s*/g, ' ').trim();
+        
+        // Add appropriate classes
+        if (!isVisible) {
+          className += ' search-dimmed';
+        }
+        if (isSelected) {
+          className += ' search-selected';
+        }
+        
+        // Only update if className changed
+        if (node.className !== className.trim()) {
+          return {
+            ...node,
+            className: className.trim(),
+            // Explicitly preserve position and other React Flow properties
+            position: node.position,
+            type: node.type,
+            data: node.data
           };
-          
-          if (!isVisible) {
-            targetStyle = {
-              ...targetStyle,
-              opacity: 0.05,
-              strokeWidth: 1
-            };
-          } else if (isSelected) {
-            targetStyle = {
-              ...targetStyle,
-              opacity: 1,
-              strokeWidth: 3,
-              stroke: '#10b981' // teal color for selected
-            };
-          } else {
-            targetStyle = {
-              ...targetStyle,
-              opacity: 1,
-              strokeWidth: 2
-            };
-          }
-          
-          // Check if style or hidden state changed
-          const currentHidden = !!edge.hidden;
-          const targetHidden = !isVisible;
-          
-          const styleChanged = !edge.style || 
-                              edge.style.opacity !== targetStyle.opacity ||
-                              edge.style.strokeWidth !== targetStyle.strokeWidth ||
-                              (isSelected && edge.style.stroke !== targetStyle.stroke) ||
-                              currentHidden !== targetHidden;
-          
-          if (styleChanged) {
-            needsUpdate = true;
-            return {
-              ...edge,
-              hidden: targetHidden,
-              style: targetStyle
-            };
-          }
-          
-          // Return unchanged edge if no changes needed
-          return edge;
-        });
+        }
         
-        // Only return new array if updates were needed
-        return needsUpdate ? updatedEdges : prevEdges;
+        return node;
       });
-    };
-    
-    const timeoutId = setTimeout(updateEdgeStyles, 0);
-    return () => clearTimeout(timeoutId);
-  }, [nodeVisibility, selectedNode, isReactFlowReady]);
+    });
+  }, [selectedNode, nodeVisibility, isReactFlowReady]);
 
   // Initialize nodeVisibility when nodes change
   useEffect(() => {
