@@ -352,7 +352,7 @@ const CaseModal = ({
     setEditingEntryData({ ...entry });
     setExpandedTimelineEntry(entry.id);
     
-    // For existing entries, ensure the editing form is visible
+    // For existing entries, ensure the full editing form is visible
     setTimeout(() => {
       if (timelineScrollRef.current) {
         const container = timelineScrollRef.current;
@@ -361,11 +361,16 @@ const CaseModal = ({
         if (entryElement) {
           const containerRect = container.getBoundingClientRect();
           const entryRect = entryElement.getBoundingClientRect();
-          const entryBottomOffset = entryRect.bottom - containerRect.top;
           
-          // If the entry (including expanded form) would be cut off, scroll it into view
-          if (entryBottomOffset > container.clientHeight - 50) { // 50px padding
-            const scrollAmount = entryBottomOffset - container.clientHeight + 100; // Extra padding
+          // Calculate if the expanded form would be cut off
+          const estimatedExpandedHeight = 300; // Approximate height of editing form
+          const entryTop = entryRect.top - containerRect.top;
+          const entryCurrentHeight = entryRect.height;
+          const entryBottomAfterExpansion = entryTop + entryCurrentHeight + estimatedExpandedHeight;
+          
+          // If the expanded form would extend beyond the container, scroll it into view
+          if (entryBottomAfterExpansion > container.clientHeight - 20) { // 20px safety margin
+            const scrollAmount = entryBottomAfterExpansion - container.clientHeight + 80; // Extra 80px padding
             container.scrollTo({
               top: container.scrollTop + scrollAmount,
               behavior: 'smooth'
@@ -373,7 +378,31 @@ const CaseModal = ({
           }
         }
       }
-    }, 350); // Wait for expand animation
+    }, 100); // Initial scroll calculation
+    
+    // Double-check after form fully expands
+    setTimeout(() => {
+      if (timelineScrollRef.current) {
+        const container = timelineScrollRef.current;
+        const entryElement = container.querySelector(`[data-entry-id="${entry.id}"]`);
+        
+        if (entryElement) {
+          const containerRect = container.getBoundingClientRect();
+          const entryRect = entryElement.getBoundingClientRect();
+          const entryBottom = entryRect.bottom;
+          const containerBottom = containerRect.bottom;
+          
+          // Final check - if still cut off, scroll more
+          if (entryBottom > containerBottom - 20) {
+            const additionalScroll = entryBottom - containerBottom + 60; // Additional padding
+            container.scrollTo({
+              top: container.scrollTop + additionalScroll,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }
+    }, 400); // After animation completes
   }, [editingEntryId]);
 
   // Save the currently editing entry
