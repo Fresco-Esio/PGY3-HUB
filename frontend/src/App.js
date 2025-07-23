@@ -3047,92 +3047,47 @@ useEffect(() => {
     return () => clearTimeout(timeoutId);
   }, [focusedCategory, searchQuery, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
   
-  // Update node styles based on selection status and visibility - separate from search logic
+  // CSS-based search filtering - no direct style manipulation
   useEffect(() => {
-    if (!isReactFlowReady || nodes.length === 0) return;
+    if (!isReactFlowReady) return;
     
-    // Create a stable reference to the current node visibility
-    const currentVisibility = visibilityRef.current;
-    const currentSelectedId = selectedNode?.id;
+    // Apply CSS classes instead of direct style manipulation
+    const styleSheet = document.getElementById('search-filter-styles') || document.createElement('style');
+    styleSheet.id = 'search-filter-styles';
     
-    // Use a timeout to break potential render cycles
-    const updateNodeStyles = () => {
-      setNodes(prevNodes => {
-        // Check if we actually need to update
-        let needsUpdate = false;
-        
-        // Deep comparison of current styles vs what they should be
-        const updatedNodes = prevNodes.map(node => {
-          const isVisible = currentVisibility[node.id] !== false; // Default to visible
-          const isSelected = currentSelectedId === node.id;
-          
-          // Create target style based on visibility and selection
-          let targetStyle = {
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          };
-          
-          if (!isVisible) {
-            targetStyle = {
-              ...targetStyle,
-              opacity: 0.15,
-              transform: 'scale(0.8)',
-              filter: 'grayscale(0.7)'
-              // REMOVED: pointerEvents: 'none' - this was preventing dragging!
-            };
-          } else if (isSelected) {
-            targetStyle = {
-              ...targetStyle,
-              boxShadow: '0 0 0 2px #10b981, 0 0 20px rgba(16, 185, 129, 0.6)',
-              transform: 'scale(1.05)',
-              zIndex: 1000,
-              opacity: 1
-            };
-          } else {
-            targetStyle = {
-              ...targetStyle,
-              boxShadow: 'none',
-              transform: 'scale(1)',
-              zIndex: 0,
-              opacity: 1,
-              filter: 'none'
-            };
-          }
-          
-          // Check if current node style differs from target style
-          // Note: We don't use React Flow's hidden property as it can interfere with dragging
-          const currentHidden = false; // Always keep nodes interactive
-          const targetHidden = false;  // Never hide nodes completely
-          
-          const styleChanged = !node.style || 
-            node.style.opacity !== targetStyle.opacity ||
-            node.style.transform !== targetStyle.transform ||
-            node.style.filter !== targetStyle.filter ||
-            node.style.boxShadow !== targetStyle.boxShadow ||
-            node.style.zIndex !== targetStyle.zIndex ||
-            currentHidden !== targetHidden;
-            
-          if (styleChanged) {
-            needsUpdate = true;
-            return {
-              ...node,
-              hidden: targetHidden,
-              style: targetStyle,
-              position: node.position // Explicitly preserve position to prevent race condition
-            };
-          }
-          
-          // Return unchanged node if no style changes needed
-          return node;
-        });
-        
-        // Only return new array if updates were needed
-        return needsUpdate ? updatedNodes : prevNodes;
-      });
-    };
+    if (!document.getElementById('search-filter-styles')) {
+      document.head.appendChild(styleSheet);
+    }
     
-    const timeoutId = setTimeout(updateNodeStyles, 0);
-    return () => clearTimeout(timeoutId);
-  }, [selectedNode, nodeVisibility, isReactFlowReady]); // REMOVED 'nodes' to prevent race condition with dragging
+    // Generate CSS for search filtering
+    let css = `
+      /* Default node styling */
+      .react-flow__node {
+        transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease !important;
+      }
+      
+      /* Search dimmed nodes */
+      .react-flow__node.search-dimmed {
+        opacity: 0.15 !important;
+        filter: grayscale(0.7) !important;
+        transform: scale(0.9) !important;
+      }
+      
+      /* Selected node highlighting */
+      .react-flow__node.search-selected {
+        box-shadow: 0 0 0 2px #10b981, 0 0 20px rgba(16, 185, 129, 0.6) !important;
+        z-index: 1000 !important;
+      }
+      
+      /* Ensure dragging still works */
+      .react-flow__node.search-dimmed {
+        pointer-events: auto !important;
+      }
+    `;
+    
+    styleSheet.textContent = css;
+    
+  }, [isReactFlowReady]);
 
   // Update edge visibility based on node visibility - separate from node styling
   useEffect(() => {
