@@ -2128,8 +2128,8 @@ useEffect(() => {
       layoutNodes = allItems;
     }
 
-    // Quick layout without expensive calculations for nodes without force layout
-    const quickNodes = (layoutNodes || getQuickLayout(allItems)).map(item => {
+    // Quick layout without expensive calculations - ensure all nodes get proper positions
+    const quickNodes = (layoutNodes || allItems).map((item, index) => {
       const nodeId = `${item.type}-${item.id}`;
       
       // Convert case fields efficiently
@@ -2144,10 +2144,27 @@ useEffect(() => {
         clinicalReflection: item.clinicalReflection || item.clinical_reflection || ''
       } : item;
 
+      // Ensure proper positioning: use existing position, or create grid-based position
+      let position;
+      if (item.position && typeof item.position.x === 'number' && typeof item.position.y === 'number') {
+        position = item.position;
+      } else {
+        // Create grid-based layout for nodes without positions
+        const gridSize = Math.ceil(Math.sqrt(allItems.length));
+        const nodeSpacing = 250;
+        const offsetX = 300; // Offset from left sidebar
+        const offsetY = 150; // Offset from top
+        
+        position = {
+          x: (index % gridSize) * nodeSpacing + offsetX,
+          y: Math.floor(index / gridSize) * nodeSpacing + offsetY
+        };
+      }
+
       return {
         id: nodeId,
         type: item.type,
-        position: item.position || { x: (Math.random() - 0.5) * 100, y: (Math.random() - 0.5) * 100 },
+        position: position,
         data: { 
           ...nodeData, 
           onDelete: () => handleDeleteNode(nodeId),
