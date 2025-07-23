@@ -2903,7 +2903,7 @@ useEffect(() => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isEditing, applyForceLayout, clearSearch, caseModal, topicModal, taskModal, literatureModal, showNodeSelector, isTemplateManagerOpen]);
+  }, [isEditing, applyForceLayout, caseModal, topicModal, taskModal, literatureModal, showNodeSelector, isTemplateManagerOpen]);
 
   useEffect(() => {
     // DISABLED automatic force layout to prevent overriding individual node positions
