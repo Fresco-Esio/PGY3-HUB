@@ -724,7 +724,7 @@ const CaseModal = ({
                     transition={{ duration: 0.4, ease: "easeOut" }}
                     layout="position"
                     layoutId="tabContent"
-                    className="p-6 h-[calc(85vh-200px)]"
+                    className="p-6 h-[calc(85vh-200px)] flex flex-col"
                   >
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-semibold text-gray-800">Case Timeline</h3>
@@ -739,8 +739,90 @@ const CaseModal = ({
                       </motion.button>
                     </div>
                     
+                    {/* Add Entry Form */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200"
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <Plus size={18} className="text-blue-600" />
+                        <span className="font-medium text-blue-800">Add Timeline Entry</span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {/* Entry Type and Custom Timestamp Row */}
+                        <div className="flex gap-3">
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Entry Type
+                            </label>
+                            <select
+                              value={newTimelineType}
+                              onChange={(e) => setNewTimelineType(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            >
+                              <option value="assessment">Assessment</option>
+                              <option value="medication">Medication</option>
+                              <option value="therapy">Therapy</option>
+                              <option value="followup">Follow-up</option>
+                              <option value="note">Note</option>
+                            </select>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Custom Timestamp (optional)
+                            </label>
+                            <input
+                              type="datetime-local"
+                              value={customTimestamp}
+                              onChange={(e) => setCustomTimestamp(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Entry Content */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Entry Content
+                          </label>
+                          <textarea
+                            value={newTimelineEntry}
+                            onChange={(e) => setNewTimelineEntry(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Enter clinical notes, observations, or updates..."
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Press Shift+Enter to add entry
+                          </p>
+                        </div>
+                        
+                        {/* Add Button */}
+                        <div className="flex justify-end">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={addTimelineEntry}
+                            disabled={!newTimelineEntry.trim() || isAddingEntry}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-2"
+                          >
+                            {isAddingEntry ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Send size={16} />
+                            )}
+                            {isAddingEntry ? 'Adding...' : 'Add Entry'}
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                    
                     {/* Timeline implementation */}
-                    <div className="relative">
+                    <div className="relative flex-1">
                       <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
                       
                       <div
@@ -751,109 +833,125 @@ const CaseModal = ({
                           scrollbarColor: '#475569 #1e293b'
                         }}
                       >
-                        {timelineEntries.map((entry, index) => (
-                          <motion.div
-                            key={entry.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ delay: index * 0.1, duration: 0.4 }}
-                            className={`relative ${entry.isNew ? 'animate-pulse' : ''}`}
-                          >
-                            {index < timelineEntries.length - 1 && (
-                              <div className="absolute left-6 top-12 w-0.5 h-16 bg-gradient-to-b from-blue-400 to-purple-500" />
-                            )}
-                            
+                        <AnimatePresence mode="popLayout">
+                          {timelineEntries.map((entry, index) => (
                             <motion.div
-                              whileHover={{ 
-                                scale: 1.02,
-                                boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15)'
+                              key={entry.id}
+                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                              animate={{ 
+                                opacity: 1, 
+                                y: 0, 
+                                scale: 1,
+                                transition: { 
+                                  delay: entry.isNew ? 0 : index * 0.1, 
+                                  duration: 0.4,
+                                  type: "spring",
+                                  stiffness: 500,
+                                  damping: 30
+                                }
                               }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => toggleTimelineEntry(entry.id)}
-                              className={`relative bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg p-4 cursor-pointer border-l-4 transition-all duration-300 ${
-                                entry.type === 'assessment' ? 'border-green-400' :
-                                entry.type === 'medication' ? 'border-blue-400' :
-                                entry.type === 'therapy' ? 'border-purple-400' :
-                                'border-orange-400'
-                              } ${entry.isNew ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
+                              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                              layout
+                              className={`relative ${entry.isNew ? 'animate-pulse' : ''}`}
                             >
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-3">
-                                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                                    entry.type === 'assessment' ? 'bg-green-500' :
-                                    entry.type === 'medication' ? 'bg-blue-500' :
-                                    entry.type === 'therapy' ? 'bg-purple-500' :
-                                    'bg-orange-500'
-                                  }`}>
-                                    {entry.type === 'assessment' && <Clipboard size={16} className="text-white" />}
-                                    {entry.type === 'medication' && <Heart size={16} className="text-white" />}
-                                    {entry.type === 'therapy' && <Brain size={16} className="text-white" />}
-                                    {entry.type === 'followup' && <Calendar size={16} className="text-white" />}
+                              {index < timelineEntries.length - 1 && (
+                                <div className="absolute left-6 top-12 w-0.5 h-16 bg-gradient-to-b from-blue-400 to-purple-500" />
+                              )}
+                              
+                              <motion.div
+                                whileHover={{ 
+                                  scale: 1.02,
+                                  boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15)'
+                                }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => toggleTimelineEntry(entry.id)}
+                                className={`relative bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg p-4 cursor-pointer border-l-4 transition-all duration-300 ${
+                                  entry.type === 'assessment' ? 'border-green-400' :
+                                  entry.type === 'medication' ? 'border-blue-400' :
+                                  entry.type === 'therapy' ? 'border-purple-400' :
+                                  entry.type === 'note' ? 'border-yellow-400' :
+                                  'border-orange-400'
+                                } ${entry.isNew ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start gap-3">
+                                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                      entry.type === 'assessment' ? 'bg-green-500' :
+                                      entry.type === 'medication' ? 'bg-blue-500' :
+                                      entry.type === 'therapy' ? 'bg-purple-500' :
+                                      entry.type === 'note' ? 'bg-yellow-500' :
+                                      'bg-orange-500'
+                                    }`}>
+                                      {entry.type === 'assessment' && <Clipboard size={16} className="text-white" />}
+                                      {entry.type === 'medication' && <Heart size={16} className="text-white" />}
+                                      {entry.type === 'therapy' && <Brain size={16} className="text-white" />}
+                                      {entry.type === 'note' && <StickyNote size={16} className="text-white" />}
+                                      {entry.type === 'followup' && <Calendar size={16} className="text-white" />}
+                                    </div>
+                                    
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <h4 className="text-white font-semibold text-sm">{entry.title}</h4>
+                                        {entry.isNew && (
+                                          <motion.span
+                                            animate={{ 
+                                              scale: [1, 1.2, 1],
+                                              opacity: [0.7, 1, 0.7]
+                                            }}
+                                            transition={{ 
+                                              duration: 2, 
+                                              repeat: Infinity,
+                                              ease: "easeInOut"
+                                            }}
+                                            className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded-full"
+                                          >
+                                            New
+                                          </motion.span>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-4 text-xs text-slate-300 mb-2">
+                                        <span className="flex items-center gap-1">
+                                          <Calendar size={12} />
+                                          {entry.date}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                          <Clock size={12} />
+                                          {entry.time}
+                                        </span>
+                                        <span>by {entry.author}</span>
+                                      </div>
+                                      <p className="text-slate-200 text-sm">{entry.content}</p>
+                                    </div>
                                   </div>
                                   
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <h4 className="text-white font-semibold text-sm">{entry.title}</h4>
-                                      {entry.isNew && (
-                                        <motion.span
-                                          animate={{ 
-                                            scale: [1, 1.2, 1],
-                                            opacity: [0.7, 1, 0.7]
-                                          }}
-                                          transition={{ 
-                                            duration: 2, 
-                                            repeat: Infinity,
-                                            ease: "easeInOut"
-                                          }}
-                                          className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded-full"
-                                        >
-                                          New
-                                        </motion.span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-4 text-xs text-slate-300 mb-2">
-                                      <span className="flex items-center gap-1">
-                                        <Calendar size={12} />
-                                        {entry.date}
-                                      </span>
-                                      <span className="flex items-center gap-1">
-                                        <Clock size={12} />
-                                        {entry.time}
-                                      </span>
-                                      <span>by {entry.author}</span>
-                                    </div>
-                                    <p className="text-slate-200 text-sm">{entry.summary}</p>
-                                  </div>
+                                  <motion.div
+                                    animate={{ rotate: expandedTimelineEntry === entry.id ? 180 : 0 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    <ChevronDown size={20} className="text-slate-400" />
+                                  </motion.div>
                                 </div>
                                 
-                                <motion.div
-                                  animate={{ rotate: expandedTimelineEntry === entry.id ? 180 : 0 }}
-                                  transition={{ duration: 0.2 }}
-                                >
-                                  <ChevronDown size={20} className="text-slate-400" />
-                                </motion.div>
-                              </div>
-                              
-                              <AnimatePresence>
-                                {expandedTimelineEntry === entry.id && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                                    className="overflow-hidden"
-                                  >
-                                    <div className="mt-4 pt-4 border-t border-slate-600">
-                                      <h5 className="text-white font-medium text-sm mb-2">Detailed Notes:</h5>
-                                      <p className="text-slate-300 text-sm leading-relaxed">{entry.details}</p>
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
+                                <AnimatePresence>
+                                  {expandedTimelineEntry === entry.id && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="mt-4 pt-4 border-t border-slate-600">
+                                        <h5 className="text-white font-medium text-sm mb-2">Detailed Notes:</h5>
+                                        <p className="text-slate-300 text-sm leading-relaxed">{entry.details}</p>
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </motion.div>
                             </motion.div>
-                          </motion.div>
-                        ))}
+                          ))}
+                        </AnimatePresence>
                       </div>
                       
                       <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
