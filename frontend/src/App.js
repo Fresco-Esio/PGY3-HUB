@@ -3031,7 +3031,7 @@ useEffect(() => {
         return node;
       });
     });
-  }, [selectedNode, nodeVisibility, isReactFlowReady]);
+  }, [selectedNode, isReactFlowReady]);
 
   // Initialize nodeVisibility when nodes are added or removed (not when className changes)
   useEffect(() => {
