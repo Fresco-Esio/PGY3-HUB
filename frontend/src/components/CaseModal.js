@@ -310,11 +310,9 @@ const CaseModal = ({
     setEditingEntryData({ ...newEntry });
     setIsCreatingEntry(true);
     
-    // Scroll to bottom after animation
-    setTimeout(() => {
-      scrollToLatest();
-    }, 300);
-  }, [editData?.timeline, isCreatingEntry, editingEntryId, scrollToLatest]);
+    // Scroll to show the full editing form after it expands
+    scrollToShowEditingEntry();
+  }, [editData?.timeline, isCreatingEntry, editingEntryId, scrollToShowEditingEntry]);
 
   // Start editing an existing entry
   const startEditingEntry = useCallback((entry) => {
