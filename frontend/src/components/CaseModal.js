@@ -130,7 +130,6 @@ const CaseModal = ({
   const [expandedTimelineEntry, setExpandedTimelineEntry] = useState(null);
   const [editingEntryId, setEditingEntryId] = useState(null);
   const [editingEntryData, setEditingEntryData] = useState({});
-  const [isCreatingEntry, setIsCreatingEntry] = useState(false);
   const timelineScrollRef = useRef(null);
 
   useEffect(() => {
