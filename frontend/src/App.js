@@ -2419,7 +2419,10 @@ useEffect(() => {
   }, [setNodes]);
 
   const onNodeDoubleClick = useCallback((event, node) => {
-    const [type, id] = node.id.split('-');
+    // Handle multi-part IDs correctly by joining all parts after the type
+    const parts = node.id.split('-');
+    const type = parts[0];
+    const id = parts.slice(1).join('-'); // Join all parts after the first one
     
     // Prevent multiple rapid clicks by checking if modal is already open
     if (type === 'case' && caseModal.isOpen) return;
