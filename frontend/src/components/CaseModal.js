@@ -158,53 +158,65 @@ const CaseModal = ({
     }
   }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, isTabTransitioning, isAnimating]);
 
-  // Mock timeline data - in real app this would come from data
-  const timelineEntries = useMemo(() => [
-    {
-      id: 1,
-      date: '2024-01-15',
-      time: '09:30 AM',
-      type: 'assessment',
-      title: 'Initial Assessment',
-      summary: 'Patient presented with symptoms of anxiety and depression.',
-      details: 'Comprehensive psychiatric evaluation completed. Patient reports increased anxiety over the past 3 months, difficulty sleeping, and decreased appetite. MSE reveals anxious mood, intact cognition, no psychotic features. PHQ-9 score: 14 (moderate depression). GAD-7 score: 12 (moderate anxiety).',
-      author: 'Dr. Smith',
-      isNew: false
-    },
-    {
-      id: 2,
-      date: '2024-01-22',
-      time: '02:15 PM',
-      type: 'medication',
-      title: 'Medication Adjustment',
-      summary: 'Started on Sertraline 50mg daily.',
-      details: 'After discussion of treatment options, patient agreed to trial of SSRI. Started Sertraline 50mg daily. Reviewed potential side effects including initial activation, GI upset. Plan to follow up in 2 weeks. Provided crisis resources and encouraged to call if any concerns.',
-      author: 'Dr. Smith',
-      isNew: false
-    },
-    {
-      id: 3,
-      date: '2024-02-05',
-      time: '11:00 AM',
-      type: 'followup',
-      title: 'Follow-up Visit',
-      summary: 'Patient reports mild improvement in mood.',
-      details: 'Patient tolerated medication well with minimal side effects. Reports improved energy and slightly better sleep. Still experiencing some anxiety symptoms. PHQ-9 score decreased to 10. Continue current medication, discussed therapy referral.',
-      author: 'Dr. Smith',
-      isNew: false
-    },
-    {
-      id: 4,
-      date: '2024-02-19',
-      time: '03:45 PM',
-      type: 'therapy',
-      title: 'Therapy Session',
-      summary: 'First CBT session completed.',
-      details: 'Initial therapy session with focus on psychoeducation about anxiety and depression. Introduced basic CBT concepts and breathing exercises. Patient engaged well and expressed motivation for therapy. Homework assigned: daily mood tracking and breathing practice.',
-      author: 'Sarah Johnson, LCSW',
-      isNew: true
+  // Timeline data from case or default mock data
+  const timelineEntries = useMemo(() => {
+    // If case has timeline data, use it, otherwise use mock data for demonstration
+    if (editData?.timeline && Array.isArray(editData.timeline) && editData.timeline.length > 0) {
+      return editData.timeline.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     }
-  ], []);
+    
+    // Default mock data for cases without timeline
+    return [
+      {
+        id: 1,
+        timestamp: '2024-01-15T09:30:00.000Z',
+        date: '2024-01-15',
+        time: '09:30 AM',
+        type: 'assessment',
+        title: 'Initial Assessment',
+        content: 'Patient presented with symptoms of anxiety and depression.',
+        details: 'Comprehensive psychiatric evaluation completed. Patient reports increased anxiety over the past 3 months, difficulty sleeping, and decreased appetite. MSE reveals anxious mood, intact cognition, no psychotic features. PHQ-9 score: 14 (moderate depression). GAD-7 score: 12 (moderate anxiety).',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 2,
+        timestamp: '2024-01-22T14:15:00.000Z',
+        date: '2024-01-22',
+        time: '02:15 PM',
+        type: 'medication',
+        title: 'Medication Adjustment',
+        content: 'Started on Sertraline 50mg daily.',
+        details: 'After discussion of treatment options, patient agreed to trial of SSRI. Started Sertraline 50mg daily. Reviewed potential side effects including initial activation, GI upset. Plan to follow up in 2 weeks. Provided crisis resources and encouraged to call if any concerns.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 3,
+        timestamp: '2024-02-05T11:00:00.000Z',
+        date: '2024-02-05',
+        time: '11:00 AM',
+        type: 'followup',
+        title: 'Follow-up Visit',
+        content: 'Patient reports mild improvement in mood.',
+        details: 'Patient tolerated medication well with minimal side effects. Reports improved energy and slightly better sleep. Still experiencing some anxiety symptoms. PHQ-9 score decreased to 10. Continue current medication, discussed therapy referral.',
+        author: 'Dr. Smith',
+        isNew: false
+      },
+      {
+        id: 4,
+        timestamp: '2024-02-19T15:45:00.000Z',
+        date: '2024-02-19',
+        time: '03:45 PM',
+        type: 'therapy',
+        title: 'Therapy Session',
+        content: 'First CBT session completed.',
+        details: 'Initial therapy session with focus on psychoeducation about anxiety and depression. Introduced basic CBT concepts and breathing exercises. Patient engaged well and expressed motivation for therapy. Homework assigned: daily mood tracking and breathing practice.',
+        author: 'Sarah Johnson, LCSW',
+        isNew: true
+      }
+    ];
+  }, [editData?.timeline]);
 
   const scrollToLatest = useCallback(() => {
     if (timelineScrollRef.current) {
