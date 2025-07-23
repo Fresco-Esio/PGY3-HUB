@@ -2872,19 +2872,6 @@ useEffect(() => {
     setFocusedCategory(null);
     
     // Then reset node visibility (more complex operation)
-    if (nodes.length > 0) {
-      const resetVisibility = {};
-      
-      // Set all nodes to visible
-      for (let i = 0; i < nodes.length; i++) {
-        resetVisibility[nodes[i].id] = true;
-      }
-      
-      // Update ref first to avoid circular updates
-      visibilityRef.current = {...resetVisibility};
-      // Then update state
-      setNodeVisibility(resetVisibility);
-    }
   }, [nodes]);
 
   // Keyboard shortcuts
