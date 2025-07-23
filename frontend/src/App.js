@@ -3751,15 +3751,22 @@ useEffect(() => {
               };
             }
             
-            // Get the current viewport to center the new node in the visible area
-            const viewport = getViewport();
-            const centerX = (viewport.x * -1) + (window.innerWidth - 250) / 2; // Account for sidebar width
-            const centerY = (viewport.y * -1) + window.innerHeight / 2;
+            // Calculate grid-based position for new nodes to avoid clustering
+            const existingNodeCount = nodes.length;
+            const gridSize = Math.ceil(Math.sqrt(existingNodeCount + 1));
+            const nodeSpacing = 250;
+            const offsetX = 350; // Offset from left sidebar
+            const offsetY = 200; // Offset from top
+            
+            const gridPosition = {
+              x: (existingNodeCount % gridSize) * nodeSpacing + offsetX,
+              y: Math.floor(existingNodeCount / gridSize) * nodeSpacing + offsetY
+            };
             
             const newNode = {
               id,
               type: nodeType,
-              position: { x: centerX, y: centerY },
+              position: gridPosition,
               data: { ...nodeData, onDelete: () => handleDeleteNode(id) }
             };
 
