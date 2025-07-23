@@ -582,8 +582,18 @@ const TopicNode = ({ data, selected }) => {
         {data.onDelete && (
           <button
             onClick={(e) => {
-              e.stopPropagation();
-              data.onDelete();
+              // Only stop propagation if this is a single click, not part of a double-click
+              if (e.detail === 1) {
+                e.stopPropagation();
+                // Use a small timeout to ensure this isn't part of a double-click
+                setTimeout(() => {
+                  data.onDelete();
+                }, 200);
+              }
+            }}
+            onDoubleClick={(e) => {
+              // Prevent delete on double-click, allow modal to open
+              e.preventDefault();
             }}
             className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
           >
