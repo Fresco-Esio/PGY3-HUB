@@ -8,7 +8,7 @@
       "title": "Untitled Literature",
       "authors": null,
       "publication": null,
-      "year": null,
+      "year": 0,
       "doi": null,
       "abstract": null,
       "notes": null,
@@ -19,7 +19,7 @@
         "y": 812.6127659574468
       },
       "created_at": "2025-07-23T11:18:49.016000+00:00",
-      "updated_at": "2025-07-23T11:18:49.016000+00:00"
+      "updated_at": "2025-07-23T11:19:16.032000+00:00"
     }
   ],
   "connections": []
