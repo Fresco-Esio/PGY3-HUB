@@ -3089,7 +3089,7 @@ useEffect(() => {
     });
   }, [selectedNode, nodeVisibility, isReactFlowReady]);
 
-  // Initialize nodeVisibility when nodes change
+  // Initialize nodeVisibility when nodes are added or removed (not when className changes)
   useEffect(() => {
     // Skip if no nodes
     if (nodes.length === 0) return;
@@ -3134,7 +3134,7 @@ useEffect(() => {
     
     const timeoutId = setTimeout(updateVisibility, 0);
     return () => clearTimeout(timeoutId);
-  }, [nodes]); // Only depend on nodes changes
+  }, [nodes.length]); // Only depend on node count changes, not individual node changes
 
   // Optionally: handle layout setup on first render if needed
 
