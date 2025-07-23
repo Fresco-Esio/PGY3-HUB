@@ -3093,7 +3093,7 @@ useEffect(() => {
   useEffect(() => {
     if (!isReactFlowReady) return;
     
-    const currentVisibility = nodeVisibilityRef.current;
+    const currentVisibility = visibilityRef.current;
     const currentSelectedId = selectedNode?.id;
     
     setNodes(prevNodes => {
