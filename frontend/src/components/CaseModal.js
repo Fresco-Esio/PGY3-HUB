@@ -270,10 +270,6 @@ const CaseModal = ({
     }
   }, []);
 
-  const toggleTimelineEntry = useCallback((entryId) => {
-    setExpandedTimelineEntry(prev => prev === entryId ? null : entryId);
-  }, []);
-
   // Auto-save timeline changes with debounce
   const saveTimelineChange = useCallback((newTimeline) => {
     const timeoutId = setTimeout(() => {
