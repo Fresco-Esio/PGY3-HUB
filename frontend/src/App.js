@@ -2044,7 +2044,7 @@ useEffect(() => {
       console.log('Converting data to React Flow nodes due to data change');
       // Use a timeout to avoid dependency issues and ensure state is stable
       setTimeout(() => {
-        convertDataToReactFlow(mindMapData, true);
+        convertDataToReactFlow(mindMapData, false); // CHANGED: Don't apply force layout automatically
       }, 100);
     }
   }
