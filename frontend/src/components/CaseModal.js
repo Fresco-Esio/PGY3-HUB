@@ -929,6 +929,7 @@ const CaseModal = ({
                                 
                                 <motion.div
                                   layout
+                                  data-entry-id={entry.id}
                                   whileHover={!isEditing ? { 
                                     scale: 1.01,
                                     boxShadow: '0 8px 20px rgba(59, 130, 246, 0.12)'
