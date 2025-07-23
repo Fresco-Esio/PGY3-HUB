@@ -448,15 +448,18 @@ test_plan:
 
   - task: "Editable Timeline functionality in CaseModal"
     implemented: true
-    working: true
+    working: false
     file: "CaseModal.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
           comment: "COMPREHENSIVE TIMELINE FUNCTIONALITY TESTING COMPLETED: Successfully verified all Timeline features in CaseModal are working correctly. DETAILED VERIFICATION: ✅ CaseModal opens via double-click on case nodes ✅ Timeline tab is accessible and functional with proper navigation ✅ Add Timeline Entry form displays correctly with all required components: Entry Type dropdown (Assessment, Medication, Therapy, Follow-up, Note), Custom Timestamp field (datetime-local input), Entry Content textarea, Add Entry button with proper validation ✅ Form validation working - button disabled when content empty, enabled when filled ✅ Timeline displays existing entries with dark theme gradient styling, color-coded left borders by entry type, proper date/time formatting, author information ✅ Timeline interactions functional: click to expand/collapse entries with AnimatePresence, Scroll to Latest button working, smooth framer-motion animations and transitions ✅ Visual design elements present: gradient fades at top/bottom, hover effects and scaling, new entry badges with pulsing animations ✅ Auto-save functionality implemented with 800ms debounce ✅ Data persistence tested across modal close/reopen cycles. All success criteria from the review request have been met. The Timeline functionality preserves all existing design elements while adding full editability."
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL ISSUE FOUND: Timeline functionality is completely broken due to JavaScript runtime errors. The application shows 'Uncaught runtime errors' with 'Cannot access getEntryTitle before initialization' ReferenceError in CaseModal component. This prevents the CaseModal from opening properly and makes the Timeline functionality inaccessible. The error occurs at line 364 in the saveEditingEntry callback where getEntryTitle is called before it's defined. This is a function declaration order issue - getEntryTitle is defined at line 385 but called earlier in the code. The Timeline interface cannot be tested because the modal crashes on load. This is a critical blocking issue that prevents any Timeline functionality from working."
 
 agent_communication:
     - agent: "main"
