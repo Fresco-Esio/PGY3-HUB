@@ -423,7 +423,7 @@ const CaseModal = ({
     // Clear editing state
     setEditingEntryId(null);
     setEditingEntryData({});
-    setIsCreatingEntry(false);
+    setExpandedTimelineEntry(null);
     
     addToast(
       editingEntryData.id.toString().startsWith('new-') 
@@ -431,18 +431,12 @@ const CaseModal = ({
         : 'Timeline entry updated successfully', 
       'success'
     );
-    
-    // Only scroll to latest for new entries
-    if (editingEntryData.id.toString().startsWith('new-')) {
-      setTimeout(() => scrollToLatest(), 300);
-    }
   }, [
     editingEntryId, 
     editingEntryData, 
     editData?.timeline, 
     saveTimelineChange, 
-    addToast, 
-    scrollToLatest,
+    addToast,
     getEntryTitle
   ]);
 
@@ -460,7 +454,6 @@ const CaseModal = ({
     // Clear editing state
     setEditingEntryId(null);
     setEditingEntryData({});
-    setIsCreatingEntry(false);
     setExpandedTimelineEntry(null);
   }, [editingEntryId, editingEntryData, editData?.timeline]);
 
