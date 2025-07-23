@@ -2440,14 +2440,19 @@ useEffect(() => {
     }
     
     if (type === 'case') {
+      console.log('🔍 Case node clicked:', { nodeId: node.id, type, id, mindMapDataCases: mindMapData.cases });
       const dataItem = mindMapData.cases.find(item => String(item.id) === id);
+      console.log('📋 Case data lookup result:', { dataItem, searchingForId: id });
       if (dataItem) {
+        console.log('✅ Opening CaseModal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, case: true }));
         setCaseModal({ isOpen: true, data: dataItem });
         // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, case: false }));
         }, 800);
+      } else {
+        console.log('❌ Case data not found for id:', id);
       }
       return;
     }
