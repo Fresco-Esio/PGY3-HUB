@@ -918,34 +918,17 @@ const CaseModal = ({
                       
                       <div
                         ref={timelineScrollRef}
-                        className="h-full max-h-full overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4"
+                        className="h-full max-h-full overflow-y-scroll bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4"
                         style={{
                           scrollbarWidth: 'auto',
-                          scrollbarColor: '#64748b #334155'
+                          scrollbarGutter: 'stable'
                         }}
                       >
-                        {/* Custom scrollbar styles */}
-                        <style jsx>{`
-                          div::-webkit-scrollbar {
-                            width: 12px;
-                          }
-                          div::-webkit-scrollbar-track {
-                            background: #334155;
-                            border-radius: 6px;
-                          }
-                          div::-webkit-scrollbar-thumb {
-                            background: #64748b;
-                            border-radius: 6px;
-                          }
-                          div::-webkit-scrollbar-thumb:hover {
-                            background: #94a3b8;
-                          }
-                        `}</style>
-                        
                         {/* Vertical timeline bar */}
                         <div className="absolute left-7 top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-400 via-purple-500 to-blue-400 opacity-30" />
                         
-                        <div className="space-y-1 min-h-full">
+                        {/* Force minimum height to ensure scrolling is possible */}
+                        <div className="space-y-1" style={{ minHeight: 'calc(100% + 1px)' }}>
                           <AnimatePresence mode="wait">
                             {timelineEntries.map((entry, index) => {
                               const isEditing = editingEntryId === entry.id;
