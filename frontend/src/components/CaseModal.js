@@ -918,7 +918,7 @@ const CaseModal = ({
                       
                       <div
                         ref={timelineScrollRef}
-                        className="h-full max-h-full overflow-y-scroll bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4"
+                        className="timeline-scroll h-full max-h-full overflow-y-scroll bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4"
                         style={{
                           scrollbarWidth: 'auto',
                           scrollbarGutter: 'stable'
