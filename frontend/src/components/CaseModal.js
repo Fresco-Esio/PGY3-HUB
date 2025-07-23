@@ -423,10 +423,8 @@ const CaseModal = ({
     setEditingEntryData({ ...newEntry });
     setExpandedTimelineEntry(newEntry.id);
     
-    // Start scroll immediately when expansion begins
-    requestAnimationFrame(() => {
-      scrollToShowEntry(newEntry.id, true); // true indicates it's expanding
-    });
+    // Trigger immediate scroll - no delays
+    scrollToShowEntry(newEntry.id, true);
   }, [editData?.timeline, editingEntryId, scrollToShowEntry]);
 
   // Toggle entry expansion and start editing if needed
@@ -459,10 +457,8 @@ const CaseModal = ({
       setEditingEntryId(entryId);
       setEditingEntryData({ ...entry });
       
-      // Start scroll immediately with expansion
-      requestAnimationFrame(() => {
-        scrollToShowEntry(entryId, true); // true indicates it's expanding
-      });
+      // Trigger immediate scroll - no delays
+      scrollToShowEntry(entryId, true);
     }
   }, [editingEntryId, expandedTimelineEntry, addToast, scrollToShowEntry]);
 
