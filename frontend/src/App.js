@@ -2869,7 +2869,6 @@ useEffect(() => {
     console.log("Clearing search and resetting visibility");
     
     // First update the simpler states
-    setSearchQuery('');
     setFocusedCategory(null);
     
     // Then reset node visibility (more complex operation)
