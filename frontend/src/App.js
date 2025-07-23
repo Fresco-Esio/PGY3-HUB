@@ -2896,7 +2896,7 @@ useEffect(() => {
         // Clear search if no modals are open
         if (!caseModal.isOpen && !topicModal.isOpen && !taskModal.isOpen && 
             !literatureModal.isOpen && !showNodeSelector && !isTemplateManagerOpen) {
-          clearSearch();
+          // Search functionality removed
         }
       }
     };
