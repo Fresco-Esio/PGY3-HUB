@@ -128,6 +128,10 @@ const CaseModal = ({
   const [activeTab, setActiveTab] = useState('overview');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
   const [expandedTimelineEntry, setExpandedTimelineEntry] = useState(null);
+  const [newTimelineEntry, setNewTimelineEntry] = useState('');
+  const [newTimelineType, setNewTimelineType] = useState('followup');
+  const [customTimestamp, setCustomTimestamp] = useState('');
+  const [isAddingEntry, setIsAddingEntry] = useState(false);
   const timelineScrollRef = useRef(null);
 
   useEffect(() => {
