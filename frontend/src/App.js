@@ -1816,8 +1816,6 @@ const DashboardComponent = () => {
   const [exportProgress, setExportProgress] = useState({ show: false, progress: 0, message: '' });
 
   const [toasts, setToasts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResultsCount, setSearchResultsCount] = useState(0);
   const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
@@ -1827,8 +1825,6 @@ const DashboardComponent = () => {
     task: false,
     literature: false
   });
-  // Separate nodeVisibility state to track node visibility without modifying node data
-  const [nodeVisibility, setNodeVisibility] = useState({});
   // Use a ref to store the current visibility state for comparison
   const visibilityRef = useRef({});
   
