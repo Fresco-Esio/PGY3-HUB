@@ -216,61 +216,59 @@ const CaseModal = ({
     ];
   }, [editData?.timeline]);
 
-  const scrollToLatest = useCallback(() => {
-    if (timelineScrollRef.current) {
-      timelineScrollRef.current.scrollTop = timelineScrollRef.current.scrollHeight;
-    }
-  }, []);
-
-  // Enhanced scroll function for new entries in editing mode
-  const scrollToShowEditingEntry = useCallback(() => {
-    if (timelineScrollRef.current && editingEntryId) {
-      // Wait for DOM to update and form to fully expand
-      setTimeout(() => {
-        const container = timelineScrollRef.current;
-        const containerHeight = container.clientHeight;
-        const scrollHeight = container.scrollHeight;
-        
-        // Estimate the height of an expanded editing form (approximately 300-350px)
-        const estimatedFormHeight = 350;
-        
-        // Calculate how much space we need from the bottom
-        const requiredBottomSpace = estimatedFormHeight + 50; // Extra 50px padding
-        
-        // Calculate target scroll to ensure full form visibility
-        const targetScroll = scrollHeight - containerHeight + requiredBottomSpace;
-        
-        container.scrollTo({
-          top: Math.max(0, targetScroll),
-          behavior: 'smooth'
-        });
-      }, 100); // Reduced delay for immediate scroll
-      
-      // Additional scroll check after form fully expands
-      setTimeout(() => {
-        const container = timelineScrollRef.current;
-        if (container) {
-          const containerRect = container.getBoundingClientRect();
-          const editingElement = container.querySelector(`[data-entry-id="${editingEntryId}"]`);
+  // Enhanced scroll function to ensure expanded entries are fully visible
+  const scrollToShowEntry = useCallback((entryId) => {
+    if (timelineScrollRef.current && entryId) {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const container = timelineScrollRef.current;
+          const entryElement = container.querySelector(`[data-entry-id="${entryId}"]`);
           
-          if (editingElement) {
-            const elementRect = editingElement.getBoundingClientRect();
-            const elementBottom = elementRect.bottom;
-            const containerBottom = containerRect.bottom;
+          if (entryElement && container) {
+            const containerRect = container.getBoundingClientRect();
+            const entryRect = entryElement.getBoundingClientRect();
             
-            // If element extends beyond container, scroll more
-            if (elementBottom > containerBottom - 20) { // 20px safety margin
-              const additionalScroll = elementBottom - containerBottom + 80; // Extra space
+            // Calculate the position relative to the scrollable container
+            const entryTop = entryRect.top - containerRect.top + container.scrollTop;
+            const entryBottom = entryTop + entryRect.height;
+            const containerHeight = container.clientHeight;
+            const currentScrollTop = container.scrollTop;
+            
+            // Determine if we need to scroll
+            let targetScrollTop = currentScrollTop;
+            
+            // If entry extends below visible area, scroll to show the bottom with padding
+            if (entryBottom > currentScrollTop + containerHeight) {
+              targetScrollTop = entryBottom - containerHeight + 60; // 60px bottom padding
+            }
+            
+            // If entry is above visible area, scroll to show the top
+            if (entryTop < currentScrollTop) {
+              targetScrollTop = entryTop - 20; // 20px top padding
+            }
+            
+            // Only scroll if necessary
+            if (targetScrollTop !== currentScrollTop) {
               container.scrollTo({
-                top: container.scrollTop + additionalScroll,
+                top: Math.max(0, targetScrollTop),
                 behavior: 'smooth'
               });
             }
           }
-        }
-      }, 400); // After animation completes
+        }, 100); // Wait for animation to start
+      });
     }
-  }, [editingEntryId]);
+  }, []);
+
+  const scrollToLatest = useCallback(() => {
+    if (timelineScrollRef.current) {
+      timelineScrollRef.current.scrollTo({
+        top: timelineScrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, []);
 
   const toggleTimelineEntry = useCallback((entryId) => {
     setExpandedTimelineEntry(prev => prev === entryId ? null : entryId);
