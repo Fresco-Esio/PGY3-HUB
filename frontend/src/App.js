@@ -2636,17 +2636,7 @@ useEffect(() => {
       return;
     }
 
-    // Check for node removals and update nodeVisibility state
-    const removedNodes = changes.filter(change => change.type === 'remove');
-    if (removedNodes.length > 0) {
-      setNodeVisibility(prevVisibility => {
-        const newVisibility = { ...prevVisibility };
-        removedNodes.forEach(change => {
-          delete newVisibility[change.id];
-        });
-        return newVisibility;
-      });
-    }
+
     
     // Process position changes for data persistence - SIMPLIFIED
     const positionChanges = changes.filter(change => 
