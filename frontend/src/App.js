@@ -3087,8 +3087,8 @@ useEffect(() => {
               ...targetStyle,
               opacity: 0.15,
               transform: 'scale(0.8)',
-              filter: 'grayscale(0.7)',
-              pointerEvents: 'none'
+              filter: 'grayscale(0.7)'
+              // REMOVED: pointerEvents: 'none' - this was preventing dragging!
             };
           } else if (isSelected) {
             targetStyle = {
