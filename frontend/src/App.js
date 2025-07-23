@@ -820,18 +820,28 @@ const CaseNode = ({ data, selected }) => {
         {data.onDelete && (
           <button
             onClick={(e) => {
-              // Only stop propagation if this is a single click, not part of a double-click
-              if (e.detail === 1) {
-                e.stopPropagation();
-                // Use a small timeout to ensure this isn't part of a double-click
-                setTimeout(() => {
-                  data.onDelete();
-                }, 200);
-              }
+              // Don't stop propagation immediately - delay the action to allow double-clicks
+              e.preventDefault(); // Prevent any default behavior but allow bubbling
+              
+              // Use a longer timeout to distinguish between single click and double-click
+              const deleteTimeout = setTimeout(() => {
+                // Only execute delete if this wasn't part of a double-click sequence
+                e.stopPropagation(); // Stop propagation only when actually deleting
+                data.onDelete();
+              }, 300); // Increased timeout
+              
+              // Store timeout ID on the button to cancel it if double-click occurs
+              e.currentTarget.deleteTimeout = deleteTimeout;
             }}
             onDoubleClick={(e) => {
-              // Prevent delete on double-click, allow modal to open
-              e.preventDefault();
+              // Cancel the pending delete action
+              if (e.currentTarget.deleteTimeout) {
+                clearTimeout(e.currentTarget.deleteTimeout);
+                e.currentTarget.deleteTimeout = null;
+              }
+              
+              // Don't prevent default - allow the double-click to bubble up for modal opening
+              // The parent node will handle the double-click to open the modal
             }}
             className="ml-auto p-1 hover:bg-gray-200 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
           >
