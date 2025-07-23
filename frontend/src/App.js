@@ -1825,17 +1825,6 @@ const DashboardComponent = () => {
     task: false,
     literature: false
   });
-  // Use a ref to store the current visibility state for comparison
-  const visibilityRef = useRef({});
-  
-  // Initialize the ref
-  useEffect(() => {
-    // Only initialize once if empty
-    if (Object.keys(visibilityRef.current).length === 0) {
-      visibilityRef.current = {};
-    }
-  }, []);
-
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
