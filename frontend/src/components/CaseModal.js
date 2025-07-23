@@ -321,6 +321,29 @@ const CaseModal = ({
     setEditingEntryId(entry.id);
     setEditingEntryData({ ...entry });
     setExpandedTimelineEntry(entry.id);
+    
+    // For existing entries, ensure the editing form is visible
+    setTimeout(() => {
+      if (timelineScrollRef.current) {
+        const container = timelineScrollRef.current;
+        const entryElement = container.querySelector(`[data-entry-id="${entry.id}"]`);
+        
+        if (entryElement) {
+          const containerRect = container.getBoundingClientRect();
+          const entryRect = entryElement.getBoundingClientRect();
+          const entryBottomOffset = entryRect.bottom - containerRect.top;
+          
+          // If the entry (including expanded form) would be cut off, scroll it into view
+          if (entryBottomOffset > container.clientHeight - 50) { // 50px padding
+            const scrollAmount = entryBottomOffset - container.clientHeight + 100; // Extra padding
+            container.scrollTo({
+              top: container.scrollTop + scrollAmount,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }
+    }, 350); // Wait for expand animation
   }, [editingEntryId]);
 
   // Save the currently editing entry
