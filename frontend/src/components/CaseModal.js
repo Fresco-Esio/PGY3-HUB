@@ -259,6 +259,17 @@ const CaseModal = ({
     return titles[type] || 'Clinical Entry';
   }, []);
 
+  const getEntryTitle = useCallback((type) => {
+    const titles = {
+      assessment: 'Clinical Assessment',
+      medication: 'Medication Update',
+      therapy: 'Therapy Session',
+      followup: 'Follow-up Visit',
+      note: 'Clinical Note'
+    };
+    return titles[type] || 'Clinical Entry';
+  }, []);
+
   // Create a new blank timeline entry for inline editing
   const createNewTimelineEntry = useCallback(() => {
     if (isCreatingEntry || editingEntryId) return; // Prevent multiple new entries
