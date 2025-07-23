@@ -2162,15 +2162,16 @@ useEffect(() => {
   }, [setNodes, setEdges, handleDeleteNode, handleLiteratureClick, isInitialLoad]);
 
   const saveToBackend = useCallback(async (data) => {
+    // Deep clone the data to avoid modifying the original
+    const cleanData = {
+      topics: JSON.parse(JSON.stringify(data.topics || [])),
+      cases: JSON.parse(JSON.stringify(data.cases || [])),
+      tasks: JSON.parse(JSON.stringify(data.tasks || [])),
+      literature: JSON.parse(JSON.stringify(data.literature || [])),
+      connections: JSON.parse(JSON.stringify(data.connections || []))
+    };
+    
     try {
-      // Deep clone the data to avoid modifying the original
-      const cleanData = {
-        topics: JSON.parse(JSON.stringify(data.topics || [])),
-        cases: JSON.parse(JSON.stringify(data.cases || [])),
-        tasks: JSON.parse(JSON.stringify(data.tasks || [])),
-        literature: JSON.parse(JSON.stringify(data.literature || [])),
-        connections: JSON.parse(JSON.stringify(data.connections || []))
-      };
       
       // Current timestamp for created_at/updated_at fields
       const now = new Date().toISOString();
