@@ -2979,49 +2979,6 @@ useEffect(() => {
     
   }, [isReactFlowReady]);
 
-  // Apply CSS classes to nodes based on search and selection
-  useEffect(() => {
-    if (!isReactFlowReady) return;
-    
-    const currentVisibility = visibilityRef.current;
-    const currentSelectedId = selectedNode?.id;
-    
-    setNodes(prevNodes => {
-      return prevNodes.map(node => {
-        const isVisible = currentVisibility[node.id] !== false;
-        const isSelected = currentSelectedId === node.id;
-        
-        // Build className instead of modifying styles
-        let className = node.className || '';
-        
-        // Remove existing search classes
-        className = className.replace(/\s*(search-dimmed|search-selected)\s*/g, ' ').trim();
-        
-        // Add appropriate classes
-        if (!isVisible) {
-          className += ' search-dimmed';
-        }
-        if (isSelected) {
-          className += ' search-selected';
-        }
-        
-        // Only update if className changed
-        if (node.className !== className.trim()) {
-          return {
-            ...node,
-            className: className.trim(),
-            // Explicitly preserve position and other React Flow properties
-            position: node.position,
-            type: node.type,
-            data: node.data
-          };
-        }
-        
-        return node;
-      });
-    });
-  }, [selectedNode, isReactFlowReady]);
-
   // Optionally: handle layout setup on first render if needed
 
   // Show optimized loading screen during initial load
