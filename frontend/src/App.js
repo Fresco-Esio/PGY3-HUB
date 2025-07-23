@@ -1171,10 +1171,19 @@ const LiteratureNode = ({ data, selected }) => {
       <div 
         className="flex items-center gap-2 mb-1 cursor-pointer"
         onClick={(e) => {
-          e.stopPropagation();
-          if (data.onLiteratureClick) {
-            data.onLiteratureClick(data);
+          // Only stop propagation if this is a single click, not part of a double-click
+          if (e.detail === 1) {
+            e.stopPropagation();
+            setTimeout(() => {
+              if (data.onLiteratureClick) {
+                data.onLiteratureClick(data);
+              }
+            }, 200);
           }
+        }}
+        onDoubleClick={(e) => {
+          // Allow double-click to bubble up for modal opening
+          e.preventDefault();
         }}
       >
         <BookOpen size={16} className="text-purple-600" />
