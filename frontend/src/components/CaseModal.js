@@ -248,66 +248,139 @@ const CaseModal = ({
     return timeoutId;
   }, [data?.id, setMindMapData, autoSaveMindMapData]);
 
-  const addTimelineEntry = useCallback(() => {
-    if (!newTimelineEntry.trim()) return;
+  // Create a new blank timeline entry for inline editing
+  const createNewTimelineEntry = useCallback(() => {
+    if (isCreatingEntry || editingEntryId) return; // Prevent multiple new entries
     
-    setIsAddingEntry(true);
+    const newEntry = {
+      id: `new-${Date.now()}`, // Temporary ID for new entries
+      timestamp: new Date().toISOString(),
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: true 
+      }),
+      type: 'followup',
+      title: 'Follow-up Visit',
+      content: '',
+      details: '',
+      author: 'Current User',
+      isNew: true,
+      isEditing: true
+    };
+
+    // Add to timeline and set as editing
+    const currentTimeline = editData?.timeline || [];
+    const updatedTimeline = [...currentTimeline, newEntry];
     
-    // Create timestamp - use custom if provided, otherwise current time
-    const timestamp = customTimestamp 
-      ? new Date(customTimestamp).toISOString()
-      : new Date().toISOString();
+    setEditData(prev => ({ ...prev, timeline: updatedTimeline }));
+    setEditingEntryId(newEntry.id);
+    setEditingEntryData({ ...newEntry });
+    setIsCreatingEntry(true);
     
-    const dateObj = new Date(timestamp);
-    const date = dateObj.toISOString().split('T')[0];
-    const time = dateObj.toLocaleTimeString('en-US', { 
+    // Scroll to bottom after animation
+    setTimeout(() => {
+      scrollToLatest();
+    }, 300);
+  }, [editData?.timeline, isCreatingEntry, editingEntryId, scrollToLatest]);
+
+  // Start editing an existing entry
+  const startEditingEntry = useCallback((entry) => {
+    if (editingEntryId === entry.id) return; // Already editing this entry
+    
+    setEditingEntryId(entry.id);
+    setEditingEntryData({ ...entry });
+    setExpandedTimelineEntry(entry.id);
+  }, [editingEntryId]);
+
+  // Save the currently editing entry
+  const saveEditingEntry = useCallback(() => {
+    if (!editingEntryId || !editingEntryData) return;
+    
+    const currentTimeline = editData?.timeline || [];
+    let updatedTimeline;
+    
+    // Generate final ID for new entries
+    const finalEntry = {
+      ...editingEntryData,
+      id: editingEntryData.id.toString().startsWith('new-') 
+        ? Date.now() 
+        : editingEntryData.id,
+      isNew: editingEntryData.id.toString().startsWith('new-'),
+      isEditing: false,
+      updated_at: new Date().toISOString()
+    };
+    
+    // Update title based on type
+    finalEntry.title = getEntryTitle(finalEntry.type);
+    
+    // Update timestamp-derived fields
+    const dateObj = new Date(finalEntry.timestamp);
+    finalEntry.date = dateObj.toISOString().split('T')[0];
+    finalEntry.time = dateObj.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit', 
       hour12: true 
     });
-
-    const newEntry = {
-      id: Date.now(), // Simple ID generation
-      timestamp,
-      date,
-      time,
-      type: newTimelineType,
-      title: getEntryTitle(newTimelineType),
-      content: newTimelineEntry.trim(),
-      details: newTimelineEntry.trim(), // Use same content for details initially
-      author: 'Current User', // TODO: Get from user context
-      isNew: true
-    };
-
-    // Add to existing timeline entries
-    const currentTimeline = editData?.timeline || [];
-    const updatedTimeline = [...currentTimeline, newEntry].sort((a, b) => 
-      new Date(a.timestamp) - new Date(b.timestamp)
-    );
-
+    
+    if (editingEntryData.id.toString().startsWith('new-')) {
+      // Adding new entry
+      updatedTimeline = [...currentTimeline.filter(e => e.id !== editingEntryId), finalEntry]
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    } else {
+      // Updating existing entry
+      updatedTimeline = currentTimeline.map(entry =>
+        entry.id === editingEntryId ? finalEntry : entry
+      ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    }
+    
     // Save changes
     saveTimelineChange(updatedTimeline);
     
-    // Reset form
-    setNewTimelineEntry('');
-    setCustomTimestamp('');
-    setIsAddingEntry(false);
+    // Clear editing state
+    setEditingEntryId(null);
+    setEditingEntryData({});
+    setIsCreatingEntry(false);
     
-    // Auto-scroll to latest after a short delay to allow for animation
-    setTimeout(() => {
-      scrollToLatest();
-    }, 300);
+    addToast(
+      editingEntryData.id.toString().startsWith('new-') 
+        ? 'Timeline entry added successfully' 
+        : 'Timeline entry updated successfully', 
+      'success'
+    );
     
-    addToast('Timeline entry added successfully', 'success');
+    // Only scroll to latest for new entries
+    if (editingEntryData.id.toString().startsWith('new-')) {
+      setTimeout(() => scrollToLatest(), 300);
+    }
   }, [
-    newTimelineEntry, 
-    customTimestamp, 
-    newTimelineType, 
+    editingEntryId, 
+    editingEntryData, 
     editData?.timeline, 
     saveTimelineChange, 
-    scrollToLatest, 
-    addToast
+    addToast, 
+    scrollToLatest,
+    getEntryTitle
   ]);
+
+  // Cancel editing
+  const cancelEditingEntry = useCallback(() => {
+    if (!editingEntryId) return;
+    
+    // If it's a new entry, remove it from timeline
+    if (editingEntryData.id && editingEntryData.id.toString().startsWith('new-')) {
+      const currentTimeline = editData?.timeline || [];
+      const updatedTimeline = currentTimeline.filter(e => e.id !== editingEntryId);
+      setEditData(prev => ({ ...prev, timeline: updatedTimeline }));
+    }
+    
+    // Clear editing state
+    setEditingEntryId(null);
+    setEditingEntryData({});
+    setIsCreatingEntry(false);
+    setExpandedTimelineEntry(null);
+  }, [editingEntryId, editingEntryData, editData?.timeline]);
 
   const getEntryTitle = useCallback((type) => {
     const titles = {
@@ -320,20 +393,34 @@ const CaseModal = ({
     return titles[type] || 'Clinical Entry';
   }, []);
 
-  const handleKeyPress = useCallback((e) => {
+  // Handle keyboard shortcuts for editing
+  const handleEditingKeyPress = useCallback((e) => {
     if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      addTimelineEntry();
+      saveEditingEntry();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEditingEntry();
     }
-  }, [addTimelineEntry]);
+  }, [saveEditingEntry, cancelEditingEntry]);
+
+  // Update editing entry data
+  const updateEditingEntry = useCallback((field, value) => {
+    setEditingEntryData(prev => ({
+      ...prev,
+      [field]: value,
+      // Auto-update details to match content for consistency
+      ...(field === 'content' && { details: value })
+    }));
+  }, []);
 
   // Clear isNew flag after a delay for entries that were just added
   useEffect(() => {
-    const newEntries = timelineEntries.filter(entry => entry.isNew);
+    const newEntries = timelineEntries.filter(entry => entry.isNew && !entry.isEditing);
     if (newEntries.length > 0) {
       const timeout = setTimeout(() => {
         const updatedTimeline = timelineEntries.map(entry => 
-          entry.isNew ? { ...entry, isNew: false } : entry
+          entry.isNew && !entry.isEditing ? { ...entry, isNew: false } : entry
         );
         if (editData?.timeline) {
           saveTimelineChange(updatedTimeline);
