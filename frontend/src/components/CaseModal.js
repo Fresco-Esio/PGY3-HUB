@@ -423,9 +423,18 @@ const CaseModal = ({
     setEditingEntryData({ ...newEntry });
     setExpandedTimelineEntry(newEntry.id);
     
-    // Trigger immediate scroll - no delays
-    scrollToShowEntry(newEntry.id, true);
-  }, [editData?.timeline, editingEntryId, scrollToShowEntry]);
+    // Force immediate scroll to bottom for new entries (simpler approach)
+    setTimeout(() => {
+      if (timelineScrollRef.current) {
+        const container = timelineScrollRef.current;
+        const targetScroll = container.scrollHeight - container.clientHeight + 100; // Extra padding
+        container.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: 'smooth'
+        });
+      }
+    }, 50); // Very small delay to ensure DOM is updated
+  }, [editData?.timeline, editingEntryId]);
 
   // Toggle entry expansion and start editing if needed
   const toggleTimelineEntry = useCallback((entry) => {
@@ -457,8 +466,10 @@ const CaseModal = ({
       setEditingEntryId(entryId);
       setEditingEntryData({ ...entry });
       
-      // Trigger immediate scroll - no delays
-      scrollToShowEntry(entryId, true);
+      // Trigger scroll with a small delay to ensure DOM updates
+      setTimeout(() => {
+        scrollToShowEntry(entryId, true);
+      }, 50);
     }
   }, [editingEntryId, expandedTimelineEntry, addToast, scrollToShowEntry]);
 
