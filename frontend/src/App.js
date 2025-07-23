@@ -2946,7 +2946,7 @@ useEffect(() => {
     const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
     if (isAnimating || anyModalAnimating) return;
     
-  }, [focusedCategory, searchQuery, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
+  }, [focusedCategory, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
   
   // CSS-based search filtering - no direct style manipulation
   useEffect(() => {
