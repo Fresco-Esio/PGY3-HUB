@@ -3109,9 +3109,10 @@ useEffect(() => {
             };
           }
           
-          // Check if current node style differs from target style or if hidden state differs
-          const currentHidden = !!node.hidden;
-          const targetHidden = !isVisible;
+          // Check if current node style differs from target style
+          // Note: We don't use React Flow's hidden property as it can interfere with dragging
+          const currentHidden = false; // Always keep nodes interactive
+          const targetHidden = false;  // Never hide nodes completely
           
           const styleChanged = !node.style || 
             node.style.opacity !== targetStyle.opacity ||
