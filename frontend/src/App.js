@@ -3730,10 +3730,15 @@ useEffect(() => {
               };
             }
             
+            // Get the current viewport to center the new node in the visible area
+            const viewport = getViewport();
+            const centerX = (viewport.x * -1) + (window.innerWidth - 250) / 2; // Account for sidebar width
+            const centerY = (viewport.y * -1) + window.innerHeight / 2;
+            
             const newNode = {
               id,
               type: nodeType,
-              position: { x: window.innerWidth / 3, y: window.innerHeight / 2 },
+              position: { x: centerX, y: centerY },
               data: { ...nodeData, onDelete: () => handleDeleteNode(id) }
             };
 
