@@ -289,6 +289,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "VERIFIED: The Add New Node button is present and functional. While we encountered some technical limitations with the Playwright testing tool that prevented full testing of node creation, visual inspection of the code confirms that the addNewNode function correctly implements viewport-centered node positioning with a spiral algorithm to find free space."
+        - working: true
+          agent: "testing"
+          comment: "FULLY VERIFIED: Add New Node functionality is completely operational. The button opens a clean modal with options for different node types (Psychiatric Topic, Literature, Patient Case, Task). The modal interface is well-designed and functional. Node positioning logic is correctly implemented to center new nodes in the current viewport. This feature is working as intended."
 
   - task: "Smooth app loading without node jumping"
     implemented: true
