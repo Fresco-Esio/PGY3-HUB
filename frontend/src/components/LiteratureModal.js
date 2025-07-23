@@ -1,5 +1,5 @@
 // Enhanced Literature Modal with tabbed interface and advanced animations
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -14,7 +14,11 @@ import {
   Search,
   Filter,
   ExternalLink,
-  Download
+  Download,
+  Edit3,
+  Save,
+  Trash2,
+  Plus
 } from 'lucide-react';
 
 // Animation variants for Framer Motion
@@ -50,89 +54,52 @@ const modalVariants = {
 };
 
 const backdropVariants = {
-  hidden: { opacity: 0 },
+  hidden: { 
+    opacity: 0,
+    backdropFilter: 'blur(0px)'
+  },
   visible: { 
     opacity: 1,
-    transition: { duration: 0.3 }
+    backdropFilter: 'blur(8px)',
+    transition: {
+      duration: 0.4,
+      ease: "easeOut"
+    }
   },
   exit: { 
     opacity: 0,
-    transition: { duration: 0.4 }
-  }
-};
-
-const tabContentVariants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-    scale: 0.95,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
+    backdropFilter: 'blur(0px)',
     transition: {
-      type: "easeOut",
       duration: 0.3,
-      delay: 0.1,
-    }
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    scale: 1.02,
-    transition: {
-      type: "easeIn",
-      duration: 0.2,
+      ease: "easeIn"
     }
   }
 };
 
-const literatureCardVariants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
+const tabVariants = {
+  hidden: { 
+    opacity: 0, 
+    x: -30,
+    scale: 0.95
   },
-  visible: (index) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "easeOut",
-      duration: 0.5,
-      delay: index * 0.05, // Staggered animation
-    }
-  }),
-  hover: {
-    y: -2,
-    scale: 1.02,
-    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
-    transition: {
-      type: "easeOut",
-      duration: 0.2,
-    }
-  }
-};
-
-const tabButtonVariants = {
-  inactive: {
+  visible: { 
+    opacity: 1, 
+    x: 0,
     scale: 1,
-    backgroundColor: "transparent",
-  },
-  active: {
-    scale: 1.05,
-    backgroundColor: "rgba(147, 51, 234, 0.1)",
     transition: {
       type: "spring",
       damping: 20,
       stiffness: 300,
+      duration: 0.4
     }
   },
-  hover: {
-    scale: 1.03,
-    backgroundColor: "rgba(107, 114, 128, 0.1)",
+  exit: { 
+    opacity: 0, 
+    x: 30,
+    scale: 0.95,
     transition: {
-      type: "easeOut",
-      duration: 0.2,
+      duration: 0.3,
+      ease: "easeInOut"
     }
   }
 };
@@ -143,6 +110,9 @@ const LiteratureModal = ({
   literatureData, 
   allNodes = [], 
   connections = [],
+  setMindMapData,
+  autoSaveMindMapData,
+  addToast,
   onAnimationStart,
   onAnimationEnd
 }) => {
@@ -151,19 +121,110 @@ const LiteratureModal = ({
   const [filterType, setFilterType] = useState('all');
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Editable form data
+  const [formData, setFormData] = useState({
+    title: '',
+    authors: [],
+    year: '',
+    journal: '',
+    abstract: '',
+    keywords: '',
+    doi: '',
+    volume: '',
+    pages: '',
+    notes: ''
+  });
 
-  // Reset state when modal opens
+  // Initialize form data when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && literatureData && !hasInitialized) {
+      setFormData({
+        title: literatureData.title || '',
+        authors: Array.isArray(literatureData.authors) ? literatureData.authors : 
+                (literatureData.authors ? [literatureData.authors] : []),
+        year: literatureData.year || '',
+        journal: literatureData.journal || '',
+        abstract: literatureData.abstract || '',
+        keywords: literatureData.keywords || '',
+        doi: literatureData.doi || '',
+        volume: literatureData.volume || '',
+        pages: literatureData.pages || '',
+        notes: literatureData.notes || ''
+      });
       setActiveTab('overview');
+      setHasInitialized(true);
+      
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
         setIsVisible(true);
       });
-    } else {
+    } else if (!isOpen) {
       setIsVisible(false);
+      setHasInitialized(false);
+      setIsEditing(false);
     }
-  }, [isOpen]);
+  }, [isOpen, literatureData, hasInitialized]);
+
+  // Save changes to literature data
+  const handleSave = useCallback(() => {
+    if (!literatureData || !setMindMapData) return;
+    
+    const updatedLiterature = {
+      ...literatureData,
+      title: formData.title,
+      authors: formData.authors,
+      year: formData.year,
+      journal: formData.journal,
+      abstract: formData.abstract,
+      keywords: formData.keywords,
+      doi: formData.doi,
+      volume: formData.volume,
+      pages: formData.pages,
+      notes: formData.notes
+    };
+
+    setMindMapData(prevData => {
+      const newData = {
+        ...prevData,
+        literature: (prevData.literature || []).map(lit => 
+          lit.id === literatureData.id ? updatedLiterature : lit
+        )
+      };
+      
+      // Auto-save with the updated data
+      if (autoSaveMindMapData) {
+        autoSaveMindMapData(newData);
+      }
+      
+      return newData;
+    });
+    
+    if (addToast) {
+      addToast('Literature updated successfully!', 'success');
+    }
+    
+    setIsEditing(false);
+  }, [formData, literatureData, setMindMapData, autoSaveMindMapData, addToast]);
+
+  // Handle form field changes
+  const handleFieldChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle authors array changes
+  const handleAuthorsChange = (authorsString) => {
+    const authorsArray = authorsString.split(',').map(author => author.trim()).filter(Boolean);
+    setFormData(prev => ({
+      ...prev,
+      authors: authorsArray
+    }));
+  };
 
   // Enhanced tab switching with smooth animation
   const handleTabSwitch = (newTab) => {
@@ -199,28 +260,27 @@ const LiteratureModal = ({
 
   // Get connected nodes for this literature item
   const connectedNodes = useMemo(() => {
-    if (!literatureData?.id) return [];
+    if (!literatureData || !connections) return [];
     
-    const literatureNodeId = `literature-${literatureData.id}`;
-    const connectedNodeIds = connections
-      .filter(conn => 
-        conn.source === literatureNodeId || conn.target === literatureNodeId
-      )
-      .map(conn => 
-        conn.source === literatureNodeId ? conn.target : conn.source
-      );
+    const relatedConnections = connections.filter(conn => 
+      conn.source.includes('literature') && conn.source.includes(literatureData.id) ||
+      conn.target.includes('literature') && conn.target.includes(literatureData.id)
+    );
     
-    return allNodes.filter(node => connectedNodeIds.includes(node.id));
-  }, [literatureData, allNodes, connections]);
+    const nodeIds = relatedConnections.map(conn => 
+      conn.source.includes(literatureData.id) ? conn.target : conn.source
+    );
+    
+    return allNodes.filter(node => nodeIds.includes(node.id));
+  }, [literatureData, connections, allNodes]);
 
-  // Extract keywords from connected nodes
+  // Extract keywords from connected nodes for search relevance
   const extractedKeywords = useMemo(() => {
     const keywords = new Set();
     
     connectedNodes.forEach(node => {
       const data = node.data;
       
-      // Extract from different node types
       if (node.type === 'case') {
         if (data.primary_diagnosis) keywords.add(data.primary_diagnosis.toLowerCase());
         if (data.secondary_diagnoses) {
@@ -284,25 +344,22 @@ const LiteratureModal = ({
     if (searchQuery) {
       filtered = filtered.filter(item =>
         item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.authors?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.keywords?.toLowerCase().includes(searchQuery.toLowerCase())
+        item.authors?.join(' ').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.journal?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
     if (filterType !== 'all') {
-      filtered = filtered.filter(item => 
-        item.type?.toLowerCase() === filterType.toLowerCase()
-      );
+      filtered = filtered.filter(item => item.type === filterType);
     }
     
     return filtered;
   }, [relatedLiterature, searchQuery, filterType]);
 
-  // Get publication type color
+  // Get type-specific styling
   const getTypeColor = (type) => {
     const colors = {
-      'pdf': 'bg-red-100 text-red-800 border-red-200',
-      'guideline': 'bg-blue-100 text-blue-800 border-blue-200',
+      'clinical-trial': 'bg-blue-100 text-blue-800 border-blue-200',
       'rct': 'bg-green-100 text-green-800 border-green-200',
       'review': 'bg-purple-100 text-purple-800 border-purple-200',
       'meta-analysis': 'bg-indigo-100 text-indigo-800 border-indigo-200',
@@ -348,320 +405,429 @@ const LiteratureModal = ({
               if (onAnimationEnd) onAnimationEnd();
             }}
           >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold mb-2">{literatureData.title || 'Literature Item'}</h2>
-              <div className="flex items-center gap-4 text-purple-100">
-                {literatureData.authors && (
-                  <div className="flex items-center gap-1">
-                    <User size={16} />
-                    <span className="text-sm">{literatureData.authors}</span>
-                  </div>
-                )}
-                {literatureData.year && (
-                  <div className="flex items-center gap-1">
-                    <Calendar size={16} />
-                    <span className="text-sm">{literatureData.year}</span>
-                  </div>
-                )}
-                {literatureData.type && (
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getTypeColor(literatureData.type)}`}>
-                    {literatureData.type.toUpperCase()}
-                  </div>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={handleClose}
-              className="text-purple-200 hover:text-white transition-all duration-200 p-2 hover:bg-purple-600 rounded-lg transform hover:scale-110 active:scale-95"
-            >
-              <X size={24} />
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200 bg-gray-50">
-          <nav className="flex space-x-8 px-6">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <motion.button
-                  key={tab.id}
-                  onClick={() => handleTabSwitch(tab.id)}
-                  variants={tabButtonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                  className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? 'border-purple-500 text-purple-600 bg-purple-50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon size={16} />
-                  {tab.label}
-                  {tab.badge > 0 && (
-                    <motion.span 
-                      className="bg-purple-100 text-purple-600 text-xs font-medium px-2 py-1 rounded-full"
-                      whileHover={{ scale: 1.1 }}
-                    >
-                      {tab.badge}
-                    </motion.span>
-                  )}
-                </motion.button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Tab Content with Animation */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={tabContentVariants}
-              className="space-y-6"
-            >
-              {activeTab === 'overview' && (
-            <div className="space-y-6">
-              {/* Abstract */}
-              {literatureData.abstract && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Abstract</h3>
-                  <p className="text-gray-700 leading-relaxed">{literatureData.abstract}</p>
-                </div>
-              )}
-
-              {/* Keywords */}
-              {literatureData.keywords && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Keywords</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {literatureData.keywords.split(',').map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm"
-                      >
-                        {keyword.trim()}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Publication Info */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Publication Details</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  {literatureData.journal && (
-                    <div>
-                      <span className="font-medium text-gray-600">Journal:</span>
-                      <span className="ml-2 text-gray-900">{literatureData.journal}</span>
-                    </div>
-                  )}
-                  {literatureData.doi && (
-                    <div>
-                      <span className="font-medium text-gray-600">DOI:</span>
-                      <span className="ml-2 text-gray-900">{literatureData.doi}</span>
-                    </div>
-                  )}
-                  {literatureData.volume && (
-                    <div>
-                      <span className="font-medium text-gray-600">Volume:</span>
-                      <span className="ml-2 text-gray-900">{literatureData.volume}</span>
-                    </div>
-                  )}
-                  {literatureData.pages && (
-                    <div>
-                      <span className="font-medium text-gray-600">Pages:</span>
-                      <span className="ml-2 text-gray-900">{literatureData.pages}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Connected Nodes */}
-              {connectedNodes.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Connected To</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {connectedNodes.map((node) => (
-                      <div
-                        key={node.id}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border"
-                      >
-                        <div className={`w-3 h-3 rounded-full ${
-                          node.type === 'case' ? 'bg-indigo-500' :
-                          node.type === 'topic' ? 'bg-blue-500' :
-                          node.type === 'task' ? 'bg-amber-500' : 'bg-purple-500'
-                        }`} />
-                        <div>
-                          <div className="font-medium text-sm text-gray-900">{node.data.label || node.data.title}</div>
-                          <div className="text-xs text-gray-500 capitalize">{node.type}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'pdf' && (
-            <div className="text-center py-8">
-              <Eye size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">PDF Viewer</h3>
-              <p className="text-gray-600 mb-4">PDF viewing functionality will be implemented here</p>
-              {literatureData.pdf_url && (
-                <div className="space-y-3">
-                  <a
-                    href={literatureData.pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="enhanced-button inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium"
-                  >
-                    <ExternalLink size={16} />
-                    Open PDF in New Tab
-                  </a>
-                  <div className="text-sm text-gray-500">
-                    Or implement an embedded PDF viewer here
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'notes' && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Notes</h3>
-              <textarea
-                className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                placeholder="Add your notes about this literature item..."
-                defaultValue={literatureData.notes || ''}
-              />
-              <div className="mt-4 flex justify-end">
-                <button className="enhanced-button bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium">
-                  Save Notes
-                </button>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'related' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Related Literature</h3>
-                <div className="flex items-center gap-3">
-                  {/* Search */}
-                  <div className="relative">
-                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            {/* Enhanced Header with Dark Theme */}
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  {isEditing ? (
                     <input
                       type="text"
-                      placeholder="Search related..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent w-48"
+                      value={formData.title}
+                      onChange={(e) => handleFieldChange('title', e.target.value)}
+                      className="text-2xl font-bold mb-2 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                      placeholder="Literature title..."
                     />
-                  </div>
+                  ) : (
+                    <h2 className="text-2xl font-bold mb-2">{formData.title || 'Literature Item'}</h2>
+                  )}
                   
-                  {/* Filter */}
-                  <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="pdf">PDF</option>
-                    <option value="guideline">Guideline</option>
-                    <option value="rct">RCT</option>
-                    <option value="review">Review</option>
-                    <option value="meta-analysis">Meta-Analysis</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Keywords used for matching */}
-              {extractedKeywords.length > 0 && (
-                <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                  <h4 className="text-sm font-medium text-blue-900 mb-2">Matching based on connected nodes:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {extractedKeywords.slice(0, 10).map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
-                    {extractedKeywords.length > 10 && (
-                      <span className="text-blue-600 text-xs">+{extractedKeywords.length - 10} more</span>
+                  <div className="flex items-center gap-4 text-slate-300">
+                    {isEditing ? (
+                      <div className="flex flex-wrap gap-4">
+                        <input
+                          type="text"
+                          value={formData.authors.join(', ')}
+                          onChange={(e) => handleAuthorsChange(e.target.value)}
+                          className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm text-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                          placeholder="Authors (comma separated)..."
+                        />
+                        <input
+                          type="number"
+                          value={formData.year}
+                          onChange={(e) => handleFieldChange('year', e.target.value)}
+                          className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm text-white w-20 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                          placeholder="Year"
+                        />
+                        <input
+                          type="text"
+                          value={formData.journal}
+                          onChange={(e) => handleFieldChange('journal', e.target.value)}
+                          className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm text-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                          placeholder="Journal..."
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        {formData.authors.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <User size={16} />
+                            <span>{formData.authors.slice(0, 3).join(', ')}{formData.authors.length > 3 ? ' et al.' : ''}</span>
+                          </div>
+                        )}
+                        {formData.year && (
+                          <div className="flex items-center gap-1">
+                            <Calendar size={16} />
+                            <span>{formData.year}</span>
+                          </div>
+                        )}
+                        {formData.journal && (
+                          <div className="flex items-center gap-1">
+                            <BookOpen size={16} />
+                            <span>{formData.journal}</span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
-              )}
-
-              {/* Related Literature List */}
-              {filteredRelatedLiterature.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredRelatedLiterature.map((item, index) => (
-                    <motion.div
-                      key={index}
-                      variants={literatureCardVariants}
-                      initial="hidden"
-                      animate="visible"
-                      whileHover="hover"
-                      custom={index}
-                      className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer group"
+                
+                <div className="flex items-center gap-2">
+                  {isEditing ? (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleSave}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                      >
+                        <Save size={16} />
+                        Save
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setIsEditing(false)}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 rounded-lg transition-colors"
+                      >
+                        <X size={16} />
+                        Cancel
+                      </motion.button>
+                    </>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 mb-1">{item.title}</h4>
-                          <p className="text-sm text-gray-600 mb-2">{item.authors} • {item.year}</p>
-                          {item.abstract && (
-                            <p className="text-sm text-gray-700 line-clamp-2 mb-2">
-                              {item.abstract.substring(0, 150)}...
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2">
-                            {item.type && (
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getTypeColor(item.type)}`}>
-                                {item.type.toUpperCase()}
-                              </span>
-                            )}
-                            <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                              {item.relevanceScore} match{item.relevanceScore !== 1 ? 'es' : ''}
-                            </span>
-                          </div>
-                        </div>
-                        <button className="ml-4 p-2 text-gray-400 hover:text-purple-600 transition-colors">
-                          <ExternalLink size={16} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
+                      <Edit3 size={16} />
+                      Edit
+                    </motion.button>
+                  )}
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleClose}
+                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <X size={24} />
+                  </motion.button>
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Link2 size={48} className="mx-auto text-gray-400 mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">No Related Literature Found</h4>
-                  <p className="text-gray-600">
-                    {extractedKeywords.length === 0 
-                      ? "Connect this literature to topics or cases to find related items"
-                      : "No literature found matching the keywords from connected nodes"
-                    }
-                  </p>
+              </div>
+              
+              {literatureData?.type && (
+                <div className="mt-4">
+                  <div className="inline-flex items-center px-3 py-1 bg-slate-700 text-slate-200 rounded-full text-sm">
+                    {literatureData.type.toUpperCase()}
+                  </div>
                 </div>
               )}
             </div>
-          )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+
+            {/* Tab Navigation with Dark Theme */}
+            <div className="border-b border-slate-200 bg-gradient-to-r from-slate-100 to-slate-50">
+              <nav className="flex space-x-8 px-6">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <motion.button
+                      key={tab.id}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleTabSwitch(tab.id)}
+                      disabled={isAnimating}
+                      className={`flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm transition-all duration-300 ${
+                        activeTab === tab.id
+                          ? 'text-slate-900 border-slate-900 bg-white shadow-sm'
+                          : 'text-slate-600 border-transparent hover:text-slate-900 hover:border-slate-300'
+                      }`}
+                    >
+                      <Icon size={16} className={activeTab === tab.id ? 'text-slate-900' : 'text-slate-500'} />
+                      {tab.label}
+                      {tab.badge !== undefined && tab.badge > 0 && (
+                        <span className="ml-1 bg-slate-700 text-white text-xs px-2 py-0.5 rounded-full">
+                          {tab.badge}
+                        </span>
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={tabVariants}
+                  layout="position"
+                  layoutId="tabContent"
+                >
+                  {activeTab === 'overview' && (
+                    <div className="space-y-6">
+                      {/* Abstract Section */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-900 mb-3">Abstract</h3>
+                        {isEditing ? (
+                          <textarea
+                            value={formData.abstract}
+                            onChange={(e) => handleFieldChange('abstract', e.target.value)}
+                            className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none"
+                            rows={6}
+                            placeholder="Enter abstract..."
+                          />
+                        ) : (
+                          <p className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg">
+                            {formData.abstract || 'No abstract provided'}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Keywords Section */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-900 mb-3">Keywords</h3>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={formData.keywords}
+                            onChange={(e) => handleFieldChange('keywords', e.target.value)}
+                            className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                            placeholder="Enter keywords (comma separated)..."
+                          />
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {formData.keywords ? formData.keywords.split(',').map((keyword, index) => (
+                              <span
+                                key={index}
+                                className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm"
+                              >
+                                {keyword.trim()}
+                              </span>
+                            )) : (
+                              <span className="text-slate-500 italic">No keywords provided</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Publication Details */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-900 mb-3">Publication Details</h3>
+                        {isEditing ? (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-1">DOI</label>
+                              <input
+                                type="text"
+                                value={formData.doi}
+                                onChange={(e) => handleFieldChange('doi', e.target.value)}
+                                className="w-full p-2 bg-slate-50 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                placeholder="DOI..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-1">Volume</label>
+                              <input
+                                type="text"
+                                value={formData.volume}
+                                onChange={(e) => handleFieldChange('volume', e.target.value)}
+                                className="w-full p-2 bg-slate-50 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                placeholder="Volume..."
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <label className="block text-sm font-medium text-slate-700 mb-1">Pages</label>
+                              <input
+                                type="text"
+                                value={formData.pages}
+                                onChange={(e) => handleFieldChange('pages', e.target.value)}
+                                className="w-full p-2 bg-slate-50 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                placeholder="Pages..."
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg">
+                            {formData.doi && (
+                              <div>
+                                <span className="font-medium text-slate-600">DOI:</span>
+                                <span className="ml-2 text-slate-900">{formData.doi}</span>
+                              </div>
+                            )}
+                            {formData.volume && (
+                              <div>
+                                <span className="font-medium text-slate-600">Volume:</span>
+                                <span className="ml-2 text-slate-900">{formData.volume}</span>
+                              </div>
+                            )}
+                            {formData.pages && (
+                              <div className="col-span-2">
+                                <span className="font-medium text-slate-600">Pages:</span>
+                                <span className="ml-2 text-slate-900">{formData.pages}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Connected Nodes */}
+                      {connectedNodes.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-slate-900 mb-3">Connected To</h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {connectedNodes.map((node) => (
+                              <div
+                                key={node.id}
+                                className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors"
+                              >
+                                <div className={`w-3 h-3 rounded-full ${
+                                  node.type === 'case' ? 'bg-indigo-500' :
+                                  node.type === 'topic' ? 'bg-blue-500' :
+                                  node.type === 'task' ? 'bg-amber-500' : 'bg-purple-500'
+                                }`} />
+                                <div>
+                                  <div className="font-medium text-sm text-slate-900">{node.data.label || node.data.title}</div>
+                                  <div className="text-xs text-slate-500 capitalize">{node.type}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'notes' && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-3">Personal Notes</h3>
+                      {isEditing ? (
+                        <textarea
+                          value={formData.notes}
+                          onChange={(e) => handleFieldChange('notes', e.target.value)}
+                          className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none"
+                          rows={12}
+                          placeholder="Add your personal notes about this literature..."
+                        />
+                      ) : (
+                        <div className="bg-slate-50 p-4 rounded-lg min-h-64">
+                          {formData.notes ? (
+                            <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{formData.notes}</p>
+                          ) : (
+                            <p className="text-slate-500 italic">No notes yet. Click Edit to add your thoughts about this literature.</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'pdf' && (
+                    <div className="text-center py-8">
+                      <Eye size={48} className="mx-auto text-slate-400 mb-4" />
+                      <h3 className="text-lg font-medium text-slate-900 mb-2">PDF Viewer</h3>
+                      <p className="text-slate-600 mb-4">PDF viewing functionality will be implemented here</p>
+                      {literatureData?.pdf_url && (
+                        <a
+                          href={literatureData.pdf_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <ExternalLink size={16} />
+                          Open PDF
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'related' && (
+                    <div className="space-y-4">
+                      {/* Search and Filter Controls */}
+                      <div className="flex gap-4 mb-6">
+                        <div className="flex-1 relative">
+                          <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            placeholder="Search related literature..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                          />
+                        </div>
+                        
+                        <select
+                          value={filterType}
+                          onChange={(e) => setFilterType(e.target.value)}
+                          className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                        >
+                          <option value="all">All Types</option>
+                          <option value="rct">RCT</option>
+                          <option value="review">Review</option>
+                          <option value="meta-analysis">Meta-Analysis</option>
+                          <option value="case-study">Case Study</option>
+                        </select>
+                      </div>
+
+                      {/* Related Literature Grid */}
+                      {filteredRelatedLiterature.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4">
+                          {filteredRelatedLiterature.map((item, index) => (
+                            <motion.div
+                              key={`${item.id}-${index}`}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="p-4 border border-slate-200 rounded-lg hover:shadow-md transition-all duration-200 bg-white"
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <h4 className="font-medium text-slate-900 flex-1">{item.title}</h4>
+                                {item.type && (
+                                  <span className={`ml-2 px-2 py-1 text-xs rounded border ${getTypeColor(item.type)}`}>
+                                    {item.type.toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="text-sm text-slate-600 mb-2">
+                                {Array.isArray(item.authors) ? item.authors.slice(0, 3).join(', ') : item.authors}
+                                {item.year && ` (${item.year})`}
+                              </div>
+                              
+                              {item.journal && (
+                                <div className="text-sm text-slate-500 italic mb-2">{item.journal}</div>
+                              )}
+                              
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    Relevance: {item.relevanceScore}
+                                  </span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <BookOpen size={48} className="mx-auto text-slate-400 mb-4" />
+                          <h3 className="text-lg font-medium text-slate-900 mb-2">No Related Literature</h3>
+                          <p className="text-slate-600">
+                            {extractedKeywords.length === 0 
+                              ? "Connect this literature to cases or topics to find related content"
+                              : "No literature matches the current search criteria"
+                            }
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </motion.div>
         </motion.div>
       )}

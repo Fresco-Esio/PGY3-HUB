@@ -1817,6 +1817,7 @@ const DashboardComponent = () => {
 
   const [toasts, setToasts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResultsCount, setSearchResultsCount] = useState(0);
   const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
@@ -1826,6 +1827,18 @@ const DashboardComponent = () => {
     task: false,
     literature: false
   });
+  // Separate nodeVisibility state to track node visibility without modifying node data
+  const [nodeVisibility, setNodeVisibility] = useState({});
+  // Use a ref to store the current visibility state for comparison
+  const visibilityRef = useRef({});
+  
+  // Initialize the ref
+  useEffect(() => {
+    // Only initialize once if empty
+    if (Object.keys(visibilityRef.current).length === 0) {
+      visibilityRef.current = {};
+    }
+  }, []);
 
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
@@ -1963,7 +1976,74 @@ const handleLiteratureClick = useCallback((literatureData) => {
   setTimeout(() => setIsAnimating(false), 700); // 600ms modal animation + 100ms buffer
 }, []);
 
-  const convertDataToReactFlow = useCallback(async (data) => {
+// Auto-sync node titles with modal form data
+const syncNodeTitles = useCallback(() => {
+  setNodes(currentNodes => {
+    return currentNodes.map(node => {
+      const nodeType = node.id.split('-')[0];
+      const nodeId = node.id.split('-')[1];
+      
+      let newLabel = node.data.label;
+      
+      // Find the corresponding data item and sync title
+      if (nodeType === 'case') {
+        const caseData = mindMapData.cases?.find(c => c.id === nodeId);
+        if (caseData) {
+          newLabel = caseData.primaryDiagnosis || caseData.primary_diagnosis || caseData.title || 'Untitled Case';
+        }
+      } else if (nodeType === 'topic') {
+        const topicData = mindMapData.topics?.find(t => t.id === nodeId);
+        if (topicData) {
+          newLabel = topicData.title || 'Untitled Topic';
+        }
+      } else if (nodeType === 'task') {
+        const taskData = mindMapData.tasks?.find(t => t.id === nodeId);
+        if (taskData) {
+          newLabel = taskData.title || 'Untitled Task';
+        }
+      } else if (nodeType === 'literature') {
+        const literatureData = mindMapData.literature?.find(l => l.id === nodeId);
+        if (literatureData) {
+          newLabel = literatureData.title || 'Untitled Literature';
+        }
+      }
+      
+      // Only update if the label actually changed
+      if (newLabel !== node.data.label) {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            label: newLabel
+          }
+        };
+      }
+      
+      return node;
+    });
+  });
+}, [mindMapData, setNodes]);
+
+// Trigger auto-sync when mindMapData changes
+useEffect(() => {
+  const hasData = mindMapData && (mindMapData.cases?.length > 0 || mindMapData.topics?.length > 0 || 
+                                 mindMapData.tasks?.length > 0 || mindMapData.literature?.length > 0);
+  
+  if (hasData) {
+    syncNodeTitles();
+    
+    // If we don't have nodes but we have data, convert data to React Flow
+    if (nodes.length === 0) {
+      console.log('Converting data to React Flow nodes due to data change');
+      // Use a timeout to avoid dependency issues and ensure state is stable
+      setTimeout(() => {
+        convertDataToReactFlow(mindMapData, true);
+      }, 100);
+    }
+  }
+}, [mindMapData, syncNodeTitles, nodes.length]); // Removed convertDataToReactFlow from dependencies
+
+  const convertDataToReactFlow = useCallback(async (data, applyLayoutImmediately = false) => {
     // Use optimized quick layout for initial load
     const allItems = [
       ...data.topics.map(item => ({ ...item, type: 'topic' })),
@@ -1972,8 +2052,71 @@ const handleLiteratureClick = useCallback((literatureData) => {
       ...data.literature.map(item => ({ ...item, type: 'literature' }))
     ];
 
-    // Quick layout without expensive calculations
-    const quickNodes = getQuickLayout(allItems).map(item => {
+    // If we have data and need immediate layout, apply force layout to positions
+    let layoutNodes;
+    if (allItems.length > 0 && applyLayoutImmediately) {
+      try {
+        // Lazy load D3 force simulation for initial positioning
+        const { 
+          forceSimulation, 
+          forceManyBody, 
+          forceLink, 
+          forceCenter, 
+          forceCollide 
+        } = await loadD3Force();
+
+        // Create nodes for simulation
+        const simulationNodes = allItems.map((item, index) => ({
+          id: `${item.type}-${item.id}`,
+          x: item.position?.x || (Math.random() - 0.5) * 200,
+          y: item.position?.y || (Math.random() - 0.5) * 200,
+          type: item.type
+        }));
+
+        // Create D3-compatible edge objects
+        const d3Edges = (data.connections || []).map(edge => ({
+          source: edge.source,
+          target: edge.target,
+          id: edge.id
+        })).filter(edge => {
+          const nodeIds = new Set(simulationNodes.map(n => n.id));
+          return nodeIds.has(edge.source) && nodeIds.has(edge.target);
+        });
+
+        // Run simulation synchronously for initial layout
+        const simulation = forceSimulation(simulationNodes)
+          .force('link', forceLink(d3Edges).id(d => d.id).distance(200).strength(0.5))
+          .force('charge', forceManyBody().strength(-800).distanceMax(400))
+          .force('center', forceCenter(window.innerWidth / 3, window.innerHeight / 2))
+          .force('collision', forceCollide().radius(80))
+          .stop();
+
+        // Run enough ticks to get a good layout
+        for (let i = 0; i < 300; i++) {
+          simulation.tick();
+        }
+
+        // Create a map of positioned nodes
+        const positionMap = new Map();
+        simulationNodes.forEach(node => {
+          positionMap.set(node.id, { x: node.x, y: node.y });
+        });
+
+        layoutNodes = allItems.map(item => {
+          const nodeId = `${item.type}-${item.id}`;
+          const position = positionMap.get(nodeId) || { x: 0, y: 0 };
+          return { ...item, position };
+        });
+      } catch (error) {
+        console.warn('Failed to apply initial layout, using fallback positioning:', error);
+        layoutNodes = allItems;
+      }
+    } else {
+      layoutNodes = allItems;
+    }
+
+    // Quick layout without expensive calculations for nodes without force layout
+    const quickNodes = (layoutNodes || getQuickLayout(allItems)).map(item => {
       const nodeId = `${item.type}-${item.id}`;
       
       // Convert case fields efficiently
@@ -2465,6 +2608,18 @@ const handleLiteratureClick = useCallback((literatureData) => {
       console.log('Skipping position updates during animation');
       return;
     }
+
+    // Check for node removals and update nodeVisibility state
+    const removedNodes = changes.filter(change => change.type === 'remove');
+    if (removedNodes.length > 0) {
+      setNodeVisibility(prevVisibility => {
+        const newVisibility = { ...prevVisibility };
+        removedNodes.forEach(change => {
+          delete newVisibility[change.id];
+        });
+        return newVisibility;
+      });
+    }
     
     // Now process position changes for edge updates
     const positionChanges = changes.filter(change => 
@@ -2522,7 +2677,7 @@ const handleLiteratureClick = useCallback((literatureData) => {
         }, 100); // Debounce position updates
       });
     }
-  }, [onNodesChange, setEdges, setMindMapData, isAnimating, autoSavePositionData]);
+  }, [onNodesChange, setEdges, setMindMapData, isAnimating, autoSavePositionData, setNodeVisibility]);
 
   const handleNodeDragStop = useCallback((event, node) => {
     // Debounce the auto-save to prevent excessive backend calls
@@ -2552,9 +2707,9 @@ const handleLiteratureClick = useCallback((literatureData) => {
         setMindMapData(local);
         
         setLoadingProgress(60);
-        setLoadingMessage('Rendering nodes...');
+        setLoadingMessage('Applying layout...');
         
-        await convertDataToReactFlow(local);
+        await convertDataToReactFlow(local, true); // Apply layout immediately
         
         setLoadingProgress(90);
         setLoadingMessage('Finalizing...');
@@ -2587,23 +2742,45 @@ const handleLiteratureClick = useCallback((literatureData) => {
       setLoadingProgress(20);
       setLoadingMessage('Loading from server...');
       
-      const response = await axios.get(`${API}/mindmap-data`);
-      if (!response.data.connections) response.data.connections = [];
-      
-      setLoadingProgress(50);
-      setLoadingMessage('Processing data...');
-      
-      setMindMapData(response.data);
-      
-      setLoadingProgress(80);
-      setLoadingMessage('Rendering interface...');
-      
-      await convertDataToReactFlow(response.data);
-      autoSaveMindMapData(response.data);
-      
-      setLoadingProgress(100);
-      setLoading(false);
-      setIsInitialLoad(false);
+      try {
+        const response = await axios.get(`${API}/mindmap-data`);
+        if (!response.data.connections) response.data.connections = [];
+        
+        setLoadingProgress(50);
+        setLoadingMessage('Processing data...');
+        
+        setMindMapData(response.data);
+        
+        setLoadingProgress(80);
+        setLoadingMessage('Applying layout...');
+        
+        await convertDataToReactFlow(response.data, true); // Apply layout immediately
+        autoSaveMindMapData(response.data);
+        
+        setLoadingProgress(100);
+        setLoading(false);
+        setIsInitialLoad(false);
+      } catch (backendError) {
+        console.warn('Backend loading failed, populating with sample data:', backendError);
+        
+        // If backend fails, populate with sample data for better UX
+        setLoadingProgress(60);
+        setLoadingMessage('Loading sample data...');
+        
+        // Populate sample data
+        const emptyData = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
+        
+        setMindMapData(emptyData);
+        
+        // Populate sample data
+        setTimeout(() => {
+          populateSampleLiteratureData(setMindMapData, autoSaveMindMapData, addToast);
+        }, 100);
+        
+        setLoadingProgress(100);
+        setLoading(false);
+        setIsInitialLoad(false);
+      }
     } catch (err) {
       console.error('Error loading mind map:', err);
       addToast('Failed to load mind map', 'error');
@@ -2613,17 +2790,9 @@ const handleLiteratureClick = useCallback((literatureData) => {
   }, [addToast, autoSaveMindMapData, convertDataToReactFlow]);
 
   useEffect(() => {
-    // EMERGENCY PATCH: Force clear all mind map data on every load
-    const empty = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
-    localStorageUtils.save(empty);
-    setMindMapData(empty);
-    setNodes([]);
-    setEdges([]);
-    // Optionally, also clear backend data if needed:
-    // saveToBackend(empty);
-
-    // Continue with normal load (will be empty)
+    // Load initial mind map data
     loadMindMapData();
+    
     // Load templates from a source (e.g., API or localStorage)
     // For now, using mock data
     setTemplates([
@@ -2632,6 +2801,95 @@ const handleLiteratureClick = useCallback((literatureData) => {
       { id: 'template3', name: 'CBT for Anxiety', nodeType: 'topic', data: { title: 'CBT for Anxiety', category: 'Anxiety Disorders' } }
     ]);
   }, []); // Run only once on mount
+
+  // Helper function to check if a node matches the search query
+  const nodeMatchesSearch = useCallback((node, query) => {
+    // Guard against null/undefined node
+    if (!node || !node.id || !node.data) return false;
+    
+    // Return early if no query
+    if (!query) return true;
+    
+    // Normalize and trim query
+    const searchTerm = query.toLowerCase().trim();
+    if (!searchTerm) return true;
+    
+    try {
+      // Safely extract node type and ID
+      const parts = node.id.split('-');
+      const nodeType = parts.length > 0 ? parts[0] : '';
+      const nodeId = parts.length > 1 ? parts[1] : '';
+      
+      // Start with no match
+      let hasMatch = false;
+      
+      // 1. Basic title/label matching - most common searches
+      if (!hasMatch && node.data.label) {
+        const label = node.data.label.toLowerCase();
+        hasMatch = label.includes(searchTerm);
+      }
+      
+      // 2. Node type matching
+      if (!hasMatch && nodeType) {
+        hasMatch = nodeType.includes(searchTerm);
+      }
+      
+      // 3. Case ID pattern matching for case nodes
+      if (!hasMatch && nodeType === 'case' && nodeId) {
+        hasMatch = (`case-${nodeId}`).toLowerCase().includes(searchTerm);
+      }
+      
+      // 4. Type-specific content matching
+      if (!hasMatch) {
+        if (nodeType === 'case') {
+          const diagnosis = (node.data.primary_diagnosis || node.data.primaryDiagnosis || '').toLowerCase();
+          hasMatch = diagnosis.includes(searchTerm);
+        } else if (nodeType === 'topic') {
+          const title = (node.data.title || '').toLowerCase();
+          hasMatch = title.includes(searchTerm);
+        } else if (nodeType === 'literature') {
+          const title = (node.data.title || '').toLowerCase();
+          const authors = (node.data.authors || '').toLowerCase();
+          hasMatch = title.includes(searchTerm) || authors.includes(searchTerm);
+        }
+      }
+      
+      // 5. Psychiatric category matching for all node types
+      if (!hasMatch && node.data.category) {
+        const category = node.data.category.toLowerCase();
+        hasMatch = category.includes(searchTerm);
+      }
+      
+      return hasMatch;
+    } catch (error) {
+      console.error('Error in nodeMatchesSearch for node:', node.id, error);
+      return false;
+    }
+  }, []);
+
+  // Reset search and filters
+  const clearSearch = useCallback(() => {
+    console.log("Clearing search and resetting visibility");
+    
+    // First update the simpler states
+    setSearchQuery('');
+    setFocusedCategory(null);
+    
+    // Then reset node visibility (more complex operation)
+    if (nodes.length > 0) {
+      const resetVisibility = {};
+      
+      // Set all nodes to visible
+      for (let i = 0; i < nodes.length; i++) {
+        resetVisibility[nodes[i].id] = true;
+      }
+      
+      // Update ref first to avoid circular updates
+      visibilityRef.current = {...resetVisibility};
+      // Then update state
+      setNodeVisibility(resetVisibility);
+    }
+  }, [nodes]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -2653,6 +2911,11 @@ const handleLiteratureClick = useCallback((literatureData) => {
             event.preventDefault();
             applyForceLayout();
             break;
+          case 'f':
+            event.preventDefault();
+            // Focus the search box
+            document.querySelector('input[type="text"][placeholder*="Search"]')?.focus();
+            break;
           default:
             break;
         }
@@ -2667,15 +2930,23 @@ const handleLiteratureClick = useCallback((literatureData) => {
         setLiteratureModal({ isOpen: false, data: null });
         setShowNodeSelector(false);
         setIsTemplateManagerOpen(false);
+        
+        // Clear search if no modals are open
+        if (!caseModal.isOpen && !topicModal.isOpen && !taskModal.isOpen && 
+            !literatureModal.isOpen && !showNodeSelector && !isTemplateManagerOpen) {
+          clearSearch();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isEditing, applyForceLayout]);
+  }, [isEditing, applyForceLayout, clearSearch, caseModal, topicModal, taskModal, literatureModal, showNodeSelector, isTemplateManagerOpen]);
 
   useEffect(() => {
-    if (isReactFlowReady && !hasAppliedInitialLayout && nodes.length > 0) {
+    // Only apply force layout if it hasn't been applied during initial load
+    // and we have nodes that need positioning
+    if (isReactFlowReady && !hasAppliedInitialLayout && nodes.length > 0 && !isInitialLoad) {
       // Add a delay to ensure React Flow is fully ready
       setTimeout(() => {
         try {
@@ -2686,38 +2957,303 @@ const handleLiteratureClick = useCallback((literatureData) => {
           setHasAppliedInitialLayout(true);
         }
       }, 500);
+    } else if (isInitialLoad && nodes.length > 0) {
+      // For initial load, just mark as applied since layout was already done in convertDataToReactFlow
+      setHasAppliedInitialLayout(true);
     }
-  }, [isReactFlowReady, hasAppliedInitialLayout, nodes, forceLayout]);
+  }, [isReactFlowReady, hasAppliedInitialLayout, nodes, forceLayout, isInitialLoad]);
 
-  // Category filtering effect
+  // Enhanced search and category filtering effect - completely redesigned to use visibility state
   useEffect(() => {
-    if (focusedCategory) {
-      setNodes(currentNodes => {
-        const filteredNodes = currentNodes.map(node => ({
-          ...node,
-          hidden: !node.id.startsWith(focusedCategory)
-        }));
-        
-        // Also filter edges based on visible nodes
-        const visibleNodeIds = new Set(filteredNodes.filter(n => !n.hidden).map(n => n.id));
-        setEdges(currentEdges => currentEdges.map(edge => ({
-          ...edge,
-          hidden: !visibleNodeIds.has(edge.source) || !visibleNodeIds.has(edge.target)
-        })));
-        
-        return filteredNodes;
-      });
-    } else {
-      setNodes(currentNodes => currentNodes.map(node => ({
-        ...node,
-        hidden: false
-      })));
-      setEdges(currentEdges => currentEdges.map(edge => ({
-        ...edge,
-        hidden: false
-      })));
+    // Skip if no nodes are available
+    if (nodes.length === 0) return;
+    
+    // Skip search updates during animations
+    const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
+    if (isAnimating || anyModalAnimating) {
+      console.log("Skipping search filter during animation");
+      return;
     }
-  }, [focusedCategory, setNodes, setEdges]);
+    
+    // Create a new function to handle the visibility calculation with a timeout
+    // This prevents the effect from running synchronously within the current render cycle
+    const calculateVisibility = () => {
+      // Shallow copy of current visibility state for comparison
+      const currentVisibility = {...visibilityRef.current};
+      const newVisibility = {};
+      let visibilityChanged = false;
+      let visibleCount = 0;
+      
+      // First pass: determine node visibility
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        let shouldShow = true;
+        
+        // Apply category filter first
+        if (focusedCategory && !node.id.startsWith(focusedCategory)) {
+          shouldShow = false;
+        }
+        
+        // Apply search filter if there's a search query
+        if (shouldShow && searchQuery.trim()) {
+          shouldShow = nodeMatchesSearch(node, searchQuery);
+        }
+        
+        // Track visible count
+        if (shouldShow) {
+          visibleCount++;
+        }
+        
+        // Store in visibility state
+        newVisibility[node.id] = shouldShow;
+        
+        // Check if visibility has changed for this node
+        if (currentVisibility[node.id] !== shouldShow) {
+          visibilityChanged = true;
+        }
+      }
+      
+      // Only update state if changes were detected or node count changed
+      const currentKeys = Object.keys(currentVisibility);
+      const newKeys = Object.keys(newVisibility);
+      
+      const differentNodeCount = currentKeys.length !== newKeys.length;
+      const nodesChanged = currentKeys.some(key => !newKeys.includes(key)) || 
+                           newKeys.some(key => !currentKeys.includes(key));
+      
+      if (visibilityChanged || differentNodeCount || nodesChanged) {
+        console.log("Updating visibility state from search filter");
+        // Update the ref first to break circular dependency
+        visibilityRef.current = {...newVisibility};
+        
+        // Then update the state in a separate cycle to prevent immediate re-renders
+        setTimeout(() => {
+          setSearchResultsCount(visibleCount);
+          setNodeVisibility(newVisibility);
+        }, 0);
+      } else if (visibleCount !== searchResultsCount) {
+        // Just update the count if only that changed
+        setTimeout(() => {
+          setSearchResultsCount(visibleCount);
+        }, 0);
+      }
+    };
+    
+    // Use timeout to break potential render cycles
+    const timeoutId = setTimeout(calculateVisibility, 0);
+    return () => clearTimeout(timeoutId);
+  }, [focusedCategory, searchQuery, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
+  
+  // Update node styles based on selection status and visibility - separate from search logic
+  useEffect(() => {
+    if (!isReactFlowReady || nodes.length === 0) return;
+    
+    // Create a stable reference to the current node visibility
+    const currentVisibility = visibilityRef.current;
+    const currentSelectedId = selectedNode?.id;
+    
+    // Use a timeout to break potential render cycles
+    const updateNodeStyles = () => {
+      setNodes(prevNodes => {
+        // Check if we actually need to update
+        let needsUpdate = false;
+        
+        // Deep comparison of current styles vs what they should be
+        const updatedNodes = prevNodes.map(node => {
+          const isVisible = currentVisibility[node.id] !== false; // Default to visible
+          const isSelected = currentSelectedId === node.id;
+          
+          // Create target style based on visibility and selection
+          let targetStyle = {
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          };
+          
+          if (!isVisible) {
+            targetStyle = {
+              ...targetStyle,
+              opacity: 0.15,
+              transform: 'scale(0.8)',
+              filter: 'grayscale(0.7)',
+              pointerEvents: 'none'
+            };
+          } else if (isSelected) {
+            targetStyle = {
+              ...targetStyle,
+              boxShadow: '0 0 0 2px #10b981, 0 0 20px rgba(16, 185, 129, 0.6)',
+              transform: 'scale(1.05)',
+              zIndex: 1000,
+              opacity: 1
+            };
+          } else {
+            targetStyle = {
+              ...targetStyle,
+              boxShadow: 'none',
+              transform: 'scale(1)',
+              zIndex: 0,
+              opacity: 1,
+              filter: 'none'
+            };
+          }
+          
+          // Check if current node style differs from target style or if hidden state differs
+          const currentHidden = !!node.hidden;
+          const targetHidden = !isVisible;
+          
+          const styleChanged = !node.style || 
+            node.style.opacity !== targetStyle.opacity ||
+            node.style.transform !== targetStyle.transform ||
+            node.style.filter !== targetStyle.filter ||
+            node.style.boxShadow !== targetStyle.boxShadow ||
+            node.style.zIndex !== targetStyle.zIndex ||
+            currentHidden !== targetHidden;
+            
+          if (styleChanged) {
+            needsUpdate = true;
+            return {
+              ...node,
+              hidden: targetHidden,
+              style: targetStyle
+            };
+          }
+          
+          // Return unchanged node if no style changes needed
+          return node;
+        });
+        
+        // Only return new array if updates were needed
+        return needsUpdate ? updatedNodes : prevNodes;
+      });
+    };
+    
+    const timeoutId = setTimeout(updateNodeStyles, 0);
+    return () => clearTimeout(timeoutId);
+  }, [selectedNode, nodeVisibility, isReactFlowReady, nodes]);
+
+  // Update edge visibility based on node visibility - separate from node styling
+  useEffect(() => {
+    if (!isReactFlowReady || Object.keys(nodeVisibility).length === 0) return;
+    
+    // Create stable references to the current states
+    const currentVisibility = visibilityRef.current;
+    const currentSelectedId = selectedNode?.id;
+    
+    // Use a timeout to break potential render cycles
+    const updateEdgeStyles = () => {
+      setEdges(prevEdges => {
+        // Check if we actually need to update
+        let needsUpdate = false;
+        
+        const updatedEdges = prevEdges.map(edge => {
+          const isSourceVisible = currentVisibility[edge.source] !== false;
+          const isTargetVisible = currentVisibility[edge.target] !== false;
+          const isVisible = isSourceVisible && isTargetVisible;
+          const isSelected = currentSelectedId && 
+                            (currentSelectedId === edge.source || currentSelectedId === edge.target);
+          
+          // Create target style based on visibility and selection
+          let targetStyle = {
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          };
+          
+          if (!isVisible) {
+            targetStyle = {
+              ...targetStyle,
+              opacity: 0.05,
+              strokeWidth: 1
+            };
+          } else if (isSelected) {
+            targetStyle = {
+              ...targetStyle,
+              opacity: 1,
+              strokeWidth: 3,
+              stroke: '#10b981' // teal color for selected
+            };
+          } else {
+            targetStyle = {
+              ...targetStyle,
+              opacity: 1,
+              strokeWidth: 2
+            };
+          }
+          
+          // Check if style or hidden state changed
+          const currentHidden = !!edge.hidden;
+          const targetHidden = !isVisible;
+          
+          const styleChanged = !edge.style || 
+                              edge.style.opacity !== targetStyle.opacity ||
+                              edge.style.strokeWidth !== targetStyle.strokeWidth ||
+                              (isSelected && edge.style.stroke !== targetStyle.stroke) ||
+                              currentHidden !== targetHidden;
+          
+          if (styleChanged) {
+            needsUpdate = true;
+            return {
+              ...edge,
+              hidden: targetHidden,
+              style: targetStyle
+            };
+          }
+          
+          // Return unchanged edge if no changes needed
+          return edge;
+        });
+        
+        // Only return new array if updates were needed
+        return needsUpdate ? updatedEdges : prevEdges;
+      });
+    };
+    
+    const timeoutId = setTimeout(updateEdgeStyles, 0);
+    return () => clearTimeout(timeoutId);
+  }, [nodeVisibility, selectedNode, isReactFlowReady]);
+
+  // Initialize nodeVisibility when nodes change
+  useEffect(() => {
+    // Skip if no nodes
+    if (nodes.length === 0) return;
+    
+    // Use a timeout to break potential render cycles
+    const updateVisibility = () => {
+      // Create stable references to avoid memory issues
+      const currentVisibility = {...visibilityRef.current};
+      const currentNodeIds = new Set(nodes.map(node => node.id));
+      const existingIds = new Set(Object.keys(currentVisibility));
+      
+      // Quick checks to avoid unnecessary work
+      const hasNewNodes = nodes.some(node => !existingIds.has(node.id));
+      const hasRemovedNodes = Array.from(existingIds).some(id => !currentNodeIds.has(id));
+      
+      // Only update if there are new nodes or removed nodes
+      if (hasNewNodes || hasRemovedNodes) {
+        console.log("Initializing node visibility - nodes added or removed");
+        
+        // Create new visibility state with defaults
+        const initialVisibility = {};
+        
+        // Process each node
+        for (let i = 0; i < nodes.length; i++) {
+          const nodeId = nodes[i].id;
+          
+          // Determine visibility status (preserve existing or default to true)
+          initialVisibility[nodeId] = existingIds.has(nodeId) 
+            ? currentVisibility[nodeId] 
+            : true;
+        }
+        
+        // Update ref first to avoid circular updates
+        visibilityRef.current = {...initialVisibility};
+        
+        // Use another timeout to break the update cycle
+        setTimeout(() => {
+          setNodeVisibility(initialVisibility);
+        }, 0);
+      }
+    };
+    
+    const timeoutId = setTimeout(updateVisibility, 0);
+    return () => clearTimeout(timeoutId);
+  }, [nodes]); // Only depend on nodes changes
 
   // Optionally: handle layout setup on first render if needed
 
@@ -2829,18 +3365,64 @@ const handleLiteratureClick = useCallback((literatureData) => {
           <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
         </div>
 
-        {/* --- Search --- */}
+        {/* --- Enhanced Search --- */}
         <div className="mb-6">
           <div className="relative">
             <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search nodes..."
+              placeholder="Search by title, diagnosis, case ID, category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-700 bg-opacity-50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  clearSearch();
+                }
+              }}
+              className="w-full pl-10 pr-12 py-2 bg-slate-700 bg-opacity-50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all duration-200"
             />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                title="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
+          {searchQuery && (
+            <div className="mt-2 text-xs text-slate-400">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span>✓ Searching: titles, diagnoses, case IDs, categories</span>
+                  <span className="bg-slate-600 px-2 py-1 rounded text-xs">
+                    {searchResultsCount} {searchResultsCount === 1 ? 'result' : 'results'}
+                  </span>
+                </div>
+                <div>✓ Try: "mood disorders", "case-123", "anxiety", "bipolar"</div>
+                <div className="text-slate-500">Press Esc to clear search</div>
+              </div>
+            </div>
+          )}
+          {!searchQuery && (
+            <div className="mt-2 space-y-2">
+              <div className="text-xs text-slate-500">
+                Search examples: "depression", "CASE-101", "mood disorders"
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {['depression', 'anxiety', 'bipolar', 'psychosis', 'mood disorders', 'case'].map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => setSearchQuery(term)}
+                    className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-xs text-slate-300 rounded transition-colors"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* --- Category Filters --- */}
@@ -3110,6 +3692,9 @@ const handleLiteratureClick = useCallback((literatureData) => {
           literatureData={literatureModal.data}
           allNodes={nodes}
           connections={mindMapData.connections || []}
+          setMindMapData={setMindMapData}
+          autoSaveMindMapData={autoSaveMindMapData}
+          addToast={addToast}
         />
       )}
       {showNodeSelector && (
@@ -3163,16 +3748,25 @@ const handleLiteratureClick = useCallback((literatureData) => {
         />
       )}
 
-      {/* Specialized Modals */}
+      {/* Specialized Modals with optimized rendering */}
       <AnimatePresence mode="wait">
         {caseModal.isOpen && (
           <CaseModal 
-            key="case-modal"
+            key={`case-modal-${caseModal.data?.id || 'default'}`}
             isOpen={caseModal.isOpen} 
             data={caseModalStableData.current || caseModal.data} 
-            onClose={() => setCaseModal({ isOpen: false, data: null })}
-            onAnimationStart={() => setIsAnimating(true)}
-            onAnimationEnd={() => setIsAnimating(false)}
+            onClose={() => {
+              setModalAnimationStates(prev => ({ ...prev, case: true }));
+              setCaseModal({ isOpen: false, data: null });
+            }}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, case: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, case: false }));
+            }}
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
@@ -3183,12 +3777,21 @@ const handleLiteratureClick = useCallback((literatureData) => {
       <AnimatePresence mode="wait">
         {topicModal.isOpen && (
           <TopicModal 
-            key="topic-modal"
+            key={`topic-modal-${topicModal.data?.id || 'default'}`}
             isOpen={topicModal.isOpen} 
             data={topicModalStableData.current || topicModal.data} 
-            onClose={() => setTopicModal({ isOpen: false, data: null })}
-            onAnimationStart={() => setIsAnimating(true)}
-            onAnimationEnd={() => setIsAnimating(false)}
+            onClose={() => {
+              setModalAnimationStates(prev => ({ ...prev, topic: true }));
+              setTopicModal({ isOpen: false, data: null });
+            }}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, topic: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, topic: false }));
+            }}
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
@@ -3199,12 +3802,21 @@ const handleLiteratureClick = useCallback((literatureData) => {
       <AnimatePresence mode="wait">
         {taskModal.isOpen && (
           <TaskModal 
-            key="task-modal"
+            key={`task-modal-${taskModal.data?.id || 'default'}`}
             isOpen={taskModal.isOpen} 
             data={taskModalStableData.current || taskModal.data} 
-            onClose={() => setTaskModal({ isOpen: false, data: null })}
-            onAnimationStart={() => setIsAnimating(true)}
-            onAnimationEnd={() => setIsAnimating(false)}
+            onClose={() => {
+              setModalAnimationStates(prev => ({ ...prev, task: true }));
+              setTaskModal({ isOpen: false, data: null });
+            }}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setModalAnimationStates(prev => ({ ...prev, task: true }));
+            }}
+            onAnimationEnd={() => {
+              setIsAnimating(false);
+              setModalAnimationStates(prev => ({ ...prev, task: false }));
+            }}
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}

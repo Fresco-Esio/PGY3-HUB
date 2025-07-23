@@ -57,14 +57,25 @@ const modalVariants = {
 };
 
 const backdropVariants = {
-  hidden: { opacity: 0 },
+  hidden: { 
+    opacity: 0,
+    backdropFilter: 'blur(0px)'
+  },
   visible: { 
     opacity: 1,
-    transition: { duration: 0.3 }
+    backdropFilter: 'blur(8px)',
+    transition: {
+      duration: 0.4,
+      ease: "easeOut"
+    }
   },
   exit: { 
     opacity: 0,
-    transition: { duration: 0.4 }
+    backdropFilter: 'blur(0px)',
+    transition: {
+      duration: 0.3,
+      ease: "easeIn"
+    }
   }
 };
 
@@ -158,21 +169,15 @@ const TopicModal = ({
   }, [editData.flashcard_count, editData.completed_flashcards]);
 
   const handleClose = useCallback(() => {
-    if (isAnimating) return;
+    if (isAnimating || isClosing) return;
     
     setIsAnimating(true);
     setIsClosing(true);
     if (onAnimationStart) onAnimationStart();
     
-    setTimeout(() => {
-      setIsVisible(false);
-      setIsClosing(false);
-      setIsAnimating(false);
-      setHasInitialized(false);
-      onClose();
-      if (onAnimationEnd) onAnimationEnd();
-    }, 400);
-  }, [onClose, isAnimating, onAnimationStart, onAnimationEnd]);
+    // Set visibility to false to trigger exit animation
+    setIsVisible(false);
+  }, [onAnimationStart, isAnimating, isClosing]);
 
   const handleSave = useCallback(async () => {
     if (isLoading) return;
@@ -327,7 +332,13 @@ const TopicModal = ({
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence mode="wait" onExitComplete={() => setHasInitialized(false)}>
+    <AnimatePresence mode="wait" onExitComplete={() => {
+      setIsAnimating(false);
+      setIsClosing(false);
+      setHasInitialized(false);
+      onClose();
+      if (onAnimationEnd) onAnimationEnd();
+    }}>
       {isVisible && (
         <motion.div
           key={`topic-modal-${data?.id || 'default'}`}
@@ -336,6 +347,11 @@ const TopicModal = ({
           exit="exit"
           variants={backdropVariants}
           className="fixed inset-0 bg-black flex items-center justify-center z-50"
+          style={{ 
+            willChange: 'backdrop-filter, opacity',
+            backfaceVisibility: 'hidden',
+            transform: 'translate3d(0, 0, 0)'
+          }}
           onClick={(e) => e.target === e.currentTarget && handleClose()}
         >
           <motion.div
@@ -344,14 +360,26 @@ const TopicModal = ({
             exit="exit"
             variants={modalVariants}
             className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[85vh] overflow-hidden"
+            style={{ 
+              willChange: 'transform, opacity, scale',
+              backfaceVisibility: 'hidden'
+            }}
             onClick={(e) => e.stopPropagation()}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              if (onAnimationStart) onAnimationStart();
+            }}
+            onAnimationComplete={() => {
+              setIsAnimating(false);
+              if (onAnimationEnd) onAnimationEnd();
+            }}
           >
             <motion.div 
               initial="hidden"
               animate="visible"
               exit="exit"
               variants={contentVariants}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between"
+              className="bg-gradient-to-br from-slate-900 to-slate-800 text-white px-6 py-4 flex items-center justify-between"
             >
               <div className="flex items-center gap-3">
                 <BookOpen size={24} />
