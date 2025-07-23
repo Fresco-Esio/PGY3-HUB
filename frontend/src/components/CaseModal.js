@@ -918,7 +918,7 @@ const CaseModal = ({
                       
                       <div
                         ref={timelineScrollRef}
-                        className="h-full overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 space-y-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800"
+                        className="h-full overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800"
                         style={{
                           scrollbarWidth: 'thin',
                           scrollbarColor: '#475569 #1e293b'
@@ -927,230 +927,242 @@ const CaseModal = ({
                         {/* Vertical timeline bar */}
                         <div className="absolute left-7 top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-400 via-purple-500 to-blue-400 opacity-30" />
                         
-                        <AnimatePresence mode="popLayout">
-                          {timelineEntries.map((entry, index) => {
-                            const isEditing = editingEntryId === entry.id;
-                            const isExpanded = expandedTimelineEntry === entry.id;
-                            
-                            return (
-                              <motion.div
-                                key={entry.id}
-                                data-entry-id={entry.id}
-                                layout
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ 
-                                  opacity: 1, 
-                                  y: 0,
-                                  transition: { 
-                                    delay: entry.isNew && !entry.isEditing ? 0 : index * 0.03, 
-                                    duration: 0.3,
-                                    type: "spring",
-                                    stiffness: 400,
-                                    damping: 25
-                                  }
-                                }}
-                                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                                className={`relative z-10 ${entry.isNew && !isEditing ? 'animate-pulse' : ''}`}
-                              >
-                                {/* Timeline dot */}
-                                <div className={`absolute left-6 top-4 w-3 h-3 rounded-full border-2 border-slate-900 z-20 ${
-                                  entry.type === 'assessment' ? 'bg-green-500' :
-                                  entry.type === 'medication' ? 'bg-blue-500' :
-                                  entry.type === 'therapy' ? 'bg-purple-500' :
-                                  entry.type === 'note' ? 'bg-yellow-500' :
-                                  'bg-orange-500'
-                                }`} />
-                                
+                        <div className="space-y-1">
+                          <AnimatePresence mode="wait">
+                            {timelineEntries.map((entry, index) => {
+                              const isEditing = editingEntryId === entry.id;
+                              const isExpanded = expandedTimelineEntry === entry.id;
+                              
+                              return (
                                 <motion.div
-                                  layout
-                                  whileHover={!isEditing ? { 
-                                    scale: 1.005,
-                                    boxShadow: '0 8px 25px rgba(59, 130, 246, 0.15)',
+                                  key={entry.id}
+                                  data-entry-id={entry.id}
+                                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                                  animate={{ 
+                                    opacity: 1, 
+                                    y: 0,
+                                    scale: 1,
+                                    transition: { 
+                                      delay: entry.isNew && !entry.isEditing ? 0 : index * 0.02, 
+                                      duration: 0.25,
+                                      ease: [0.25, 0.46, 0.45, 0.94] // Custom easing for smoothness
+                                    }
+                                  }}
+                                  exit={{ 
+                                    opacity: 0, 
+                                    y: -10, 
+                                    scale: 0.95,
                                     transition: { duration: 0.2 }
-                                  } : {}}
-                                  className={`ml-12 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border-l-3 transition-all duration-300 cursor-pointer ${
-                                    entry.type === 'assessment' ? 'border-green-400' :
-                                    entry.type === 'medication' ? 'border-blue-400' :
-                                    entry.type === 'therapy' ? 'border-purple-400' :
-                                    entry.type === 'note' ? 'border-yellow-400' :
-                                    'border-orange-400'
-                                  } ${entry.isNew && !isEditing ? 'ring-1 ring-blue-400 ring-opacity-50' : ''} ${
-                                    isEditing ? 'ring-2 ring-green-400 ring-opacity-70' : ''
-                                  }`}
-                                  onClick={() => !isEditing && toggleTimelineEntry(entry)}
+                                  }}
+                                  className={`relative ${entry.isNew && !isEditing ? 'animate-pulse' : ''}`}
+                                  style={{ 
+                                    // Prevent layout thrashing during animations
+                                    willChange: isExpanded ? 'height' : 'auto',
+                                    contain: 'layout style paint'
+                                  }}
                                 >
-                                  {/* Entry Header - Always Visible */}
-                                  <div className="p-4">
-                                    <div className="flex items-start justify-between">
-                                      <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                          <h4 className="text-white font-semibold text-sm">
-                                            {entry.title}
-                                          </h4>
-                                          {entry.isNew && !isEditing && (
-                                            <motion.span
-                                              animate={{ 
-                                                scale: [1, 1.1, 1],
-                                                opacity: [0.7, 1, 0.7]
-                                              }}
-                                              transition={{ 
-                                                duration: 2, 
-                                                repeat: Infinity,
-                                                ease: "easeInOut"
-                                              }}
-                                              className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded-full"
-                                            >
-                                              New
-                                            </motion.span>
-                                          )}
-                                          {isEditing && (
-                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full">
-                                              Editing
+                                  {/* Timeline dot */}
+                                  <div className={`absolute left-6 top-4 w-3 h-3 rounded-full border-2 border-slate-900 z-20 transition-colors duration-200 ${
+                                    entry.type === 'assessment' ? 'bg-green-500' :
+                                    entry.type === 'medication' ? 'bg-blue-500' :
+                                    entry.type === 'therapy' ? 'bg-purple-500' :
+                                    entry.type === 'note' ? 'bg-yellow-500' :
+                                    'bg-orange-500'
+                                  }`} />
+                                  
+                                  <motion.div
+                                    layout="position"
+                                    whileHover={!isEditing ? { 
+                                      scale: 1.002,
+                                      transition: { duration: 0.15, ease: "easeOut" }
+                                    } : {}}
+                                    className={`ml-12 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border-l-3 transition-all duration-200 cursor-pointer ${
+                                      entry.type === 'assessment' ? 'border-green-400' :
+                                      entry.type === 'medication' ? 'border-blue-400' :
+                                      entry.type === 'therapy' ? 'border-purple-400' :
+                                      entry.type === 'note' ? 'border-yellow-400' :
+                                      'border-orange-400'
+                                    } ${entry.isNew && !isEditing ? 'ring-1 ring-blue-400 ring-opacity-50' : ''} ${
+                                      isEditing ? 'ring-2 ring-green-400 ring-opacity-70' : ''
+                                    }`}
+                                    onClick={() => !isEditing && toggleTimelineEntry(entry)}
+                                  >
+                                    {/* Entry Header - Always Visible */}
+                                    <div className="p-4">
+                                      <div className="flex items-start justify-between">
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <h4 className="text-white font-semibold text-sm truncate">
+                                              {entry.title}
+                                            </h4>
+                                            {entry.isNew && !isEditing && (
+                                              <motion.span
+                                                animate={{ 
+                                                  scale: [1, 1.05, 1],
+                                                  opacity: [0.8, 1, 0.8]
+                                                }}
+                                                transition={{ 
+                                                  duration: 1.5, 
+                                                  repeat: Infinity,
+                                                  ease: "easeInOut"
+                                                }}
+                                                className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded-full shrink-0"
+                                              >
+                                                New
+                                              </motion.span>
+                                            )}
+                                            {isEditing && (
+                                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full shrink-0">
+                                                Editing
+                                              </span>
+                                            )}
+                                          </div>
+                                          <div className="flex items-center gap-3 text-xs text-slate-300 mb-2">
+                                            <span className="flex items-center gap-1">
+                                              <Calendar size={11} />
+                                              {entry.date}
                                             </span>
+                                            <span className="flex items-center gap-1">
+                                              <Clock size={11} />
+                                              {entry.time}
+                                            </span>
+                                            <span className="truncate">by {entry.author}</span>
+                                          </div>
+                                          
+                                          {!isExpanded && (
+                                            <p className="text-slate-200 text-sm leading-relaxed">
+                                              {entry.content?.length > 120 
+                                                ? `${entry.content.substring(0, 120)}...` 
+                                                : entry.content || 'Click to edit...'}
+                                            </p>
                                           )}
-                                        </div>
-                                        <div className="flex items-center gap-4 text-xs text-slate-300 mb-2">
-                                          <span className="flex items-center gap-1">
-                                            <Calendar size={12} />
-                                            {entry.date}
-                                          </span>
-                                          <span className="flex items-center gap-1">
-                                            <Clock size={12} />
-                                            {entry.time}
-                                          </span>
-                                          <span>by {entry.author}</span>
                                         </div>
                                         
-                                        {!isExpanded && (
-                                          <p className="text-slate-200 text-sm">
-                                            {entry.content?.length > 100 
-                                              ? `${entry.content.substring(0, 100)}...` 
-                                              : entry.content || 'Click to edit...'}
-                                          </p>
+                                        {!isEditing && (
+                                          <motion.div
+                                            animate={{ rotate: isExpanded ? 180 : 0 }}
+                                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                                            className="ml-2 shrink-0"
+                                          >
+                                            <Edit3 size={15} className="text-slate-400" />
+                                          </motion.div>
                                         )}
                                       </div>
-                                      
-                                      {!isEditing && (
-                                        <motion.div
-                                          animate={{ rotate: isExpanded ? 180 : 0 }}
-                                          transition={{ duration: 0.2 }}
-                                        >
-                                          <Edit3 size={16} className="text-slate-400" />
-                                        </motion.div>
-                                      )}
                                     </div>
-                                  </div>
-                                  
-                                  {/* Inline Editing Form */}
-                                  <AnimatePresence>
-                                    {isExpanded && (
-                                      <motion.div
-                                        layout
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ 
-                                          height: "auto", 
-                                          opacity: 1,
-                                          transition: { 
-                                            duration: 0.4, 
-                                            ease: "easeOut"
-                                          }
-                                        }}
-                                        exit={{ 
-                                          height: 0, 
-                                          opacity: 0,
-                                          transition: { 
-                                            duration: 0.3, 
-                                            ease: "easeIn"
-                                          }
-                                        }}
-                                        className="overflow-hidden"
-                                      >
-                                        <div className="px-4 pb-4 border-t border-slate-600">
-                                          <div className="space-y-4 mt-4">
-                                            {/* Type and Timestamp Row */}
-                                            <div className="grid grid-cols-2 gap-4">
-                                              <div>
-                                                <label className="block text-xs font-medium text-slate-300 mb-2">
-                                                  Entry Type
-                                                </label>
-                                                <select
-                                                  value={editingEntryData.type || 'followup'}
-                                                  onChange={(e) => updateEditingEntry('type', e.target.value)}
-                                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                                >
-                                                  <option value="assessment">Assessment</option>
-                                                  <option value="medication">Medication</option>
-                                                  <option value="therapy">Therapy</option>
-                                                  <option value="followup">Follow-up</option>
-                                                  <option value="note">Note</option>
-                                                </select>
+                                    
+                                    {/* Inline Editing Form */}
+                                    <AnimatePresence mode="wait">
+                                      {isExpanded && (
+                                        <motion.div
+                                          initial={{ height: 0, opacity: 0 }}
+                                          animate={{ 
+                                            height: "auto", 
+                                            opacity: 1,
+                                            transition: { 
+                                              height: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
+                                              opacity: { duration: 0.2, delay: 0.1 }
+                                            }
+                                          }}
+                                          exit={{ 
+                                            height: 0, 
+                                            opacity: 0,
+                                            transition: { 
+                                              height: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] },
+                                              opacity: { duration: 0.15 }
+                                            }
+                                          }}
+                                          style={{ 
+                                            overflow: 'hidden',
+                                            willChange: 'height, opacity'
+                                          }}
+                                        >
+                                          <div className="px-4 pb-4 border-t border-slate-600">
+                                            <div className="space-y-4 mt-4">
+                                              {/* Type and Timestamp Row */}
+                                              <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                  <label className="block text-xs font-medium text-slate-300 mb-2">
+                                                    Entry Type
+                                                  </label>
+                                                  <select
+                                                    value={editingEntryData.type || 'followup'}
+                                                    onChange={(e) => updateEditingEntry('type', e.target.value)}
+                                                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 focus:bg-slate-650"
+                                                  >
+                                                    <option value="assessment">Assessment</option>
+                                                    <option value="medication">Medication</option>
+                                                    <option value="therapy">Therapy</option>
+                                                    <option value="followup">Follow-up</option>
+                                                    <option value="note">Note</option>
+                                                  </select>
+                                                </div>
+                                                
+                                                <div>
+                                                  <label className="block text-xs font-medium text-slate-300 mb-2">
+                                                    Timestamp
+                                                  </label>
+                                                  <input
+                                                    type="datetime-local"
+                                                    value={editingEntryData.timestamp ? 
+                                                      new Date(editingEntryData.timestamp).toISOString().slice(0, -1) : 
+                                                      new Date().toISOString().slice(0, -1)
+                                                    }
+                                                    onChange={(e) => updateEditingEntry('timestamp', new Date(e.target.value).toISOString())}
+                                                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 focus:bg-slate-650"
+                                                  />
+                                                </div>
                                               </div>
                                               
+                                              {/* Content */}
                                               <div>
                                                 <label className="block text-xs font-medium text-slate-300 mb-2">
-                                                  Timestamp
+                                                  Content
                                                 </label>
-                                                <input
-                                                  type="datetime-local"
-                                                  value={editingEntryData.timestamp ? 
-                                                    new Date(editingEntryData.timestamp).toISOString().slice(0, -1) : 
-                                                    new Date().toISOString().slice(0, -1)
-                                                  }
-                                                  onChange={(e) => updateEditingEntry('timestamp', new Date(e.target.value).toISOString())}
-                                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                                <textarea
+                                                  value={editingEntryData.content || ''}
+                                                  onChange={(e) => updateEditingEntry('content', e.target.value)}
+                                                  onKeyPress={handleEditingKeyPress}
+                                                  placeholder="Enter clinical notes, observations, or updates..."
+                                                  rows={4}
+                                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 focus:bg-slate-650"
                                                 />
+                                                <p className="text-xs text-slate-400 mt-1">
+                                                  Press Shift+Enter to save, Escape to cancel
+                                                </p>
+                                              </div>
+                                              
+                                              {/* Action Buttons - These must always be visible */}
+                                              <div className="flex justify-end gap-2 pt-2 pb-1">
+                                                <motion.button
+                                                  whileHover={{ scale: 1.02 }}
+                                                  whileTap={{ scale: 0.98 }}
+                                                  onClick={cancelEditingEntry}
+                                                  className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm font-medium"
+                                                >
+                                                  Cancel
+                                                </motion.button>
+                                                <motion.button
+                                                  whileHover={{ scale: 1.02 }}
+                                                  whileTap={{ scale: 0.98 }}
+                                                  onClick={saveEditingEntry}
+                                                  disabled={!editingEntryData.content?.trim()}
+                                                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
+                                                >
+                                                  <Save size={14} />
+                                                  Save
+                                                </motion.button>
                                               </div>
                                             </div>
-                                            
-                                            {/* Content */}
-                                            <div>
-                                              <label className="block text-xs font-medium text-slate-300 mb-2">
-                                                Content
-                                              </label>
-                                              <textarea
-                                                value={editingEntryData.content || ''}
-                                                onChange={(e) => updateEditingEntry('content', e.target.value)}
-                                                onKeyPress={handleEditingKeyPress}
-                                                placeholder="Enter clinical notes, observations, or updates..."
-                                                rows={4}
-                                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all"
-                                              />
-                                              <p className="text-xs text-slate-400 mt-1">
-                                                Press Shift+Enter to save, Escape to cancel
-                                              </p>
-                                            </div>
-                                            
-                                            {/* Action Buttons */}
-                                            <div className="flex justify-end gap-2 pt-2">
-                                              <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                onClick={cancelEditingEntry}
-                                                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm"
-                                              >
-                                                Cancel
-                                              </motion.button>
-                                              <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                onClick={saveEditingEntry}
-                                                disabled={!editingEntryData.content?.trim()}
-                                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-2"
-                                              >
-                                                <Save size={14} />
-                                                Save
-                                              </motion.button>
-                                            </div>
                                           </div>
-                                        </div>
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </motion.div>
                                 </motion.div>
-                              </motion.div>
-                            );
-                          })}
-                        </AnimatePresence>
+                              );
+                            })}
+                          </AnimatePresence>
+                        </div>
                         
                         {/* Empty state */}
                         {timelineEntries.length === 0 && (
