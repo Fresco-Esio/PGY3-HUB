@@ -3143,66 +3143,6 @@ useEffect(() => {
           <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
         </div>
 
-        {/* --- Enhanced Search --- */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by title, diagnosis, case ID, category..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  clearSearch();
-                }
-              }}
-              className="w-full pl-10 pr-12 py-2 bg-slate-700 bg-opacity-50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all duration-200"
-            />
-            {searchQuery && (
-              <button
-                onClick={clearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                title="Clear search"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-          {searchQuery && (
-            <div className="mt-2 text-xs text-slate-400">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span>✓ Searching: titles, diagnoses, case IDs, categories</span>
-                  <span className="bg-slate-600 px-2 py-1 rounded text-xs">
-                    {searchResultsCount} {searchResultsCount === 1 ? 'result' : 'results'}
-                  </span>
-                </div>
-                <div>✓ Try: "mood disorders", "case-123", "anxiety", "bipolar"</div>
-                <div className="text-slate-500">Press Esc to clear search</div>
-              </div>
-            </div>
-          )}
-          {!searchQuery && (
-            <div className="mt-2 space-y-2">
-              <div className="text-xs text-slate-500">
-                Search examples: "depression", "CASE-101", "mood disorders"
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {['depression', 'anxiety', 'bipolar', 'psychosis', 'mood disorders', 'case'].map((term) => (
-                  <button
-                    key={term}
-                    onClick={() => setSearchQuery(term)}
-                    className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-xs text-slate-300 rounded transition-colors"
-                  >
-                    {term}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* --- Category Filters --- */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-slate-300 mb-3">Filter by Category</h3>
