@@ -3645,7 +3645,7 @@ useEffect(() => {
             nodeTypes={nodeTypes}
             edgeTypes={{ floating: FloatingEdge, enhanced: EnhancedEdge }}
             nodesDraggable={true}
-            nodesConnectable={true}
+            nodesConnectable={isEditing}
             elementsSelectable={true}
             onInit={(reactFlowInstance) => {
               setIsReactFlowReady(true);
@@ -3660,8 +3660,6 @@ useEffect(() => {
               }
             }}
             fitView
-            nodesConnectable={isEditing}
-            nodesDraggable={true}
             snapToGrid={false}
             snapGrid={[15, 15]}
             elevateEdgesOnSelect={false}
