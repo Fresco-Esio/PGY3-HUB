@@ -715,18 +715,48 @@ const TopicModal = ({
                   >
                     {/* Definition Section */}
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <Brain size={20} className="text-purple-400" />
-                        Definition
-                      </h3>
-                      {isEditing ? (
-                        <textarea
-                          value={editData.definition || ''}
-                          onChange={(e) => updateField('definition', e.target.value)}
-                          rows={4}
-                          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-                          placeholder="Enter the definition of this topic..."
-                        />
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Brain size={20} className="text-purple-400" />
+                          Definition
+                        </h3>
+                        {!editingSections.definition && (
+                          <button
+                            onClick={() => startEditingSection('definition')}
+                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                            title="Edit definition"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {editingSections.definition ? (
+                        <div className="space-y-4">
+                          <textarea
+                            value={sectionData.definition?.definition || editData.definition || ''}
+                            onChange={(e) => updateSectionField('definition', 'definition', e.target.value)}
+                            rows={4}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                            placeholder="Enter the definition of this topic..."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => cancelEditingSection('definition')}
+                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => saveSectionEdit('definition')}
+                              disabled={isLoading}
+                              className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                            >
+                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save
+                            </button>
+                          </div>
+                        </div>
                       ) : (
                         <div className="text-slate-300 leading-relaxed">
                           {editData.definition || <span className="text-slate-500 italic">No definition provided</span>}
