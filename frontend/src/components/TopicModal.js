@@ -1077,18 +1077,52 @@ const TopicModal = ({
 
                     {/* Psychotherapy Modalities Section */}
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <Brain size={20} className="text-purple-400" />
-                        Psychotherapy Modalities
-                      </h3>
-                      {isEditing ? (
-                        <textarea
-                          value={Array.isArray(editData.psychotherapy_modalities) ? editData.psychotherapy_modalities.join('\n') : editData.psychotherapy_modalities || ''}
-                          onChange={(e) => updateField('psychotherapy_modalities', e.target.value.split('\n').filter(item => item.trim()))}
-                          rows={4}
-                          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-                          placeholder="Enter psychotherapy modalities (one per line)..."
-                        />
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Brain size={20} className="text-purple-400" />
+                          Psychotherapy Modalities
+                        </h3>
+                        {!editingSections.psychotherapy_modalities && (
+                          <button
+                            onClick={() => startEditingSection('psychotherapy_modalities')}
+                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                            title="Edit psychotherapy modalities"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {editingSections.psychotherapy_modalities ? (
+                        <div className="space-y-4">
+                          <textarea
+                            value={Array.isArray(sectionData.psychotherapy_modalities?.psychotherapy_modalities) 
+                              ? sectionData.psychotherapy_modalities.psychotherapy_modalities.join('\n') 
+                              : Array.isArray(editData.psychotherapy_modalities)
+                                ? editData.psychotherapy_modalities.join('\n')
+                                : editData.psychotherapy_modalities || ''}
+                            onChange={(e) => updateSectionField('psychotherapy_modalities', 'psychotherapy_modalities', e.target.value.split('\n').filter(item => item.trim()))}
+                            rows={4}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                            placeholder="Enter psychotherapy modalities (one per line)..."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => cancelEditingSection('psychotherapy_modalities')}
+                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => saveSectionEdit('psychotherapy_modalities')}
+                              disabled={isLoading}
+                              className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                            >
+                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save
+                            </button>
+                          </div>
+                        </div>
                       ) : (
                         <div className="space-y-2">
                           {(editData.psychotherapy_modalities || []).length > 0 ? (
