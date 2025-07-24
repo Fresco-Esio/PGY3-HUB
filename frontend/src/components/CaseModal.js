@@ -545,12 +545,64 @@ const CaseModal = ({
 
   // Update editing entry data
   const updateEditingEntry = useCallback((field, value) => {
-    setEditingEntryData(prev => ({
-      ...prev,
-      [field]: value,
-      // Auto-update details to match content for consistency
-      ...(field === 'content' && { details: value })
-    }));
+    setEditingEntryData(prev => {
+      const updated = {
+        ...prev,
+        [field]: value,
+        // Auto-update details to match content for consistency
+        ...(field === 'content' && { details: value })
+      };
+      
+      // Check if there are unsaved changes
+      const currentEntry = timelineEntries.find(e => e.id === editingEntryId);
+      const hasChanges = currentEntry ? 
+        JSON.stringify(updated) !== JSON.stringify(currentEntry) :
+        Object.values(updated).some(val => val && val.toString().trim());
+      
+      setHasUnsavedChanges(hasChanges);
+      return updated;
+    });
+  }, [editingEntryId, timelineEntries]);
+
+  // Delete timeline entry functions
+  const initiateDeleteEntry = useCallback((entryId) => {
+    setDeletingEntryId(entryId);
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const confirmDeleteEntry = useCallback(() => {
+    if (!deletingEntryId) return;
+    
+    const currentTimeline = editData?.timeline || [];
+    const entryToDelete = currentTimeline.find(e => e.id === deletingEntryId);
+    
+    if (!entryToDelete) {
+      setShowDeleteConfirm(false);
+      setDeletingEntryId(null);
+      return;
+    }
+    
+    // Remove entry from timeline
+    const updatedTimeline = currentTimeline.filter(e => e.id !== deletingEntryId);
+    
+    // Save changes
+    saveTimelineChange(updatedTimeline);
+    
+    // Clear states
+    setShowDeleteConfirm(false);
+    setDeletingEntryId(null);
+    if (editingEntryId === deletingEntryId) {
+      setEditingEntryId(null);
+      setEditingEntryData({});
+      setExpandedTimelineEntry(null);
+    }
+    
+    addToast('Timeline entry deleted successfully', 'success');
+  }, [deletingEntryId, editData?.timeline, saveTimelineChange, editingEntryId, addToast]);
+
+  const cancelDeleteEntry = useCallback(() => {
+    setShowDeleteConfirm(false);
+    setDeletingEntryId(null);
   }, []);
 
   // Clear isNew flag after a delay for entries that were just added
