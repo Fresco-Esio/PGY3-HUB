@@ -448,7 +448,7 @@ test_plan:
 
   - task: "Editable Timeline functionality in CaseModal"
     implemented: true
-    working: false
+    working: true
     file: "CaseModal.js"
     stuck_count: 3
     priority: "high"
