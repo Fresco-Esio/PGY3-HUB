@@ -1249,16 +1249,23 @@ const CaseModal = ({
                                                 
                                                 <div>
                                                   <label className="block text-xs font-medium text-slate-300 mb-2">
-                                                    Timestamp
+                                                    Date
                                                   </label>
                                                   <input
-                                                    type="datetime-local"
+                                                    type="date"
                                                     value={editingEntryData.timestamp ? 
-                                                      new Date(editingEntryData.timestamp).toISOString().slice(0, -1) : 
-                                                      new Date().toISOString().slice(0, -1)
+                                                      new Date(editingEntryData.timestamp).toISOString().split('T')[0] : 
+                                                      new Date().toISOString().split('T')[0]
                                                     }
-                                                    onChange={(e) => updateEditingEntry('timestamp', new Date(e.target.value).toISOString())}
+                                                    onChange={(e) => {
+                                                      // Create timestamp with selected date at current time
+                                                      const selectedDate = new Date(e.target.value);
+                                                      const now = new Date();
+                                                      selectedDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
+                                                      updateEditingEntry('timestamp', selectedDate.toISOString());
+                                                    }}
                                                     className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 focus:bg-slate-650"
+                                                    title="Select date for this timeline entry"
                                                   />
                                                 </div>
                                               </div>
