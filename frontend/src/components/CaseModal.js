@@ -385,11 +385,12 @@ const CaseModal = ({
   const createNewTimelineEntry = useCallback(() => {
     if (editingEntryId) return; // Prevent multiple entries being edited simultaneously
     
+    const now = new Date();
     const newEntry = {
       id: `new-${Date.now()}`, // Temporary ID for new entries
-      timestamp: new Date().toISOString(),
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString('en-US', { 
+      timestamp: now.toISOString(),
+      date: now.toISOString().split('T')[0],
+      time: now.toLocaleTimeString('en-US', { 
         hour: '2-digit', 
         minute: '2-digit', 
         hour12: true 
@@ -411,6 +412,7 @@ const CaseModal = ({
     setEditingEntryId(newEntry.id);
     setEditingEntryData({ ...newEntry });
     setExpandedTimelineEntry(newEntry.id);
+    setHasUnsavedChanges(false);
     
     // Scroll to show the new entry after it's rendered and expanded
     scrollToShowEntry(newEntry.id);
