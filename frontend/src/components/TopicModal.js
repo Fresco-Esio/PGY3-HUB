@@ -152,7 +152,8 @@ const TopicModal = ({
   onAnimationEnd,
   setMindMapData,
   autoSaveMindMapData,
-  addToast
+  addToast,
+  syncNodeData
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
