@@ -23,7 +23,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159494",
-      "updated_at": "2025-07-24T04:06:03.405000+00:00"
+      "updated_at": "2025-07-24T04:09:17.598000+00:00"
     },
     {
       "id": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
@@ -48,7 +48,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159508",
-      "updated_at": "2025-07-24T04:06:03.405000+00:00"
+      "updated_at": "2025-07-24T04:09:17.598000+00:00"
     },
     {
       "id": "a9c0a2ec-bdb8-4043-adf7-b4d761c1dabe",
@@ -73,7 +73,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159519",
-      "updated_at": "2025-07-24T04:06:03.405000+00:00"
+      "updated_at": "2025-07-24T04:09:17.598000+00:00"
     },
     {
       "id": "bf0ca57b-4ce6-48f0-a77f-a10394dc7cc7",
@@ -98,7 +98,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159534",
-      "updated_at": "2025-07-24T04:06:03.405000+00:00"
+      "updated_at": "2025-07-24T04:09:17.598000+00:00"
     },
     {
       "id": "e3f00945-e7d6-48c9-9044-53ee940b7bce",
@@ -123,7 +123,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159552",
-      "updated_at": "2025-07-24T04:06:03.405000+00:00"
+      "updated_at": "2025-07-24T04:09:17.598000+00:00"
     },
     {
       "id": "fe743542-0af5-4889-b77a-744ed7a7eeda",
@@ -148,7 +148,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159579",
-      "updated_at": "2025-07-24T04:06:03.405000+00:00"
+      "updated_at": "2025-07-24T04:09:17.598000+00:00"
     },
     {
       "id": "d89194f6-b8ee-40c6-a8e6-18f37164349e",
@@ -173,7 +173,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159591",
-      "updated_at": "2025-07-24T04:06:03.405000+00:00"
+      "updated_at": "2025-07-24T04:09:17.598000+00:00"
     }
   ],
   "cases": [],
@@ -190,16 +190,7 @@
       "id": "e7629ce315fff4d38afb6ff000c124a5d",
       "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
       "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
-      "sourceHandle": "7f8ca947-0887-4794-8dd0-074f8b1be81c-bottom",
-      "targetHandle": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6-top",
       "label": "Updated Old Format Connection"
-    },
-    {
-      "id": "e29cd1b197b8c4bf181617743d13d3758",
-      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
-      "sourceHandle": "bottom",
-      "targetHandle": "top",
-      "label": "Malformed Connection"
     }
   ]
 }
