@@ -370,11 +370,22 @@ const TopicModal = ({
       console.log('Saving category change to backend:', newCategory, newColor);
       autoSaveMindMapData(newData);
       
+      // Force immediate node update after state change
+      setTimeout(() => {
+        console.log('Triggering force node update');
+        if (forceNodeUpdate) {
+          forceNodeUpdate();
+        }
+        if (syncNodeData) {
+          syncNodeData();
+        }
+      }, 200);
+      
       return newData;
     });
     
     addToast(`Category updated to ${newCategory}`, 'success');
-  }, [data?.id, editData, setMindMapData, categoryColors, autoSaveMindMapData, addToast, syncNodeData]);
+  }, [data?.id, editData, setMindMapData, categoryColors, autoSaveMindMapData, addToast, syncNodeData, forceNodeUpdate]);
 
   // Get connected nodes for Connections tab
   const connectedNodes = useMemo(() => {
