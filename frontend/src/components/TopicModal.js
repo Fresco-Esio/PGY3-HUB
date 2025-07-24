@@ -966,119 +966,101 @@ const TopicModal = ({
 
                     {/* Differential Diagnoses Section */}
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <Activity size={20} className="text-cyan-400" />
-                          Differential Diagnoses
-                        </h3>
-                        {!editingSections.differential_diagnoses && (
-                          <button
-                            onClick={() => startEditingSection('differential_diagnoses')}
-                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
-                            title="Edit differential diagnoses"
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Activity size={20} className="text-cyan-400" />
+                        Differential Diagnoses
+                      </h3>
+                      
+                      {/* Current differential diagnoses list */}
+                      <div className="space-y-2 mb-4">
+                        {(editData.differential_diagnoses || []).map((diagnosis, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className="flex items-center justify-between p-3 bg-cyan-600/10 rounded-lg border border-cyan-600/20 group hover:bg-cyan-600/15 transition-colors"
                           >
-                            <Edit3 size={16} />
-                          </button>
-                        )}
+                            <span className="text-cyan-300">{diagnosis}</span>
+                            <button
+                              onClick={() => {
+                                const newDiagnoses = editData.differential_diagnoses.filter(item => item !== diagnosis);
+                                const updatedData = { ...editData, differential_diagnoses: newDiagnoses, last_updated: new Date().toISOString() };
+                                setEditData(updatedData);
+                                setMindMapData(prevData => {
+                                  const updatedTopics = prevData.topics.map(topic =>
+                                    String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
+                                  );
+                                  const newData = { ...prevData, topics: updatedTopics };
+                                  autoSaveMindMapData(newData);
+                                  return newData;
+                                });
+                                addToast('Differential diagnosis removed', 'success');
+                              }}
+                              className="text-cyan-400 hover:text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                              title="Remove differential diagnosis"
+                            >
+                              <X size={16} />
+                            </button>
+                          </motion.div>
+                        ))}
                       </div>
                       
-                      {editingSections.differential_diagnoses ? (
-                        <motion.div 
-                          className="space-y-4"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
+                      {/* Add new differential diagnosis */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={getNewTag('differential_diagnoses')}
+                          onChange={(e) => setNewTag('differential_diagnoses', e.target.value)}
+                          placeholder="Add differential diagnosis..."
+                          className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && getNewTag('differential_diagnoses').trim()) {
+                              const newDiagnoses = [...(editData.differential_diagnoses || []), getNewTag('differential_diagnoses').trim()];
+                              const updatedData = { ...editData, differential_diagnoses: newDiagnoses, last_updated: new Date().toISOString() };
+                              setEditData(updatedData);
+                              setMindMapData(prevData => {
+                                const updatedTopics = prevData.topics.map(topic =>
+                                  String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
+                                );
+                                const newData = { ...prevData, topics: updatedTopics };
+                                autoSaveMindMapData(newData);
+                                return newData;
+                              });
+                              clearNewTag('differential_diagnoses');
+                              addToast('Differential diagnosis added', 'success');
+                            }
+                          }}
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            if (getNewTag('differential_diagnoses').trim()) {
+                              const newDiagnoses = [...(editData.differential_diagnoses || []), getNewTag('differential_diagnoses').trim()];
+                              const updatedData = { ...editData, differential_diagnoses: newDiagnoses, last_updated: new Date().toISOString() };
+                              setEditData(updatedData);
+                              setMindMapData(prevData => {
+                                const updatedTopics = prevData.topics.map(topic =>
+                                  String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
+                                );
+                                const newData = { ...prevData, topics: updatedTopics };
+                                autoSaveMindMapData(newData);
+                                return newData;
+                              });
+                              clearNewTag('differential_diagnoses');
+                              addToast('Differential diagnosis added', 'success');
+                            }
+                          }}
+                          className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors flex items-center gap-2"
                         >
-                          {/* Add new differential diagnosis */}
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={getNewTag('differential_diagnoses')}
-                              onChange={(e) => setNewTag('differential_diagnoses', e.target.value)}
-                              placeholder="Add differential diagnosis..."
-                              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-500"
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  addTagToSection('differential_diagnoses', 'differential_diagnoses', getNewTag('differential_diagnoses'));
-                                  clearNewTag('differential_diagnoses');
-                                }
-                              }}
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => {
-                                addTagToSection('differential_diagnoses', 'differential_diagnoses', getNewTag('differential_diagnoses'));
-                                clearNewTag('differential_diagnoses');
-                              }}
-                              className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
-                            >
-                              Add
-                            </motion.button>
-                          </div>
-                          
-                          {/* Current differential diagnoses */}
-                          <div className="flex flex-wrap gap-2">
-                            {(sectionData.differential_diagnoses?.differential_diagnoses || editData.differential_diagnoses || []).map((diagnosis, index) => (
-                              <motion.span
-                                key={index}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-600/20 text-cyan-300 rounded-full text-sm border border-cyan-600/30"
-                              >
-                                {diagnosis}
-                                <button
-                                  onClick={() => removeTagFromSection('differential_diagnoses', 'differential_diagnoses', diagnosis)}
-                                  className="text-cyan-400 hover:text-cyan-200"
-                                >
-                                  <X size={14} />
-                                </button>
-                              </motion.span>
-                            ))}
-                          </div>
-                          
-                          <div className="flex justify-end gap-2">
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => cancelEditingSection('differential_diagnoses')}
-                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
-                            >
-                              Cancel
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => saveSectionEdit('differential_diagnoses')}
-                              disabled={isLoading}
-                              className="px-3 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors text-sm flex items-center gap-2"
-                            >
-                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                              Save
-                            </motion.button>
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div 
-                          className="flex flex-wrap gap-2"
-                          whileHover={{ scale: 1.01 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {(editData.differential_diagnoses || []).map((diagnosis, index) => (
-                            <motion.span
-                              key={index}
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-600/20 text-cyan-300 rounded-full text-sm border border-cyan-600/30"
-                            >
-                              {diagnosis}
-                            </motion.span>
-                          ))}
-                          {(editData.differential_diagnoses || []).length === 0 && (
-                            <span className="text-slate-500 italic">No differential diagnoses added</span>
-                          )}
-                        </motion.div>
+                          <Plus size={16} />
+                          Add
+                        </motion.button>
+                      </div>
+                      
+                      {(editData.differential_diagnoses || []).length === 0 && (
+                        <p className="text-slate-500 italic text-center py-4">No differential diagnoses added yet</p>
                       )}
                     </div>
                   </motion.div>
