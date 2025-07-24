@@ -1206,6 +1206,53 @@
       "sourceHandle": "bottom",
       "targetHandle": "top",
       "label": "Malformed Connection"
+    },
+    {
+      "id": "eabd94954b7fa46dabf2bcee512ad353a",
+      "source": "1753270126528",
+      "target": "1753272294792",
+      "sourceHandle": "1753270126528-bottom",
+      "targetHandle": "1753272294792-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e9862c852961a4591aebfd0de750060dd",
+      "source": "1753270126528",
+      "target": "1753272602329",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Topic-Case Connection"
+    },
+    {
+      "id": "e6b210b498eca4d0a903947c00ae87044",
+      "source": "1753270126528",
+      "target": "1753269525678",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Topic-Literature Connection"
+    },
+    {
+      "id": "ed4d04fcee30b4b9e8bb0ba55e29ce7ae",
+      "source": "1753272303491",
+      "target": "1753270126528",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Task-Topic Connection"
+    },
+    {
+      "id": "ed8bdccbf9acc45fd99d37f71a44ad940",
+      "source": "1753272303491",
+      "target": "1753272602329",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Task-Case Connection"
+    },
+    {
+      "id": "e5ca0a3631053451d8c4cf34fd8db3d92",
+      "source": "1753270126528",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
     }
   ]
 }
