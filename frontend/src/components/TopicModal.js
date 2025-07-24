@@ -391,6 +391,9 @@ const TopicModal = ({
         last_updated: new Date().toISOString()
       };
       
+      // Update editData immediately for instant feedback
+      setEditData(updatedData);
+      
       setMindMapData(prevData => {
         const updatedTopics = prevData.topics.map(topic =>
           String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
@@ -400,7 +403,6 @@ const TopicModal = ({
         return newData;
       });
       
-      setEditData(updatedData);
       setEditingSections(prev => ({ ...prev, [sectionId]: false }));
       setSectionData(prev => {
         const newData = { ...prev };
