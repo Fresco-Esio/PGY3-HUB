@@ -187,6 +187,100 @@
       },
       "created_at": "2025-07-23T12:51:50.978000+00:00",
       "updated_at": "2025-07-24T00:17:50.959000+00:00"
+    },
+    {
+      "id": "14164cb8-9d34-48e8-a048-7a2089b3afa3",
+      "case_id": "TIMELINE-TEST-1753316505",
+      "encounter_date": "2025-07-24T00:21:45.181724",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Generalized Anxiety Disorder"
+      ],
+      "age": 28,
+      "gender": "Female",
+      "chief_complaint": "Feeling depressed and anxious for the past 3 months",
+      "initial_presentation": "Patient reports persistent low mood, decreased energy, and difficulty concentrating",
+      "current_presentation": "Symptoms have stabilized with medication and therapy",
+      "medication_history": "No prior psychiatric medications",
+      "therapy_progress": "Engaged in CBT, showing good insight",
+      "defense_patterns": "Intellectualization, some denial",
+      "clinical_reflection": "Complex case requiring integrated approach",
+      "history_present_illness": "3-month history of depression following job loss",
+      "medical_history": "No significant medical history",
+      "medications": [
+        "Sertraline 50mg daily"
+      ],
+      "mental_status_exam": "Alert, oriented x3, depressed mood, restricted affect",
+      "assessment_plan": "Continue medication, weekly therapy sessions",
+      "notes": "Patient has strong family support system",
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 500.0,
+        "y": 300.0
+      },
+      "created_at": "2025-07-24T00:21:45.181729",
+      "updated_at": "2025-07-24T00:21:45.181731"
+    },
+    {
+      "id": "8147b555-2af5-4ff1-abcc-7de53444d072",
+      "case_id": "MALFORMED-TEST",
+      "encounter_date": "2025-07-24T00:21:45.528001",
+      "primary_diagnosis": "Test Diagnosis",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Test complaint",
+      "initial_presentation": null,
+      "current_presentation": null,
+      "medication_history": null,
+      "therapy_progress": null,
+      "defense_patterns": null,
+      "clinical_reflection": null,
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "created_at": "2025-07-24T00:21:45.528008",
+      "updated_at": "2025-07-24T00:21:45.528010"
+    },
+    {
+      "id": "b44338fe-72cb-4d7e-94fb-f91617ad27f2",
+      "case_id": "LARGE-TIMELINE-1753316505",
+      "encounter_date": "2025-07-24T00:21:45.576188",
+      "primary_diagnosis": "Test Case with Large Timeline",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Testing large timeline handling",
+      "initial_presentation": null,
+      "current_presentation": null,
+      "medication_history": null,
+      "therapy_progress": null,
+      "defense_patterns": null,
+      "clinical_reflection": null,
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 600.0,
+        "y": 400.0
+      },
+      "created_at": "2025-07-24T00:21:45.576190",
+      "updated_at": "2025-07-24T00:21:45.576192"
     }
   ],
   "tasks": [
