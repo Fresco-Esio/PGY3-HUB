@@ -23,7 +23,8 @@ import {
   Calendar,
   Brain,
   Plus,
-  Send
+  Send,
+  Check
 } from 'lucide-react';
 
 // Animation variants for Framer Motion
