@@ -1229,9 +1229,19 @@ const CaseModal = ({
                                           }}
                                         >
                                           <div className="px-4 pb-4 border-t border-slate-600">
-                                            <div className="space-y-4 mt-4">
-                                              {/* Type and Timestamp Row */}
-                                              <div className="grid grid-cols-2 gap-4">
+                                            <motion.div 
+                                              className="space-y-4 mt-4"
+                                              initial={{ opacity: 0, y: 10 }}
+                                              animate={{ opacity: 1, y: 0 }}
+                                              transition={{ duration: 0.3, delay: 0.1 }}
+                                            >
+                                              {/* Type and Date Row */}
+                                              <motion.div 
+                                                className="grid grid-cols-2 gap-4"
+                                                initial={{ opacity: 0, y: 5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.2, delay: 0.15 }}
+                                              >
                                                 <div>
                                                   <label className="block text-xs font-medium text-slate-300 mb-2">
                                                     Entry Type
@@ -1270,10 +1280,14 @@ const CaseModal = ({
                                                     title="Select date for this timeline entry"
                                                   />
                                                 </div>
-                                              </div>
+                                              </motion.div>
                                               
                                               {/* Content */}
-                                              <div>
+                                              <motion.div
+                                                initial={{ opacity: 0, y: 5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.2, delay: 0.2 }}
+                                              >
                                                 <label className="block text-xs font-medium text-slate-300 mb-2">
                                                   Content
                                                 </label>
@@ -1288,10 +1302,15 @@ const CaseModal = ({
                                                 <p className="text-xs text-slate-400 mt-1">
                                                   Press Shift+Enter to save, Escape to cancel
                                                 </p>
-                                              </div>
+                                              </motion.div>
                                               
                                               {/* Action Buttons - These must always be visible */}
-                                              <div className="flex justify-between items-center pt-2 pb-1">
+                                              <motion.div 
+                                                className="flex justify-between items-center pt-2 pb-1"
+                                                initial={{ opacity: 0, y: 5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.2, delay: 0.25 }}
+                                              >
                                                 {/* Delete button on the left */}
                                                 {!editingEntryData.id?.toString().startsWith('new-') && (
                                                   <motion.button
@@ -1337,8 +1356,8 @@ const CaseModal = ({
                                                     )}
                                                   </motion.button>
                                                 </div>
-                                              </div>
-                                            </div>
+                                              </motion.div>
+                                            </motion.div>
                                           </div>
                                         </motion.div>
                                       )}
