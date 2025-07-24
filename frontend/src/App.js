@@ -2265,10 +2265,15 @@ useEffect(() => {
         position: position,
         data: { 
           ...nodeData, 
+          label: item.title || item.label || `Untitled ${item.type}`, // Ensure label matches title
+          color: item.color || '#3B82F6', // Include color in data
           onDelete: () => handleDeleteNode(nodeId),
           onLiteratureClick: item.type === 'literature' ? handleLiteratureClick : undefined,
           skipAnimation: isInitialLoad // Use the isInitialLoad state
         },
+        style: item.type === 'topic' ? {
+          backgroundColor: item.color || '#3B82F6' // Set style for topic nodes
+        } : undefined
       };
     });
 
