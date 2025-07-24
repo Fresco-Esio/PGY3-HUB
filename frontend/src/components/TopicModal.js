@@ -509,29 +509,12 @@ const TopicModal = ({
                 <BookOpen size={24} />
                 <h2 className="text-xl font-semibold">Topic Details</h2>
               </div>
-              <div className="flex items-center gap-2">
-                {!isEditing && !isLoading && (
-                  <>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-                      title="Edit"
-                    >
-                      <Edit3 size={20} />
-                    </button>
-                    <button
-                      onClick={handleDelete}
-                      className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
-                      title="Delete"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  </>
-                )}
-                <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
-                  <X size={20} />
-                </button>
-              </div>
+              <button
+                onClick={handleClose}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
             </motion.div>
 
             {/* Tab Navigation */}
