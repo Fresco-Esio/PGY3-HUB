@@ -143,10 +143,6 @@ const TopicModal = ({
   const contentRefs = useRef({});
   
   // Form states for different tabs
-  const [newTag, setNewTag] = useState('');
-  const [showAddComorbidity, setShowAddComorbidity] = useState(false);
-  const [showAddDifferential, setShowAddDifferential] = useState(false);
-  const [showAddMedication, setShowAddMedication] = useState(false);
   const [expandedCriteria, setExpandedCriteria] = useState(false);
   const [newResource, setNewResource] = useState('');
   const [showResourceForm, setShowResourceForm] = useState(false);
