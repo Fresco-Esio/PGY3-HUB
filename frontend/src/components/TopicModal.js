@@ -1175,7 +1175,7 @@ const TopicModal = ({
                             >
                               {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                               Save
-                            </button>
+                            </motion.button>
                           </div>
                         </motion.div>
                       ) : (
