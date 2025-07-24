@@ -21,7 +21,15 @@ import {
   TrendingUp,
   Lightbulb,
   FileText,
-  Layers
+  Layers,
+  Stethoscope,
+  Pills,
+  Users,
+  Tag,
+  Calendar,
+  Activity,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 // Animation variants for Framer Motion
