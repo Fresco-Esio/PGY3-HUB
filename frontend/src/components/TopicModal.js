@@ -144,6 +144,8 @@ const TopicModal = ({
   const [showAddDifferential, setShowAddDifferential] = useState(false);
   const [showAddMedication, setShowAddMedication] = useState(false);
   const [expandedCriteria, setExpandedCriteria] = useState(false);
+  const [newResource, setNewResource] = useState('');
+  const [showResourceForm, setShowResourceForm] = useState(false);
 
   // Category color mapping
   const categoryColors = {
