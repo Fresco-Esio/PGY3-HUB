@@ -1398,6 +1398,62 @@ const CaseModal = ({
                 </div>
               </div>
             )}
+            
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+              {showDeleteConfirm && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                  onClick={cancelDeleteEntry}
+                >
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    className="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-md mx-4 shadow-2xl"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <Trash2 size={24} className="text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">Delete Timeline Entry</h3>
+                        <p className="text-sm text-slate-300">This action cannot be undone.</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-slate-300 text-sm mb-6">
+                      Are you sure you want to delete this timeline entry? All data will be permanently removed.
+                    </p>
+                    
+                    <div className="flex gap-3 justify-end">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={cancelDeleteEntry}
+                        className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm font-medium"
+                      >
+                        Cancel
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={confirmDeleteEntry}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
+                      >
+                        <Trash2 size={14} />
+                        Delete Entry
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       )}
