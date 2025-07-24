@@ -1204,34 +1204,6 @@ const TopicModal = ({
               </AnimatePresence>
             </motion.div>
 
-            {/* Footer */}
-            {isEditing && (
-              <div className="bg-slate-900 border-t border-slate-700 px-6 py-4 flex items-center justify-between">
-                <div className="text-sm text-slate-400">
-                  Changes will be saved automatically
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setEditData({ ...data });
-                    }}
-                    disabled={isLoading}
-                    className="px-4 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-                  >
-                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </div>
-            )}
           </motion.div>
         </motion.div>
       )}
