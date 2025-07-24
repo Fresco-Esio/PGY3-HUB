@@ -1883,6 +1883,9 @@ const DashboardComponent = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
+  // State for forcing node updates
+  const [nodeUpdateTrigger, setNodeUpdateTrigger] = useState(0);
+
   const [mindMapData, setMindMapData] = useState({
     topics: [],
     cases: [],
