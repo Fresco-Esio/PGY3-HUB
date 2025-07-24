@@ -132,6 +132,7 @@ const TopicModal = ({
   const [hasInitialized, setHasInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   
   // Individual section edit states
   const [editingSections, setEditingSections] = useState({});
