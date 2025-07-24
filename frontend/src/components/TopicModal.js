@@ -299,6 +299,80 @@ const TopicModal = ({
     }, 300);
   }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
+  // Utility functions for managing form fields
+  const updateField = useCallback((field, value) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  // Tag management functions
+  const addTag = useCallback((field, tag) => {
+    if (!tag.trim() || !editData[field]) return;
+    
+    const currentTags = editData[field] || [];
+    if (!currentTags.includes(tag.trim())) {
+      updateField(field, [...currentTags, tag.trim()]);
+    }
+    setNewTag('');
+  }, [editData, updateField]);
+
+  const removeTag = useCallback((field, tagToRemove) => {
+    const currentTags = editData[field] || [];
+    updateField(field, currentTags.filter(tag => tag !== tagToRemove));
+  }, [editData, updateField]);
+
+  // Category change handler - updates node color in mind map
+  const handleCategoryChange = useCallback((newCategory) => {
+    updateField('category', newCategory);
+    
+    // Update node color in mind map immediately
+    setMindMapData(prevData => {
+      const updatedTopics = prevData.topics.map(topic =>
+        String(topic.id) === String(data?.id) 
+          ? { ...topic, category: newCategory, color: categoryColors[newCategory]?.primary || categoryColors.Other.primary }
+          : topic
+      );
+      const newData = { ...prevData, topics: updatedTopics };
+      // Don't auto-save here, wait for manual save
+      return newData;
+    });
+  }, [updateField, data?.id, setMindMapData, categoryColors]);
+
+  // Get connected nodes for Connections tab
+  const connectedNodes = useMemo(() => {
+    if (!data?.id) return { cases: [], literature: [] };
+    
+    // This would typically come from your mind map data
+    // For now, return empty arrays - you can implement based on your data structure
+    return {
+      cases: [],
+      literature: []
+    };
+  }, [data?.id]);
+
+  const handleDelete = useCallback(async () => {
+    if (isLoading) return;
+    
+    if (!window.confirm('Are you sure you want to delete this topic?')) return;
+    
+    setIsLoading(true);
+    try {
+      setMindMapData(prevData => {
+        const updatedTopics = prevData.topics.filter(topic => String(topic.id) !== String(data?.id));
+        const newData = { ...prevData, topics: updatedTopics };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      addToast('Topic deleted successfully', 'success');
+      handleClose();
+    } catch (error) {
+      console.error('Error deleting topic:', error);
+      addToast('Failed to delete topic', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
+
   const handleDelete = useCallback(async () => {
     if (isLoading) return;
     
