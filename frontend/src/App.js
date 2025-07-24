@@ -2132,28 +2132,31 @@ const syncNodeData = useCallback(() => {
       // Create entirely new node object if something changed (forces React Flow re-render)
       if (needsUpdate) {
         hasChanges = true;
+        // Force React to treat this as a completely new object
+        const timestamp = Date.now();
         const newNode = {
-          ...node,
-          // Force new object reference for React Flow
           id: node.id,
           type: node.type,
           position: { ...node.position },
           data: {
             ...node.data,
             label: newLabel,
-            color: newColor
-          }
-        };
-        
-        // For topic nodes, ensure style backgroundColor matches the new color
-        if (nodeType === 'topic') {
-          newNode.style = {
-            ...node.style,
+            color: newColor,
+            // Add timestamp to force re-render
+            lastUpdated: timestamp
+          },
+          // Force new style object for topic nodes
+          style: nodeType === 'topic' ? {
             backgroundColor: newColor,
-            // Force re-render by adding timestamp
-            lastUpdated: Date.now()
-          };
-        }
+            color: 'white',
+            boxShadow: `0 4px 20px ${newColor}20`,
+            transition: 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease',
+            // Force React to detect change
+            zIndex: timestamp % 1000
+          } : node.style,
+          // Add a rendering key to force React Flow update
+          key: `${node.id}-${timestamp}`
+        };
         
         return newNode;
       }
@@ -2162,8 +2165,9 @@ const syncNodeData = useCallback(() => {
     });
     
     if (hasChanges) {
-      console.log('syncNodeData: Changes detected, updating nodes');
-      return updatedNodes;
+      console.log('syncNodeData: Changes detected, updating nodes with forced re-render');
+      // Return completely new array to force React Flow update
+      return [...updatedNodes];
     } else {
       console.log('syncNodeData: No changes needed');
       return currentNodes;
