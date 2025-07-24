@@ -932,7 +932,12 @@ const TopicModal = ({
                       </div>
                       
                       {editingSections.comorbidities ? (
-                        <div className="space-y-4">
+                        <motion.div 
+                          className="space-y-4"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
                           <textarea
                             value={Array.isArray(sectionData.comorbidities?.comorbidities) 
                               ? sectionData.comorbidities.comorbidities.join('\n') 
@@ -945,13 +950,17 @@ const TopicModal = ({
                             placeholder="Enter comorbidities (one per line)..."
                           />
                           <div className="flex justify-end gap-2">
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => cancelEditingSection('comorbidities')}
                               className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
                             >
                               Cancel
-                            </button>
+                            </motion.button>
                             <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => saveSectionEdit('comorbidities')}
                               disabled={isLoading}
                               className="px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm flex items-center gap-2"
@@ -960,7 +969,7 @@ const TopicModal = ({
                               Save
                             </motion.button>
                           </div>
-                        </div>
+                        </motion.div>
                       ) : (
                         <div className="flex flex-wrap gap-2">
                           {(editData.comorbidities || []).map((comorbidity, index) => (
