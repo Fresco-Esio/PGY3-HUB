@@ -68,7 +68,7 @@ import {
 // Lazy load components for better initial load time
 import { RichTextEditor, TemplateManager, LiteratureModal } from './components/LazyComponents';
 import CaseModal from './components/CaseModal';
-import TopicModal from './components/TopicModalSimple';
+import TopicModal from './components/TopicModalMinimal';
 import TaskModal from './components/TaskModal';
 import FloatingEdge from './components/FloatingEdge'; // Import the custom FloatingEdge component
 import EnhancedEdge from './components/EnhancedEdge'; // Import the enhanced edge component
