@@ -868,66 +868,64 @@ const TopicModal = ({
                           <Users size={20} className="text-amber-400" />
                           Comorbidities
                         </h3>
-                        {isEditing && (
+                        {!editingSections.comorbidities && (
                           <button
-                            onClick={() => setShowAddComorbidity(!showAddComorbidity)}
-                            className="text-amber-400 hover:text-amber-300 transition-colors"
+                            onClick={() => startEditingSection('comorbidities')}
+                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                            title="Edit comorbidities"
                           >
-                            <Plus size={20} />
+                            <Edit3 size={16} />
                           </button>
                         )}
                       </div>
                       
-                      {isEditing && showAddComorbidity && (
-                        <div className="mb-4 flex gap-2">
-                          <input
-                            type="text"
-                            value={newTag}
-                            onChange={(e) => setNewTag(e.target.value)}
-                            placeholder="Add comorbidity..."
-                            className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500"
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                addTag('comorbidities', newTag);
-                                setShowAddComorbidity(false);
-                              }
-                            }}
+                      {editingSections.comorbidities ? (
+                        <div className="space-y-4">
+                          <textarea
+                            value={Array.isArray(sectionData.comorbidities?.comorbidities) 
+                              ? sectionData.comorbidities.comorbidities.join('\n') 
+                              : Array.isArray(editData.comorbidities)
+                                ? editData.comorbidities.join('\n')
+                                : editData.comorbidities || ''}
+                            onChange={(e) => updateSectionField('comorbidities', 'comorbidities', e.target.value.split('\n').filter(item => item.trim()))}
+                            rows={4}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                            placeholder="Enter comorbidities (one per line)..."
                           />
-                          <button
-                            onClick={() => {
-                              addTag('comorbidities', newTag);
-                              setShowAddComorbidity(false);
-                            }}
-                            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-                          >
-                            Add
-                          </button>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => cancelEditingSection('comorbidities')}
+                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => saveSectionEdit('comorbidities')}
+                              disabled={isLoading}
+                              className="px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm flex items-center gap-2"
+                            >
+                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {(editData.comorbidities || []).map((comorbidity, index) => (
+                            <motion.span
+                              key={index}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="inline-flex items-center gap-2 px-3 py-1 bg-amber-600/20 text-amber-300 rounded-full text-sm border border-amber-600/30"
+                            >
+                              {comorbidity}
+                            </motion.span>
+                          ))}
+                          {editData.comorbidities?.length === 0 && (
+                            <span className="text-slate-500 italic">No comorbidities added</span>
+                          )}
                         </div>
                       )}
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {(editData.comorbidities || []).map((comorbidity, index) => (
-                          <motion.span
-                            key={index}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 bg-amber-600/20 text-amber-300 rounded-full text-sm border border-amber-600/30"
-                          >
-                            {comorbidity}
-                            {isEditing && (
-                              <button
-                                onClick={() => removeTag('comorbidities', comorbidity)}
-                                className="text-amber-400 hover:text-amber-200"
-                              >
-                                <X size={14} />
-                              </button>
-                            )}
-                          </motion.span>
-                        ))}
-                        {editData.comorbidities?.length === 0 && (
-                          <span className="text-slate-500 italic">No comorbidities added</span>
-                        )}
-                      </div>
                     </div>
 
                     {/* Differential Diagnoses Section */}
