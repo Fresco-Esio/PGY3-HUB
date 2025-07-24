@@ -1102,26 +1102,73 @@ const TopicModal = ({
                       </div>
                       
                       {editingSections.medications ? (
-                        <div className="space-y-4">
-                          <textarea
-                            value={Array.isArray(sectionData.medications?.medications) 
-                              ? sectionData.medications.medications.join('\n') 
-                              : Array.isArray(editData.medications)
-                                ? editData.medications.join('\n')
-                                : editData.medications || ''}
-                            onChange={(e) => updateSectionField('medications', 'medications', e.target.value.split('\n').filter(item => item.trim()))}
-                            rows={4}
-                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                            placeholder="Enter medications (one per line)..."
-                          />
+                        <motion.div 
+                          className="space-y-4"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {/* Add new medication */}
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={getNewTag('medications')}
+                              onChange={(e) => setNewTag('medications', e.target.value)}
+                              placeholder="Add medication..."
+                              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  addTagToSection('medications', 'medications', getNewTag('medications'));
+                                  clearNewTag('medications');
+                                }
+                              }}
+                            />
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                addTagToSection('medications', 'medications', getNewTag('medications'));
+                                clearNewTag('medications');
+                              }}
+                              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                            >
+                              Add
+                            </motion.button>
+                          </div>
+                          
+                          {/* Current medications */}
+                          <div className="flex flex-wrap gap-2">
+                            {(sectionData.medications?.medications || editData.medications || []).map((medication, index) => (
+                              <motion.span
+                                key={index}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="inline-flex items-center gap-2 px-3 py-1 bg-green-600/20 text-green-300 rounded-full text-sm border border-green-600/30"
+                              >
+                                {medication}
+                                <button
+                                  onClick={() => removeTagFromSection('medications', 'medications', medication)}
+                                  className="text-green-400 hover:text-green-200"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </motion.span>
+                            ))}
+                          </div>
+                          
                           <div className="flex justify-end gap-2">
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => cancelEditingSection('medications')}
                               className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
                             >
                               Cancel
-                            </button>
-                            <button
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => saveSectionEdit('medications')}
                               disabled={isLoading}
                               className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center gap-2"
@@ -1130,9 +1177,13 @@ const TopicModal = ({
                               Save
                             </button>
                           </div>
-                        </div>
+                        </motion.div>
                       ) : (
-                        <div className="flex flex-wrap gap-2">
+                        <motion.div 
+                          className="flex flex-wrap gap-2"
+                          whileHover={{ scale: 1.01 }}
+                          transition={{ duration: 0.2 }}
+                        >
                           {(editData.medications || []).map((medication, index) => (
                             <motion.span
                               key={index}
@@ -1143,10 +1194,10 @@ const TopicModal = ({
                               {medication}
                             </motion.span>
                           ))}
-                          {editData.medications?.length === 0 && (
+                          {(editData.medications || []).length === 0 && (
                             <span className="text-slate-500 italic">No medications added</span>
                           )}
-                        </div>
+                        </motion.div>
                       )}
                     </div>
 
