@@ -429,6 +429,21 @@ const TopicModal = ({
     }));
   }, []);
 
+  // Tag management functions for list-based sections
+  const addTagToSection = useCallback((sectionId, field, tag) => {
+    if (!tag.trim()) return;
+    
+    const currentTags = sectionData[sectionId]?.[field] || editData[field] || [];
+    if (!currentTags.includes(tag.trim())) {
+      updateSectionField(sectionId, field, [...currentTags, tag.trim()]);
+    }
+  }, [sectionData, editData]);
+
+  const removeTagFromSection = useCallback((sectionId, field, tagToRemove) => {
+    const currentTags = sectionData[sectionId]?.[field] || editData[field] || [];
+    updateSectionField(sectionId, field, currentTags.filter(tag => tag !== tagToRemove));
+  }, [sectionData, editData]);
+
   if (!isOpen) return null;
 
   return (
