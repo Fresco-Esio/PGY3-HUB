@@ -538,6 +538,7 @@ const CaseModal = ({
     setEditingEntryId(null);
     setEditingEntryData({});
     setExpandedTimelineEntry(null);
+    setHasUnsavedChanges(false);
   }, [editingEntryId, editingEntryData, editData?.timeline]);
 
   // Handle keyboard shortcuts for editing
