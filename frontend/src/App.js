@@ -2068,10 +2068,13 @@ const handleLiteratureClick = useCallback((literatureData) => {
   setTimeout(() => setIsAnimating(false), 700); // 600ms modal animation + 100ms buffer
 }, []);
 
-// Enhanced node sync function that updates titles, colors, and other properties
+// Enhanced node sync function that forces React Flow re-renders
 const syncNodeData = useCallback(() => {
+  console.log('syncNodeData called - syncing node colors and labels');
+  
   setNodes(currentNodes => {
-    return currentNodes.map(node => {
+    let hasChanges = false;
+    const updatedNodes = currentNodes.map(node => {
       const nodeType = node.id.split('-')[0];
       const nodeId = node.id.split('-')[1];
       
@@ -2081,51 +2084,90 @@ const syncNodeData = useCallback(() => {
       
       // Find the corresponding data item and sync properties
       if (nodeType === 'case') {
-        const caseData = mindMapData.cases?.find(c => c.id === nodeId);
+        const caseData = mindMapData.cases?.find(c => String(c.id) === nodeId);
         if (caseData) {
-          newLabel = caseData.primaryDiagnosis || caseData.primary_diagnosis || caseData.title || 'Untitled Case';
+          const expectedLabel = caseData.primaryDiagnosis || caseData.primary_diagnosis || caseData.title || 'Untitled Case';
+          if (expectedLabel !== node.data.label) {
+            newLabel = expectedLabel;
+            needsUpdate = true;
+          }
         }
       } else if (nodeType === 'topic') {
-        const topicData = mindMapData.topics?.find(t => t.id === nodeId);
+        const topicData = mindMapData.topics?.find(t => String(t.id) === nodeId);
         if (topicData) {
-          newLabel = topicData.title || 'Untitled Topic';
-          newColor = topicData.color || '#3B82F6';
+          const expectedLabel = topicData.title || 'Untitled Topic';
+          const expectedColor = topicData.color || '#3B82F6';
+          
+          if (expectedLabel !== node.data.label) {
+            newLabel = expectedLabel;
+            needsUpdate = true;
+          }
+          
+          if (expectedColor !== node.data.color) {
+            newColor = expectedColor;
+            needsUpdate = true;
+            console.log(`Topic ${nodeId}: Color changing from ${node.data.color} to ${expectedColor}`);
+          }
         }
       } else if (nodeType === 'task') {
-        const taskData = mindMapData.tasks?.find(t => t.id === nodeId);
+        const taskData = mindMapData.tasks?.find(t => String(t.id) === nodeId);
         if (taskData) {
-          newLabel = taskData.title || 'Untitled Task';
+          const expectedLabel = taskData.title || 'Untitled Task';
+          if (expectedLabel !== node.data.label) {
+            newLabel = expectedLabel;
+            needsUpdate = true;
+          }
         }
       } else if (nodeType === 'literature') {
-        const literatureData = mindMapData.literature?.find(l => l.id === nodeId);
+        const literatureData = mindMapData.literature?.find(l => String(l.id) === nodeId);
         if (literatureData) {
-          newLabel = literatureData.title || 'Untitled Literature';
+          const expectedLabel = literatureData.title || 'Untitled Literature';
+          if (expectedLabel !== node.data.label) {
+            newLabel = expectedLabel;
+            needsUpdate = true;
+          }
         }
       }
       
-      // Check if any property needs updating
-      if (newLabel !== node.data.label || newColor !== node.data.color) {
-        needsUpdate = true;
-      }
-      
-      // Only update if something actually changed
+      // Create entirely new node object if something changed (forces React Flow re-render)
       if (needsUpdate) {
-        return {
+        hasChanges = true;
+        const newNode = {
           ...node,
+          // Force new object reference for React Flow
+          id: node.id,
+          type: node.type,
+          position: { ...node.position },
           data: {
             ...node.data,
             label: newLabel,
             color: newColor
-          },
-          style: nodeType === 'topic' ? {
-            ...node.style,
-            backgroundColor: newColor
-          } : node.style
+          }
         };
+        
+        // For topic nodes, ensure style backgroundColor matches the new color
+        if (nodeType === 'topic') {
+          newNode.style = {
+            ...node.style,
+            backgroundColor: newColor,
+            // Force re-render by adding timestamp
+            lastUpdated: Date.now()
+          };
+        }
+        
+        return newNode;
       }
       
       return node;
     });
+    
+    if (hasChanges) {
+      console.log('syncNodeData: Changes detected, updating nodes');
+      return updatedNodes;
+    } else {
+      console.log('syncNodeData: No changes needed');
+      return currentNodes;
+    }
   });
 }, [mindMapData, setNodes]);
 
