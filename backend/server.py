@@ -263,6 +263,8 @@ def save_mind_map_data(data: MindMapData) -> None:
                 topic['created_at'] = topic['created_at'].isoformat()
             if 'updated_at' in topic and topic['updated_at']:
                 topic['updated_at'] = topic['updated_at'].isoformat()
+            if 'last_updated' in topic and topic['last_updated']:
+                topic['last_updated'] = topic['last_updated'].isoformat()
         
         for case in data_dict.get('cases', []):
             if 'created_at' in case and case['created_at']:
