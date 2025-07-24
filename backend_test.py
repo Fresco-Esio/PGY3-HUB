@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 
 # Use the production backend URL for testing (from frontend/.env)
-BASE_URL = "https://0d877e72-99c8-407d-9e49-011eb53a336a.preview.emergentagent.com/api"
+BASE_URL = "https://89542774-55c9-4de2-9a50-f2df2d65d9b9.preview.emergentagent.com/api"
 
 class MindMapConnectionTester:
     def __init__(self, base_url):
