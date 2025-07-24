@@ -607,7 +607,7 @@ const TopicModal = ({
                             >
                               Cancel
                             </button>
-                            <button
+                            <motion.button
                               onClick={() => saveSectionEdit('title')}
                               disabled={isLoading}
                               className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
