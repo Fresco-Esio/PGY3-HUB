@@ -222,6 +222,21 @@
       "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
       "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
       "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e6aacd373d3854fb787c1492cf05b5d40",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
+      "sourceHandle": "7f8ca947-0887-4794-8dd0-074f8b1be81c-bottom",
+      "targetHandle": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e7ea0b9667c4e43e98dc43cc5ed4a1a44",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
     }
   ]
 }
