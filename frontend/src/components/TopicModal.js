@@ -384,6 +384,75 @@ const TopicModal = ({
     }
   }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
 
+  // Individual section edit functions
+  const startEditingSection = useCallback((sectionId) => {
+    setEditingSections(prev => ({ ...prev, [sectionId]: true }));
+    // Initialize section data with current values
+    setSectionData(prev => ({
+      ...prev,
+      [sectionId]: { ...editData }
+    }));
+  }, [editData]);
+
+  const cancelEditingSection = useCallback((sectionId) => {
+    setEditingSections(prev => ({ ...prev, [sectionId]: false }));
+    setSectionData(prev => {
+      const newData = { ...prev };
+      delete newData[sectionId];
+      return newData;
+    });
+  }, []);
+
+  const saveSectionEdit = useCallback(async (sectionId) => {
+    if (isLoading) return;
+    
+    const sectionChanges = sectionData[sectionId];
+    if (!sectionChanges) return;
+    
+    setIsLoading(true);
+    try {
+      const updatedData = {
+        ...editData,
+        ...sectionChanges,
+        last_updated: new Date().toISOString()
+      };
+      
+      setMindMapData(prevData => {
+        const updatedTopics = prevData.topics.map(topic =>
+          String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
+        );
+        const newData = { ...prevData, topics: updatedTopics };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      setEditData(updatedData);
+      setEditingSections(prev => ({ ...prev, [sectionId]: false }));
+      setSectionData(prev => {
+        const newData = { ...prev };
+        delete newData[sectionId];
+        return newData;
+      });
+      
+      addToast('Section updated successfully', 'success');
+    } catch (error) {
+      console.error('Error saving section:', error);
+      addToast('Failed to save section', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sectionData, editData, data?.id, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
+  const updateSectionField = useCallback((sectionId, field, value) => {
+    setSectionData(prev => ({
+      ...prev,
+      [sectionId]: {
+        ...prev[sectionId],
+        [field]: value
+      }
+    }));
+  }, []);
+
   if (!isOpen) return null;
 
   return (
