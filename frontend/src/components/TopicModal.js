@@ -23,7 +23,7 @@ import {
   FileText,
   Layers,
   Stethoscope,
-  Pill,
+  Pills,
   Users,
   Tag,
   Calendar,
