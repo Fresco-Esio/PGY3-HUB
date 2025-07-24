@@ -445,6 +445,23 @@ const TopicModal = ({
     updateSectionField(sectionId, field, currentTags.filter(tag => tag !== tagToRemove));
   }, [sectionData, editData]);
 
+  // Helper functions for new tag input management
+  const setNewTag = useCallback((sectionId, value) => {
+    setNewTags(prev => ({ ...prev, [sectionId]: value }));
+  }, []);
+
+  const getNewTag = useCallback((sectionId) => {
+    return newTags[sectionId] || '';
+  }, [newTags]);
+
+  const clearNewTag = useCallback((sectionId) => {
+    setNewTags(prev => {
+      const newTags = { ...prev };
+      delete newTags[sectionId];
+      return newTags;
+    });
+  }, []);
+
   if (!isOpen) return null;
 
   return (
