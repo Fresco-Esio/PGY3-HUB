@@ -1034,10 +1034,28 @@ const CaseModal = ({
                                   <motion.div
                                     layout="position"
                                     whileHover={!isEditing ? { 
-                                      scale: 1.002,
-                                      transition: { duration: 0.15, ease: "easeOut" }
+                                      scaleY: 1.12,
+                                      scaleX: 1.02,
+                                      boxShadow: [
+                                        '0 8px 25px rgba(59, 130, 246, 0.15)',
+                                        '0 12px 35px rgba(59, 130, 246, 0.25)',
+                                        '0 16px 45px rgba(59, 130, 246, 0.35)'
+                                      ],
+                                      borderLeftColor: entry.type === 'assessment' ? '#4ade80' :
+                                                     entry.type === 'medication' ? '#60a5fa' :
+                                                     entry.type === 'therapy' ? '#a78bfa' :
+                                                     entry.type === 'note' ? '#facc15' :
+                                                     '#fb923c',
+                                      transition: { 
+                                        duration: 0.25, 
+                                        ease: [0.23, 1, 0.32, 1] // Custom easing for smooth feel
+                                      }
                                     } : {}}
-                                    className={`ml-12 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border-l-3 transition-all duration-200 cursor-pointer ${
+                                    whileTap={!isEditing ? { 
+                                      scale: 0.98,
+                                      transition: { duration: 0.1 }
+                                    } : {}}
+                                    className={`ml-12 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border-l-3 transition-all duration-200 cursor-pointer overflow-hidden ${
                                       entry.type === 'assessment' ? 'border-green-400' :
                                       entry.type === 'medication' ? 'border-blue-400' :
                                       entry.type === 'therapy' ? 'border-purple-400' :
@@ -1046,6 +1064,10 @@ const CaseModal = ({
                                     } ${entry.isNew && !isEditing ? 'ring-1 ring-blue-400 ring-opacity-50' : ''} ${
                                       isEditing ? 'ring-2 ring-green-400 ring-opacity-70' : ''
                                     }`}
+                                    style={{
+                                      transformOrigin: 'center',
+                                      willChange: 'transform, box-shadow'
+                                    }}
                                     onClick={() => !isEditing && toggleTimelineEntry(entry)}
                                   >
                                     {/* Entry Header - Always Visible */}
