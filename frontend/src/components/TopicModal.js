@@ -304,14 +304,15 @@ const TopicModal = ({
     }, 300);
   }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
-  // Utility functions for managing form fields
-  const updateField = useCallback((field, value) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
-  }, []);
-
   // Category change handler - updates node color in mind map
   const handleCategoryChange = useCallback((newCategory) => {
-    updateField('category', newCategory);
+    setSectionData(prev => ({
+      ...prev,
+      category: {
+        ...prev.category,
+        category: newCategory
+      }
+    }));
     
     // Update node color in mind map immediately
     setMindMapData(prevData => {
@@ -324,7 +325,7 @@ const TopicModal = ({
       // Don't auto-save here, wait for manual save
       return newData;
     });
-  }, [updateField, data?.id, setMindMapData, categoryColors]);
+  }, [data?.id, setMindMapData, categoryColors]);
 
   // Get connected nodes for Connections tab
   const connectedNodes = useMemo(() => {
