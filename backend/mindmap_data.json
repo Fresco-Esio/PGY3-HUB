@@ -326,5 +326,21 @@
   "cases": [],
   "tasks": [],
   "literature": [],
-  "connections": []
+  "connections": [
+    {
+      "id": "ea9a2ab228f1c41998873a3bf5ba6fcb3",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
+      "sourceHandle": "7f8ca947-0887-4794-8dd0-074f8b1be81c-bottom",
+      "targetHandle": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e249d282487a2459ea248b60e1ce3ca91",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
+    }
+  ]
 }
