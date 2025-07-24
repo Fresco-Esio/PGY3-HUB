@@ -3588,6 +3588,7 @@ useEffect(() => {
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
+            syncNodeData={syncNodeData}
           />
         )}
       </AnimatePresence>
