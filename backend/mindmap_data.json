@@ -185,6 +185,21 @@
       "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
       "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
       "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e7629ce315fff4d38afb6ff000c124a5d",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
+      "sourceHandle": "7f8ca947-0887-4794-8dd0-074f8b1be81c-bottom",
+      "targetHandle": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e29cd1b197b8c4bf181617743d13d3758",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
     }
   ]
 }
