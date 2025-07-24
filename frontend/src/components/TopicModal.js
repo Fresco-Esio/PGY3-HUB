@@ -344,7 +344,7 @@ const TopicModal = ({
     }, 300);
   }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
-  // Enhanced category change handler - fixes node color updates and category saving
+// Enhanced category change handler - fixes node color updates and category saving
   const handleCategoryChange = useCallback(async (newCategory) => {
     console.log('Category changing to:', newCategory);
     
@@ -369,22 +369,22 @@ const TopicModal = ({
       console.log('Saving category change to backend:', newCategory, newColor);
       autoSaveMindMapData(newData);
       
+      // Force immediate node sync after state update
+      setTimeout(() => {
+        console.log('Triggering force sync for immediate color update');
+        if (syncNodeData) {
+          syncNodeData();
+          console.log('syncNodeData() called successfully');
+        } else {
+          console.warn('syncNodeData function not available');
+        }
+      }, 150); // Slightly longer delay to ensure state update completes
+      
       return newData;
     });
     
-    // Force an immediate sync of node data to ensure visual update
-    setTimeout(() => {
-      console.log('Triggering force sync for immediate color update');
-      if (syncNodeData) {
-        syncNodeData();
-        console.log('syncNodeData() called successfully');
-      } else {
-        console.warn('syncNodeData function not available');
-      }
-    }, 100);
-    
     addToast(`Category updated to ${newCategory}`, 'success');
-  }, [data?.id, editData, setMindMapData, categoryColors, autoSaveMindMapData, addToast]);
+  }, [data?.id, editData, setMindMapData, categoryColors, autoSaveMindMapData, addToast, syncNodeData]);
 
   // Get connected nodes for Connections tab
   const connectedNodes = useMemo(() => {
