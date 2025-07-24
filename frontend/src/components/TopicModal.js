@@ -569,16 +569,47 @@ const TopicModal = ({
                   >
                     {/* Title Section */}
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={editData.title || ''}
-                          onChange={(e) => updateField('title', e.target.value)}
-                          className="w-full text-2xl font-bold bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                          placeholder="Topic title..."
-                        />
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white">Title</h3>
+                        {!editingSections.title && (
+                          <button
+                            onClick={() => startEditingSection('title')}
+                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                            title="Edit title"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {editingSections.title ? (
+                        <div className="space-y-4">
+                          <input
+                            type="text"
+                            value={sectionData.title?.title || editData.title || ''}
+                            onChange={(e) => updateSectionField('title', 'title', e.target.value)}
+                            className="w-full text-xl font-bold bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="Topic title..."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => cancelEditingSection('title')}
+                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => saveSectionEdit('title')}
+                              disabled={isLoading}
+                              className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                            >
+                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save
+                            </button>
+                          </div>
+                        </div>
                       ) : (
-                        <h1 className="text-2xl font-bold text-white mb-2">{editData.title || 'Untitled Topic'}</h1>
+                        <h1 className="text-2xl font-bold text-white">{editData.title || 'Untitled Topic'}</h1>
                       )}
                     </div>
 
