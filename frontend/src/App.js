@@ -2135,7 +2135,7 @@ useEffect(() => {
                                  mindMapData.tasks?.length > 0 || mindMapData.literature?.length > 0);
   
   if (hasData) {
-    syncNodeTitles();
+    syncNodeData();
     
     // If we don't have nodes but we have data, convert data to React Flow
     if (nodes.length === 0) {
@@ -2146,7 +2146,7 @@ useEffect(() => {
       }, 100);
     }
   }
-}, [mindMapData, syncNodeTitles, nodes.length]); // Removed convertDataToReactFlow from dependencies
+}, [mindMapData, syncNodeData, nodes.length]); // Updated to use syncNodeData
 
   const convertDataToReactFlow = useCallback(async (data, applyLayoutImmediately = false) => {
     // Use optimized quick layout for initial load
