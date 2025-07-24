@@ -347,13 +347,16 @@ const TopicModal = ({
   const handleCategoryChange = useCallback(async (newCategory) => {
     console.log('Category changing to:', newCategory);
     
+    // Get the new color for immediate update
+    const newColor = categoryColors[newCategory]?.primary || categoryColors.Other.primary;
+    console.log('New color for category:', newColor);
+    
     // Update local edit data for immediate UI feedback
-    const updatedEditData = { ...editData, category: newCategory, last_updated: new Date().toISOString() };
+    const updatedEditData = { ...editData, category: newCategory, color: newColor, last_updated: new Date().toISOString() };
     setEditData(updatedEditData);
     
     // Update node color in mind map immediately and save
     setMindMapData(prevData => {
-      const newColor = categoryColors[newCategory]?.primary || categoryColors.Other.primary;
       const updatedTopics = prevData.topics.map(topic =>
         String(topic.id) === String(data?.id) 
           ? { ...topic, category: newCategory, color: newColor, last_updated: new Date().toISOString() }
