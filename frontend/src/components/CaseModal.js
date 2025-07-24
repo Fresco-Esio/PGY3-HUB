@@ -5,26 +5,24 @@ import {
   X, 
   Users, 
   FileText, 
-  Clipboard, 
-  Heart, 
-  Clock, 
-  Sparkles, 
-  Target,
+  Pill, 
+  Brain, 
+  Link2,
   Edit3,
   Trash2,
   Save,
   Loader2,
-  AlertCircle,
-  StickyNote,
-  Eye,
-  BookOpen,
-  ChevronDown,
-  ArrowDown,
-  Calendar,
-  Brain,
   Plus,
-  Send,
-  Check
+  Check,
+  Calendar,
+  Clock,
+  AlertCircle,
+  BookOpen,
+  Target,
+  Heart,
+  ChevronDown,
+  ChevronRight,
+  Activity
 } from 'lucide-react';
 
 // Animation variants for Framer Motion
@@ -109,6 +107,36 @@ const contentVariants = {
   }
 };
 
+// Card animation variants for sections
+const cardVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut"
+    }
+  },
+  edit: { 
+    scale: 1.02,
+    boxShadow: "0 8px 25px rgba(59, 130, 246, 0.15)",
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  },
+  saved: {
+    scale: 1,
+    boxShadow: "0 4px 15px rgba(34, 197, 94, 0.15)",
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  }
+};
+
 const CaseModal = ({ 
   isOpen, 
   data, 
@@ -122,24 +150,35 @@ const CaseModal = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
-  const [expandedTimelineEntry, setExpandedTimelineEntry] = useState(null);
-  const [editingEntryId, setEditingEntryId] = useState(null);
-  const [editingEntryData, setEditingEntryData] = useState({});
-  const [deletingEntryId, setDeletingEntryId] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const timelineScrollRef = useRef(null);
+  
+  // Individual section edit states
+  const [editingSections, setEditingSections] = useState({});
+  const [sectionData, setSectionData] = useState({});
+  
+  // Tab-specific scroll positions
+  const [scrollPositions, setScrollPositions] = useState({});
+  const contentRefs = useRef({});
+  
+  // Form states for different tabs
+  const [newMedication, setNewMedication] = useState({ name: '', dosage: '', frequency: '', effect: '' });
+  const [showMedicationForm, setShowMedicationForm] = useState(false);
 
   useEffect(() => {
     if (isOpen && data && !hasInitialized) {
       setIsVisible(true);
-      setEditData({ ...data });
+      const initialData = { 
+        ...data,
+        narrative_summary: data.narrative_summary || '',
+        medications: data.medications || [],
+        therapeutic_highlights: data.therapeutic_highlights || '',
+        last_updated: data.last_updated || new Date().toISOString()
+      };
+      setEditData(initialData);
       setHasInitialized(true);
       setIsAnimating(true);
       if (onAnimationStart) onAnimationStart();
@@ -150,8 +189,11 @@ const CaseModal = ({
       }, 600);
     } else if (!isOpen && hasInitialized) {
       setHasInitialized(false);
+      setScrollPositions({});
+      setEditingSections({});
+      setSectionData({});
     }
-  }, [isOpen, hasInitialized, onAnimationStart, onAnimationEnd]);
+  }, [isOpen, data, hasInitialized, onAnimationStart, onAnimationEnd]);
 
   // Enhanced effect for instant feedback - updates editData immediately when data changes
   useEffect(() => {
@@ -166,482 +208,6 @@ const CaseModal = ({
       });
     }
   }, [data, isOpen, hasInitialized]);
-
-  // Timeline data from case or default mock data
-  const timelineEntries = useMemo(() => {
-    // If case has timeline data, use it, otherwise use mock data for demonstration
-    if (editData?.timeline && Array.isArray(editData.timeline) && editData.timeline.length > 0) {
-      return editData.timeline.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    }
-    
-    // Default mock data for cases without timeline
-    return [
-      {
-        id: 1,
-        timestamp: '2024-01-15T09:30:00.000Z',
-        date: '2024-01-15',
-        time: '09:30 AM',
-        type: 'assessment',
-        title: 'Initial Assessment',
-        content: 'Patient presented with symptoms of anxiety and depression.',
-        details: 'Comprehensive psychiatric evaluation completed. Patient reports increased anxiety over the past 3 months, difficulty sleeping, and decreased appetite. MSE reveals anxious mood, intact cognition, no psychotic features. PHQ-9 score: 14 (moderate depression). GAD-7 score: 12 (moderate anxiety).',
-        author: 'Dr. Smith',
-        isNew: false
-      },
-      {
-        id: 2,
-        timestamp: '2024-01-22T14:15:00.000Z',
-        date: '2024-01-22',
-        time: '02:15 PM',
-        type: 'medication',
-        title: 'Medication Adjustment',
-        content: 'Started on Sertraline 50mg daily.',
-        details: 'After discussion of treatment options, patient agreed to trial of SSRI. Started Sertraline 50mg daily. Reviewed potential side effects including initial activation, GI upset. Plan to follow up in 2 weeks. Provided crisis resources and encouraged to call if any concerns.',
-        author: 'Dr. Smith',
-        isNew: false
-      },
-      {
-        id: 3,
-        timestamp: '2024-02-05T11:00:00.000Z',
-        date: '2024-02-05',
-        time: '11:00 AM',
-        type: 'followup',
-        title: 'Follow-up Visit',
-        content: 'Patient reports mild improvement in mood.',
-        details: 'Patient tolerated medication well with minimal side effects. Reports improved energy and slightly better sleep. Still experiencing some anxiety symptoms. PHQ-9 score decreased to 10. Continue current medication, discussed therapy referral.',
-        author: 'Dr. Smith',
-        isNew: false
-      },
-      {
-        id: 4,
-        timestamp: '2024-02-19T15:45:00.000Z',
-        date: '2024-02-19',
-        time: '03:45 PM',
-        type: 'therapy',
-        title: 'Therapy Session',
-        content: 'First CBT session completed.',
-        details: 'Initial therapy session with focus on psychoeducation about anxiety and depression. Introduced basic CBT concepts and breathing exercises. Patient engaged well and expressed motivation for therapy. Homework assigned: daily mood tracking and breathing practice.',
-        author: 'Sarah Johnson, LCSW',
-        isNew: false
-      },
-      {
-        id: 5,
-        timestamp: '2024-03-05T10:30:00.000Z',
-        date: '2024-03-05',
-        time: '10:30 AM',
-        type: 'followup',
-        title: 'Follow-up Visit',
-        content: 'Continued progress with therapy.',
-        details: 'Patient showing continued improvement. Engaging well with CBT techniques. Sleep patterns have normalized. PHQ-9 score now 7. Discussed potential reduction in session frequency.',
-        author: 'Dr. Smith',
-        isNew: false
-      },
-      {
-        id: 6,
-        timestamp: '2024-03-19T14:00:00.000Z',
-        date: '2024-03-19',
-        time: '02:00 PM',
-        type: 'therapy',
-        title: 'CBT Session',
-        content: 'Worked on cognitive restructuring.',
-        details: 'Focused session on identifying and challenging negative thought patterns. Patient demonstrated good understanding of CBT principles. Practiced thought records. Homework: daily thought monitoring.',
-        author: 'Sarah Johnson, LCSW',
-        isNew: false
-      },
-      {
-        id: 7,
-        timestamp: '2024-04-02T09:15:00.000Z',
-        date: '2024-04-02',
-        time: '09:15 AM',
-        type: 'assessment',
-        title: 'Progress Assessment',
-        content: 'Quarterly progress review.',
-        details: 'Comprehensive review of treatment progress. Patient reports significant improvement in mood and anxiety levels. PHQ-9 score: 4 (minimal symptoms). GAD-7 score: 3. Discussed maintenance plan.',
-        author: 'Dr. Smith',
-        isNew: false
-      },
-      {
-        id: 8,
-        timestamp: '2024-04-16T11:30:00.000Z',
-        date: '2024-04-16',
-        time: '11:30 AM',
-        type: 'medication',
-        title: 'Medication Review',
-        content: 'Medication adjustment discussion.',
-        details: 'Reviewed current medication effectiveness. Patient tolerating Sertraline well with no side effects. Discussed tapering plan for future. Continue current dose for now.',
-        author: 'Dr. Smith',
-        isNew: false
-      },
-      {
-        id: 9,
-        timestamp: '2024-05-01T13:45:00.000Z',
-        date: '2024-05-01',
-        time: '01:45 PM',
-        type: 'note',
-        title: 'Clinical Note',
-        content: 'Patient doing well, stable mood.',
-        details: 'Brief check-in. Patient reports continued stability. No new concerns. Maintaining progress with therapy techniques. Next appointment in 6 weeks.',
-        author: 'Dr. Smith',
-        isNew: false
-      },
-      {
-        id: 10,
-        timestamp: '2024-05-15T16:00:00.000Z',
-        date: '2024-05-15',
-        time: '04:00 PM',
-        type: 'therapy',
-        title: 'Therapy Session',
-        content: 'Relapse prevention planning.',
-        details: 'Focused on developing comprehensive relapse prevention plan. Identified triggers and coping strategies. Created crisis plan. Patient demonstrates excellent insight and motivation.',
-        author: 'Sarah Johnson, LCSW',
-        isNew: true
-      }
-    ];
-  }, [editData?.timeline]);
-
-  // Enhanced scroll function to ensure expanded entries are fully visible
-  const scrollToShowEntry = useCallback((entryId) => {
-    if (!timelineScrollRef.current || !entryId) return;
-    
-    // Wait for DOM to update after expansion
-    setTimeout(() => {
-      const container = timelineScrollRef.current;
-      const entryElement = container.querySelector(`[data-entry-id="${entryId}"]`);
-      
-      if (!entryElement || !container) return;
-      
-      const containerHeight = container.clientHeight;
-      const containerTop = container.scrollTop;
-      const containerBottom = containerTop + containerHeight;
-      
-      // Get entry bounds
-      const entryTop = entryElement.offsetTop;
-      const entryHeight = entryElement.offsetHeight;
-      const entryBottom = entryTop + entryHeight;
-      
-      // Calculate if we need to scroll
-      const padding = 40;
-      let newScrollTop = containerTop;
-      
-      // If entry extends below visible area, scroll down
-      if (entryBottom > containerBottom - padding) {
-        newScrollTop = entryBottom - containerHeight + padding;
-      }
-      
-      // If entry is above visible area, scroll up
-      if (entryTop < containerTop + padding) {
-        newScrollTop = entryTop - padding;
-      }
-      
-      // Clamp scroll position
-      const maxScroll = container.scrollHeight - containerHeight;
-      newScrollTop = Math.max(0, Math.min(newScrollTop, maxScroll));
-      
-      // Only scroll if needed
-      if (Math.abs(newScrollTop - containerTop) > 10) {
-        container.scrollTo({
-          top: newScrollTop,
-          behavior: 'smooth'
-        });
-      }
-    }, 350); // Wait for expansion animation to complete
-  }, []);
-
-  const scrollToLatest = useCallback(() => {
-    if (timelineScrollRef.current) {
-      timelineScrollRef.current.scrollTo({
-        top: timelineScrollRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
-
-  // Auto-save timeline changes with debounce
-  const saveTimelineChange = useCallback((newTimeline) => {
-    const timeoutId = setTimeout(() => {
-      setMindMapData(prevData => {
-        const updatedCases = prevData.cases.map(caseItem =>
-          String(caseItem.id) === String(data?.id) 
-            ? { ...caseItem, timeline: newTimeline, updated_at: new Date().toISOString() }
-            : caseItem
-        );
-        const newData = { ...prevData, cases: updatedCases };
-        autoSaveMindMapData(newData);
-        return newData;
-      });
-      
-      // Update local edit data as well
-      setEditData(prev => ({ ...prev, timeline: newTimeline }));
-    }, 800); // 800ms debounce
-
-    return timeoutId;
-  }, [data?.id, setMindMapData, autoSaveMindMapData]);
-
-  const getEntryTitle = useCallback((type) => {
-    const titles = {
-      assessment: 'Clinical Assessment',
-      medication: 'Medication Update',
-      therapy: 'Therapy Session',
-      followup: 'Follow-up Visit',
-      note: 'Clinical Note'
-    };
-    return titles[type] || 'Clinical Entry';
-  }, []);
-
-  // Create a new blank timeline entry for inline editing
-  const createNewTimelineEntry = useCallback(() => {
-    if (editingEntryId) return; // Prevent multiple entries being edited simultaneously
-    
-    const now = new Date();
-    const newEntry = {
-      id: `new-${Date.now()}`, // Temporary ID for new entries
-      timestamp: now.toISOString(),
-      date: now.toISOString().split('T')[0],
-      time: now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: true 
-      }),
-      type: 'followup',
-      title: 'Follow-up Visit',
-      content: '',
-      details: '',
-      author: 'Current User',
-      isNew: true,
-      isEditing: true
-    };
-
-    // Add to timeline and set as editing
-    const currentTimeline = editData?.timeline || [];
-    const updatedTimeline = [...currentTimeline, newEntry];
-    
-    setEditData(prev => ({ ...prev, timeline: updatedTimeline }));
-    setEditingEntryId(newEntry.id);
-    setEditingEntryData({ ...newEntry });
-    setExpandedTimelineEntry(newEntry.id);
-    setHasUnsavedChanges(false);
-    
-    // Scroll to show the new entry after it's rendered and expanded
-    scrollToShowEntry(newEntry.id);
-  }, [editData?.timeline, editingEntryId, scrollToShowEntry]);
-
-  // Toggle entry expansion and start editing if needed
-  const toggleTimelineEntry = useCallback((entry) => {
-    const entryId = entry.id;
-    
-    // If currently editing this entry, close it
-    if (editingEntryId === entryId) {
-      setEditingEntryId(null);
-      setEditingEntryData({});
-      setExpandedTimelineEntry(null);
-      return;
-    }
-    
-    // If editing another entry, don't allow switching
-    if (editingEntryId && editingEntryId !== entryId) {
-      addToast('Please save or cancel the current entry first', 'warning');
-      return;
-    }
-    
-    // Toggle expansion
-    const isCurrentlyExpanded = expandedTimelineEntry === entryId;
-    
-    if (isCurrentlyExpanded) {
-      // Collapse the entry
-      setExpandedTimelineEntry(null);
-    } else {
-      // Expand and start editing
-      setExpandedTimelineEntry(entryId);
-      setEditingEntryId(entryId);
-      setEditingEntryData({ ...entry });
-      
-      // Scroll to show the expanded entry
-      scrollToShowEntry(entryId);
-    }
-  }, [editingEntryId, expandedTimelineEntry, addToast, scrollToShowEntry]);
-
-  // Save the currently editing entry
-  const saveEditingEntry = useCallback(() => {
-    if (!editingEntryId || !editingEntryData) return;
-    
-    const currentTimeline = editData?.timeline || [];
-    let updatedTimeline;
-    
-    // Generate final ID for new entries
-    const finalEntry = {
-      ...editingEntryData,
-      id: editingEntryData.id.toString().startsWith('new-') 
-        ? Date.now() 
-        : editingEntryData.id,
-      isNew: editingEntryData.id.toString().startsWith('new-'),
-      isEditing: false,
-      updated_at: new Date().toISOString()
-    };
-    
-    // Update title based on type
-    finalEntry.title = getEntryTitle(finalEntry.type);
-    
-    // Update timestamp-derived fields
-    const dateObj = new Date(finalEntry.timestamp);
-    finalEntry.date = dateObj.toISOString().split('T')[0];
-    finalEntry.time = dateObj.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: true 
-    });
-    
-    if (editingEntryData.id.toString().startsWith('new-')) {
-      // Adding new entry
-      updatedTimeline = [...currentTimeline.filter(e => e.id !== editingEntryId), finalEntry]
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    } else {
-      // Updating existing entry
-      updatedTimeline = currentTimeline.map(entry =>
-        entry.id === editingEntryId ? finalEntry : entry
-      ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    }
-    
-    // Save changes
-    saveTimelineChange(updatedTimeline);
-    
-    // Reset unsaved changes flag
-    setHasUnsavedChanges(false);
-    
-    // Show success toast
-    addToast(
-      editingEntryData.id.toString().startsWith('new-') 
-        ? 'Timeline entry added successfully' 
-        : 'Timeline entry updated successfully', 
-      'success'
-    );
-    
-    // Brief delay to show success state before collapsing
-    setTimeout(() => {
-      setEditingEntryId(null);
-      setEditingEntryData({});
-      setExpandedTimelineEntry(null);
-    }, 1000); // 1 second delay to show success state
-  }, [
-    editingEntryId, 
-    editingEntryData, 
-    editData?.timeline, 
-    saveTimelineChange, 
-    addToast,
-    getEntryTitle
-  ]);
-
-  // Cancel editing
-  const cancelEditingEntry = useCallback(() => {
-    if (!editingEntryId) return;
-    
-    // If it's a new entry, remove it from timeline
-    if (editingEntryData.id && editingEntryData.id.toString().startsWith('new-')) {
-      const currentTimeline = editData?.timeline || [];
-      const updatedTimeline = currentTimeline.filter(e => e.id !== editingEntryId);
-      setEditData(prev => ({ ...prev, timeline: updatedTimeline }));
-    }
-    
-    // Clear editing state
-    setEditingEntryId(null);
-    setEditingEntryData({});
-    setExpandedTimelineEntry(null);
-    setHasUnsavedChanges(false);
-  }, [editingEntryId, editingEntryData, editData?.timeline]);
-
-  // Handle keyboard shortcuts for editing
-  const handleEditingKeyPress = useCallback((e) => {
-    if (e.key === 'Enter' && e.shiftKey) {
-      e.preventDefault();
-      saveEditingEntry();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      cancelEditingEntry();
-    }
-  }, [saveEditingEntry, cancelEditingEntry]);
-
-  // Update editing entry data
-  const updateEditingEntry = useCallback((field, value) => {
-    setEditingEntryData(prev => {
-      const updated = {
-        ...prev,
-        [field]: value,
-        // Auto-update details to match content for consistency
-        ...(field === 'content' && { details: value })
-      };
-      
-      // Check if there are unsaved changes
-      const currentEntry = timelineEntries.find(e => e.id === editingEntryId);
-      const hasChanges = currentEntry ? 
-        JSON.stringify(updated) !== JSON.stringify(currentEntry) :
-        Object.values(updated).some(val => val && val.toString().trim());
-      
-      setHasUnsavedChanges(hasChanges);
-      return updated;
-    });
-  }, [editingEntryId, timelineEntries]);
-
-  // Delete timeline entry functions
-  const initiateDeleteEntry = useCallback((entryId) => {
-    setDeletingEntryId(entryId);
-    setShowDeleteConfirm(true);
-  }, []);
-
-  const confirmDeleteEntry = useCallback(() => {
-    if (!deletingEntryId) return;
-    
-    const currentTimeline = editData?.timeline || [];
-    const entryToDelete = currentTimeline.find(e => e.id === deletingEntryId);
-    
-    if (!entryToDelete) {
-      setShowDeleteConfirm(false);
-      setDeletingEntryId(null);
-      return;
-    }
-    
-    // Remove entry from timeline with animation
-    const updatedTimeline = currentTimeline.filter(e => e.id !== deletingEntryId);
-    
-    // Save changes
-    saveTimelineChange(updatedTimeline);
-    
-    // Clear states
-    setShowDeleteConfirm(false);
-    if (editingEntryId === deletingEntryId) {
-      setEditingEntryId(null);
-      setEditingEntryData({});
-      setExpandedTimelineEntry(null);
-      setHasUnsavedChanges(false);
-    }
-    
-    // Brief delay for delete confirmation, then reset deletingEntryId
-    setTimeout(() => {
-      setDeletingEntryId(null);
-    }, 300); // Match the exit animation duration
-    
-    addToast('Timeline entry deleted successfully', 'success');
-  }, [deletingEntryId, editData?.timeline, saveTimelineChange, editingEntryId, addToast]);
-
-  const cancelDeleteEntry = useCallback(() => {
-    setShowDeleteConfirm(false);
-    setDeletingEntryId(null);
-  }, []);
-
-  // Clear isNew flag after a delay for entries that were just added
-  useEffect(() => {
-    const newEntries = timelineEntries.filter(entry => entry.isNew && !entry.isEditing);
-    if (newEntries.length > 0) {
-      const timeout = setTimeout(() => {
-        const updatedTimeline = timelineEntries.map(entry => 
-          entry.isNew && !entry.isEditing ? { ...entry, isNew: false } : entry
-        );
-        if (editData?.timeline) {
-          saveTimelineChange(updatedTimeline);
-        }
-      }, 5000); // Remove isNew flag after 5 seconds
-
-      return () => clearTimeout(timeout);
-    }
-  }, [timelineEntries, editData?.timeline, saveTimelineChange]);
 
   const handleClose = useCallback(() => {
     if (isAnimating || isClosing) return;
@@ -659,16 +225,21 @@ const CaseModal = ({
     
     setIsLoading(true);
     try {
+      const updatedData = {
+        ...editData,
+        last_updated: new Date().toISOString()
+      };
+      
       setMindMapData(prevData => {
         const updatedCases = prevData.cases.map(caseItem =>
-          String(caseItem.id) === String(data?.id) ? { ...caseItem, ...editData } : caseItem
+          String(caseItem.id) === String(data?.id) ? { ...caseItem, ...updatedData } : caseItem
         );
         const newData = { ...prevData, cases: updatedCases };
         autoSaveMindMapData(newData);
         return newData;
       });
       
-      setIsEditing(false);
+      setEditData(updatedData);
       addToast('Case updated successfully', 'success');
     } catch (error) {
       console.error('Error saving case:', error);
@@ -677,6 +248,45 @@ const CaseModal = ({
       setIsLoading(false);
     }
   }, [data?.id, editData, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
+  // Save current tab's scroll position before switching
+  const saveScrollPosition = useCallback((tabId) => {
+    const contentRef = contentRefs.current[tabId];
+    if (contentRef) {
+      setScrollPositions(prev => ({
+        ...prev,
+        [tabId]: contentRef.scrollTop
+      }));
+    }
+  }, []);
+
+  // Restore scroll position when switching to a tab
+  const restoreScrollPosition = useCallback((tabId) => {
+    setTimeout(() => {
+      const contentRef = contentRefs.current[tabId];
+      const savedPosition = scrollPositions[tabId];
+      if (contentRef && savedPosition) {
+        contentRef.scrollTop = savedPosition;
+      }
+    }, 100); // Small delay to ensure content is rendered
+  }, [scrollPositions]);
+
+  // Handle tab switching with scroll position preservation
+  const handleTabSwitch = useCallback((newTabId) => {
+    if (newTabId === activeTab || isTabTransitioning) return;
+    
+    // Save current tab's scroll position
+    saveScrollPosition(activeTab);
+    
+    setIsTabTransitioning(true);
+    setActiveTab(newTabId);
+    
+    setTimeout(() => {
+      setIsTabTransitioning(false);
+      // Restore new tab's scroll position
+      restoreScrollPosition(newTabId);
+    }, 300);
+  }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
   const handleDelete = useCallback(async () => {
     if (isLoading) return;
@@ -702,93 +312,152 @@ const CaseModal = ({
     }
   }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
 
-  const updateField = useCallback((field, value) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
+  // Individual section edit functions
+  const startEditingSection = useCallback((sectionId) => {
+    setEditingSections(prev => ({ ...prev, [sectionId]: true }));
+    // Initialize section data with current values
+    setSectionData(prev => ({
+      ...prev,
+      [sectionId]: { ...editData }
+    }));
+  }, [editData]);
+
+  const cancelEditingSection = useCallback((sectionId) => {
+    setEditingSections(prev => ({ ...prev, [sectionId]: false }));
+    setSectionData(prev => {
+      const newData = { ...prev };
+      delete newData[sectionId];
+      return newData;
+    });
   }, []);
 
-  const renderField = (label, field, type = 'text', options = {}) => {
-    const value = editData[field] || '';
+  const saveSectionEdit = useCallback(async (sectionId) => {
+    if (isLoading) return;
     
-    if (!isEditing) {
-      if (type === 'textarea') {
-        return (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">{label}</label>
-            <div className="p-3 bg-gray-50 rounded-lg border min-h-[2.5rem] text-gray-800">
-              {value || <span className="text-gray-400 italic">Not specified</span>}
-            </div>
-          </div>
-        );
-      }
+    const sectionChanges = sectionData[sectionId];
+    if (!sectionChanges) return;
+    
+    setIsLoading(true);
+    try {
+      const updatedData = {
+        ...editData,
+        ...sectionChanges,
+        last_updated: new Date().toISOString()
+      };
       
-      if (type === 'select') {
-        return (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">{label}</label>
-            <div className="p-3 bg-gray-50 rounded-lg border text-gray-800">
-              {value || <span className="text-gray-400 italic">Not specified</span>}
-            </div>
-          </div>
-        );
-      }
+      // Update editData immediately for instant feedback
+      setEditData(updatedData);
       
-      return (
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{label}</label>
-          <div className="p-3 bg-gray-50 rounded-lg border text-gray-800">
-            {value || <span className="text-gray-400 italic">Not specified</span>}
-          </div>
-        </div>
-      );
+      setMindMapData(prevData => {
+        const updatedCases = prevData.cases.map(caseItem =>
+          String(caseItem.id) === String(data?.id) ? { ...caseItem, ...updatedData } : caseItem
+        );
+        const newData = { ...prevData, cases: updatedCases };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      setEditingSections(prev => ({ ...prev, [sectionId]: false }));
+      setSectionData(prev => {
+        const newData = { ...prev };
+        delete newData[sectionId];
+        return newData;
+      });
+      
+      addToast('Section updated successfully', 'success');
+    } catch (error) {
+      console.error('Error saving section:', error);
+      addToast('Failed to save section', 'error');
+    } finally {
+      setIsLoading(false);
     }
+  }, [sectionData, editData, data?.id, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
 
-    // Editing mode
-    if (type === 'textarea') {
-      return (
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{label}</label>
-          <textarea
-            value={value}
-            onChange={(e) => updateField(field, e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-            rows={options.rows || 3}
-            placeholder={`Enter ${label.toLowerCase()}...`}
-          />
-        </div>
+  const updateSectionField = useCallback((sectionId, field, value) => {
+    setSectionData(prev => ({
+      ...prev,
+      [sectionId]: {
+        ...prev[sectionId],
+        [field]: value
+      }
+    }));
+  }, []);
+
+  // Medication management functions
+  const addMedication = useCallback(() => {
+    if (!newMedication.name.trim()) return;
+    
+    const updatedMedications = [...(editData.medications || []), { 
+      id: Date.now(),
+      ...newMedication,
+      dateAdded: new Date().toISOString()
+    }];
+    
+    const updatedData = {
+      ...editData,
+      medications: updatedMedications,
+      last_updated: new Date().toISOString()
+    };
+    
+    setEditData(updatedData);
+    
+    setMindMapData(prevData => {
+      const updatedCases = prevData.cases.map(caseItem =>
+        String(caseItem.id) === String(data?.id) ? { ...caseItem, ...updatedData } : caseItem
       );
-    }
+      const newData = { ...prevData, cases: updatedCases };
+      autoSaveMindMapData(newData);
+      return newData;
+    });
+    
+    setNewMedication({ name: '', dosage: '', frequency: '', effect: '' });
+    setShowMedicationForm(false);
+    addToast('Medication added successfully', 'success');
+  }, [newMedication, editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
 
-    if (type === 'select' && options.choices) {
-      return (
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{label}</label>
-          <select
-            value={value}
-            onChange={(e) => updateField(field, e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-          >
-            <option value="">Select {label.toLowerCase()}...</option>
-            {options.choices.map(choice => (
-              <option key={choice} value={choice}>{choice}</option>
-            ))}
-          </select>
-        </div>
+  const removeMedication = useCallback((medicationId) => {
+    const updatedMedications = (editData.medications || []).filter(med => med.id !== medicationId);
+    const updatedData = {
+      ...editData,
+      medications: updatedMedications,
+      last_updated: new Date().toISOString()
+    };
+    
+    setEditData(updatedData);
+    
+    setMindMapData(prevData => {
+      const updatedCases = prevData.cases.map(caseItem =>
+        String(caseItem.id) === String(data?.id) ? { ...caseItem, ...updatedData } : caseItem
       );
-    }
+      const newData = { ...prevData, cases: updatedCases };
+      autoSaveMindMapData(newData);
+      return newData;
+    });
+    
+    addToast('Medication removed successfully', 'success');
+  }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
 
-    return (
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => updateField(field, type === 'number' ? Number(e.target.value) : e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-          placeholder={`Enter ${label.toLowerCase()}...`}
-        />
-      </div>
-    );
-  };
+  // Get connected nodes for Related tab
+  const connectedNodes = useMemo(() => {
+    if (!data?.id) return { topics: [], literature: [], cases: [] };
+    
+    // This would typically come from your mind map connections data
+    // For now, return empty arrays - you can implement based on your data structure
+    return {
+      topics: [],
+      literature: [],
+      cases: []
+    };
+  }, [data?.id]);
+
+  // Tab configuration
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: Users },
+    { id: 'narrative', label: 'Narrative', icon: FileText },
+    { id: 'medications', label: 'Medications', icon: Pill },
+    { id: 'therapy', label: 'Therapy & Insights', icon: Brain },
+    { id: 'related', label: 'Related', icon: Link2 }
+  ];
 
   if (!isOpen) return null;
 
@@ -840,144 +509,123 @@ const CaseModal = ({
               animate="visible"
               exit="exit"
               variants={contentVariants}
-              className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between"
+              className="bg-gradient-to-br from-slate-900 to-slate-800 text-white px-6 py-4 flex items-center justify-between"
             >
               <div className="flex items-center gap-3">
                 <Users size={24} />
                 <h2 className="text-xl font-semibold">Case Details</h2>
               </div>
-              <div className="flex items-center gap-2">
-                {!isEditing && !isLoading && (
-                  <>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-                      title="Edit"
-                    >
-                      <Edit3 size={20} />
-                    </button>
-                    <button
-                      onClick={handleDelete}
-                      className="text-white hover:text-red-200 p-2 rounded-full hover:bg-red-500 hover:bg-opacity-30 transition-all"
-                      title="Delete"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  </>
-                )}
-                <button onClick={handleClose} className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
-                  <X size={20} />
-                </button>
-              </div>
+              <button
+                onClick={handleClose}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
             </motion.div>
 
             {/* Tab Navigation */}
             <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-600">
               <nav className="flex flex-wrap gap-2 px-6 py-4">
-                {[
-                  { key: 'overview', label: 'Overview', icon: Users },
-                  { key: 'narrative', label: 'Narrative', icon: FileText },
-                  { key: 'medications', label: 'Medications', icon: Clipboard },
-                  { key: 'therapy', label: 'Therapy', icon: Heart },
-                  { key: 'timeline', label: 'Timeline', icon: Clock },
-                  { key: 'insights', label: 'Insights', icon: Sparkles },
-                  { key: 'related', label: 'Related', icon: Target }
-                ].map(({ key, label, icon: Icon }) => (
+                {tabs.map(({ id, label, icon: Icon }) => (
                   <motion.button
-                    key={key}
-                    onClick={() => {
-                      if (isTabTransitioning) return;
-                      setIsTabTransitioning(true);
-                      setActiveTab(key);
-                      setTimeout(() => setIsTabTransitioning(false), 300);
-                    }}
+                    key={id}
+                    onClick={() => handleTabSwitch(id)}
                     className={`relative flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
-                      activeTab === key
+                      activeTab === id
                         ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
                         : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-md'
                     }`}
-                    whileHover={{ scale: activeTab === key ? 1 : 1.02 }}
+                    whileHover={{ scale: activeTab === id ? 1 : 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    initial={false}
-                    animate={{
-                      scale: activeTab === key ? 1.05 : 1,
-                      boxShadow: activeTab === key 
-                        ? '0 8px 25px rgba(59, 130, 246, 0.3), 0 0 20px rgba(99, 102, 241, 0.2)' 
-                        : '0 2px 8px rgba(0, 0, 0, 0.1)'
-                    }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    disabled={isTabTransitioning}
                   >
-                    <Icon size={16} className={activeTab === key ? 'drop-shadow-sm' : ''} />
+                    <Icon size={16} className={activeTab === id ? 'drop-shadow-sm' : ''} />
                     {label}
-                    {/* Timeline notification badge */}
-                    {key === 'timeline' && timelineEntries.some(entry => entry.isNew) && (
-                      <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
-                        !
-                      </span>
-                    )}
                     
-                    {activeTab === key && (
+                    {activeTab === id && (
                       <motion.div
-                        layoutId="tabGlow"
+                        layoutId="caseActiveTab"
                         className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-500/20 rounded-xl blur-sm"
                         initial={false}
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
                       />
                     )}
                   </motion.button>
                 ))}
               </nav>
             </div>
-            
-            {/* Tab Content */}
-            <motion.div 
-              className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100"
-              layout="position"
-              layoutRoot
-              transition={{ 
-                layout: { duration: 0.4, ease: "easeInOut" },
-                height: { duration: 0.4, ease: "easeInOut" }
-              }}
+
+            {/* Dark Content Area */}
+            <motion.div
+              className="flex-1 bg-gradient-to-br from-slate-900 to-slate-800 overflow-hidden"
+              animate={{ opacity: isTabTransitioning ? 0.7 : 1 }}
+              transition={{ duration: 0.2 }}
             >
-              <AnimatePresence mode="wait" initial={false} onExitComplete={() => setIsTabTransitioning(false)}>
+              <AnimatePresence mode="wait">
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
                   <motion.div
                     key="overview"
-                    initial={{ opacity: 0, x: -30 }}
+                    ref={el => contentRefs.current.overview = el}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    <div className="space-y-6">
-                      <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                          <Users size={20} className="text-blue-600" />
-                          Demographics & Basic Info
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {renderField('Case ID', 'case_id')}
-                          {renderField('Primary Diagnosis', 'primary_diagnosis')}
-                          {renderField('Age', 'age', 'number')}
-                          {renderField('Gender', 'gender', 'select', {
-                            choices: ['Male', 'Female', 'Non-binary', 'Other']
-                          })}
+                    {/* Case Title */}
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <h3 className="text-lg font-semibold text-white mb-4">Case Information</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-300 mb-2">Primary Diagnosis</label>
+                          <div className="text-white bg-slate-700/50 rounded-lg p-3">
+                            {editData.primaryDiagnosis || editData.primary_diagnosis || editData.title || 'No diagnosis specified'}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
+                          <div className="text-white bg-slate-700/50 rounded-lg p-3">
+                            {editData.status || 'Active'}
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                          <AlertCircle size={20} className="text-amber-600" />
-                          Initial Impressions
-                        </h3>
-                        <div className="space-y-4">
-                          {renderField('Chief Complaint', 'chiefComplaint', 'textarea', { rows: 3 })}
-                          {renderField('Initial Presentation', 'initialPresentation', 'textarea', { rows: 4 })}
-                        </div>
+                    </motion.div>
+
+                    {/* Chief Complaint */}
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <h4 className="text-lg font-semibold text-white mb-3">Chief Complaint</h4>
+                      <div className="text-slate-300 leading-relaxed bg-slate-700/30 rounded-lg p-4">
+                        {editData.chiefComplaint || 'No chief complaint documented'}
                       </div>
+                    </motion.div>
+
+                    {/* Initial Presentation */}
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <h4 className="text-lg font-semibold text-white mb-3">Initial Presentation</h4>
+                      <div className="text-slate-300 leading-relaxed bg-slate-700/30 rounded-lg p-4">
+                        {editData.initialPresentation || 'No initial presentation documented'}
+                      </div>
+                    </motion.div>
+
+                    {/* Last Updated */}
+                    <div className="text-xs text-slate-500 text-right">
+                      Last updated: {editData.last_updated ? new Date(editData.last_updated).toLocaleString() : 'Never'}
                     </div>
                   </motion.div>
                 )}
@@ -986,512 +634,445 @@ const CaseModal = ({
                 {activeTab === 'narrative' && (
                   <motion.div
                     key="narrative"
-                    initial={{ opacity: 0, x: -30 }}
+                    ref={el => contentRefs.current.narrative = el}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                        <FileText size={20} className="text-green-600" />
-                        Patient Story & Narrative
-                      </h3>
-                      <div className="space-y-6">
-                        {renderField('Current Presentation', 'currentPresentation', 'textarea', { rows: 8 })}
-                        <div className="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg">
-                          <p className="italic">Use this space to tell the patient's story in your own words. Include context, progression, and your narrative understanding of their journey.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Other tabs would continue here following the same pattern... */}
-                {/* For brevity, I'll include key tabs. The full implementation would include all tabs */}
-                
-                {/* Timeline Tab */}
-                {activeTab === 'timeline' && (
-                  <motion.div
-                    key="timeline"
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 h-[calc(85vh-200px)] flex flex-col"
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-800">Case Timeline</h3>
-                      <div className="flex items-center gap-2">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={createNewTimelineEntry}
-                          disabled={editingEntryId}
-                          className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
-                        >
-                          <Plus size={16} />
-                          Add Entry
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={scrollToLatest}
-                          className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                        >
-                          <ArrowDown size={16} />
-                          Scroll to Latest
-                        </motion.button>
-                      </div>
-                    </div>
-                    
-                    {/* Timeline implementation with inline editing */}
-                    <div className="relative flex-1 min-h-0">
-                      <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-                      
-                      <div
-                        ref={timelineScrollRef}
-                        className="timeline-scroll h-full max-h-full overflow-y-scroll bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4"
-                        style={{
-                          scrollbarWidth: 'auto',
-                          scrollbarGutter: 'stable'
-                        }}
-                      >
-                        {/* Vertical timeline bar */}
-                        <div className="absolute left-7 top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-400 via-purple-500 to-blue-400 opacity-30" />
-                        
-                        {/* Force minimum height to ensure scrolling is possible */}
-                        <div className="space-y-1" style={{ minHeight: 'calc(100% + 1px)' }}>
-                          <AnimatePresence mode="wait">
-                            {timelineEntries.map((entry, index) => {
-                              const isEditing = editingEntryId === entry.id;
-                              const isExpanded = expandedTimelineEntry === entry.id;
-                              
-                              return (
-                                <motion.div
-                                  key={entry.id}
-                                  data-entry-id={entry.id}
-                                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                                  animate={{ 
-                                    opacity: 1, 
-                                    y: 0,
-                                    scale: 1,
-                                    transition: { 
-                                      delay: entry.isNew && !entry.isEditing ? 0 : index * 0.02, 
-                                      duration: 0.25,
-                                      ease: [0.25, 0.46, 0.45, 0.94] // Custom easing for smoothness
-                                    }
-                                  }}
-                                  exit={{ 
-                                    opacity: 0, 
-                                    y: -10, 
-                                    scale: 0.95,
-                                    transition: { duration: 0.2 }
-                                  }}
-                                  className={`relative ${entry.isNew && !isEditing ? 'animate-pulse' : ''}`}
-                                  style={{ 
-                                    // Prevent layout thrashing during animations
-                                    willChange: isExpanded ? 'height' : 'auto',
-                                    contain: 'layout style paint'
-                                  }}
-                                >
-                                  {/* Timeline dot */}
-                                  <div className={`absolute left-6 top-4 w-3 h-3 rounded-full border-2 border-slate-900 z-20 transition-colors duration-200 ${
-                                    entry.type === 'assessment' ? 'bg-green-500' :
-                                    entry.type === 'medication' ? 'bg-blue-500' :
-                                    entry.type === 'therapy' ? 'bg-purple-500' :
-                                    entry.type === 'note' ? 'bg-yellow-500' :
-                                    'bg-orange-500'
-                                  }`} />
-                                  
-                                  <motion.div
-                                    layout="position"
-                                    whileHover={!isEditing ? { 
-                                      scaleY: 1.12,
-                                      scaleX: 1.02,
-                                      boxShadow: [
-                                        '0 8px 25px rgba(59, 130, 246, 0.15)',
-                                        '0 12px 35px rgba(59, 130, 246, 0.25)',
-                                        '0 16px 45px rgba(59, 130, 246, 0.35)'
-                                      ],
-                                      borderLeftColor: entry.type === 'assessment' ? '#4ade80' :
-                                                     entry.type === 'medication' ? '#60a5fa' :
-                                                     entry.type === 'therapy' ? '#a78bfa' :
-                                                     entry.type === 'note' ? '#facc15' :
-                                                     '#fb923c',
-                                      transition: { 
-                                        duration: 0.25, 
-                                        ease: [0.23, 1, 0.32, 1] // Custom easing for smooth feel
-                                      }
-                                    } : {}}
-                                    whileTap={!isEditing ? { 
-                                      scale: 0.98,
-                                      transition: { duration: 0.1 }
-                                    } : {}}
-                                    className={`ml-12 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border-l-3 transition-all duration-200 cursor-pointer overflow-hidden ${
-                                      entry.type === 'assessment' ? 'border-green-400' :
-                                      entry.type === 'medication' ? 'border-blue-400' :
-                                      entry.type === 'therapy' ? 'border-purple-400' :
-                                      entry.type === 'note' ? 'border-yellow-400' :
-                                      'border-orange-400'
-                                    } ${entry.isNew && !isEditing ? 'ring-1 ring-blue-400 ring-opacity-50' : ''} ${
-                                      isEditing ? 'ring-2 ring-green-400 ring-opacity-70' : ''
-                                    }`}
-                                    style={{
-                                      transformOrigin: 'center',
-                                      willChange: 'transform, box-shadow'
-                                    }}
-                                    onClick={() => !isEditing && toggleTimelineEntry(entry)}
-                                  >
-                                    {/* Entry Header - Always Visible */}
-                                    <div className="p-4">
-                                      <div className="flex items-start justify-between">
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="text-white font-semibold text-sm truncate">
-                                              {entry.title}
-                                            </h4>
-                                            {entry.isNew && !isEditing && (
-                                              <motion.span
-                                                animate={{ 
-                                                  scale: [1, 1.05, 1],
-                                                  opacity: [0.8, 1, 0.8]
-                                                }}
-                                                transition={{ 
-                                                  duration: 1.5, 
-                                                  repeat: Infinity,
-                                                  ease: "easeInOut"
-                                                }}
-                                                className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded-full shrink-0"
-                                              >
-                                                New
-                                              </motion.span>
-                                            )}
-                                            {isEditing && (
-                                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full shrink-0">
-                                                Editing
-                                              </span>
-                                            )}
-                                          </div>
-                                          <div className="flex items-center gap-3 text-xs text-slate-300 mb-2">
-                                            <span className="flex items-center gap-1">
-                                              <Calendar size={11} />
-                                              {entry.date}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                              <Clock size={11} />
-                                              {entry.time}
-                                            </span>
-                                            <span className="truncate">by {entry.author}</span>
-                                          </div>
-                                          
-                                          {!isExpanded && (
-                                            <p className="text-slate-200 text-sm leading-relaxed">
-                                              {entry.content?.length > 120 
-                                                ? `${entry.content.substring(0, 120)}...` 
-                                                : entry.content || 'Click to edit...'}
-                                            </p>
-                                          )}
-                                        </div>
-                                        
-                                        {!isEditing && (
-                                          <motion.div
-                                            animate={{ rotate: isExpanded ? 180 : 0 }}
-                                            transition={{ duration: 0.2, ease: "easeInOut" }}
-                                            className="ml-2 shrink-0"
-                                          >
-                                            <Edit3 size={15} className="text-slate-400" />
-                                          </motion.div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    
-                                    {/* Inline Editing Form */}
-                                    <AnimatePresence mode="wait">
-                                      {isExpanded && (
-                                        <motion.div
-                                          initial={{ height: 0, opacity: 0 }}
-                                          animate={{ 
-                                            height: "auto", 
-                                            opacity: 1,
-                                            transition: { 
-                                              height: { 
-                                                duration: 0.35, 
-                                                ease: [0.25, 0.46, 0.45, 0.94] 
-                                              },
-                                              opacity: { 
-                                                duration: 0.2, 
-                                                delay: 0.1 
-                                              }
-                                            }
-                                          }}
-                                          exit={{ 
-                                            height: 0, 
-                                            opacity: 0,
-                                            transition: { 
-                                              height: { 
-                                                duration: 0.25, 
-                                                ease: [0.25, 0.46, 0.45, 0.94] 
-                                              },
-                                              opacity: { 
-                                                duration: 0.15 
-                                              }
-                                            }
-                                          }}
-                                          style={{ 
-                                            overflow: 'hidden',
-                                            willChange: 'height, opacity'
-                                          }}
-                                        >
-                                          <div className="px-4 pb-4 border-t border-slate-600">
-                                            <motion.div 
-                                              className="space-y-4 mt-4"
-                                              initial={{ opacity: 0, y: 10 }}
-                                              animate={{ opacity: 1, y: 0 }}
-                                              transition={{ duration: 0.3, delay: 0.1 }}
-                                            >
-                                              {/* Type and Date Row */}
-                                              <motion.div 
-                                                className="grid grid-cols-2 gap-4"
-                                                initial={{ opacity: 0, y: 5 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.2, delay: 0.15 }}
-                                              >
-                                                <div>
-                                                  <label className="block text-xs font-medium text-slate-300 mb-2">
-                                                    Entry Type
-                                                  </label>
-                                                  <select
-                                                    value={editingEntryData.type || 'followup'}
-                                                    onChange={(e) => updateEditingEntry('type', e.target.value)}
-                                                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 focus:bg-slate-650"
-                                                  >
-                                                    <option value="assessment">Assessment</option>
-                                                    <option value="medication">Medication</option>
-                                                    <option value="therapy">Therapy</option>
-                                                    <option value="followup">Follow-up</option>
-                                                    <option value="note">Note</option>
-                                                  </select>
-                                                </div>
-                                                
-                                                <div>
-                                                  <label className="block text-xs font-medium text-slate-300 mb-2">
-                                                    Date
-                                                  </label>
-                                                  <input
-                                                    type="date"
-                                                    value={editingEntryData.timestamp ? 
-                                                      new Date(editingEntryData.timestamp).toISOString().split('T')[0] : 
-                                                      new Date().toISOString().split('T')[0]
-                                                    }
-                                                    onChange={(e) => {
-                                                      // Create timestamp with selected date at current time
-                                                      const selectedDate = new Date(e.target.value);
-                                                      const now = new Date();
-                                                      selectedDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
-                                                      updateEditingEntry('timestamp', selectedDate.toISOString());
-                                                    }}
-                                                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 focus:bg-slate-650"
-                                                    title="Select date for this timeline entry"
-                                                  />
-                                                </div>
-                                              </motion.div>
-                                              
-                                              {/* Content */}
-                                              <motion.div
-                                                initial={{ opacity: 0, y: 5 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.2, delay: 0.2 }}
-                                              >
-                                                <label className="block text-xs font-medium text-slate-300 mb-2">
-                                                  Content
-                                                </label>
-                                                <textarea
-                                                  value={editingEntryData.content || ''}
-                                                  onChange={(e) => updateEditingEntry('content', e.target.value)}
-                                                  onKeyPress={handleEditingKeyPress}
-                                                  placeholder="Enter clinical notes, observations, or updates..."
-                                                  rows={4}
-                                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 focus:bg-slate-650"
-                                                />
-                                                <p className="text-xs text-slate-400 mt-1">
-                                                  Press Shift+Enter to save, Escape to cancel
-                                                </p>
-                                              </motion.div>
-                                              
-                                              {/* Action Buttons - These must always be visible */}
-                                              <motion.div 
-                                                className="flex justify-between items-center pt-2 pb-1"
-                                                initial={{ opacity: 0, y: 5 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.2, delay: 0.25 }}
-                                              >
-                                                {/* Delete button on the left */}
-                                                {!editingEntryData.id?.toString().startsWith('new-') && (
-                                                  <motion.button
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    onClick={() => initiateDeleteEntry(entry.id)}
-                                                    className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
-                                                    title="Delete this timeline entry"
-                                                  >
-                                                    <Trash2 size={14} />
-                                                    Delete
-                                                  </motion.button>
-                                                )}
-                                                
-                                                {/* Save/Cancel buttons on the right */}
-                                                <div className="flex gap-2">
-                                                  <motion.button
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    onClick={cancelEditingEntry}
-                                                    className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm font-medium"
-                                                  >
-                                                    Cancel
-                                                  </motion.button>
-                                                  <motion.button
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    onClick={saveEditingEntry}
-                                                    disabled={!hasUnsavedChanges || !editingEntryData.content?.trim()}
-                                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
-                                                    title={hasUnsavedChanges ? "Save changes" : "No changes to save"}
-                                                  >
-                                                    {hasUnsavedChanges ? (
-                                                      <>
-                                                        <Save size={14} />
-                                                        Save Changes
-                                                      </>
-                                                    ) : (
-                                                      <>
-                                                        <Check size={14} />
-                                                        Saved
-                                                      </>
-                                                    )}
-                                                  </motion.button>
-                                                </div>
-                                              </motion.div>
-                                            </motion.div>
-                                          </div>
-                                        </motion.div>
-                                      )}
-                                    </AnimatePresence>
-                                  </motion.div>
-                                </motion.div>
-                              );
-                            })}
-                          </AnimatePresence>
-                        </div>
-                        
-                        {/* Empty state */}
-                        {timelineEntries.length === 0 && (
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-center py-12"
+                    {/* Narrative Summary Section */}
+                    <motion.div 
+                      variants={cardVariants}
+                      animate={editingSections.narrative ? "edit" : "visible"}
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <FileText size={20} className="text-blue-400" />
+                          Narrative Summary
+                        </h3>
+                        {!editingSections.narrative && (
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => startEditingSection('narrative')}
+                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                            title="Edit narrative summary"
                           >
-                            <Clock size={48} className="mx-auto text-slate-500 mb-4" />
-                            <p className="text-slate-400 text-lg mb-2">No timeline entries yet</p>
-                            <p className="text-slate-500 text-sm">Click "Add Entry" to create the first timeline entry</p>
-                          </motion.div>
+                            <Edit3 size={16} />
+                          </motion.button>
                         )}
                       </div>
                       
-                      <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-                    </div>
+                      {editingSections.narrative ? (
+                        <motion.div 
+                          className="space-y-4"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <textarea
+                            value={sectionData.narrative?.narrative_summary || editData.narrative_summary || ''}
+                            onChange={(e) => updateSectionField('narrative', 'narrative_summary', e.target.value)}
+                            rows={8}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                            placeholder="Enter the narrative summary for this case..."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => cancelEditingSection('narrative')}
+                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => saveSectionEdit('narrative')}
+                              disabled={isLoading}
+                              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
+                            >
+                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div 
+                          className="text-slate-300 leading-relaxed cursor-pointer hover:bg-slate-700/20 rounded-lg p-4 transition-colors"
+                          whileHover={{ scale: 1.01 }}
+                          transition={{ duration: 0.2 }}
+                          onClick={() => startEditingSection('narrative')}
+                        >
+                          {editData.narrative_summary || (
+                            <span className="text-slate-500 italic">Click to add narrative summary...</span>
+                          )}
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {/* Medications Tab */}
+                {activeTab === 'medications' && (
+                  <motion.div
+                    key="medications"
+                    ref={el => contentRefs.current.medications = el}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
+                  >
+                    {/* Medications List */}
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Pill size={20} className="text-green-400" />
+                        Current Medications
+                      </h3>
+                      
+                      {/* Existing Medications */}
+                      <div className="space-y-4 mb-6">
+                        <AnimatePresence>
+                          {(editData.medications || []).map((medication, index) => (
+                            <motion.div
+                              key={medication.id || index}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              className="bg-green-600/10 border border-green-600/20 rounded-lg p-4 group hover:bg-green-600/15 transition-colors"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h4 className="font-semibold text-green-300">{medication.name}</h4>
+                                    {medication.dosage && (
+                                      <span className="text-xs bg-green-600/20 text-green-300 px-2 py-1 rounded">
+                                        {medication.dosage}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="space-y-1 text-sm text-slate-300">
+                                    {medication.frequency && (
+                                      <div className="flex items-center gap-2">
+                                        <Clock size={14} className="text-green-400" />
+                                        <span>Frequency: {medication.frequency}</span>
+                                      </div>
+                                    )}
+                                    {medication.effect && (
+                                      <div className="flex items-center gap-2">
+                                        <Activity size={14} className="text-green-400" />
+                                        <span>Effect: {medication.effect}</span>
+                                      </div>
+                                    )}
+                                    {medication.dateAdded && (
+                                      <div className="flex items-center gap-2">
+                                        <Calendar size={14} className="text-green-400" />
+                                        <span>Added: {new Date(medication.dateAdded).toLocaleDateString()}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => removeMedication(medication.id)}
+                                  className="text-green-400 hover:text-green-200 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                                  title="Remove medication"
+                                >
+                                  <Trash2 size={16} />
+                                </motion.button>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                      
+                      {/* Add New Medication */}
+                      {!showMedicationForm ? (
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setShowMedicationForm(true)}
+                          className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-green-600/30 rounded-lg text-green-400 hover:border-green-600/50 hover:bg-green-600/5 transition-colors"
+                        >
+                          <Plus size={16} />
+                          Add New Medication
+                        </motion.button>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-slate-700/30 rounded-lg p-4 space-y-4"
+                        >
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Medication Name <span className="text-red-400">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={newMedication.name}
+                                onChange={(e) => setNewMedication(prev => ({ ...prev, name: e.target.value }))}
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                placeholder="Enter medication name"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-slate-300 mb-2">Dosage</label>
+                              <input
+                                type="text"
+                                value={newMedication.dosage}
+                                onChange={(e) => setNewMedication(prev => ({ ...prev, dosage: e.target.value }))}
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                placeholder="e.g., 50mg"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-slate-300 mb-2">Frequency</label>
+                              <input
+                                type="text"
+                                value={newMedication.frequency}
+                                onChange={(e) => setNewMedication(prev => ({ ...prev, frequency: e.target.value }))}
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                placeholder="e.g., Once daily"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-slate-300 mb-2">Effect/Notes</label>
+                              <input
+                                type="text"
+                                value={newMedication.effect}
+                                onChange={(e) => setNewMedication(prev => ({ ...prev, effect: e.target.value }))}
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                placeholder="e.g., Improved mood"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                setShowMedicationForm(false);
+                                setNewMedication({ name: '', dosage: '', frequency: '', effect: '' });
+                              }}
+                              className="px-4 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors"
+                            >
+                              Cancel
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={addMedication}
+                              disabled={!newMedication.name.trim()}
+                              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Plus size={16} />
+                              Add Medication
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      )}
+                      
+                      {(editData.medications || []).length === 0 && !showMedicationForm && (
+                        <p className="text-slate-500 italic text-center py-8">No medications documented yet</p>
+                      )}
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {/* Therapy & Insights Tab */}
+                {activeTab === 'therapy' && (
+                  <motion.div
+                    key="therapy"
+                    ref={el => contentRefs.current.therapy = el}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
+                  >
+                    {/* Therapeutic Highlights Section */}
+                    <motion.div 
+                      variants={cardVariants}
+                      animate={editingSections.therapeutic_highlights ? "edit" : "visible"}
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Brain size={20} className="text-purple-400" />
+                          Therapeutic Highlights
+                        </h3>
+                        {!editingSections.therapeutic_highlights && (
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => startEditingSection('therapeutic_highlights')}
+                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                            title="Edit therapeutic highlights"
+                          >
+                            <Edit3 size={16} />
+                          </motion.button>
+                        )}
+                      </div>
+                      
+                      {editingSections.therapeutic_highlights ? (
+                        <motion.div 
+                          className="space-y-4"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <textarea
+                            value={sectionData.therapeutic_highlights?.therapeutic_highlights || editData.therapeutic_highlights || ''}
+                            onChange={(e) => updateSectionField('therapeutic_highlights', 'therapeutic_highlights', e.target.value)}
+                            rows={10}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                            placeholder="Enter key therapeutic moments, insights, breakthroughs, or notes on therapy process..."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => cancelEditingSection('therapeutic_highlights')}
+                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => saveSectionEdit('therapeutic_highlights')}
+                              disabled={isLoading}
+                              className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                            >
+                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div 
+                          className="text-slate-300 leading-relaxed cursor-pointer hover:bg-slate-700/20 rounded-lg p-4 transition-colors min-h-[200px]"
+                          whileHover={{ scale: 1.01 }}
+                          transition={{ duration: 0.2 }}
+                          onClick={() => startEditingSection('therapeutic_highlights')}
+                        >
+                          {editData.therapeutic_highlights ? (
+                            <div className="whitespace-pre-wrap">{editData.therapeutic_highlights}</div>
+                          ) : (
+                            <span className="text-slate-500 italic">Click to add therapeutic highlights, key moments, insights, breakthroughs, or therapy process notes...</span>
+                          )}
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {/* Related Tab */}
+                {activeTab === 'related' && (
+                  <motion.div
+                    key="related"
+                    ref={el => contentRefs.current.related = el}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
+                  >
+                    {/* Connected Nodes */}
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Link2 size={20} className="text-cyan-400" />
+                        Connected Nodes
+                      </h3>
+                      
+                      {/* Topics */}
+                      <div className="mb-6">
+                        <h4 className="text-md font-medium text-slate-300 mb-3 flex items-center gap-2">
+                          <Brain size={16} className="text-blue-400" />
+                          Related Topics
+                        </h4>
+                        {connectedNodes.topics.length > 0 ? (
+                          <div className="space-y-2">
+                            {connectedNodes.topics.map((topic, index) => (
+                              <div key={index} className="flex items-center gap-3 p-3 bg-blue-600/10 border border-blue-600/20 rounded-lg">
+                                <Brain size={16} className="text-blue-400" />
+                                <span className="text-blue-300">{topic.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 italic text-sm">No connected topics</p>
+                        )}
+                      </div>
+
+                      {/* Literature */}
+                      <div className="mb-6">
+                        <h4 className="text-md font-medium text-slate-300 mb-3 flex items-center gap-2">
+                          <BookOpen size={16} className="text-purple-400" />
+                          Related Literature
+                        </h4>
+                        {connectedNodes.literature.length > 0 ? (
+                          <div className="space-y-2">
+                            {connectedNodes.literature.map((lit, index) => (
+                              <div key={index} className="flex items-center gap-3 p-3 bg-purple-600/10 border border-purple-600/20 rounded-lg">
+                                <BookOpen size={16} className="text-purple-400" />
+                                <span className="text-purple-300">{lit.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 italic text-sm">No connected literature</p>
+                        )}
+                      </div>
+
+                      {/* Other Cases */}
+                      <div>
+                        <h4 className="text-md font-medium text-slate-300 mb-3 flex items-center gap-2">
+                          <Users size={16} className="text-green-400" />
+                          Related Cases
+                        </h4>
+                        {connectedNodes.cases.length > 0 ? (
+                          <div className="space-y-2">
+                            {connectedNodes.cases.map((caseNode, index) => (
+                              <div key={index} className="flex items-center gap-3 p-3 bg-green-600/10 border border-green-600/20 rounded-lg">
+                                <Users size={16} className="text-green-400" />
+                                <span className="text-green-300">{caseNode.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 italic text-sm">No connected cases</p>
+                        )}
+                      </div>
+
+                      <div className="mt-6 p-4 bg-slate-700/20 rounded-lg border border-slate-600">
+                        <p className="text-slate-400 text-sm italic">
+                          Connected nodes will be automatically populated based on mind map relationships and connections created in the graph view.
+                        </p>
+                      </div>
+                    </motion.div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.div>
-
-            {isEditing && (
-              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-                <div className="text-sm text-gray-500">
-                  Changes will be auto-saved
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setEditData({ ...data });
-                    }}
-                    disabled={isLoading}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                  >
-                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {/* Delete Confirmation Modal */}
-            <AnimatePresence>
-              {showDeleteConfirm && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                  onClick={cancelDeleteEntry}
-                >
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-md mx-4 shadow-2xl"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <Trash2 size={24} className="text-red-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">Delete Timeline Entry</h3>
-                        <p className="text-sm text-slate-300">This action cannot be undone.</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-slate-300 text-sm mb-6">
-                      Are you sure you want to delete this timeline entry? All data will be permanently removed.
-                    </p>
-                    
-                    <div className="flex gap-3 justify-end">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={cancelDeleteEntry}
-                        className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm font-medium"
-                      >
-                        Cancel
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={confirmDeleteEntry}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
-                      >
-                        <Trash2 size={14} />
-                        Delete Entry
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </motion.div>
         </motion.div>
       )}
@@ -1499,10 +1080,4 @@ const CaseModal = ({
   );
 };
 
-export default React.memo(CaseModal, (prevProps, nextProps) => {
-  return (
-    prevProps.isOpen === nextProps.isOpen &&
-    prevProps.data?.id === nextProps.data?.id &&
-    prevProps.data?.updated_at === nextProps.data?.updated_at
-  );
-});
+export default CaseModal;
