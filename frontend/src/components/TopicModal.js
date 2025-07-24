@@ -771,12 +771,23 @@ const TopicModal = ({
                           <FileText size={20} className="text-indigo-400" />
                           Diagnostic Criteria
                         </h3>
-                        <button
-                          onClick={() => setExpandedCriteria(!expandedCriteria)}
-                          className="text-slate-400 hover:text-white transition-colors"
-                        >
-                          {expandedCriteria ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {!editingSections.diagnostic_criteria && (
+                            <button
+                              onClick={() => startEditingSection('diagnostic_criteria')}
+                              className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                              title="Edit diagnostic criteria"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setExpandedCriteria(!expandedCriteria)}
+                            className="text-slate-400 hover:text-white transition-colors"
+                          >
+                            {expandedCriteria ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                          </button>
+                        </div>
                       </div>
                       
                       <AnimatePresence>
@@ -788,14 +799,36 @@ const TopicModal = ({
                             transition={{ duration: 0.3 }}
                             className="overflow-hidden"
                           >
-                            {isEditing ? (
-                              <textarea
-                                value={Array.isArray(editData.diagnostic_criteria) ? editData.diagnostic_criteria.join('\n') : editData.diagnostic_criteria || ''}
-                                onChange={(e) => updateField('diagnostic_criteria', e.target.value.split('\n').filter(item => item.trim()))}
-                                rows={6}
-                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-                                placeholder="Enter diagnostic criteria (one per line)..."
-                              />
+                            {editingSections.diagnostic_criteria ? (
+                              <div className="space-y-4">
+                                <textarea
+                                  value={Array.isArray(sectionData.diagnostic_criteria?.diagnostic_criteria) 
+                                    ? sectionData.diagnostic_criteria.diagnostic_criteria.join('\n') 
+                                    : Array.isArray(editData.diagnostic_criteria) 
+                                      ? editData.diagnostic_criteria.join('\n') 
+                                      : editData.diagnostic_criteria || ''}
+                                  onChange={(e) => updateSectionField('diagnostic_criteria', 'diagnostic_criteria', e.target.value.split('\n').filter(item => item.trim()))}
+                                  rows={6}
+                                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                                  placeholder="Enter diagnostic criteria (one per line)..."
+                                />
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    onClick={() => cancelEditingSection('diagnostic_criteria')}
+                                    className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => saveSectionEdit('diagnostic_criteria')}
+                                    disabled={isLoading}
+                                    className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                                  >
+                                    {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                    Save
+                                  </button>
+                                </div>
+                              </div>
                             ) : (
                               <div className="space-y-2">
                                 {(editData.diagnostic_criteria || []).length > 0 ? (
