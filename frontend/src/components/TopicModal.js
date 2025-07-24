@@ -143,6 +143,7 @@ const TopicModal = ({
   
   // Form states for different tabs
   const [expandedCriteria, setExpandedCriteria] = useState(false);
+  const [newTags, setNewTags] = useState({}); // For managing new tag inputs
   const [newResource, setNewResource] = useState('');
   const [showResourceForm, setShowResourceForm] = useState(false);
 
