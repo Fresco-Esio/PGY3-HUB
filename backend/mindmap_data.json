@@ -315,6 +315,53 @@
       "source": "literature-1753269525678",
       "target": "topic-1753272410622",
       "label": ""
+    },
+    {
+      "id": "efb670b685b9f4143ab6af546a5b7afdb",
+      "source": "1753270126528",
+      "target": "1753272294792",
+      "sourceHandle": "1753270126528-bottom",
+      "targetHandle": "1753272294792-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e3789c2f2c96c482d8e9f0913fe512b54",
+      "source": "1753270126528",
+      "target": "1753272602329",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Topic-Case Connection"
+    },
+    {
+      "id": "ebaa267308bf542a0bb95b2e343989a70",
+      "source": "1753270126528",
+      "target": "1753269525678",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Topic-Literature Connection"
+    },
+    {
+      "id": "e32a5e76a258f4440984a522c895eaf82",
+      "source": "1753272303491",
+      "target": "1753270126528",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Task-Topic Connection"
+    },
+    {
+      "id": "e8994814e50c64663a8aefda67b7f43de",
+      "source": "1753272303491",
+      "target": "1753272602329",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Task-Case Connection"
+    },
+    {
+      "id": "ec8c66bb1875f4bb5b2516f3dce7302b3",
+      "source": "1753270126528",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
     }
   ]
 }
