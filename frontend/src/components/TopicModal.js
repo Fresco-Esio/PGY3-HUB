@@ -167,7 +167,7 @@ const TopicModal = ({
     { id: 'overview', label: 'Overview', icon: BookOpen },
     { id: 'concept', label: 'Concept', icon: Brain },
     { id: 'clinical', label: 'Clinical Associations', icon: Stethoscope },
-    { id: 'treatment', label: 'Treatment', icon: Pills },
+    { id: 'treatment', label: 'Treatment', icon: Pill },
     { id: 'connections', label: 'Connections', icon: Link2 }
   ];
 
