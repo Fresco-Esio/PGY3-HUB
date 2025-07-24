@@ -235,15 +235,21 @@ const TopicModal = ({
     
     setIsLoading(true);
     try {
+      const updatedData = {
+        ...editData,
+        last_updated: new Date().toISOString()
+      };
+      
       setMindMapData(prevData => {
         const updatedTopics = prevData.topics.map(topic =>
-          String(topic.id) === String(data?.id) ? { ...topic, ...editData } : topic
+          String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
         );
         const newData = { ...prevData, topics: updatedTopics };
         autoSaveMindMapData(newData);
         return newData;
       });
       
+      setEditData(updatedData);
       setIsEditing(false);
       addToast('Topic updated successfully', 'success');
     } catch (error) {
@@ -253,6 +259,45 @@ const TopicModal = ({
       setIsLoading(false);
     }
   }, [data?.id, editData, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
+  // Save current tab's scroll position before switching
+  const saveScrollPosition = useCallback((tabId) => {
+    const contentRef = contentRefs.current[tabId];
+    if (contentRef) {
+      setScrollPositions(prev => ({
+        ...prev,
+        [tabId]: contentRef.scrollTop
+      }));
+    }
+  }, []);
+
+  // Restore scroll position when switching to a tab
+  const restoreScrollPosition = useCallback((tabId) => {
+    setTimeout(() => {
+      const contentRef = contentRefs.current[tabId];
+      const savedPosition = scrollPositions[tabId];
+      if (contentRef && savedPosition) {
+        contentRef.scrollTop = savedPosition;
+      }
+    }, 100); // Small delay to ensure content is rendered
+  }, [scrollPositions]);
+
+  // Handle tab switching with scroll position preservation
+  const handleTabSwitch = useCallback((newTabId) => {
+    if (newTabId === activeTab || isTabTransitioning) return;
+    
+    // Save current tab's scroll position
+    saveScrollPosition(activeTab);
+    
+    setIsTabTransitioning(true);
+    setActiveTab(newTabId);
+    
+    setTimeout(() => {
+      setIsTabTransitioning(false);
+      // Restore new tab's scroll position
+      restoreScrollPosition(newTabId);
+    }, 300);
+  }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
   const handleDelete = useCallback(async () => {
     if (isLoading) return;
