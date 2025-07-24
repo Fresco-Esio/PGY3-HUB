@@ -131,6 +131,9 @@ const CaseModal = ({
   const [expandedTimelineEntry, setExpandedTimelineEntry] = useState(null);
   const [editingEntryId, setEditingEntryId] = useState(null);
   const [editingEntryData, setEditingEntryData] = useState({});
+  const [deletingEntryId, setDeletingEntryId] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const timelineScrollRef = useRef(null);
 
   useEffect(() => {
