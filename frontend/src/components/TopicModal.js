@@ -114,6 +114,36 @@ const contentVariants = {
   }
 };
 
+// Card animation variants for sections
+const cardVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut"
+    }
+  },
+  edit: { 
+    scale: 1.02,
+    boxShadow: "0 8px 25px rgba(59, 130, 246, 0.15)",
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  },
+  saved: {
+    scale: 1,
+    boxShadow: "0 4px 15px rgba(34, 197, 94, 0.15)",
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  }
+};
+
 const TopicModal = ({ 
   isOpen, 
   data, 
@@ -174,7 +204,7 @@ const TopicModal = ({
   useEffect(() => {
     if (isOpen && data && !hasInitialized) {
       setIsVisible(true);
-      setEditData({ 
+      const initialData = { 
         ...data,
         category: data.category || 'Other',
         definition: data.definition || '',
@@ -186,7 +216,8 @@ const TopicModal = ({
         flashcard_count: data.flashcard_count || 0,
         completed_flashcards: data.completed_flashcards || 0,
         last_updated: data.last_updated || new Date().toISOString()
-      });
+      };
+      setEditData(initialData);
       setHasInitialized(true);
       setIsAnimating(true);
       if (onAnimationStart) onAnimationStart();
@@ -198,27 +229,34 @@ const TopicModal = ({
     } else if (!isOpen && hasInitialized) {
       setHasInitialized(false);
       setScrollPositions({});
+      setEditingSections({});
+      setSectionData({});
     }
   }, [isOpen, data, hasInitialized, onAnimationStart, onAnimationEnd]);
 
-  // Separate effect for data updates when modal is already open
+  // Enhanced effect for instant feedback - updates editData immediately when data changes
   useEffect(() => {
-    if (isOpen && data && hasInitialized && !isLoading && !isTabTransitioning && !isAnimating) {
-      setEditData({ 
-        ...data,
-        category: data.category || 'Other',
-        definition: data.definition || '',
-        diagnostic_criteria: data.diagnostic_criteria || [],
-        comorbidities: data.comorbidities || [],
-        differential_diagnoses: data.differential_diagnoses || [],
-        medications: data.medications || [],
-        psychotherapy_modalities: data.psychotherapy_modalities || [],
-        flashcard_count: data.flashcard_count || 0,
-        completed_flashcards: data.completed_flashcards || 0,
-        last_updated: data.last_updated || new Date().toISOString()
+    if (isOpen && data && hasInitialized) {
+      // Update editData with latest data for instant feedback
+      setEditData(prevEditData => {
+        const updatedData = { 
+          ...prevEditData, // Keep any local edits
+          ...data, // Override with latest data from parent
+          category: data.category || prevEditData.category || 'Other',
+          definition: data.definition || prevEditData.definition || '',
+          diagnostic_criteria: data.diagnostic_criteria || prevEditData.diagnostic_criteria || [],
+          comorbidities: data.comorbidities || prevEditData.comorbidities || [],
+          differential_diagnoses: data.differential_diagnoses || prevEditData.differential_diagnoses || [],
+          medications: data.medications || prevEditData.medications || [],
+          psychotherapy_modalities: data.psychotherapy_modalities || prevEditData.psychotherapy_modalities || [],
+          flashcard_count: data.flashcard_count || prevEditData.flashcard_count || 0,
+          completed_flashcards: data.completed_flashcards || prevEditData.completed_flashcards || 0,
+          last_updated: data.last_updated || prevEditData.last_updated || new Date().toISOString()
+        };
+        return updatedData;
       });
     }
-  }, [data?.id, isOpen, hasInitialized, isLoading, isTabTransitioning, isAnimating]);
+  }, [data, isOpen, hasInitialized]);
 
   const progressPercentage = useMemo(() => {
     const total = editData.flashcard_count || 0;
@@ -305,32 +343,33 @@ const TopicModal = ({
     }, 300);
   }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
-  // Category change handler - updates node color in mind map and saves immediately
+  // Enhanced category change handler - fixes node color updates and category saving
   const handleCategoryChange = useCallback(async (newCategory) => {
-    // Update local edit data for immediate UI feedback
-    setEditData(prev => ({ ...prev, category: newCategory }));
+    console.log('Category changing to:', newCategory);
     
-    // Update node color in mind map immediately
+    // Update local edit data for immediate UI feedback
+    const updatedEditData = { ...editData, category: newCategory, last_updated: new Date().toISOString() };
+    setEditData(updatedEditData);
+    
+    // Update node color in mind map immediately and save
     setMindMapData(prevData => {
+      const newColor = categoryColors[newCategory]?.primary || categoryColors.Other.primary;
       const updatedTopics = prevData.topics.map(topic =>
         String(topic.id) === String(data?.id) 
-          ? { ...topic, category: newCategory, color: categoryColors[newCategory]?.primary || categoryColors.Other.primary }
+          ? { ...topic, category: newCategory, color: newColor, last_updated: new Date().toISOString() }
           : topic
       );
       const newData = { ...prevData, topics: updatedTopics };
+      
       // Auto-save the changes to backend immediately
+      console.log('Saving category change to backend:', newCategory, newColor);
       autoSaveMindMapData(newData);
+      
       return newData;
     });
     
-    // Update section data as well
-    setSectionData(prev => ({
-      ...prev,
-      category: { category: newCategory }
-    }));
-    
-    addToast('Category updated successfully', 'success');
-  }, [data?.id, setMindMapData, categoryColors, autoSaveMindMapData, addToast]);
+    addToast(`Category updated to ${newCategory}`, 'success');
+  }, [data?.id, editData, setMindMapData, categoryColors, autoSaveMindMapData, addToast]);
 
   // Get connected nodes for Connections tab
   const connectedNodes = useMemo(() => {
@@ -447,12 +486,12 @@ const TopicModal = ({
     if (!currentTags.includes(tag.trim())) {
       updateSectionField(sectionId, field, [...currentTags, tag.trim()]);
     }
-  }, [sectionData, editData]);
+  }, [sectionData, editData, updateSectionField]);
 
   const removeTagFromSection = useCallback((sectionId, field, tagToRemove) => {
     const currentTags = sectionData[sectionId]?.[field] || editData[field] || [];
     updateSectionField(sectionId, field, currentTags.filter(tag => tag !== tagToRemove));
-  }, [sectionData, editData]);
+  }, [sectionData, editData, updateSectionField]);
 
   // Helper functions for new tag input management
   const setNewTag = useCallback((sectionId, value) => {
@@ -470,6 +509,61 @@ const TopicModal = ({
       return newTags;
     });
   }, []);
+
+  // Enhanced direct list management functions
+  const addItemDirectly = useCallback((field, item) => {
+    if (!item.trim()) return;
+    
+    const currentItems = editData[field] || [];
+    if (!currentItems.includes(item.trim())) {
+      const updatedItems = [...currentItems, item.trim()];
+      const updatedData = { 
+        ...editData, 
+        [field]: updatedItems, 
+        last_updated: new Date().toISOString() 
+      };
+      
+      // Update local state immediately
+      setEditData(updatedData);
+      
+      // Update mind map data and save
+      setMindMapData(prevData => {
+        const updatedTopics = prevData.topics.map(topic =>
+          String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
+        );
+        const newData = { ...prevData, topics: updatedTopics };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      addToast(`${field} updated successfully`, 'success');
+    }
+  }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
+
+  const removeItemDirectly = useCallback((field, itemToRemove) => {
+    const currentItems = editData[field] || [];
+    const updatedItems = currentItems.filter(item => item !== itemToRemove);
+    const updatedData = { 
+      ...editData, 
+      [field]: updatedItems, 
+      last_updated: new Date().toISOString() 
+    };
+    
+    // Update local state immediately
+    setEditData(updatedData);
+    
+    // Update mind map data and save
+    setMindMapData(prevData => {
+      const updatedTopics = prevData.topics.map(topic =>
+        String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
+      );
+      const newData = { ...prevData, topics: updatedTopics };
+      autoSaveMindMapData(newData);
+      return newData;
+    });
+    
+    addToast(`${field} updated successfully`, 'success');
+  }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
 
   if (!isOpen) return null;
 
@@ -586,17 +680,23 @@ const TopicModal = ({
                     className="h-full overflow-y-auto p-6 space-y-6"
                   >
                     {/* Title Section */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                    <motion.div 
+                      variants={cardVariants}
+                      animate={editingSections.title ? "edit" : "visible"}
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-white">Title</h3>
                         {!editingSections.title && (
-                          <button
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => startEditingSection('title')}
                             className="text-slate-400 hover:text-white transition-colors p-1 rounded"
                             title="Edit title"
                           >
                             <Edit3 size={16} />
-                          </button>
+                          </motion.button>
                         )}
                       </div>
                       
@@ -644,26 +744,40 @@ const TopicModal = ({
                           {editData.title || 'Untitled Topic'}
                         </motion.h1>
                       )}
-                    </div>
+                    </motion.div>
 
                     {/* Category and Progress Row */}
                     <div className="grid md:grid-cols-2 gap-6">
-                      {/* Category Selection */}
-                      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      {/* Category Selection - Direct Access (No Edit Button) */}
+                      <motion.div 
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                      >
                         <label className="block text-sm font-medium text-slate-300 mb-3">Category</label>
-                        <select
+                        <motion.select
                           value={editData.category || 'Other'}
                           onChange={(e) => handleCategoryChange(e.target.value)}
-                          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:bg-slate-650 transition-colors"
+                          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:bg-slate-650 transition-colors cursor-pointer"
+                          whileFocus={{ scale: 1.02 }}
                         >
                           {Object.keys(categoryColors).map(category => (
                             <option key={category} value={category}>{category}</option>
                           ))}
-                        </select>
-                      </div>
+                        </motion.select>
+                        <p className="text-xs text-slate-400 mt-2">
+                          Changes are saved automatically and will update the node color
+                        </p>
+                      </motion.div>
 
                       {/* Flashcard Progress */}
-                      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <motion.div 
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                      >
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-sm font-medium text-slate-300">Flashcard Progress</span>
                           <span className="text-sm text-slate-400">
@@ -682,7 +796,7 @@ const TopicModal = ({
                           <span className="text-lg font-bold text-white">{progressPercentage}%</span>
                           <span className="text-sm text-slate-400 ml-1">complete</span>
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
 
                     {/* Last Updated */}
@@ -704,20 +818,26 @@ const TopicModal = ({
                     className="h-full overflow-y-auto p-6 space-y-6"
                   >
                     {/* Definition Section */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                    <motion.div 
+                      variants={cardVariants}
+                      animate={editingSections.definition ? "edit" : "visible"}
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                           <Brain size={20} className="text-purple-400" />
                           Definition
                         </h3>
                         {!editingSections.definition && (
-                          <button
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => startEditingSection('definition')}
                             className="text-slate-400 hover:text-white transition-colors p-1 rounded"
                             title="Edit definition"
                           >
                             <Edit3 size={16} />
-                          </button>
+                          </motion.button>
                         )}
                       </div>
                       
@@ -765,10 +885,14 @@ const TopicModal = ({
                           {editData.definition || <span className="text-slate-500 italic">No definition provided</span>}
                         </motion.div>
                       )}
-                    </div>
+                    </motion.div>
 
                     {/* Diagnostic Criteria Section */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                    <motion.div 
+                      variants={cardVariants}
+                      animate={editingSections.diagnostic_criteria ? "edit" : "visible"}
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                           <FileText size={20} className="text-indigo-400" />
@@ -776,13 +900,15 @@ const TopicModal = ({
                         </h3>
                         <div className="flex items-center gap-2">
                           {!editingSections.diagnostic_criteria && (
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
                               onClick={() => startEditingSection('diagnostic_criteria')}
                               className="text-slate-400 hover:text-white transition-colors p-1 rounded"
                               title="Edit diagnostic criteria"
                             >
                               <Edit3 size={16} />
-                            </button>
+                            </motion.button>
                           )}
                           <button
                             onClick={() => setExpandedCriteria(!expandedCriteria)}
@@ -849,7 +975,7 @@ const TopicModal = ({
                           </motion.div>
                         )}
                       </AnimatePresence>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 )}
 
@@ -865,7 +991,12 @@ const TopicModal = ({
                     className="h-full overflow-y-auto p-6 space-y-6"
                   >
                     {/* Comorbidities Section */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         <Users size={20} className="text-amber-400" />
                         Comorbidities
@@ -873,37 +1004,28 @@ const TopicModal = ({
                       
                       {/* Current comorbidities list */}
                       <div className="space-y-2 mb-4">
-                        {(editData.comorbidities || []).map((comorbidity, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            className="flex items-center justify-between p-3 bg-amber-600/10 rounded-lg border border-amber-600/20 group hover:bg-amber-600/15 transition-colors"
-                          >
-                            <span className="text-amber-300">{comorbidity}</span>
-                            <button
-                              onClick={() => {
-                                const newComorbidities = editData.comorbidities.filter(item => item !== comorbidity);
-                                const updatedData = { ...editData, comorbidities: newComorbidities, last_updated: new Date().toISOString() };
-                                setEditData(updatedData);
-                                setMindMapData(prevData => {
-                                  const updatedTopics = prevData.topics.map(topic =>
-                                    String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
-                                  );
-                                  const newData = { ...prevData, topics: updatedTopics };
-                                  autoSaveMindMapData(newData);
-                                  return newData;
-                                });
-                                addToast('Comorbidity removed', 'success');
-                              }}
-                              className="text-amber-400 hover:text-amber-200 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
-                              title="Remove comorbidity"
+                        <AnimatePresence>
+                          {(editData.comorbidities || []).map((comorbidity, index) => (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              className="flex items-center justify-between p-3 bg-amber-600/10 rounded-lg border border-amber-600/20 group hover:bg-amber-600/15 transition-colors"
                             >
-                              <X size={16} />
-                            </button>
-                          </motion.div>
-                        ))}
+                              <span className="text-amber-300">{comorbidity}</span>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => removeItemDirectly('comorbidities', comorbidity)}
+                                className="text-amber-400 hover:text-amber-200 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                                title="Remove comorbidity"
+                              >
+                                <X size={16} />
+                              </motion.button>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
                       </div>
                       
                       {/* Add new comorbidity */}
@@ -916,19 +1038,8 @@ const TopicModal = ({
                           className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                           onKeyPress={(e) => {
                             if (e.key === 'Enter' && getNewTag('comorbidities').trim()) {
-                              const newComorbidities = [...(editData.comorbidities || []), getNewTag('comorbidities').trim()];
-                              const updatedData = { ...editData, comorbidities: newComorbidities, last_updated: new Date().toISOString() };
-                              setEditData(updatedData);
-                              setMindMapData(prevData => {
-                                const updatedTopics = prevData.topics.map(topic =>
-                                  String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
-                                );
-                                const newData = { ...prevData, topics: updatedTopics };
-                                autoSaveMindMapData(newData);
-                                return newData;
-                              });
+                              addItemDirectly('comorbidities', getNewTag('comorbidities'));
                               clearNewTag('comorbidities');
-                              addToast('Comorbidity added', 'success');
                             }
                           }}
                         />
@@ -937,19 +1048,8 @@ const TopicModal = ({
                           whileTap={{ scale: 0.98 }}
                           onClick={() => {
                             if (getNewTag('comorbidities').trim()) {
-                              const newComorbidities = [...(editData.comorbidities || []), getNewTag('comorbidities').trim()];
-                              const updatedData = { ...editData, comorbidities: newComorbidities, last_updated: new Date().toISOString() };
-                              setEditData(updatedData);
-                              setMindMapData(prevData => {
-                                const updatedTopics = prevData.topics.map(topic =>
-                                  String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
-                                );
-                                const newData = { ...prevData, topics: updatedTopics };
-                                autoSaveMindMapData(newData);
-                                return newData;
-                              });
+                              addItemDirectly('comorbidities', getNewTag('comorbidities'));
                               clearNewTag('comorbidities');
-                              addToast('Comorbidity added', 'success');
                             }
                           }}
                           className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2"
@@ -962,10 +1062,15 @@ const TopicModal = ({
                       {(editData.comorbidities || []).length === 0 && (
                         <p className="text-slate-500 italic text-center py-4">No comorbidities added yet</p>
                       )}
-                    </div>
+                    </motion.div>
 
                     {/* Differential Diagnoses Section */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         <Activity size={20} className="text-cyan-400" />
                         Differential Diagnoses
@@ -973,37 +1078,28 @@ const TopicModal = ({
                       
                       {/* Current differential diagnoses list */}
                       <div className="space-y-2 mb-4">
-                        {(editData.differential_diagnoses || []).map((diagnosis, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            className="flex items-center justify-between p-3 bg-cyan-600/10 rounded-lg border border-cyan-600/20 group hover:bg-cyan-600/15 transition-colors"
-                          >
-                            <span className="text-cyan-300">{diagnosis}</span>
-                            <button
-                              onClick={() => {
-                                const newDiagnoses = editData.differential_diagnoses.filter(item => item !== diagnosis);
-                                const updatedData = { ...editData, differential_diagnoses: newDiagnoses, last_updated: new Date().toISOString() };
-                                setEditData(updatedData);
-                                setMindMapData(prevData => {
-                                  const updatedTopics = prevData.topics.map(topic =>
-                                    String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
-                                  );
-                                  const newData = { ...prevData, topics: updatedTopics };
-                                  autoSaveMindMapData(newData);
-                                  return newData;
-                                });
-                                addToast('Differential diagnosis removed', 'success');
-                              }}
-                              className="text-cyan-400 hover:text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
-                              title="Remove differential diagnosis"
+                        <AnimatePresence>
+                          {(editData.differential_diagnoses || []).map((diagnosis, index) => (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              className="flex items-center justify-between p-3 bg-cyan-600/10 rounded-lg border border-cyan-600/20 group hover:bg-cyan-600/15 transition-colors"
                             >
-                              <X size={16} />
-                            </button>
-                          </motion.div>
-                        ))}
+                              <span className="text-cyan-300">{diagnosis}</span>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => removeItemDirectly('differential_diagnoses', diagnosis)}
+                                className="text-cyan-400 hover:text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                                title="Remove differential diagnosis"
+                              >
+                                <X size={16} />
+                              </motion.button>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
                       </div>
                       
                       {/* Add new differential diagnosis */}
@@ -1016,19 +1112,8 @@ const TopicModal = ({
                           className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors"
                           onKeyPress={(e) => {
                             if (e.key === 'Enter' && getNewTag('differential_diagnoses').trim()) {
-                              const newDiagnoses = [...(editData.differential_diagnoses || []), getNewTag('differential_diagnoses').trim()];
-                              const updatedData = { ...editData, differential_diagnoses: newDiagnoses, last_updated: new Date().toISOString() };
-                              setEditData(updatedData);
-                              setMindMapData(prevData => {
-                                const updatedTopics = prevData.topics.map(topic =>
-                                  String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
-                                );
-                                const newData = { ...prevData, topics: updatedTopics };
-                                autoSaveMindMapData(newData);
-                                return newData;
-                              });
+                              addItemDirectly('differential_diagnoses', getNewTag('differential_diagnoses'));
                               clearNewTag('differential_diagnoses');
-                              addToast('Differential diagnosis added', 'success');
                             }
                           }}
                         />
@@ -1037,19 +1122,8 @@ const TopicModal = ({
                           whileTap={{ scale: 0.98 }}
                           onClick={() => {
                             if (getNewTag('differential_diagnoses').trim()) {
-                              const newDiagnoses = [...(editData.differential_diagnoses || []), getNewTag('differential_diagnoses').trim()];
-                              const updatedData = { ...editData, differential_diagnoses: newDiagnoses, last_updated: new Date().toISOString() };
-                              setEditData(updatedData);
-                              setMindMapData(prevData => {
-                                const updatedTopics = prevData.topics.map(topic =>
-                                  String(topic.id) === String(data?.id) ? { ...topic, ...updatedData } : topic
-                                );
-                                const newData = { ...prevData, topics: updatedTopics };
-                                autoSaveMindMapData(newData);
-                                return newData;
-                              });
+                              addItemDirectly('differential_diagnoses', getNewTag('differential_diagnoses'));
                               clearNewTag('differential_diagnoses');
-                              addToast('Differential diagnosis added', 'success');
                             }
                           }}
                           className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors flex items-center gap-2"
@@ -1062,7 +1136,7 @@ const TopicModal = ({
                       {(editData.differential_diagnoses || []).length === 0 && (
                         <p className="text-slate-500 italic text-center py-4">No differential diagnoses added yet</p>
                       )}
-                    </div>
+                    </motion.div>
                   </motion.div>
                 )}
 
@@ -1078,138 +1152,100 @@ const TopicModal = ({
                     className="h-full overflow-y-auto p-6 space-y-6"
                   >
                     {/* Medications Section */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <Pill size={20} className="text-green-400" />
-                          Medications
-                        </h3>
-                        {!editingSections.medications && (
-                          <button
-                            onClick={() => startEditingSection('medications')}
-                            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
-                            title="Edit medications"
-                          >
-                            <Edit3 size={16} />
-                          </button>
-                        )}
-                      </div>
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Pill size={20} className="text-green-400" />
+                        Medications
+                      </h3>
                       
-                      {editingSections.medications ? (
-                        <motion.div 
-                          className="space-y-4"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {/* Add new medication */}
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={getNewTag('medications')}
-                              onChange={(e) => setNewTag('medications', e.target.value)}
-                              placeholder="Add medication..."
-                              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500"
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  addTagToSection('medications', 'medications', getNewTag('medications'));
-                                  clearNewTag('medications');
-                                }
-                              }}
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => {
-                                addTagToSection('medications', 'medications', getNewTag('medications'));
-                                clearNewTag('medications');
-                              }}
-                              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                            >
-                              Add
-                            </motion.button>
-                          </div>
-                          
-                          {/* Current medications */}
-                          <div className="flex flex-wrap gap-2">
-                            {(sectionData.medications?.medications || editData.medications || []).map((medication, index) => (
-                              <motion.span
-                                key={index}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className="inline-flex items-center gap-2 px-3 py-1 bg-green-600/20 text-green-300 rounded-full text-sm border border-green-600/30"
-                              >
-                                {medication}
-                                <button
-                                  onClick={() => removeTagFromSection('medications', 'medications', medication)}
-                                  className="text-green-400 hover:text-green-200"
-                                >
-                                  <X size={14} />
-                                </button>
-                              </motion.span>
-                            ))}
-                          </div>
-                          
-                          <div className="flex justify-end gap-2">
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => cancelEditingSection('medications')}
-                              className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
-                            >
-                              Cancel
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => saveSectionEdit('medications')}
-                              disabled={isLoading}
-                              className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center gap-2"
-                            >
-                              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                              Save
-                            </motion.button>
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div 
-                          className="flex flex-wrap gap-2"
-                          whileHover={{ scale: 1.01 }}
-                          transition={{ duration: 0.2 }}
-                        >
+                      {/* Current medications list */}
+                      <div className="space-y-2 mb-4">
+                        <AnimatePresence>
                           {(editData.medications || []).map((medication, index) => (
-                            <motion.span
+                            <motion.div
                               key={index}
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="inline-flex items-center gap-2 px-3 py-1 bg-green-600/20 text-green-300 rounded-full text-sm border border-green-600/30"
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              className="flex items-center justify-between p-3 bg-green-600/10 rounded-lg border border-green-600/20 group hover:bg-green-600/15 transition-colors"
                             >
-                              {medication}
-                            </motion.span>
+                              <span className="text-green-300">{medication}</span>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => removeItemDirectly('medications', medication)}
+                                className="text-green-400 hover:text-green-200 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                                title="Remove medication"
+                              >
+                                <X size={16} />
+                              </motion.button>
+                            </motion.div>
                           ))}
-                          {(editData.medications || []).length === 0 && (
-                            <span className="text-slate-500 italic">No medications added</span>
-                          )}
-                        </motion.div>
+                        </AnimatePresence>
+                      </div>
+                      
+                      {/* Add new medication */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={getNewTag('medications')}
+                          onChange={(e) => setNewTag('medications', e.target.value)}
+                          placeholder="Add medication..."
+                          className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && getNewTag('medications').trim()) {
+                              addItemDirectly('medications', getNewTag('medications'));
+                              clearNewTag('medications');
+                            }
+                          }}
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            if (getNewTag('medications').trim()) {
+                              addItemDirectly('medications', getNewTag('medications'));
+                              clearNewTag('medications');
+                            }
+                          }}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                        >
+                          <Plus size={16} />
+                          Add
+                        </motion.button>
+                      </div>
+                      
+                      {(editData.medications || []).length === 0 && (
+                        <p className="text-slate-500 italic text-center py-4">No medications added yet</p>
                       )}
-                    </div>
+                    </motion.div>
 
                     {/* Psychotherapy Modalities Section */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                    <motion.div 
+                      variants={cardVariants}
+                      animate={editingSections.psychotherapy_modalities ? "edit" : "visible"}
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                           <Brain size={20} className="text-purple-400" />
                           Psychotherapy Modalities
                         </h3>
                         {!editingSections.psychotherapy_modalities && (
-                          <button
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => startEditingSection('psychotherapy_modalities')}
                             className="text-slate-400 hover:text-white transition-colors p-1 rounded"
                             title="Edit psychotherapy modalities"
                           >
                             <Edit3 size={16} />
-                          </button>
+                          </motion.button>
                         )}
                       </div>
                       
@@ -1248,16 +1284,16 @@ const TopicModal = ({
                           {(editData.psychotherapy_modalities || []).length > 0 ? (
                             editData.psychotherapy_modalities.map((modality, index) => (
                               <div key={index} className="flex items-center gap-3">
-                                <div className="w-2 h-2 bg-purple-400 rounded-full" />
+                                <span className="text-purple-400 font-medium">•</span>
                                 <span className="text-slate-300">{modality}</span>
                               </div>
                             ))
                           ) : (
-                            <span className="text-slate-500 italic">No psychotherapy modalities provided</span>
+                            <span className="text-slate-500 italic">No psychotherapy modalities added</span>
                           )}
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   </motion.div>
                 )}
 
@@ -1272,58 +1308,24 @@ const TopicModal = ({
                     transition={{ duration: 0.3 }}
                     className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    {/* Connected Cases */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                    <motion.div 
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
+                    >
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <Users size={20} className="text-pink-400" />
-                        Connected Cases
+                        <Link2 size={20} className="text-blue-400" />
+                        Connected Nodes
                       </h3>
-                      {connectedNodes.cases.length > 0 ? (
-                        <div className="space-y-3">
-                          {connectedNodes.cases.map((caseNode, index) => (
-                            <div key={index} className="p-3 bg-pink-600/10 rounded-lg border border-pink-600/20">
-                              <div className="font-medium text-pink-300">{caseNode.title}</div>
-                              <div className="text-sm text-slate-400">{caseNode.description}</div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-slate-500">
-                          <Users size={48} className="mx-auto mb-3 text-slate-600" />
-                          <p>No connected cases</p>
-                          <p className="text-sm mt-1">Connect this topic to patient cases in the mind map</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Connected Literature */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <BookOpen size={20} className="text-blue-400" />
-                        Connected Literature
-                      </h3>
-                      {connectedNodes.literature.length > 0 ? (
-                        <div className="space-y-3">
-                          {connectedNodes.literature.map((litNode, index) => (
-                            <div key={index} className="p-3 bg-blue-600/10 rounded-lg border border-blue-600/20">
-                              <div className="font-medium text-blue-300">{litNode.title}</div>
-                              <div className="text-sm text-slate-400">{litNode.authors}</div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-slate-500">
-                          <BookOpen size={48} className="mx-auto mb-3 text-slate-600" />
-                          <p>No connected literature</p>
-                          <p className="text-sm mt-1">Connect this topic to literature in the mind map</p>
-                        </div>
-                      )}
-                    </div>
+                      <p className="text-slate-400 text-center py-8">
+                        This section will show nodes connected to this topic in the mind map.
+                      </p>
+                    </motion.div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.div>
-
           </motion.div>
         </motion.div>
       )}
@@ -1331,10 +1333,4 @@ const TopicModal = ({
   );
 };
 
-export default React.memo(TopicModal, (prevProps, nextProps) => {
-  return (
-    prevProps.isOpen === nextProps.isOpen &&
-    prevProps.data?.id === nextProps.data?.id &&
-    prevProps.data?.updated_at === nextProps.data?.updated_at
-  );
-});
+export default TopicModal;
