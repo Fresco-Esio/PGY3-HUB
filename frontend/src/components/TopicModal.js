@@ -592,7 +592,12 @@ const TopicModal = ({
                       </div>
                       
                       {editingSections.title ? (
-                        <div className="space-y-4">
+                        <motion.div 
+                          className="space-y-4"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
                           <input
                             type="text"
                             value={sectionData.title?.title || editData.title || ''}
@@ -601,13 +606,17 @@ const TopicModal = ({
                             placeholder="Topic title..."
                           />
                           <div className="flex justify-end gap-2">
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => cancelEditingSection('title')}
                               className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
                             >
                               Cancel
-                            </button>
+                            </motion.button>
                             <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => saveSectionEdit('title')}
                               disabled={isLoading}
                               className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
@@ -616,9 +625,15 @@ const TopicModal = ({
                               Save
                             </motion.button>
                           </div>
-                        </div>
+                        </motion.div>
                       ) : (
-                        <h1 className="text-2xl font-bold text-white">{editData.title || 'Untitled Topic'}</h1>
+                        <motion.h1 
+                          className="text-2xl font-bold text-white"
+                          whileHover={{ scale: 1.01 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {editData.title || 'Untitled Topic'}
+                        </motion.h1>
                       )}
                     </div>
 
