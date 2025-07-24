@@ -305,8 +305,8 @@ const TopicModal = ({
     }, 300);
   }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
-  // Category change handler - updates node color in mind map
-  const handleCategoryChange = useCallback((newCategory) => {
+  // Category change handler - updates node color in mind map and saves immediately
+  const handleCategoryChange = useCallback(async (newCategory) => {
     // Update local edit data for immediate UI feedback
     setEditData(prev => ({ ...prev, category: newCategory }));
     
@@ -318,10 +318,19 @@ const TopicModal = ({
           : topic
       );
       const newData = { ...prevData, topics: updatedTopics };
-      // Don't auto-save here, wait for manual save
+      // Auto-save the changes to backend immediately
+      autoSaveMindMapData(newData);
       return newData;
     });
-  }, [data?.id, setMindMapData, categoryColors]);
+    
+    // Update section data as well
+    setSectionData(prev => ({
+      ...prev,
+      category: { category: newCategory }
+    }));
+    
+    addToast('Category updated successfully', 'success');
+  }, [data?.id, setMindMapData, categoryColors, autoSaveMindMapData, addToast]);
 
   // Get connected nodes for Connections tab
   const connectedNodes = useMemo(() => {
