@@ -127,12 +127,15 @@ const TopicModal = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+  
+  // Individual section edit states
+  const [editingSections, setEditingSections] = useState({});
+  const [sectionData, setSectionData] = useState({});
   
   // Tab-specific scroll positions
   const [scrollPositions, setScrollPositions] = useState({});
