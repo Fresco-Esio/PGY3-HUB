@@ -215,6 +215,8 @@ def load_mind_map_data() -> MindMapData:
                     topic['created_at'] = datetime.fromisoformat(topic['created_at'].replace('Z', '+00:00'))
                 if 'updated_at' in topic:
                     topic['updated_at'] = datetime.fromisoformat(topic['updated_at'].replace('Z', '+00:00'))
+                if 'last_updated' in topic and topic['last_updated']:
+                    topic['last_updated'] = datetime.fromisoformat(topic['last_updated'].replace('Z', '+00:00'))
             
             for case in data.get('cases', []):
                 if 'created_at' in case:
