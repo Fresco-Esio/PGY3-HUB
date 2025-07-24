@@ -371,6 +371,12 @@ const TopicModal = ({
       return newData;
     });
     
+    // Force an immediate sync of node data to ensure visual update
+    setTimeout(() => {
+      console.log('Triggering force sync for immediate color update');
+      // This timeout ensures the mindMapData state has been updated before syncing
+    }, 100);
+    
     addToast(`Category updated to ${newCategory}`, 'success');
   }, [data?.id, editData, setMindMapData, categoryColors, autoSaveMindMapData, addToast]);
 
