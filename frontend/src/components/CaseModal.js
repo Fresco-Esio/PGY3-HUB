@@ -1291,25 +1291,52 @@ const CaseModal = ({
                                               </div>
                                               
                                               {/* Action Buttons - These must always be visible */}
-                                              <div className="flex justify-end gap-2 pt-2 pb-1">
-                                                <motion.button
-                                                  whileHover={{ scale: 1.02 }}
-                                                  whileTap={{ scale: 0.98 }}
-                                                  onClick={cancelEditingEntry}
-                                                  className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm font-medium"
-                                                >
-                                                  Cancel
-                                                </motion.button>
-                                                <motion.button
-                                                  whileHover={{ scale: 1.02 }}
-                                                  whileTap={{ scale: 0.98 }}
-                                                  onClick={saveEditingEntry}
-                                                  disabled={!editingEntryData.content?.trim()}
-                                                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
-                                                >
-                                                  <Save size={14} />
-                                                  Save
-                                                </motion.button>
+                                              <div className="flex justify-between items-center pt-2 pb-1">
+                                                {/* Delete button on the left */}
+                                                {!editingEntryData.id?.toString().startsWith('new-') && (
+                                                  <motion.button
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={() => initiateDeleteEntry(entry.id)}
+                                                    className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
+                                                    title="Delete this timeline entry"
+                                                  >
+                                                    <Trash2 size={14} />
+                                                    Delete
+                                                  </motion.button>
+                                                )}
+                                                
+                                                {/* Save/Cancel buttons on the right */}
+                                                <div className="flex gap-2">
+                                                  <motion.button
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={cancelEditingEntry}
+                                                    className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors text-sm font-medium"
+                                                  >
+                                                    Cancel
+                                                  </motion.button>
+                                                  <motion.button
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={saveEditingEntry}
+                                                    disabled={!hasUnsavedChanges || !editingEntryData.content?.trim()}
+                                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
+                                                    title={hasUnsavedChanges ? "Save changes" : "No changes to save"}
+                                                  >
+                                                    {hasUnsavedChanges ? (
+                                                      <>
+                                                        <Save size={14} />
+                                                        Save Changes
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <Check size={14} />
+                                                        Saved
+                                                      </>
+                                                    )}
+                                                  </motion.button>
+                                                </div>
                                               </div>
                                             </div>
                                           </div>
