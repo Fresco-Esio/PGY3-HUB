@@ -2068,16 +2068,18 @@ const handleLiteratureClick = useCallback((literatureData) => {
   setTimeout(() => setIsAnimating(false), 700); // 600ms modal animation + 100ms buffer
 }, []);
 
-// Auto-sync node titles with modal form data
-const syncNodeTitles = useCallback(() => {
+// Enhanced node sync function that updates titles, colors, and other properties
+const syncNodeData = useCallback(() => {
   setNodes(currentNodes => {
     return currentNodes.map(node => {
       const nodeType = node.id.split('-')[0];
       const nodeId = node.id.split('-')[1];
       
       let newLabel = node.data.label;
+      let newColor = node.data.color;
+      let needsUpdate = false;
       
-      // Find the corresponding data item and sync title
+      // Find the corresponding data item and sync properties
       if (nodeType === 'case') {
         const caseData = mindMapData.cases?.find(c => c.id === nodeId);
         if (caseData) {
@@ -2087,6 +2089,7 @@ const syncNodeTitles = useCallback(() => {
         const topicData = mindMapData.topics?.find(t => t.id === nodeId);
         if (topicData) {
           newLabel = topicData.title || 'Untitled Topic';
+          newColor = topicData.color || '#3B82F6';
         }
       } else if (nodeType === 'task') {
         const taskData = mindMapData.tasks?.find(t => t.id === nodeId);
@@ -2100,14 +2103,24 @@ const syncNodeTitles = useCallback(() => {
         }
       }
       
-      // Only update if the label actually changed
-      if (newLabel !== node.data.label) {
+      // Check if any property needs updating
+      if (newLabel !== node.data.label || newColor !== node.data.color) {
+        needsUpdate = true;
+      }
+      
+      // Only update if something actually changed
+      if (needsUpdate) {
         return {
           ...node,
           data: {
             ...node.data,
-            label: newLabel
-          }
+            label: newLabel,
+            color: newColor
+          },
+          style: nodeType === 'topic' ? {
+            ...node.style,
+            backgroundColor: newColor
+          } : node.style
         };
       }
       
