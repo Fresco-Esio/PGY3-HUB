@@ -256,7 +256,6 @@ const TopicModal = ({
       });
       
       setEditData(updatedData);
-      setIsEditing(false);
       addToast('Topic updated successfully', 'success');
     } catch (error) {
       console.error('Error saving topic:', error);
