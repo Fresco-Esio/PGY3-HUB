@@ -927,7 +927,7 @@ const TopicModal = ({
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <Pill size={20} className="text-green-400" />
+                          <Pills size={20} className="text-green-400" />
                           Medications
                         </h3>
                         {isEditing && (
