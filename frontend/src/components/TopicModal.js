@@ -559,384 +559,471 @@ const TopicModal = ({
             {/* Tab Navigation */}
             <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-600">
               <nav className="flex flex-wrap gap-2 px-6 py-4">
-                {[
-                  { key: 'overview', label: 'Overview', icon: BookOpen },
-                  { key: 'progress', label: 'Progress', icon: TrendingUp },
-                  { key: 'resources', label: 'Resources', icon: FileText },
-                  { key: 'insights', label: 'Insights', icon: Lightbulb },
-                  { key: 'connections', label: 'Connections', icon: Link2 }
-                ].map(({ key, label, icon: Icon }) => (
+                {tabs.map(({ id, label, icon: Icon }) => (
                   <motion.button
-                    key={key}
-                    onClick={() => {
-                      if (isTabTransitioning) return;
-                      setIsTabTransitioning(true);
-                      setActiveTab(key);
-                      setTimeout(() => setIsTabTransitioning(false), 300);
-                    }}
+                    key={id}
+                    onClick={() => handleTabSwitch(id)}
                     className={`relative flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
-                      activeTab === key
+                      activeTab === id
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/25'
                         : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-md'
                     }`}
-                    whileHover={{ scale: activeTab === key ? 1 : 1.02 }}
+                    whileHover={{ scale: activeTab === id ? 1 : 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    initial={false}
-                    animate={{
-                      scale: activeTab === key ? 1.05 : 1,
-                      boxShadow: activeTab === key 
-                        ? '0 8px 25px rgba(147, 51, 234, 0.3), 0 0 20px rgba(99, 102, 241, 0.2)' 
-                        : '0 2px 8px rgba(0, 0, 0, 0.1)'
-                    }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    disabled={isTabTransitioning}
                   >
-                    <Icon size={16} className={activeTab === key ? 'drop-shadow-sm' : ''} />
+                    <Icon size={16} className={activeTab === id ? 'drop-shadow-sm' : ''} />
                     {label}
                     
-                    {activeTab === key && (
+                    {activeTab === id && (
                       <motion.div
-                        layoutId="topicTabGlow"
+                        layoutId="topicActiveTab"
                         className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-500/20 rounded-xl blur-sm"
                         initial={false}
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
                       />
                     )}
                   </motion.button>
                 ))}
               </nav>
             </div>
-            
-            {/* Tab Content */}
-            <motion.div 
-              className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100"
-              layout="position"
-              layoutRoot
-              transition={{ 
-                layout: { duration: 0.4, ease: "easeInOut" },
-                height: { duration: 0.4, ease: "easeInOut" }
-              }}
+
+            {/* Dark Content Area */}
+            <motion.div
+              className="flex-1 bg-gradient-to-br from-slate-900 to-slate-800 overflow-hidden"
+              animate={{ opacity: isTabTransitioning ? 0.7 : 1 }}
+              transition={{ duration: 0.2 }}
             >
-              <AnimatePresence mode="wait" initial={false} onExitComplete={() => setIsTabTransitioning(false)}>
+              <AnimatePresence mode="wait">
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
                   <motion.div
                     key="overview"
-                    initial={{ opacity: 0, x: -30 }}
+                    ref={el => contentRefs.current.overview = el}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    <div className="space-y-6">
-                      <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                          <Brain size={20} className="text-purple-600" />
-                          Topic Information
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {renderField('Title', 'title')}
-                          {renderField('Category', 'category', 'select', {
-                            choices: [
-                              'Mood Disorders',
-                              'Anxiety Disorders', 
-                              'Psychotic Disorders',
-                              'Personality Disorders',
-                              'Substance Use Disorders',
-                              'Neurodevelopmental Disorders',
-                              'Trauma-Related Disorders',
-                              'Eating Disorders',
-                              'Sleep Disorders',
-                              'Neurocognitive Disorders',
-                              'Other'
-                            ]
-                          })}
-                        </div>
-                        <div className="mt-6">
-                          {renderField('Description', 'description', 'textarea', { rows: 4 })}
-                        </div>
-                      </div>
-                      
-                      <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                          <Target size={20} className="text-green-600" />
-                          Learning Progress
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {renderField('Total Flashcards', 'flashcard_count', 'number')}
-                          {renderField('Completed Flashcards', 'completed_flashcards', 'number')}
-                        </div>
-                        
-                        {/* Progress Visualization */}
-                        <div className="mt-6">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700">Progress</span>
-                            <span className="text-sm text-gray-500">{progressPercentage}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <motion.div
-                              className="bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${progressPercentage}%` }}
-                              transition={{ duration: 0.8, ease: "easeOut" }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                    {/* Title Section */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editData.title || ''}
+                          onChange={(e) => updateField('title', e.target.value)}
+                          className="w-full text-2xl font-bold bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          placeholder="Topic title..."
+                        />
+                      ) : (
+                        <h1 className="text-2xl font-bold text-white mb-2">{editData.title || 'Untitled Topic'}</h1>
+                      )}
                     </div>
-                  </motion.div>
-                )}
 
-                {/* Progress Tab */}
-                {activeTab === 'progress' && (
-                  <motion.div
-                    key="progress"
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
-                  >
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                      <h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
-                        <TrendingUp size={20} className="text-blue-600" />
-                        Learning Analytics
-                      </h3>
-                      
-                      {/* Progress Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200"
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <Check size={20} className="text-green-600" />
-                            <span className="font-medium text-green-800">Completed</span>
+                    {/* Category and Progress Row */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* Category Selection */}
+                      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                        <label className="block text-sm font-medium text-slate-300 mb-3">Category</label>
+                        {isEditing ? (
+                          <select
+                            value={editData.category || 'Other'}
+                            onChange={(e) => handleCategoryChange(e.target.value)}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          >
+                            {Object.keys(categoryColors).map(category => (
+                              <option key={category} value={category}>{category}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <div 
+                            className="px-4 py-3 rounded-lg border-2 text-white font-medium"
+                            style={{ 
+                              backgroundColor: categoryColors[editData.category]?.primary + '20',
+                              borderColor: categoryColors[editData.category]?.primary || '#6b7280',
+                              color: categoryColors[editData.category]?.primary || '#6b7280'
+                            }}
+                          >
+                            {editData.category || 'Other'}
                           </div>
-                          <div className="text-2xl font-bold text-green-700">
-                            {editData.completed_flashcards || 0}
-                          </div>
-                          <div className="text-sm text-green-600">flashcards mastered</div>
-                        </motion.div>
-                        
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200"
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <Clock size={20} className="text-blue-600" />
-                            <span className="font-medium text-blue-800">Remaining</span>
-                          </div>
-                          <div className="text-2xl font-bold text-blue-700">
-                            {Math.max(0, (editData.flashcard_count || 0) - (editData.completed_flashcards || 0))}
-                          </div>
-                          <div className="text-sm text-blue-600">flashcards to review</div>
-                        </motion.div>
-                        
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          className="bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200"
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <Award size={20} className="text-purple-600" />
-                            <span className="font-medium text-purple-800">Progress</span>
-                          </div>
-                          <div className="text-2xl font-bold text-purple-700">
-                            {progressPercentage}%
-                          </div>
-                          <div className="text-sm text-purple-600">completion rate</div>
-                        </motion.div>
+                        )}
                       </div>
-                      
-                      {/* Visual Progress Bar */}
-                      <div className="mb-6">
+
+                      {/* Flashcard Progress */}
+                      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-lg font-medium text-gray-800">Overall Progress</span>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm font-medium text-slate-300">Flashcard Progress</span>
+                          <span className="text-sm text-slate-400">
                             {editData.completed_flashcards || 0} / {editData.flashcard_count || 0}
                           </span>
                         </div>
-                        <div className="relative">
-                          <div className="w-full bg-gray-200 rounded-full h-4">
-                            <motion.div
-                              className="bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-600 h-4 rounded-full flex items-center justify-end pr-2"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${progressPercentage}%` }}
-                              transition={{ duration: 1.2, ease: "easeOut" }}
-                            >
-                              {progressPercentage > 10 && (
-                                <span className="text-xs font-bold text-white drop-shadow-sm">
-                                  {progressPercentage}%
-                                </span>
-                              )}
-                            </motion.div>
-                          </div>
+                        <div className="w-full bg-slate-700 rounded-full h-3 mb-2">
+                          <motion.div
+                            className="h-3 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressPercentage}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                          />
+                        </div>
+                        <div className="text-right">
+                          <span className="text-lg font-bold text-white">{progressPercentage}%</span>
+                          <span className="text-sm text-slate-400 ml-1">complete</span>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Last Updated */}
+                    <div className="text-xs text-slate-500 text-right">
+                      Last updated: {editData.last_updated ? new Date(editData.last_updated).toLocaleString() : 'Never'}
                     </div>
                   </motion.div>
                 )}
 
-                {/* Resources Tab */}
-                {activeTab === 'resources' && (
+                {/* Concept Tab */}
+                {activeTab === 'concept' && (
                   <motion.div
-                    key="resources"
-                    initial={{ opacity: 0, x: -30 }}
+                    key="concept"
+                    ref={el => contentRefs.current.concept = el}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                          <FileText size={20} className="text-orange-600" />
-                          Learning Resources
+                    {/* Definition Section */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Brain size={20} className="text-purple-400" />
+                        Definition
+                      </h3>
+                      {isEditing ? (
+                        <textarea
+                          value={editData.definition || ''}
+                          onChange={(e) => updateField('definition', e.target.value)}
+                          rows={4}
+                          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                          placeholder="Enter the definition of this topic..."
+                        />
+                      ) : (
+                        <div className="text-slate-300 leading-relaxed">
+                          {editData.definition || <span className="text-slate-500 italic">No definition provided</span>}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Diagnostic Criteria Section */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <FileText size={20} className="text-indigo-400" />
+                          Diagnostic Criteria
+                        </h3>
+                        <button
+                          onClick={() => setExpandedCriteria(!expandedCriteria)}
+                          className="text-slate-400 hover:text-white transition-colors"
+                        >
+                          {expandedCriteria ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        </button>
+                      </div>
+                      
+                      <AnimatePresence>
+                        {expandedCriteria && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden"
+                          >
+                            {isEditing ? (
+                              <textarea
+                                value={Array.isArray(editData.diagnostic_criteria) ? editData.diagnostic_criteria.join('\n') : editData.diagnostic_criteria || ''}
+                                onChange={(e) => updateField('diagnostic_criteria', e.target.value.split('\n').filter(item => item.trim()))}
+                                rows={6}
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                                placeholder="Enter diagnostic criteria (one per line)..."
+                              />
+                            ) : (
+                              <div className="space-y-2">
+                                {(editData.diagnostic_criteria || []).length > 0 ? (
+                                  editData.diagnostic_criteria.map((criteria, index) => (
+                                    <div key={index} className="flex items-start gap-3">
+                                      <span className="text-purple-400 font-medium">{index + 1}.</span>
+                                      <span className="text-slate-300">{criteria}</span>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <span className="text-slate-500 italic">No diagnostic criteria provided</span>
+                                )}
+                              </div>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Clinical Associations Tab */}
+                {activeTab === 'clinical' && (
+                  <motion.div
+                    key="clinical"
+                    ref={el => contentRefs.current.clinical = el}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
+                  >
+                    {/* Comorbidities Section */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Users size={20} className="text-amber-400" />
+                          Comorbidities
                         </h3>
                         {isEditing && (
                           <button
-                            onClick={() => setShowResourceForm(!showResourceForm)}
-                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                            onClick={() => setShowAddComorbidity(!showAddComorbidity)}
+                            className="text-amber-400 hover:text-amber-300 transition-colors"
                           >
-                            <Plus size={16} />
-                            Add Resource
+                            <Plus size={20} />
                           </button>
                         )}
                       </div>
                       
-                      {/* Add Resource Form */}
-                      {isEditing && showResourceForm && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200"
-                        >
-                          <div className="flex gap-3">
-                            <input
-                              type="text"
-                              value={newResource}
-                              onChange={(e) => setNewResource(e.target.value)}
-                              placeholder="Enter resource URL or description..."
-                              className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              onKeyPress={(e) => e.key === 'Enter' && addResource()}
-                            />
-                            <button
-                              onClick={addResource}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                              Add
-                            </button>
-                          </div>
-                        </motion.div>
+                      {isEditing && showAddComorbidity && (
+                        <div className="mb-4 flex gap-2">
+                          <input
+                            type="text"
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            placeholder="Add comorbidity..."
+                            className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                addTag('comorbidities', newTag);
+                                setShowAddComorbidity(false);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              addTag('comorbidities', newTag);
+                              setShowAddComorbidity(false);
+                            }}
+                            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                          >
+                            Add
+                          </button>
+                        </div>
                       )}
                       
-                      {/* Resources List */}
-                      <div className="space-y-3">
-                        {editData.resources && editData.resources.length > 0 ? (
-                          editData.resources.map((resource, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
-                            >
-                              <span className="text-gray-700">{resource}</span>
-                              {isEditing && (
-                                <button
-                                  onClick={() => removeResource(index)}
-                                  className="text-red-500 hover:text-red-700 p-1 rounded"
-                                >
-                                  <X size={16} />
-                                </button>
-                              )}
-                            </motion.div>
-                          ))
-                        ) : (
-                          <div className="text-center py-8 text-gray-500">
-                            <FileText size={48} className="mx-auto mb-3 text-gray-300" />
-                            <p>No resources added yet</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(editData.comorbidities || []).map((comorbidity, index) => (
+                          <motion.span
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-amber-600/20 text-amber-300 rounded-full text-sm border border-amber-600/30"
+                          >
+                            {comorbidity}
                             {isEditing && (
-                              <p className="text-sm mt-1">Click "Add Resource" to get started</p>
+                              <button
+                                onClick={() => removeTag('comorbidities', comorbidity)}
+                                className="text-amber-400 hover:text-amber-200"
+                              >
+                                <X size={14} />
+                              </button>
                             )}
-                          </div>
+                          </motion.span>
+                        ))}
+                        {editData.comorbidities?.length === 0 && (
+                          <span className="text-slate-500 italic">No comorbidities added</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Differential Diagnoses Section */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Activity size={20} className="text-cyan-400" />
+                          Differential Diagnoses
+                        </h3>
+                        {isEditing && (
+                          <button
+                            onClick={() => setShowAddDifferential(!showAddDifferential)}
+                            className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                          >
+                            <Plus size={20} />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {isEditing && showAddDifferential && (
+                        <div className="mb-4 flex gap-2">
+                          <input
+                            type="text"
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            placeholder="Add differential diagnosis..."
+                            className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-500"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                addTag('differential_diagnoses', newTag);
+                                setShowAddDifferential(false);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              addTag('differential_diagnoses', newTag);
+                              setShowAddDifferential(false);
+                            }}
+                            className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      )}
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {(editData.differential_diagnoses || []).map((diagnosis, index) => (
+                          <motion.span
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-600/20 text-cyan-300 rounded-full text-sm border border-cyan-600/30"
+                          >
+                            {diagnosis}
+                            {isEditing && (
+                              <button
+                                onClick={() => removeTag('differential_diagnoses', diagnosis)}
+                                className="text-cyan-400 hover:text-cyan-200"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                          </motion.span>
+                        ))}
+                        {editData.differential_diagnoses?.length === 0 && (
+                          <span className="text-slate-500 italic">No differential diagnoses added</span>
                         )}
                       </div>
                     </div>
                   </motion.div>
                 )}
 
-                {/* Insights Tab */}
-                {activeTab === 'insights' && (
+                {/* Treatment Tab */}
+                {activeTab === 'treatment' && (
                   <motion.div
-                    key="insights"
-                    initial={{ opacity: 0, x: -30 }}
+                    key="treatment"
+                    ref={el => contentRefs.current.treatment = el}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                      <h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
-                        <Lightbulb size={20} className="text-yellow-600" />
-                        Learning Insights
-                      </h3>
-                      
-                      {/* Insights Cards */}
-                      <div className="space-y-4">
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border border-yellow-200"
-                        >
-                          <div className="flex items-start gap-3">
-                            <Sparkles size={20} className="text-yellow-600 mt-1" />
-                            <div>
-                              <h4 className="font-medium text-yellow-800 mb-1">Study Recommendation</h4>
-                              <p className="text-yellow-700 text-sm">
-                                Based on your progress, consider reviewing foundational concepts before advancing to complex topics.
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                        
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
-                        >
-                          <div className="flex items-start gap-3">
-                            <Brain size={20} className="text-blue-600 mt-1" />
-                            <div>
-                              <h4 className="font-medium text-blue-800 mb-1">Learning Pattern</h4>
-                              <p className="text-blue-700 text-sm">
-                                You tend to perform better with visual learning materials. Consider adding more diagrams and charts.
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                        
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200"
-                        >
-                          <div className="flex items-start gap-3">
-                            <Target size={20} className="text-green-600 mt-1" />
-                            <div>
-                              <h4 className="font-medium text-green-800 mb-1">Next Steps</h4>
-                              <p className="text-green-700 text-sm">
-                                Focus on completing the remaining flashcards to solidify your understanding of this topic.
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
+                    {/* Medications Section */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Pills size={20} className="text-green-400" />
+                          Medications
+                        </h3>
+                        {isEditing && (
+                          <button
+                            onClick={() => setShowAddMedication(!showAddMedication)}
+                            className="text-green-400 hover:text-green-300 transition-colors"
+                          >
+                            <Plus size={20} />
+                          </button>
+                        )}
                       </div>
+                      
+                      {isEditing && showAddMedication && (
+                        <div className="mb-4 flex gap-2">
+                          <input
+                            type="text"
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            placeholder="Add medication..."
+                            className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-green-500"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                addTag('medications', newTag);
+                                setShowAddMedication(false);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              addTag('medications', newTag);
+                              setShowAddMedication(false);
+                            }}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      )}
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {(editData.medications || []).map((medication, index) => (
+                          <motion.span
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-green-600/20 text-green-300 rounded-full text-sm border border-green-600/30"
+                          >
+                            {medication}
+                            {isEditing && (
+                              <button
+                                onClick={() => removeTag('medications', medication)}
+                                className="text-green-400 hover:text-green-200"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                          </motion.span>
+                        ))}
+                        {editData.medications?.length === 0 && (
+                          <span className="text-slate-500 italic">No medications added</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Psychotherapy Modalities Section */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Brain size={20} className="text-purple-400" />
+                        Psychotherapy Modalities
+                      </h3>
+                      {isEditing ? (
+                        <textarea
+                          value={Array.isArray(editData.psychotherapy_modalities) ? editData.psychotherapy_modalities.join('\n') : editData.psychotherapy_modalities || ''}
+                          onChange={(e) => updateField('psychotherapy_modalities', e.target.value.split('\n').filter(item => item.trim()))}
+                          rows={4}
+                          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                          placeholder="Enter psychotherapy modalities (one per line)..."
+                        />
+                      ) : (
+                        <div className="space-y-2">
+                          {(editData.psychotherapy_modalities || []).length > 0 ? (
+                            editData.psychotherapy_modalities.map((modality, index) => (
+                              <div key={index} className="flex items-center gap-3">
+                                <div className="w-2 h-2 bg-purple-400 rounded-full" />
+                                <span className="text-slate-300">{modality}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-slate-500 italic">No psychotherapy modalities provided</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -945,45 +1032,79 @@ const TopicModal = ({
                 {activeTab === 'connections' && (
                   <motion.div
                     key="connections"
-                    initial={{ opacity: 0, x: -30 }}
+                    ref={el => contentRefs.current.connections = el}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    layout="position"
-                    layoutId="tabContent"
-                    className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-                      <h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
-                        <Link2 size={20} className="text-indigo-600" />
-                        Related Content
+                    {/* Connected Cases */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Users size={20} className="text-pink-400" />
+                        Connected Cases
                       </h3>
-                      
-                      <div className="text-center py-8 text-gray-500">
-                        <Layers size={48} className="mx-auto mb-3 text-gray-300" />
-                        <p>No connections found</p>
-                        <p className="text-sm mt-1">Create connections by linking this topic to cases, tasks, or literature</p>
-                      </div>
+                      {connectedNodes.cases.length > 0 ? (
+                        <div className="space-y-3">
+                          {connectedNodes.cases.map((caseNode, index) => (
+                            <div key={index} className="p-3 bg-pink-600/10 rounded-lg border border-pink-600/20">
+                              <div className="font-medium text-pink-300">{caseNode.title}</div>
+                              <div className="text-sm text-slate-400">{caseNode.description}</div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-slate-500">
+                          <Users size={48} className="mx-auto mb-3 text-slate-600" />
+                          <p>No connected cases</p>
+                          <p className="text-sm mt-1">Connect this topic to patient cases in the mind map</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Connected Literature */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <BookOpen size={20} className="text-blue-400" />
+                        Connected Literature
+                      </h3>
+                      {connectedNodes.literature.length > 0 ? (
+                        <div className="space-y-3">
+                          {connectedNodes.literature.map((litNode, index) => (
+                            <div key={index} className="p-3 bg-blue-600/10 rounded-lg border border-blue-600/20">
+                              <div className="font-medium text-blue-300">{litNode.title}</div>
+                              <div className="text-sm text-slate-400">{litNode.authors}</div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-slate-500">
+                          <BookOpen size={48} className="mx-auto mb-3 text-slate-600" />
+                          <p>No connected literature</p>
+                          <p className="text-sm mt-1">Connect this topic to literature in the mind map</p>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.div>
 
+            {/* Footer */}
             {isEditing && (
-              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-                <div className="text-sm text-gray-500">
-                  Changes will be auto-saved
+              <div className="bg-slate-900 border-t border-slate-700 px-6 py-4 flex items-center justify-between">
+                <div className="text-sm text-slate-400">
+                  Changes will be saved automatically
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => {
                       setIsEditing(false);
                       setEditData({ ...data });
-                      setShowResourceForm(false);
                     }}
                     disabled={isLoading}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="px-4 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors"
                   >
                     Cancel
                   </button>
