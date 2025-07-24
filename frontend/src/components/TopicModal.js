@@ -369,17 +369,6 @@ const TopicModal = ({
       console.log('Saving category change to backend:', newCategory, newColor);
       autoSaveMindMapData(newData);
       
-      // Force immediate node sync after state update
-      setTimeout(() => {
-        console.log('Triggering force sync for immediate color update');
-        if (syncNodeData) {
-          syncNodeData();
-          console.log('syncNodeData() called successfully');
-        } else {
-          console.warn('syncNodeData function not available');
-        }
-      }, 150); // Slightly longer delay to ensure state update completes
-      
       return newData;
     });
     
