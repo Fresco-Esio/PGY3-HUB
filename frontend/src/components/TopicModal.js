@@ -373,30 +373,6 @@ const TopicModal = ({
     }
   }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
 
-  const handleDelete = useCallback(async () => {
-    if (isLoading) return;
-    
-    if (!window.confirm('Are you sure you want to delete this topic?')) return;
-    
-    setIsLoading(true);
-    try {
-      setMindMapData(prevData => {
-        const updatedTopics = prevData.topics.filter(topic => String(topic.id) !== String(data?.id));
-        const newData = { ...prevData, topics: updatedTopics };
-        autoSaveMindMapData(newData);
-        return newData;
-      });
-      
-      addToast('Topic deleted successfully', 'success');
-      handleClose();
-    } catch (error) {
-      console.error('Error deleting topic:', error);
-      addToast('Failed to delete topic', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
-
   const updateField = useCallback((field, value) => {
     setEditData(prev => ({ ...prev, [field]: value }));
   }, []);
