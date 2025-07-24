@@ -375,7 +375,12 @@ const TopicModal = ({
     // Force an immediate sync of node data to ensure visual update
     setTimeout(() => {
       console.log('Triggering force sync for immediate color update');
-      // This timeout ensures the mindMapData state has been updated before syncing
+      if (syncNodeData) {
+        syncNodeData();
+        console.log('syncNodeData() called successfully');
+      } else {
+        console.warn('syncNodeData function not available');
+      }
     }, 100);
     
     addToast(`Category updated to ${newCategory}`, 'success');
