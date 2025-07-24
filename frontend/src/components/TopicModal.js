@@ -133,17 +133,57 @@ const TopicModal = ({
   const [hasInitialized, setHasInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
-  const [newResource, setNewResource] = useState('');
-  const [showResourceForm, setShowResourceForm] = useState(false);
+  
+  // Tab-specific scroll positions
+  const [scrollPositions, setScrollPositions] = useState({});
+  const contentRefs = useRef({});
+  
+  // Form states for different tabs
+  const [newTag, setNewTag] = useState('');
+  const [showAddComorbidity, setShowAddComorbidity] = useState(false);
+  const [showAddDifferential, setShowAddDifferential] = useState(false);
+  const [showAddMedication, setShowAddMedication] = useState(false);
+  const [expandedCriteria, setExpandedCriteria] = useState(false);
+
+  // Category color mapping
+  const categoryColors = {
+    'Mood Disorders': { primary: '#ef4444', secondary: '#fca5a5' }, // red
+    'Anxiety Disorders': { primary: '#f59e0b', secondary: '#fbbf24' }, // amber
+    'Psychotic Disorders': { primary: '#8b5cf6', secondary: '#c4b5fd' }, // violet
+    'Personality Disorders': { primary: '#10b981', secondary: '#6ee7b7' }, // emerald
+    'Neurodevelopmental Disorders': { primary: '#3b82f6', secondary: '#93c5fd' }, // blue
+    'Trauma Related Disorders': { primary: '#dc2626', secondary: '#f87171' }, // red-600
+    'Substance Use Disorders': { primary: '#059669', secondary: '#34d399' }, // emerald-600
+    'Eating Disorders': { primary: '#d946ef', secondary: '#e879f9' }, // fuchsia
+    'Sleep Disorders': { primary: '#6366f1', secondary: '#a5b4fc' }, // indigo
+    'Cognitive Disorders': { primary: '#ea580c', secondary: '#fb923c' }, // orange-600
+    'Other': { primary: '#6b7280', secondary: '#9ca3af' } // gray
+  };
+
+  // Tab configuration
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: BookOpen },
+    { id: 'concept', label: 'Concept', icon: Brain },
+    { id: 'clinical', label: 'Clinical Associations', icon: Stethoscope },
+    { id: 'treatment', label: 'Treatment', icon: Pills },
+    { id: 'connections', label: 'Connections', icon: Link2 }
+  ];
 
   useEffect(() => {
     if (isOpen && data && !hasInitialized) {
       setIsVisible(true);
       setEditData({ 
         ...data,
-        resources: data.resources || [],
+        category: data.category || 'Other',
+        definition: data.definition || '',
+        diagnostic_criteria: data.diagnostic_criteria || [],
+        comorbidities: data.comorbidities || [],
+        differential_diagnoses: data.differential_diagnoses || [],
+        medications: data.medications || [],
+        psychotherapy_modalities: data.psychotherapy_modalities || [],
         flashcard_count: data.flashcard_count || 0,
-        completed_flashcards: data.completed_flashcards || 0
+        completed_flashcards: data.completed_flashcards || 0,
+        last_updated: data.last_updated || new Date().toISOString()
       });
       setHasInitialized(true);
       setIsAnimating(true);
@@ -155,8 +195,9 @@ const TopicModal = ({
       }, 600);
     } else if (!isOpen && hasInitialized) {
       setHasInitialized(false);
+      setScrollPositions({});
     }
-  }, [isOpen, hasInitialized, onAnimationStart, onAnimationEnd]);
+  }, [isOpen, data, hasInitialized, onAnimationStart, onAnimationEnd]);
 
   // Separate effect for data updates when modal is already open
   useEffect(() => {
