@@ -2203,6 +2203,16 @@ useEffect(() => {
   }
 }, [mindMapData, syncNodeData, nodes.length]); // Updated to use syncNodeData
 
+// Force node update when trigger changes
+useEffect(() => {
+  if (nodeUpdateTrigger > 0) {
+    console.log('Force update triggered by nodeUpdateTrigger:', nodeUpdateTrigger);
+    setTimeout(() => {
+      syncNodeData();
+    }, 100);
+  }
+}, [nodeUpdateTrigger, syncNodeData]);
+
   const convertDataToReactFlow = useCallback(async (data, applyLayoutImmediately = false) => {
     // Use optimized quick layout for initial load
     const allItems = [
