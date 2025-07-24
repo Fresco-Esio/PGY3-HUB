@@ -23,7 +23,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159494",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     },
     {
       "id": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
@@ -48,7 +48,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159508",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     },
     {
       "id": "a9c0a2ec-bdb8-4043-adf7-b4d761c1dabe",
@@ -73,7 +73,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159519",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     },
     {
       "id": "bf0ca57b-4ce6-48f0-a77f-a10394dc7cc7",
@@ -98,7 +98,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159534",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     },
     {
       "id": "e3f00945-e7d6-48c9-9044-53ee940b7bce",
@@ -123,7 +123,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159552",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     },
     {
       "id": "fe743542-0af5-4889-b77a-744ed7a7eeda",
@@ -148,7 +148,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159579",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     }
   ],
   "cases": [
@@ -181,7 +181,7 @@
       },
       "timeline": [],
       "created_at": "2025-07-24T22:56:01.406000+00:00",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     },
     {
       "id": "1753397837568",
@@ -212,7 +212,7 @@
       },
       "timeline": [],
       "created_at": "2025-07-24T22:57:17.987000+00:00",
-      "updated_at": "2025-07-24T23:02:18.231000+00:00"
+      "updated_at": "2025-07-24T23:05:54.818000+00:00"
     }
   ],
   "tasks": [],
