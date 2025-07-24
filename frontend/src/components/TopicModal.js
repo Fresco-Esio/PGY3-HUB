@@ -617,17 +617,47 @@ const TopicModal = ({
                     <div className="grid md:grid-cols-2 gap-6">
                       {/* Category Selection */}
                       <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-                        <label className="block text-sm font-medium text-slate-300 mb-3">Category</label>
-                        {isEditing ? (
-                          <select
-                            value={editData.category || 'Other'}
-                            onChange={(e) => handleCategoryChange(e.target.value)}
-                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                          >
-                            {Object.keys(categoryColors).map(category => (
-                              <option key={category} value={category}>{category}</option>
-                            ))}
-                          </select>
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="text-sm font-medium text-slate-300">Category</label>
+                          {!editingSections.category && (
+                            <button
+                              onClick={() => startEditingSection('category')}
+                              className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+                              title="Edit category"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                          )}
+                        </div>
+                        
+                        {editingSections.category ? (
+                          <div className="space-y-4">
+                            <select
+                              value={sectionData.category?.category || editData.category || 'Other'}
+                              onChange={(e) => updateSectionField('category', 'category', e.target.value)}
+                              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            >
+                              {Object.keys(categoryColors).map(category => (
+                                <option key={category} value={category}>{category}</option>
+                              ))}
+                            </select>
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => cancelEditingSection('category')}
+                                className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => saveSectionEdit('category')}
+                                disabled={isLoading}
+                                className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                              >
+                                {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                Save
+                              </button>
+                            </div>
+                          </div>
                         ) : (
                           <div 
                             className="px-4 py-3 rounded-lg border-2 text-white font-medium"
