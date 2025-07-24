@@ -306,13 +306,8 @@ const TopicModal = ({
 
   // Category change handler - updates node color in mind map
   const handleCategoryChange = useCallback((newCategory) => {
-    setSectionData(prev => ({
-      ...prev,
-      category: {
-        ...prev.category,
-        category: newCategory
-      }
-    }));
+    // Update local edit data for immediate UI feedback
+    setEditData(prev => ({ ...prev, category: newCategory }));
     
     // Update node color in mind map immediately
     setMindMapData(prevData => {
