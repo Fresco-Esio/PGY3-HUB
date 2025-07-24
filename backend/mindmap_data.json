@@ -216,6 +216,21 @@
       "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
       "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
       "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "e33eae9024ac941c2b3baae333f76fc45",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
+      "sourceHandle": "7f8ca947-0887-4794-8dd0-074f8b1be81c-bottom",
+      "targetHandle": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6-top",
+      "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "ed5b94be793e7468ba9f3ee4aecd8496f",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Malformed Connection"
     }
   ]
 }
