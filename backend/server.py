@@ -152,6 +152,13 @@ class PsychiatricTopicCreate(BaseModel):
     flashcard_count: int = 0
     notes: Optional[str] = None
     tags: Optional[str] = None
+    # NEW FIELDS for redesigned tabbed interface
+    definition: Optional[str] = None
+    diagnostic_criteria: List[str] = Field(default_factory=list)
+    comorbidities: List[str] = Field(default_factory=list)
+    differential_diagnoses: List[str] = Field(default_factory=list)
+    medications: List[Dict[str, Any]] = Field(default_factory=list)
+    psychotherapy_modalities: List[Dict[str, Any]] = Field(default_factory=list)
 
 class PatientCaseCreate(BaseModel):
     case_id: str
