@@ -206,15 +206,22 @@ const TopicModal = ({
 
   // Separate effect for data updates when modal is already open
   useEffect(() => {
-    if (isOpen && data && hasInitialized && !isEditing && !isLoading && !isTabTransitioning && !isAnimating) {
+    if (isOpen && data && hasInitialized && !isLoading && !isTabTransitioning && !isAnimating) {
       setEditData({ 
         ...data,
-        resources: data.resources || [],
+        category: data.category || 'Other',
+        definition: data.definition || '',
+        diagnostic_criteria: data.diagnostic_criteria || [],
+        comorbidities: data.comorbidities || [],
+        differential_diagnoses: data.differential_diagnoses || [],
+        medications: data.medications || [],
+        psychotherapy_modalities: data.psychotherapy_modalities || [],
         flashcard_count: data.flashcard_count || 0,
-        completed_flashcards: data.completed_flashcards || 0
+        completed_flashcards: data.completed_flashcards || 0,
+        last_updated: data.last_updated || new Date().toISOString()
       });
     }
-  }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, isTabTransitioning, isAnimating]);
+  }, [data?.id, isOpen, hasInitialized, isLoading, isTabTransitioning, isAnimating]);
 
   const progressPercentage = useMemo(() => {
     const total = editData.flashcard_count || 0;
