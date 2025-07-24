@@ -373,10 +373,6 @@ const TopicModal = ({
     }
   }, [data?.id, setMindMapData, autoSaveMindMapData, addToast, handleClose, isLoading]);
 
-  const updateField = useCallback((field, value) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
-  }, []);
-
   const addResource = useCallback(() => {
     if (!newResource.trim()) return;
     
