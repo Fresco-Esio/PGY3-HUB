@@ -107,6 +107,7 @@ class PatientCase(BaseModel):
     status: CaseStatus = CaseStatus.ACTIVE
     linked_topics: List[str] = Field(default_factory=list)  # Topic IDs
     position: Dict[str, float] = Field(default_factory=lambda: {"x": 0, "y": 0})
+    timeline: List[Dict[str, Any]] = Field(default_factory=list)  # Timeline entries for case progression
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
