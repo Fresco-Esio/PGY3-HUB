@@ -453,6 +453,13 @@ test_plan:
     stuck_count: 3
     priority: "high"
     needs_retesting: false
+  - task: "Timeline hover effects implementation"
+    implemented: true
+    working: true
+    file: "CaseModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
