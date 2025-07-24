@@ -610,10 +610,19 @@ const TopicModal = ({
                         </div>
                         
                         {editingSections.category ? (
-                          <div className="space-y-4">
+                          <motion.div 
+                            className="space-y-4"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
                             <select
                               value={sectionData.category?.category || editData.category || 'Other'}
-                              onChange={(e) => updateSectionField('category', 'category', e.target.value)}
+                              onChange={(e) => {
+                                updateSectionField('category', 'category', e.target.value);
+                                // Update node color immediately in mind map for instant feedback
+                                handleCategoryChange(e.target.value);
+                              }}
                               className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                             >
                               {Object.keys(categoryColors).map(category => (
@@ -621,33 +630,39 @@ const TopicModal = ({
                               ))}
                             </select>
                             <div className="flex justify-end gap-2">
-                              <button
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 onClick={() => cancelEditingSection('category')}
                                 className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
                               >
                                 Cancel
-                              </button>
-                              <button
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 onClick={() => saveSectionEdit('category')}
                                 disabled={isLoading}
                                 className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
                               >
                                 {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                                 Save
-                              </button>
+                              </motion.button>
                             </div>
-                          </div>
+                          </motion.div>
                         ) : (
-                          <div 
+                          <motion.div 
                             className="px-4 py-3 rounded-lg border-2 text-white font-medium"
                             style={{ 
                               backgroundColor: categoryColors[editData.category]?.primary + '20',
                               borderColor: categoryColors[editData.category]?.primary || '#6b7280',
                               color: categoryColors[editData.category]?.primary || '#6b7280'
                             }}
+                            whileHover={{ scale: 1.01 }}
+                            transition={{ duration: 0.2 }}
                           >
                             {editData.category || 'Other'}
-                          </div>
+                          </motion.div>
                         )}
                       </div>
 
