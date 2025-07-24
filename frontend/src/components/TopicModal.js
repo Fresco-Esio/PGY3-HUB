@@ -971,37 +971,88 @@ const TopicModal = ({
                       </div>
                       
                       {editingSections.differential_diagnoses ? (
-                        <div className="space-y-4">
-                          <textarea
-                            value={Array.isArray(sectionData.differential_diagnoses?.differential_diagnoses) 
-                              ? sectionData.differential_diagnoses.differential_diagnoses.join('\n') 
-                              : Array.isArray(editData.differential_diagnoses)
-                                ? editData.differential_diagnoses.join('\n')
-                                : editData.differential_diagnoses || ''}
-                            onChange={(e) => updateSectionField('differential_diagnoses', 'differential_diagnoses', e.target.value.split('\n').filter(item => item.trim()))}
-                            rows={4}
-                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 resize-none"
-                            placeholder="Enter differential diagnoses (one per line)..."
-                          />
+                        <motion.div 
+                          className="space-y-4"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {/* Add new differential diagnosis */}
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={getNewTag('differential_diagnoses')}
+                              onChange={(e) => setNewTag('differential_diagnoses', e.target.value)}
+                              placeholder="Add differential diagnosis..."
+                              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-500"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  addTagToSection('differential_diagnoses', 'differential_diagnoses', getNewTag('differential_diagnoses'));
+                                  clearNewTag('differential_diagnoses');
+                                }
+                              }}
+                            />
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                addTagToSection('differential_diagnoses', 'differential_diagnoses', getNewTag('differential_diagnoses'));
+                                clearNewTag('differential_diagnoses');
+                              }}
+                              className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                            >
+                              Add
+                            </motion.button>
+                          </div>
+                          
+                          {/* Current differential diagnoses */}
+                          <div className="flex flex-wrap gap-2">
+                            {(sectionData.differential_diagnoses?.differential_diagnoses || editData.differential_diagnoses || []).map((diagnosis, index) => (
+                              <motion.span
+                                key={index}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-600/20 text-cyan-300 rounded-full text-sm border border-cyan-600/30"
+                              >
+                                {diagnosis}
+                                <button
+                                  onClick={() => removeTagFromSection('differential_diagnoses', 'differential_diagnoses', diagnosis)}
+                                  className="text-cyan-400 hover:text-cyan-200"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </motion.span>
+                            ))}
+                          </div>
+                          
                           <div className="flex justify-end gap-2">
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => cancelEditingSection('differential_diagnoses')}
                               className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
                             >
                               Cancel
-                            </button>
-                            <button
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onClick={() => saveSectionEdit('differential_diagnoses')}
                               disabled={isLoading}
                               className="px-3 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors text-sm flex items-center gap-2"
                             >
                               {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                               Save
-                            </button>
+                            </motion.button>
                           </div>
-                        </div>
+                        </motion.div>
                       ) : (
-                        <div className="flex flex-wrap gap-2">
+                        <motion.div 
+                          className="flex flex-wrap gap-2"
+                          whileHover={{ scale: 1.01 }}
+                          transition={{ duration: 0.2 }}
+                        >
                           {(editData.differential_diagnoses || []).map((diagnosis, index) => (
                             <motion.span
                               key={index}
@@ -1012,10 +1063,10 @@ const TopicModal = ({
                               {diagnosis}
                             </motion.span>
                           ))}
-                          {editData.differential_diagnoses?.length === 0 && (
+                          {(editData.differential_diagnoses || []).length === 0 && (
                             <span className="text-slate-500 italic">No differential diagnoses added</span>
                           )}
-                        </div>
+                        </motion.div>
                       )}
                     </div>
                   </motion.div>
