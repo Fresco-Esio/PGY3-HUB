@@ -1,5 +1,328 @@
 {
-  "topics": [],
+  "topics": [
+    {
+      "id": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "title": "Test Topic - Mood Disorders",
+      "description": "Testing category color mapping for Mood Disorders",
+      "category": "Anxiety Disorders",
+      "color": "#059669",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": "Definition for Mood Disorders",
+      "diagnostic_criteria": [
+        "Criterion 1 for Mood Disorders",
+        "Criterion 2 for Mood Disorders"
+      ],
+      "comorbidities": [
+        "Common comorbidity 1",
+        "Common comorbidity 2"
+      ],
+      "differential_diagnoses": [
+        "Differential 1",
+        "Differential 2"
+      ],
+      "medications": [
+        {
+          "name": "Test Medication",
+          "dosage": "Test dosage",
+          "class": "Test class"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "type": "Test Therapy",
+          "duration": "Test duration",
+          "effectiveness": "Test effectiveness"
+        }
+      ],
+      "last_updated": "2025-07-24T02:24:34.214074",
+      "created_at": "2025-07-24T02:24:34.159494",
+      "updated_at": "2025-07-24T02:24:34.214066"
+    },
+    {
+      "id": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
+      "title": "Test Topic - Anxiety Disorders",
+      "description": "Testing category color mapping for Anxiety Disorders",
+      "category": "Anxiety Disorders",
+      "color": "#059669",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": "Definition for Anxiety Disorders",
+      "diagnostic_criteria": [
+        "Criterion 1 for Anxiety Disorders",
+        "Criterion 2 for Anxiety Disorders"
+      ],
+      "comorbidities": [
+        "Common comorbidity 1",
+        "Common comorbidity 2"
+      ],
+      "differential_diagnoses": [
+        "Differential 1",
+        "Differential 2"
+      ],
+      "medications": [
+        {
+          "name": "Test Medication",
+          "dosage": "Test dosage",
+          "class": "Test class"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "type": "Test Therapy",
+          "duration": "Test duration",
+          "effectiveness": "Test effectiveness"
+        }
+      ],
+      "last_updated": "2025-07-24T02:24:34.159507",
+      "created_at": "2025-07-24T02:24:34.159508",
+      "updated_at": "2025-07-24T02:24:34.159510"
+    },
+    {
+      "id": "a9c0a2ec-bdb8-4043-adf7-b4d761c1dabe",
+      "title": "Test Topic - Psychotic Disorders",
+      "description": "Testing category color mapping for Psychotic Disorders",
+      "category": "Psychotic Disorders",
+      "color": "#DC2626",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": "Definition for Psychotic Disorders",
+      "diagnostic_criteria": [
+        "Criterion 1 for Psychotic Disorders",
+        "Criterion 2 for Psychotic Disorders"
+      ],
+      "comorbidities": [
+        "Common comorbidity 1",
+        "Common comorbidity 2"
+      ],
+      "differential_diagnoses": [
+        "Differential 1",
+        "Differential 2"
+      ],
+      "medications": [
+        {
+          "name": "Test Medication",
+          "dosage": "Test dosage",
+          "class": "Test class"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "type": "Test Therapy",
+          "duration": "Test duration",
+          "effectiveness": "Test effectiveness"
+        }
+      ],
+      "last_updated": "2025-07-24T02:24:34.159517",
+      "created_at": "2025-07-24T02:24:34.159519",
+      "updated_at": "2025-07-24T02:24:34.159520"
+    },
+    {
+      "id": "bf0ca57b-4ce6-48f0-a77f-a10394dc7cc7",
+      "title": "Test Topic - Personality Disorders",
+      "description": "Testing category color mapping for Personality Disorders",
+      "category": "Personality Disorders",
+      "color": "#7C3AED",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": "Definition for Personality Disorders",
+      "diagnostic_criteria": [
+        "Criterion 1 for Personality Disorders",
+        "Criterion 2 for Personality Disorders"
+      ],
+      "comorbidities": [
+        "Common comorbidity 1",
+        "Common comorbidity 2"
+      ],
+      "differential_diagnoses": [
+        "Differential 1",
+        "Differential 2"
+      ],
+      "medications": [
+        {
+          "name": "Test Medication",
+          "dosage": "Test dosage",
+          "class": "Test class"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "type": "Test Therapy",
+          "duration": "Test duration",
+          "effectiveness": "Test effectiveness"
+        }
+      ],
+      "last_updated": "2025-07-24T02:24:34.159532",
+      "created_at": "2025-07-24T02:24:34.159534",
+      "updated_at": "2025-07-24T02:24:34.159535"
+    },
+    {
+      "id": "e3f00945-e7d6-48c9-9044-53ee940b7bce",
+      "title": "Test Topic - Substance Use Disorders",
+      "description": "Testing category color mapping for Substance Use Disorders",
+      "category": "Substance Use Disorders",
+      "color": "#EA580C",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": "Definition for Substance Use Disorders",
+      "diagnostic_criteria": [
+        "Criterion 1 for Substance Use Disorders",
+        "Criterion 2 for Substance Use Disorders"
+      ],
+      "comorbidities": [
+        "Common comorbidity 1",
+        "Common comorbidity 2"
+      ],
+      "differential_diagnoses": [
+        "Differential 1",
+        "Differential 2"
+      ],
+      "medications": [
+        {
+          "name": "Test Medication",
+          "dosage": "Test dosage",
+          "class": "Test class"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "type": "Test Therapy",
+          "duration": "Test duration",
+          "effectiveness": "Test effectiveness"
+        }
+      ],
+      "last_updated": "2025-07-24T02:24:34.159551",
+      "created_at": "2025-07-24T02:24:34.159552",
+      "updated_at": "2025-07-24T02:24:34.159554"
+    },
+    {
+      "id": "fe743542-0af5-4889-b77a-744ed7a7eeda",
+      "title": "Test Topic - Neurodevelopmental Disorders",
+      "description": "Testing category color mapping for Neurodevelopmental Disorders",
+      "category": "Neurodevelopmental Disorders",
+      "color": "#0891B2",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": "Definition for Neurodevelopmental Disorders",
+      "diagnostic_criteria": [
+        "Criterion 1 for Neurodevelopmental Disorders",
+        "Criterion 2 for Neurodevelopmental Disorders"
+      ],
+      "comorbidities": [
+        "Common comorbidity 1",
+        "Common comorbidity 2"
+      ],
+      "differential_diagnoses": [
+        "Differential 1",
+        "Differential 2"
+      ],
+      "medications": [
+        {
+          "name": "Test Medication",
+          "dosage": "Test dosage",
+          "class": "Test class"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "type": "Test Therapy",
+          "duration": "Test duration",
+          "effectiveness": "Test effectiveness"
+        }
+      ],
+      "last_updated": "2025-07-24T02:24:34.159577",
+      "created_at": "2025-07-24T02:24:34.159579",
+      "updated_at": "2025-07-24T02:24:34.159581"
+    },
+    {
+      "id": "d89194f6-b8ee-40c6-a8e6-18f37164349e",
+      "title": "Test Topic - Trauma and Stressor-Related Disorders",
+      "description": "Testing category color mapping for Trauma and Stressor-Related Disorders",
+      "category": "Trauma and Stressor-Related Disorders",
+      "color": "#BE185D",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": "Definition for Trauma and Stressor-Related Disorders",
+      "diagnostic_criteria": [
+        "Criterion 1 for Trauma and Stressor-Related Disorders",
+        "Criterion 2 for Trauma and Stressor-Related Disorders"
+      ],
+      "comorbidities": [
+        "Common comorbidity 1",
+        "Common comorbidity 2"
+      ],
+      "differential_diagnoses": [
+        "Differential 1",
+        "Differential 2"
+      ],
+      "medications": [
+        {
+          "name": "Test Medication",
+          "dosage": "Test dosage",
+          "class": "Test class"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "type": "Test Therapy",
+          "duration": "Test duration",
+          "effectiveness": "Test effectiveness"
+        }
+      ],
+      "last_updated": "2025-07-24T02:24:34.159589",
+      "created_at": "2025-07-24T02:24:34.159591",
+      "updated_at": "2025-07-24T02:24:34.159592"
+    }
+  ],
   "cases": [],
   "tasks": [],
   "literature": [],
