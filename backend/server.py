@@ -168,6 +168,7 @@ class PatientCaseCreate(BaseModel):
     assessment_plan: Optional[str] = None
     notes: Optional[str] = None
     linked_topics: List[str] = Field(default_factory=list)
+    timeline: List[Dict[str, Any]] = Field(default_factory=list)  # Timeline entries for case progression
 
 class TaskCreate(BaseModel):
     title: str
