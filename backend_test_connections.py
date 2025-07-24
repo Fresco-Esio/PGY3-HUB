@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 # Use the public endpoint for testing
-BASE_URL = "https://89542774-55c9-4de2-9a50-f2df2d65d9b9.preview.emergentagent.com/api"
+BASE_URL = "https://3e4d6ba1-ccf6-4dba-a36b-74521b8bcf1a.preview.emergentagent.com/api"
 
 class ConnectionPersistenceTester:
     def __init__(self, base_url):
