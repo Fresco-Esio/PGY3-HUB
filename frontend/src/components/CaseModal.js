@@ -153,12 +153,19 @@ const CaseModal = ({
     }
   }, [isOpen, hasInitialized, onAnimationStart, onAnimationEnd]);
 
-  // Separate effect for data updates when modal is already open
+  // Enhanced effect for instant feedback - updates editData immediately when data changes
   useEffect(() => {
-    if (isOpen && data && hasInitialized && !isEditing && !isLoading && !isTabTransitioning && !isAnimating) {
-      setEditData({ ...data });
+    if (isOpen && data && hasInitialized) {
+      // Update editData with latest data for instant feedback
+      setEditData(prevEditData => {
+        const updatedData = { 
+          ...prevEditData, // Keep any local edits
+          ...data, // Override with latest data from parent
+        };
+        return updatedData;
+      });
     }
-  }, [data?.id, isOpen, hasInitialized, isEditing, isLoading, isTabTransitioning, isAnimating]);
+  }, [data, isOpen, hasInitialized]);
 
   // Timeline data from case or default mock data
   const timelineEntries = useMemo(() => {
