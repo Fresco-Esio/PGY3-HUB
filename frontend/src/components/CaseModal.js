@@ -497,17 +497,23 @@ const CaseModal = ({
     // Save changes
     saveTimelineChange(updatedTimeline);
     
-    // Clear editing state
-    setEditingEntryId(null);
-    setEditingEntryData({});
-    setExpandedTimelineEntry(null);
+    // Reset unsaved changes flag
+    setHasUnsavedChanges(false);
     
+    // Show success toast
     addToast(
       editingEntryData.id.toString().startsWith('new-') 
         ? 'Timeline entry added successfully' 
         : 'Timeline entry updated successfully', 
       'success'
     );
+    
+    // Brief delay to show success state before collapsing
+    setTimeout(() => {
+      setEditingEntryId(null);
+      setEditingEntryData({});
+      setExpandedTimelineEntry(null);
+    }, 1000); // 1 second delay to show success state
   }, [
     editingEntryId, 
     editingEntryData, 
