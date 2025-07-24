@@ -315,22 +315,6 @@ const TopicModal = ({
     setEditData(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  // Tag management functions
-  const addTag = useCallback((field, tag) => {
-    if (!tag.trim() || !editData[field]) return;
-    
-    const currentTags = editData[field] || [];
-    if (!currentTags.includes(tag.trim())) {
-      updateField(field, [...currentTags, tag.trim()]);
-    }
-    setNewTag('');
-  }, [editData, updateField]);
-
-  const removeTag = useCallback((field, tagToRemove) => {
-    const currentTags = editData[field] || [];
-    updateField(field, currentTags.filter(tag => tag !== tagToRemove));
-  }, [editData, updateField]);
-
   // Category change handler - updates node color in mind map
   const handleCategoryChange = useCallback((newCategory) => {
     updateField('category', newCategory);
