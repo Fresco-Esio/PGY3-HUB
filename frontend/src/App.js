@@ -2171,13 +2171,17 @@ const syncNodeData = useCallback(() => {
   });
 }, [mindMapData, setNodes]);
 
-// Trigger auto-sync when mindMapData changes
+// Trigger auto-sync when mindMapData changes with enhanced detection
 useEffect(() => {
   const hasData = mindMapData && (mindMapData.cases?.length > 0 || mindMapData.topics?.length > 0 || 
                                  mindMapData.tasks?.length > 0 || mindMapData.literature?.length > 0);
   
   if (hasData) {
-    syncNodeData();
+    // Add small delay to ensure state has settled
+    const timeoutId = setTimeout(() => {
+      console.log('useEffect triggered syncNodeData due to mindMapData change');
+      syncNodeData();
+    }, 50);
     
     // If we don't have nodes but we have data, convert data to React Flow
     if (nodes.length === 0) {
@@ -2187,6 +2191,8 @@ useEffect(() => {
         convertDataToReactFlow(mindMapData, false); // CHANGED: Don't apply force layout automatically
       }, 100);
     }
+    
+    return () => clearTimeout(timeoutId);
   }
 }, [mindMapData, syncNodeData, nodes.length]); // Updated to use syncNodeData
 
