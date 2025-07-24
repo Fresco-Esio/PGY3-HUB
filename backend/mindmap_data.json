@@ -155,6 +155,7 @@
         "x": 92.04029344310653,
         "y": 61.02083138571249
       },
+      "timeline": [],
       "created_at": "2025-07-23T12:10:07.339000+00:00",
       "updated_at": "2025-07-24T00:17:50.959000+00:00"
     },
@@ -185,6 +186,7 @@
         "x": -256.3639661196108,
         "y": 36.043140527656725
       },
+      "timeline": [],
       "created_at": "2025-07-23T12:51:50.978000+00:00",
       "updated_at": "2025-07-24T00:17:50.959000+00:00"
     },
@@ -219,6 +221,7 @@
         "x": 500.0,
         "y": 300.0
       },
+      "timeline": [],
       "created_at": "2025-07-24T00:21:45.181729",
       "updated_at": "2025-07-24T00:21:45.181731"
     },
@@ -249,6 +252,7 @@
         "x": 0.0,
         "y": 0.0
       },
+      "timeline": [],
       "created_at": "2025-07-24T00:21:45.528008",
       "updated_at": "2025-07-24T00:21:45.528010"
     },
@@ -279,8 +283,754 @@
         "x": 600.0,
         "y": 400.0
       },
+      "timeline": [],
       "created_at": "2025-07-24T00:21:45.576190",
       "updated_at": "2025-07-24T00:21:45.576192"
+    },
+    {
+      "id": "d310e3e0-c069-456c-8c45-0741d6826f90",
+      "case_id": "TIMELINE-TEST-1753316585",
+      "encounter_date": "2025-07-24T00:23:05.439592",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Generalized Anxiety Disorder"
+      ],
+      "age": 28,
+      "gender": "Female",
+      "chief_complaint": "Feeling depressed and anxious for the past 3 months",
+      "initial_presentation": "Patient reports persistent low mood, decreased energy, and difficulty concentrating",
+      "current_presentation": "Symptoms have stabilized with medication and therapy",
+      "medication_history": "No prior psychiatric medications",
+      "therapy_progress": "Engaged in CBT, showing good insight",
+      "defense_patterns": "Intellectualization, some denial",
+      "clinical_reflection": "Complex case requiring integrated approach",
+      "history_present_illness": "3-month history of depression following job loss",
+      "medical_history": "No significant medical history",
+      "medications": [
+        "Sertraline 50mg daily"
+      ],
+      "mental_status_exam": "Alert, oriented x3, depressed mood, restricted affect",
+      "assessment_plan": "Continue medication, weekly therapy sessions",
+      "notes": "Patient has strong family support system",
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 500.0,
+        "y": 300.0
+      },
+      "timeline": [
+        {
+          "id": "5f5a1c11-4288-43a7-ba8d-90971579117e",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.439561",
+          "content": "Initial psychiatric assessment completed. Patient presents with symptoms of major depression.",
+          "author": "Dr. Smith",
+          "metadata": {
+            "severity": "moderate",
+            "duration": "3 months"
+          }
+        },
+        {
+          "id": "888a6197-6ec1-4f4b-a89a-d80c4a4f08d7",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.439574",
+          "content": "Started on Sertraline 50mg daily. Patient counseled on side effects and expectations.",
+          "author": "Dr. Smith",
+          "metadata": {
+            "medication": "Sertraline",
+            "dosage": "50mg daily",
+            "route": "oral"
+          }
+        },
+        {
+          "id": "ebb4cd88-f633-4a80-a147-bb62531c7565",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.439586",
+          "content": "First CBT session focused on identifying negative thought patterns.",
+          "author": "Dr. Johnson",
+          "metadata": {
+            "session_type": "CBT",
+            "session_number": 1,
+            "duration": "50 minutes"
+          }
+        }
+      ],
+      "created_at": "2025-07-24T00:23:05.439596",
+      "updated_at": "2025-07-24T00:23:05.439598"
+    },
+    {
+      "id": "76bdb44a-8e93-44c8-8f2d-4c67d0948a8d",
+      "case_id": "MALFORMED-TEST",
+      "encounter_date": "2025-07-24T00:23:05.882139",
+      "primary_diagnosis": "Test Diagnosis",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Test complaint",
+      "initial_presentation": null,
+      "current_presentation": null,
+      "medication_history": null,
+      "therapy_progress": null,
+      "defense_patterns": null,
+      "clinical_reflection": null,
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "timeline": [
+        {
+          "content": "Malformed entry",
+          "author": "Test"
+        },
+        {
+          "id": "d7c434e6-36af-4665-8423-16667d2db281",
+          "type": "Assessment",
+          "content": "Another malformed entry",
+          "author": "Test"
+        }
+      ],
+      "created_at": "2025-07-24T00:23:05.882156",
+      "updated_at": "2025-07-24T00:23:05.882158"
+    },
+    {
+      "id": "035484fa-9ff4-4dfb-8562-942eefe5b948",
+      "case_id": "LARGE-TIMELINE-1753316585",
+      "encounter_date": "2025-07-24T00:23:05.924572",
+      "primary_diagnosis": "Test Case with Large Timeline",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Testing large timeline handling",
+      "initial_presentation": null,
+      "current_presentation": null,
+      "medication_history": null,
+      "therapy_progress": null,
+      "defense_patterns": null,
+      "clinical_reflection": null,
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 600.0,
+        "y": 400.0
+      },
+      "timeline": [
+        {
+          "id": "1ff5f6c8-4900-4556-b689-8ab913fbebb4",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924196",
+          "content": "Timeline entry #1 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 1,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "e448bcd7-950f-4335-8998-6d562f33794e",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924219",
+          "content": "Timeline entry #2 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 2,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "985e4ed6-4514-485c-ab7c-549efecefcea",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924228",
+          "content": "Timeline entry #3 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 3,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "06295cda-3feb-4ff6-8594-51c250ced59d",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924235",
+          "content": "Timeline entry #4 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 4,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "209bbd68-a53a-450b-b108-23d662a02054",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924242",
+          "content": "Timeline entry #5 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 5,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "1d071adb-5ba3-48b2-a5bc-6a070419eed6",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924249",
+          "content": "Timeline entry #6 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 6,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "2edcc8e1-0dc0-4242-a16c-09c311bc3dd1",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924255",
+          "content": "Timeline entry #7 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 7,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "54c06def-f833-4faf-a60d-2afd7c53493c",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924265",
+          "content": "Timeline entry #8 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 8,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "5168e292-b23c-4ac2-be1d-f0f56046b5fa",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924272",
+          "content": "Timeline entry #9 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 9,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "380d6142-a747-41e5-864d-8dc9f4a7bdab",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924278",
+          "content": "Timeline entry #10 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 10,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "960cf1a3-d949-418c-ae72-da4f82234703",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924284",
+          "content": "Timeline entry #11 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 11,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "4ddab738-07a8-4981-a17a-915c1204e260",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924290",
+          "content": "Timeline entry #12 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 12,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "5f9889bf-a2ec-49e2-8009-635f95266a4a",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924296",
+          "content": "Timeline entry #13 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 13,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "ea5acf7b-d960-47f6-8c5a-5693292b4fb9",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924302",
+          "content": "Timeline entry #14 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 14,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "3e068fb9-6af2-4dc1-9516-40d2e7b106ba",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924308",
+          "content": "Timeline entry #15 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 15,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "58464c86-b7ae-4434-b118-fa11f46b6bd2",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924314",
+          "content": "Timeline entry #16 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 16,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "873975ae-adc0-4c0e-ba34-007a3a1c42c0",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924320",
+          "content": "Timeline entry #17 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 17,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "a8835dd0-4104-481c-a689-4c8a93660805",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924326",
+          "content": "Timeline entry #18 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 18,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "578fcf82-1212-4df2-aead-fe5a287d94ab",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924332",
+          "content": "Timeline entry #19 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 19,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "20b3ae03-46a6-4d4f-9258-e39105306f16",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924338",
+          "content": "Timeline entry #20 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 20,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "5c2c1829-9bb6-4dd3-9394-eb7fe97a553f",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924357",
+          "content": "Timeline entry #21 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 21,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "fcd4b2ba-3803-4629-b775-ae7b94525dac",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924364",
+          "content": "Timeline entry #22 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 22,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "e6d5d2d4-a1ca-4467-b42c-96ab1d6c1321",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924370",
+          "content": "Timeline entry #23 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 23,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "d30d2ca4-7c3c-41bd-a3f6-9547d7ccdd38",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924376",
+          "content": "Timeline entry #24 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 24,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "3ed2f382-5148-4760-af75-e844225e7e2f",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924382",
+          "content": "Timeline entry #25 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 25,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "13b5dcf2-d939-4afc-9757-9c37922eb43a",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924388",
+          "content": "Timeline entry #26 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 26,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "dde04892-8409-4d3f-87b8-508c0b948f5d",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924394",
+          "content": "Timeline entry #27 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 27,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "f0630db6-3ee4-4a57-b40b-6f6e1ba42c30",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924400",
+          "content": "Timeline entry #28 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 28,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "699bbca4-5a81-4711-a377-6d3f1383c5a0",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924421",
+          "content": "Timeline entry #29 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 29,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "1c9cc410-5036-441d-bb83-08cc6e7facc1",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924430",
+          "content": "Timeline entry #30 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 30,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "e1b0baab-0863-4c27-bb24-0db89291b2e2",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924436",
+          "content": "Timeline entry #31 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 31,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "f35402c9-fa9d-4866-ac20-1b826882cd72",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924442",
+          "content": "Timeline entry #32 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 32,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "47581b9d-047a-43b7-bc95-a1fa2b56e21a",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924448",
+          "content": "Timeline entry #33 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 33,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "5a9603c4-5e6b-4a4b-b34c-845bf40171f7",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924454",
+          "content": "Timeline entry #34 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 34,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "fc6b1669-8fc1-408d-b294-7a41e4934d45",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924460",
+          "content": "Timeline entry #35 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 35,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "c8639680-a3fe-4b80-82fe-7b01e717241f",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924466",
+          "content": "Timeline entry #36 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 36,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "a49d43cc-3e5c-491f-98a3-255170cc5dd3",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924472",
+          "content": "Timeline entry #37 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 37,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "b316f054-6442-4320-ab1b-3c1ad54823c2",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924478",
+          "content": "Timeline entry #38 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 38,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "ae825ccb-c72f-4025-98cc-c2316c4d2859",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924495",
+          "content": "Timeline entry #39 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 39,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "b20222de-61d3-421c-8b34-6643be7c01f7",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924502",
+          "content": "Timeline entry #40 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 40,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "6e342980-1e3d-48a7-9af3-d090a38ca1c2",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924508",
+          "content": "Timeline entry #41 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 41,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "ab31b34f-b85a-4336-9baf-ce5903736c73",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924515",
+          "content": "Timeline entry #42 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 42,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "b29159f7-67f8-4dd9-8092-57f150c09fb4",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924521",
+          "content": "Timeline entry #43 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 43,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "6414b694-e1ae-4525-a8b8-cd5d813f44c1",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924527",
+          "content": "Timeline entry #44 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 44,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "e90eb55c-7fbb-4bd9-ae31-098e3ee2f578",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924533",
+          "content": "Timeline entry #45 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 45,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "44f770f7-564f-4167-85b7-ea920b3474ae",
+          "type": "Assessment",
+          "timestamp": "2025-07-24T00:23:05.924539",
+          "content": "Timeline entry #46 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 46,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "91aa0767-921a-4fb1-a378-487ba6e5f202",
+          "type": "Medication",
+          "timestamp": "2025-07-24T00:23:05.924545",
+          "content": "Timeline entry #47 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 47,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "770fe0dd-b1c3-4242-a59a-9715e74a76b5",
+          "type": "Therapy",
+          "timestamp": "2025-07-24T00:23:05.924551",
+          "content": "Timeline entry #48 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test2",
+          "metadata": {
+            "entry_number": 48,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "001c3bb1-0459-4abf-8ea6-d9f07a1539e1",
+          "type": "Follow-up",
+          "timestamp": "2025-07-24T00:23:05.924557",
+          "content": "Timeline entry #49 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test0",
+          "metadata": {
+            "entry_number": 49,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        },
+        {
+          "id": "b4a02bea-d845-4935-9559-71bc9989e329",
+          "type": "Note",
+          "timestamp": "2025-07-24T00:23:05.924563",
+          "content": "Timeline entry #50 - This is a test entry with some content to simulate real usage.",
+          "author": "Dr. Test1",
+          "metadata": {
+            "entry_number": 50,
+            "test_data": true,
+            "category": "large_dataset_test"
+          }
+        }
+      ],
+      "created_at": "2025-07-24T00:23:05.924575",
+      "updated_at": "2025-07-24T00:23:05.924576"
     }
   ],
   "tasks": [
