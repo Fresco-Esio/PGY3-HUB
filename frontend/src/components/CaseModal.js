@@ -591,7 +591,7 @@ const CaseModal = ({
       return;
     }
     
-    // Remove entry from timeline
+    // Remove entry from timeline with animation
     const updatedTimeline = currentTimeline.filter(e => e.id !== deletingEntryId);
     
     // Save changes
@@ -599,12 +599,17 @@ const CaseModal = ({
     
     // Clear states
     setShowDeleteConfirm(false);
-    setDeletingEntryId(null);
     if (editingEntryId === deletingEntryId) {
       setEditingEntryId(null);
       setEditingEntryData({});
       setExpandedTimelineEntry(null);
+      setHasUnsavedChanges(false);
     }
+    
+    // Brief delay for delete confirmation, then reset deletingEntryId
+    setTimeout(() => {
+      setDeletingEntryId(null);
+    }, 300); // Match the exit animation duration
     
     addToast('Timeline entry deleted successfully', 'success');
   }, [deletingEntryId, editData?.timeline, saveTimelineChange, editingEntryId, addToast]);
