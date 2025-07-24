@@ -78,6 +78,14 @@ class PsychiatricTopic(BaseModel):
     resources: List[Dict[str, str]] = Field(default_factory=list)  # [{"title": "", "url": "", "type": ""}]
     notes: Optional[str] = None  # Additional notes and resources
     tags: Optional[str] = None   # Comma-separated tags
+    # NEW FIELDS for redesigned tabbed interface
+    definition: Optional[str] = None  # Comprehensive definition of the condition
+    diagnostic_criteria: List[str] = Field(default_factory=list)  # Array of diagnostic criteria
+    comorbidities: List[str] = Field(default_factory=list)  # Array of common comorbidities
+    differential_diagnoses: List[str] = Field(default_factory=list)  # Array of differential diagnoses
+    medications: List[Dict[str, Any]] = Field(default_factory=list)  # Array of medication objects
+    psychotherapy_modalities: List[Dict[str, Any]] = Field(default_factory=list)  # Array of therapy modalities
+    last_updated: Optional[datetime] = None  # Last update timestamp for the topic
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
