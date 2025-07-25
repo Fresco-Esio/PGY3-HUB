@@ -21,10 +21,10 @@ UPLOADS_DIR = ROOT_DIR / 'uploads'
 # Create the main app
 app = FastAPI()
 
-# CORS middleware should be added near the top, before routes are defined.
+# CORS middleware - Allow all origins for preview environment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Specific to local frontend
+    allow_origins=["*"],  # Allow all origins for preview environment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
