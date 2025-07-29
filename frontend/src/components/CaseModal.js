@@ -25,6 +25,9 @@ import {
   Activity
 } from 'lucide-react';
 
+// Import the Angular Timeline component
+import AngularTimeline from './AngularTimeline';
+
 // Animation variants for Framer Motion
 const modalVariants = {
   hidden: {
