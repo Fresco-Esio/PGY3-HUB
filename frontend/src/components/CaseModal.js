@@ -1018,6 +1018,26 @@ const CaseModal = ({
                   </motion.div>
                 )}
 
+                {/* Timeline Tab */}
+                {activeTab === 'timeline' && (
+                  <motion.div
+                    key="timeline"
+                    ref={el => contentRefs.current.timeline = el}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-hidden"
+                  >
+                    <AngularTimeline
+                      timeline={editData.timeline || []}
+                      onUpdateTimeline={updateTimeline}
+                      isLoading={isLoading}
+                      addToast={addToast}
+                    />
+                  </motion.div>
+                )}
+
                 {/* Related Tab */}
                 {activeTab === 'related' && (
                   <motion.div
