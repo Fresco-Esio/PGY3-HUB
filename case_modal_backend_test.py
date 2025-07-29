@@ -326,7 +326,7 @@ class CaseModalBackendTester:
 
 def main():
     # Use the public URL from environment
-    backend_url = "https://3e4d6ba1-ccf6-4dba-a36b-74521b8bcf1a.preview.emergentagent.com"
+    backend_url = "https://39409560-62b0-4839-a8c9-4bc285999ef7.preview.emergentagent.com"
     
     print(f"Testing backend at: {backend_url}")
     
