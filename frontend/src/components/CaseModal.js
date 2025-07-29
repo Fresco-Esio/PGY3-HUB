@@ -441,6 +441,39 @@ const CaseModal = ({
     addToast('Medication removed successfully', 'success');
   }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
 
+  // Timeline management functions
+  const updateTimeline = useCallback(async (updatedTimeline) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const updatedData = {
+        ...editData,
+        timeline: updatedTimeline,
+        last_updated: new Date().toISOString()
+      };
+      
+      // Update editData immediately for instant feedback
+      setEditData(updatedData);
+      
+      setMindMapData(prevData => {
+        const updatedCases = prevData.cases.map(caseItem =>
+          String(caseItem.id) === String(data?.id) ? { ...caseItem, ...updatedData } : caseItem
+        );
+        const newData = { ...prevData, cases: updatedCases };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      return updatedData;
+    } catch (error) {
+      console.error('Error updating timeline:', error);
+      addToast('Failed to update timeline', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
   // Get connected nodes for Related tab
   const connectedNodes = useMemo(() => {
     if (!data?.id) return { topics: [], literature: [], cases: [] };
