@@ -160,7 +160,7 @@ const AngularTimeline = ({
       .force('charge', forceManyBody().strength(-100))
       .force('center', forceCenter(TIMELINE_WIDTH / 2, TIMELINE_HEIGHT / 2))
       .force('link', forceLink(links).distance(d => d.distance).strength(0.3))
-      .force('collision', forceCollision().radius(NODE_RADIUS + 10))
+      .force('collision', forceCollide().radius(NODE_RADIUS + 10))
       .on('tick', () => {
         // Update node positions
         const newPositions = new Map();
