@@ -179,6 +179,7 @@ const CaseModal = ({
         narrative_summary: data.narrative_summary || '',
         medications: data.medications || [],
         therapeutic_highlights: data.therapeutic_highlights || '',
+        timeline: data.timeline || [], // Initialize timeline
         last_updated: data.last_updated || new Date().toISOString()
       };
       setEditData(initialData);
