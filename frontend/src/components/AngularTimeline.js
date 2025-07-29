@@ -428,7 +428,7 @@ const AngularTimeline = ({
             const isDragOver = dragOverIndex === index;
 
             return (
-              <div key={entry.id}>
+              <React.Fragment key={entry.id}>
                 {/* Connector with double-click insert */}
                 {index > 0 && (
                   <motion.div
