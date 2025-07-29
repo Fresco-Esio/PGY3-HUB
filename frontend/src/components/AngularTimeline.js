@@ -1,4 +1,4 @@
-// Angular Timeline Component for Case Modal
+// Angular Timeline Component for Case Modal - Refined Zigzag Layout
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -100,6 +100,11 @@ const AngularTimeline = ({
   const timelineRef = useRef(null);
   const cardRefs = useRef({});
 
+  // Timeline layout constants for angular zigzag
+  const ZIGZAG_WIDTH = 300; // Horizontal distance between left and right positions
+  const VERTICAL_SPACING = 180; // Vertical spacing between nodes
+  const TIMELINE_CENTER_X = 400; // Center X position of the timeline
+
   // Initialize entries with order index
   useEffect(() => {
     const sortedEntries = (timeline || []).map((entry, index) => ({
@@ -114,19 +119,78 @@ const AngularTimeline = ({
     setEntries(sortedEntries);
   }, [timeline]);
 
-  // Calculate node positioning (alternating left/right)
+  // Calculate angular zigzag node positioning
   const getNodePosition = useCallback((index) => {
-    return index % 2 === 0 ? 'left' : 'right';
+    const isLeft = index % 2 === 0;
+    const x = TIMELINE_CENTER_X + (isLeft ? -ZIGZAG_WIDTH / 2 : ZIGZAG_WIDTH / 2);
+    const y = index * VERTICAL_SPACING + 100; // Start offset from top
+    
+    return {
+      x,
+      y,
+      side: isLeft ? 'left' : 'right'
+    };
   }, []);
 
-  // Get connection corner based on position and card type
-  const getConnectionCorner = useCallback((position, cardType) => {
-    if (position === 'left') {
-      return cardType === 'patient' ? 'bottom-right' : 'top-left';
+  // Get card anchor positions based on node position and bend direction
+  const getCardAnchorPositions = useCallback((nodePos, nodeIndex) => {
+    const { x: nodeX, y: nodeY, side } = nodePos;
+    const cardWidth = 280;
+    const cardHeight = 120;
+    const cardSpacing = 20;
+    const offsetDistance = 80;
+
+    if (side === 'left') {
+      // Left bend: Patient card (left) connects via bottom-right, Clinical card (right) connects via top-left
+      return {
+        patient: {
+          x: nodeX - offsetDistance - cardWidth,
+          y: nodeY - cardHeight / 2 - cardSpacing / 2,
+          anchorPoint: { x: cardWidth, y: cardHeight }, // Bottom-right of card
+          connectionCorner: 'bottom-right'
+        },
+        clinical: {
+          x: nodeX + offsetDistance,
+          y: nodeY + cardSpacing / 2,
+          anchorPoint: { x: 0, y: 0 }, // Top-left of card
+          connectionCorner: 'top-left'
+        }
+      };
     } else {
-      return cardType === 'patient' ? 'bottom-left' : 'top-right';
+      // Right bend: Patient card (left) connects via top-right, Clinical card (right) connects via bottom-left
+      return {
+        patient: {
+          x: nodeX - offsetDistance - cardWidth,
+          y: nodeY + cardSpacing / 2,
+          anchorPoint: { x: cardWidth, y: 0 }, // Top-right of card
+          connectionCorner: 'top-right'
+        },
+        clinical: {
+          x: nodeX + offsetDistance,
+          y: nodeY - cardHeight / 2 - cardSpacing / 2,
+          anchorPoint: { x: 0, y: cardHeight }, // Bottom-left of card
+          connectionCorner: 'bottom-left'
+        }
+      };
     }
   }, []);
+
+  // Generate zigzag path SVG
+  const generateZigzagPath = useCallback(() => {
+    if (entries.length === 0) return '';
+    
+    let pathData = '';
+    entries.forEach((entry, index) => {
+      const pos = getNodePosition(index);
+      if (index === 0) {
+        pathData += `M ${pos.x} ${pos.y}`;
+      } else {
+        pathData += ` L ${pos.x} ${pos.y}`;
+      }
+    });
+    
+    return pathData;
+  }, [entries, getNodePosition]);
 
   // Handle entry updates
   const updateEntry = useCallback((entryId, field, value) => {
@@ -160,7 +224,8 @@ const AngularTimeline = ({
       date: new Date().toISOString(),
       patientNarrative: '',
       clinicalNotes: '',
-      orderIndex: entries.length
+      orderIndex: entries.length,
+      isNew: true
     };
     
     const updatedEntries = [...entries, newEntry];
@@ -171,7 +236,7 @@ const AngularTimeline = ({
       onUpdateTimeline(updatedEntries);
     }
     
-    // Scroll to bottom to show new entry
+    // Scroll to show new entry
     setTimeout(() => {
       if (timelineRef.current) {
         timelineRef.current.scrollTop = timelineRef.current.scrollHeight;
@@ -186,7 +251,8 @@ const AngularTimeline = ({
       date: new Date().toISOString(),
       patientNarrative: '',
       clinicalNotes: '',
-      orderIndex: afterIndex + 0.5
+      orderIndex: afterIndex + 0.5,
+      isNew: true
     };
     
     // Reorder entries to make room
@@ -243,13 +309,12 @@ const AngularTimeline = ({
     }
   }, [draggedEntry, entries, onUpdateTimeline]);
 
-  // Render floating cards
-  const renderFloatingCards = useCallback((entry, position) => {
+  // Render floating cards with corner connections
+  const renderFloatingCards = useCallback((entry, nodePos, nodeIndex) => {
     if (hoveredEntryId !== entry.id && editingEntryId !== entry.id) return null;
 
     const isEditing = editingEntryId === entry.id;
-    const patientCorner = getConnectionCorner(position, 'patient');
-    const clinicalCorner = getConnectionCorner(position, 'clinical');
+    const cardPositions = getCardAnchorPositions(nodePos, nodeIndex);
 
     return (
       <AnimatePresence>
@@ -257,9 +322,10 @@ const AngularTimeline = ({
           key={`cards-${entry.id}`}
           className="absolute z-50 pointer-events-none"
           style={{
-            left: position === 'left' ? '-400px' : '60px',
-            top: '-100px',
-            width: '380px'
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%'
           }}
           initial="hidden"
           animate="visible"
@@ -272,24 +338,39 @@ const AngularTimeline = ({
         >
           {/* Patient Narrative Card */}
           <motion.div
-            className={`mb-4 bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-4 shadow-xl pointer-events-auto relative ${
+            className={`absolute bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-4 shadow-xl pointer-events-auto ${
               isEditing ? 'ring-2 ring-blue-500' : ''
             }`}
+            style={{
+              left: cardPositions.patient.x,
+              top: cardPositions.patient.y,
+              width: 280,
+              minHeight: 120
+            }}
             variants={cardVariants}
             whileHover={!isEditing ? "hover" : undefined}
-            style={{
-              marginLeft: position === 'left' ? '0' : '180px'
-            }}
           >
             {/* Connection line to node */}
-            <div
-              className={`absolute w-2 h-2 bg-blue-400 ${
-                patientCorner === 'bottom-right' ? 'bottom-0 right-0 translate-x-1/2 translate-y-1/2' :
-                patientCorner === 'bottom-left' ? 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2' :
-                patientCorner === 'top-left' ? 'top-0 left-0 -translate-x-1/2 -translate-y-1/2' :
-                'top-0 right-0 translate-x-1/2 -translate-y-1/2'
-              }`}
-            />
+            <svg 
+              className="absolute pointer-events-none"
+              style={{
+                left: cardPositions.patient.anchorPoint.x,
+                top: cardPositions.patient.anchorPoint.y,
+                transform: 'translate(-50%, -50%)'
+              }}
+            >
+              <line
+                x1="0"
+                y1="0"
+                x2={nodePos.x - (cardPositions.patient.x + cardPositions.patient.anchorPoint.x)}
+                y2={nodePos.y - (cardPositions.patient.y + cardPositions.patient.anchorPoint.y)}
+                stroke="#3B82F6"
+                strokeWidth="2"
+                strokeDasharray="4,4"
+                opacity="0.6"
+              />
+              <circle cx="0" cy="0" r="3" fill="#3B82F6" />
+            </svg>
             
             <div className="flex items-center gap-2 mb-3">
               <User size={16} className="text-blue-400" />
@@ -316,24 +397,39 @@ const AngularTimeline = ({
 
           {/* Clinical Notes Card */}
           <motion.div
-            className={`bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-4 shadow-xl pointer-events-auto relative ${
+            className={`absolute bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-4 shadow-xl pointer-events-auto ${
               isEditing ? 'ring-2 ring-purple-500' : ''
             }`}
+            style={{
+              left: cardPositions.clinical.x,
+              top: cardPositions.clinical.y,
+              width: 280,
+              minHeight: 120
+            }}
             variants={cardVariants}
             whileHover={!isEditing ? "hover" : undefined}
-            style={{
-              marginLeft: position === 'left' ? '180px' : '0'
-            }}
           >
             {/* Connection line to node */}
-            <div
-              className={`absolute w-2 h-2 bg-purple-400 ${
-                clinicalCorner === 'bottom-right' ? 'bottom-0 right-0 translate-x-1/2 translate-y-1/2' :
-                clinicalCorner === 'bottom-left' ? 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2' :
-                clinicalCorner === 'top-left' ? 'top-0 left-0 -translate-x-1/2 -translate-y-1/2' :
-                'top-0 right-0 translate-x-1/2 -translate-y-1/2'
-              }`}
-            />
+            <svg 
+              className="absolute pointer-events-none"
+              style={{
+                left: cardPositions.clinical.anchorPoint.x,
+                top: cardPositions.clinical.anchorPoint.y,
+                transform: 'translate(-50%, -50%)'
+              }}
+            >
+              <line
+                x1="0"
+                y1="0"
+                x2={nodePos.x - (cardPositions.clinical.x + cardPositions.clinical.anchorPoint.x)}
+                y2={nodePos.y - (cardPositions.clinical.y + cardPositions.clinical.anchorPoint.y)}
+                stroke="#A855F7"
+                strokeWidth="2"
+                strokeDasharray="4,4"
+                opacity="0.6"
+              />
+              <circle cx="0" cy="0" r="3" fill="#A855F7" />
+            </svg>
             
             <div className="flex items-center gap-2 mb-3">
               <Brain size={16} className="text-purple-400" />
@@ -360,35 +456,41 @@ const AngularTimeline = ({
           {/* Edit Controls */}
           {isEditing && (
             <motion.div 
-              className="flex justify-end gap-2 mt-3 pointer-events-auto"
+              className="absolute pointer-events-auto bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-lg p-3 shadow-xl"
+              style={{
+                left: nodePos.x - 80,
+                top: nodePos.y + 60
+              }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setEditingEntryId(null)}
-                className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
-              >
-                Cancel
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => saveEntry(entry.id)}
-                disabled={isLoading}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
-              >
-                {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                Save
-              </motion.button>
+              <div className="flex gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setEditingEntryId(null)}
+                  className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => saveEntry(entry.id)}
+                  disabled={isLoading}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
+                >
+                  {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  Save
+                </motion.button>
+              </div>
             </motion.div>
           )}
         </motion.div>
       </AnimatePresence>
     );
-  }, [hoveredEntryId, editingEntryId, getConnectionCorner, updateEntry, saveEntry, isLoading]);
+  }, [hoveredEntryId, editingEntryId, getCardAnchorPositions, updateEntry, saveEntry, isLoading]);
 
   return (
     <motion.div
@@ -416,52 +518,79 @@ const AngularTimeline = ({
       </div>
 
       {/* Timeline Container */}
-      <div className="relative min-h-[400px]">
-        {/* Central Timeline Line */}
-        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-600 transform -translate-x-1/2" />
+      <div className="relative min-h-[600px]" style={{ width: '800px', margin: '0 auto' }}>
+        {/* Angular Zigzag Timeline Path */}
+        {entries.length > 0 && (
+          <svg 
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ zIndex: 1 }}
+          >
+            <defs>
+              <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#64748B" />
+                <stop offset="50%" stopColor="#3B82F6" />
+                <stop offset="100%" stopColor="#64748B" />
+              </linearGradient>
+            </defs>
+            <path
+              d={generateZigzagPath()}
+              stroke="url(#timelineGradient)"
+              strokeWidth="3"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
 
         {/* Timeline Entries */}
         <AnimatePresence>
           {entries.map((entry, index) => {
-            const position = getNodePosition(index);
+            const nodePos = getNodePosition(index);
             const isDragging = draggedEntry?.id === entry.id;
             const isDragOver = dragOverIndex === index;
 
             return (
               <React.Fragment key={entry.id}>
-                {/* Connector with double-click insert */}
+                {/* Connector hover zones for insertion */}
                 {index > 0 && (
                   <motion.div
-                    className="absolute left-1/2 w-0.5 h-16 cursor-pointer transform -translate-x-1/2"
-                    style={{ top: `${index * 200 - 16}px` }}
+                    className="absolute cursor-pointer"
+                    style={{
+                      left: (getNodePosition(index - 1).x + nodePos.x) / 2 - 20,
+                      top: (getNodePosition(index - 1).y + nodePos.y) / 2 - 20,
+                      width: 40,
+                      height: 40,
+                      zIndex: 2
+                    }}
                     variants={connectorVariants}
                     animate={hoveredConnectorIndex === index ? "hover" : "inactive"}
                     onMouseEnter={() => setHoveredConnectorIndex(index)}
                     onMouseLeave={() => setHoveredConnectorIndex(null)}
                     onDoubleClick={() => insertEntry(index - 1)}
                   >
-                    <div className="w-full h-full bg-gradient-to-b from-slate-600 to-blue-500" />
-                    {hoveredConnectorIndex === index && (
-                      <motion.div
-                        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                          <Plus size={12} className="text-white" />
-                        </div>
-                      </motion.div>
-                    )}
+                    <div className="w-full h-full rounded-full bg-blue-500/20 border-2 border-blue-500/40 flex items-center justify-center">
+                      {hoveredConnectorIndex === index && (
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Plus size={16} className="text-blue-400" />
+                        </motion.div>
+                      )}
+                    </div>
                   </motion.div>
                 )}
 
                 {/* Timeline Node */}
                 <motion.div
-                  className={`absolute ${position === 'left' ? 'right-1/2 mr-8' : 'left-1/2 ml-8'} transform ${
-                    isDragging ? 'opacity-50' : ''
-                  } ${isDragOver ? 'scale-105' : ''}`}
-                  style={{ top: `${index * 200}px` }}
+                  className={`absolute ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'scale-105' : ''}`}
+                  style={{ 
+                    left: nodePos.x - 24, 
+                    top: nodePos.y - 24, 
+                    zIndex: 3 
+                  }}
                   variants={entry.isNew ? nodeVariants.popIn : nodeVariants}
                   initial={entry.isNew ? undefined : "hidden"}
                   animate="visible"
@@ -482,7 +611,7 @@ const AngularTimeline = ({
                 >
                   {/* Node Circle */}
                   <motion.div
-                    className={`relative w-16 h-16 rounded-full border-4 cursor-pointer flex items-center justify-center ${
+                    className={`relative w-12 h-12 rounded-full border-4 cursor-pointer flex items-center justify-center ${
                       editingEntryId === entry.id 
                         ? 'bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/50' 
                         : hoveredEntryId === entry.id
@@ -493,7 +622,7 @@ const AngularTimeline = ({
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Calendar size={20} className={
+                    <Calendar size={18} className={
                       editingEntryId === entry.id ? 'text-white' : 'text-slate-400'
                     } />
                     
@@ -504,7 +633,7 @@ const AngularTimeline = ({
                   </motion.div>
 
                   {/* Date Label */}
-                  <div className={`absolute top-20 ${position === 'left' ? 'right-0' : 'left-0'} text-center`}>
+                  <div className="absolute top-14 left-1/2 transform -translate-x-1/2 text-center">
                     <div className="text-xs text-slate-400 font-medium">
                       {new Date(entry.date).toLocaleDateString()}
                     </div>
@@ -514,7 +643,7 @@ const AngularTimeline = ({
                   </div>
 
                   {/* Floating Cards */}
-                  {renderFloatingCards(entry, position)}
+                  {renderFloatingCards(entry, nodePos, index)}
                 </motion.div>
               </React.Fragment>
             );
