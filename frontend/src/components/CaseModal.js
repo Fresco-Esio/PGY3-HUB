@@ -493,6 +493,7 @@ const CaseModal = ({
     { id: 'narrative', label: 'Narrative', icon: FileText },
     { id: 'medications', label: 'Medications', icon: Pill },
     { id: 'therapy', label: 'Therapy & Insights', icon: Brain },
+    { id: 'timeline', label: 'Timeline', icon: Clock },
     { id: 'related', label: 'Related', icon: Link2 }
   ];
 
