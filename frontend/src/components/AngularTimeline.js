@@ -15,7 +15,7 @@ import {
   Pin,
   PinOff
 } from 'lucide-react';
-import { forceSimulation, forceManyBody, forceCenter, forceLink, forceCollision } from 'd3-force';
+import { forceSimulation, forceManyBody, forceCenter, forceLink, forceCollide } from 'd3-force';
 
 // Animation variants
 const timelineVariants = {
