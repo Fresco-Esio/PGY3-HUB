@@ -459,7 +459,8 @@ const AngularTimeline = ({
               className="absolute pointer-events-auto bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-lg p-3 shadow-xl"
               style={{
                 left: nodePos.x - 80,
-                top: nodePos.y + 60
+                top: nodePos.y + 80,
+                zIndex: 60
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -469,7 +470,10 @@ const AngularTimeline = ({
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setEditingEntryId(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingEntryId(null);
+                  }}
                   className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
                 >
                   Cancel
@@ -477,7 +481,10 @@ const AngularTimeline = ({
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => saveEntry(entry.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    saveEntry(entry.id);
+                  }}
                   disabled={isLoading}
                   className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
                 >
