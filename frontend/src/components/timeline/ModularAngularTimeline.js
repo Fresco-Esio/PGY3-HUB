@@ -355,20 +355,20 @@ const D3PhysicsTimeline = ({
       .style("cursor", "pointer")
       .style("transition", "all 0.2s ease");
 
-    // ONLY animate genuinely new nodes
+    // ONLY animate genuinely new nodes with shorter, single animation
     nodes.forEach(nodeData => {
       if (newNodeIds.has(nodeData.id)) {
         const nodeElement = node.filter(d => d.id === nodeData.id);
         nodeElement
-          .attr("r", 6)
-          .attr("opacity", 0.7)
+          .attr("r", 4)
+          .attr("opacity", 0.5)
           .transition()
-          .duration(400)
-          .ease(easeElastic)
+          .duration(250)
+          .ease(easeBackOut)
           .attr("r", 12)
           .attr("opacity", 1)
           .on("end", () => {
-            // Remove from new nodes set after animation
+            // Remove from new nodes set after single animation
             setNewNodeIds(prev => {
               const newSet = new Set(prev);
               newSet.delete(nodeData.id);
