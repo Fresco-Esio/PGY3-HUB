@@ -56,96 +56,94 @@ const TimelineHoverCard = ({
 
   const cardTitle = type === 'patient' ? 'Patient Narrative' : 'Clinical Notes';
   const cardContent = type === 'patient' ? entry.patient_narrative : entry.clinical_notes;
-  const bgColor = type === 'patient' ? 'bg-green-900/95' : 'bg-blue-900/95';
-  const borderColor = type === 'patient' ? 'border-green-500' : 'border-blue-500';
-  const glowColor = type === 'patient' ? 'shadow-green-500/20' : 'shadow-blue-500/20';
+  const bgColor = type === 'patient' ? 'bg-green-800/95' : 'bg-blue-800/95';
+  const borderColor = type === 'patient' ? 'border-green-400' : 'border-blue-400';
+  const glowColor = type === 'patient' ? 'shadow-green-400/30' : 'shadow-blue-400/30';
 
   if (!isVisible) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        ref={cardRef}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className={`absolute z-50 ${bgColor} backdrop-blur-md rounded-lg border ${borderColor} shadow-xl ${glowColor} p-3 w-64 cursor-pointer`}
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      className={`absolute z-50 ${bgColor} backdrop-blur-md rounded-lg border-2 ${borderColor} shadow-xl ${glowColor} p-3 w-64 cursor-pointer`}
+      style={{
+        left: position.x,
+        top: position.y,
+        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
+      }}
+      onClick={handleCardClick}
+    >
+      {/* Connection line to node - more visible */}
+      <div 
+        className={`absolute w-1 h-8 ${type === 'patient' ? 'bg-green-400' : 'bg-blue-400'} shadow-lg`}
         style={{
-          left: position.x,
-          top: position.y,
-          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))'
+          [position.anchorSide]: '-2px',
+          [position.anchorPosition]: '16px',
+          boxShadow: `0 0 8px ${type === 'patient' ? '#34d399' : '#60a5fa'}`
         }}
-        onClick={handleCardClick}
-      >
-        {/* Connection line to node */}
-        <div 
-          className={`absolute w-0.5 h-6 ${type === 'patient' ? 'bg-green-500' : 'bg-blue-500'}`}
-          style={{
-            [position.anchorSide]: '-1px',
-            [position.anchorPosition]: '12px',
-            boxShadow: `0 0 4px ${type === 'patient' ? '#10b981' : '#3b82f6'}`
-          }}
-        />
+      />
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-xs font-semibold text-white flex items-center gap-1">
-            {type === 'patient' ? '👤' : '🩺'} {cardTitle}
-          </h4>
-          {isEditing && (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSave();
-              }}
-              className="text-green-400 hover:text-green-300 transition-colors p-1 rounded"
-              title="Save changes"
-            >
-              <Save size={10} />
-            </motion.button>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+          {type === 'patient' ? '👤' : '🩺'} {cardTitle}
+        </h4>
+        {isEditing && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSave();
+            }}
+            className="text-green-400 hover:text-green-300 transition-colors p-1 rounded"
+            title="Save changes"
+          >
+            <Save size={12} />
+          </motion.button>
+        )}
+      </div>
+
+      {/* Content */}
+      {isEditing ? (
+        <div className="space-y-2">
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="w-full h-20 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm placeholder-slate-400 focus:ring-1 focus:ring-blue-400 focus:border-blue-400 resize-none"
+            placeholder={`Enter ${cardTitle.toLowerCase()}...`}
+            autoFocus
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="text-xs text-slate-400">Click outside to save</div>
+        </div>
+      ) : (
+        <div className="text-slate-200 text-sm leading-relaxed">
+          {cardContent ? (
+            <div className="max-h-16 overflow-y-auto">
+              <p>{cardContent}</p>
+            </div>
+          ) : (
+            <p className="text-slate-400 italic">
+              Click to add {cardTitle.toLowerCase()}
+            </p>
           )}
         </div>
+      )}
 
-        {/* Content */}
-        {isEditing ? (
-          <div className="space-y-2">
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="w-full h-20 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs placeholder-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
-              placeholder={`Enter ${cardTitle.toLowerCase()}...`}
-              autoFocus
-              onClick={(e) => e.stopPropagation()}
-            />
-            <div className="text-xs text-slate-400">Click outside to save</div>
-          </div>
-        ) : (
-          <div className="text-slate-300 text-xs leading-relaxed">
-            {cardContent ? (
-              <div className="max-h-16 overflow-y-auto">
-                <p>{cardContent}</p>
-              </div>
-            ) : (
-              <p className="text-slate-500 italic">
-                Click to add {cardTitle.toLowerCase()}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Timestamp */}
-        {!isEditing && entry.timestamp && (
-          <div className="mt-2 pt-1 border-t border-slate-700">
-            <span className="text-xs text-slate-500">
-              {new Date(entry.timestamp).toLocaleString()}
-            </span>
-          </div>
-        )}
-      </motion.div>
-    </AnimatePresence>
+      {/* Timestamp */}
+      {!isEditing && entry.timestamp && (
+        <div className="mt-2 pt-1 border-t border-slate-600">
+          <span className="text-xs text-slate-400">
+            {new Date(entry.timestamp).toLocaleString()}
+          </span>
+        </div>
+      )}
+    </motion.div>
   );
 };
 
