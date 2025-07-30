@@ -222,6 +222,22 @@ const CaseModal = ({
     }
   }, [data, isOpen, hasInitialized]);
 
+  // Escape key handling to close modal
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen, handleClose]);
+
   const handleClose = useCallback(() => {
     if (isAnimating || isClosing) return;
     
