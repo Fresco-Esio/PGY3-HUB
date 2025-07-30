@@ -674,9 +674,24 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryUpdate]);
 
-  // Get hovered node data for cards - ensure proper node lookup
-  const hoveredNodeData = hoveredNode ? 
-    nodesRef.current.find(node => node.id === hoveredNode) : null;
+  // Get hovered node data for cards - with stable reference and fallback
+  const hoveredNodeData = useMemo(() => {
+    if (!hoveredNode) return null;
+    
+    // First try to find in current nodesRef
+    let node = nodesRef.current?.find(node => node.id === hoveredNode);
+    
+    // If not found, try to find in entries and create stable node data
+    if (!node) {
+      const entry = entries.find(e => e.id === hoveredNode);
+      if (entry) {
+        const zigzagPositions = calculateZigzagPositions(entries);
+        node = zigzagPositions.find(n => n.id === hoveredNode);
+      }
+    }
+    
+    return node;
+  }, [hoveredNode, entries, calculateZigzagPositions]);
 
   return (
     <div className={`relative ${className}`}>
