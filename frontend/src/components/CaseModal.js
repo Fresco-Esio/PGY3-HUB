@@ -1030,10 +1030,19 @@ const CaseModal = ({
                     className="h-full overflow-hidden"
                   >
                     <AngularTimeline
-                      timeline={editData.timeline || []}
-                      onUpdateTimeline={updateTimeline}
-                      isLoading={isLoading}
-                      addToast={addToast}
+                      caseId={data?.id}
+                      initialEntries={editData.timeline || []}
+                      onEntryUpdate={updateTimeline}
+                      onEntryAdd={(newEntry) => {
+                        const updatedTimeline = [...(editData.timeline || []), newEntry];
+                        updateTimeline(updatedTimeline);
+                      }}
+                      onEntryDelete={(entryId) => {
+                        const updatedTimeline = (editData.timeline || []).filter(entry => entry.id !== entryId);
+                        updateTimeline(updatedTimeline);
+                      }}
+                      width={600}
+                      height={400}
                     />
                   </motion.div>
                 )}
