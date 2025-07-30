@@ -279,7 +279,7 @@ const D3PhysicsTimeline = ({
   const handleNodeLeave = useCallback(() => {
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredNode(null);
-    }, 100);
+    }, 50); // Shorter delay for more responsive dismissal
   }, []);
 
   // Initialize D3 force simulation
