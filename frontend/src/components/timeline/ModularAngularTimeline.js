@@ -534,19 +534,34 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryAdd]);
 
-  // Initialize simulation when entries change
+  // Initialize simulation when entries change - with proper state management to prevent resets
   useEffect(() => {
-    initializeSimulation();
+    // Only initialize if we have entries and the simulation doesn't exist or entries actually changed
+    if (entries.length > 0) {
+      const currentEntryIds = entries.map(e => e.id).sort().join(',');
+      const existingEntryIds = nodesRef.current.map(n => n.id).sort().join(',');
+      
+      // Only re-initialize if entries actually changed, not on hover or other state changes
+      if (currentEntryIds !== existingEntryIds) {
+        initializeSimulation();
+      }
+    }
     
     return () => {
-      if (simulationRef.current) {
-        simulationRef.current.stop();
-      }
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
       }
     };
-  }, [entries, initializeSimulation]);
+  }, [entries]); // Remove other dependencies that cause unnecessary re-renders
+
+  // Separate effect for cleanup only
+  useEffect(() => {
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
+    };
+  }, []);
 
   // Handle adding new entry at end
   const handleAddEntry = useCallback(() => {
