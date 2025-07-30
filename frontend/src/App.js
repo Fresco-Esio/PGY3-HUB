@@ -2708,7 +2708,7 @@ useEffect(() => {
             nodeTypes={nodeTypes}
             edgeTypes={{ floating: FloatingEdge, enhanced: EnhancedEdge }}
             nodesDraggable={true}
-            nodesConnectable={isEditing}
+            nodesConnectable={true}
             elementsSelectable={true}
             onInit={(reactFlowInstance) => {
               setIsReactFlowReady(true);
