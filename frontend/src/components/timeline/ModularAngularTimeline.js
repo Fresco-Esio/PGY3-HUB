@@ -362,7 +362,60 @@ const D3PhysicsTimeline = ({
     }, 150); // Increased delay for more stable hover
   }, [editingCard]);
 
-  // Initialize D3 force simulation with zigzag constraints
+  // Auto-scroll to ensure cards are visible
+  const ensureCardsVisible = useCallback((nodeId) => {
+    if (!containerRef.current || !nodeId) return;
+
+    const node = nodesRef.current?.find(n => n.id === nodeId);
+    if (!node) return;
+
+    const container = containerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    
+    // Calculate card positions
+    const patientCardPos = calculateCardPosition(node, 'patient');
+    const clinicalCardPos = calculateCardPosition(node, 'clinical');
+    
+    // Find the bounds that encompass both cards and the node
+    const minX = Math.min(node.x - 50, clinicalCardPos.x);
+    const maxX = Math.max(node.x + 50, patientCardPos.x + 320);
+    const minY = Math.min(node.y - 70, Math.min(patientCardPos.y, clinicalCardPos.y));
+    const maxY = Math.max(node.y + 70, Math.max(patientCardPos.y + 140, clinicalCardPos.y + 140));
+    
+    // Calculate required scroll adjustments
+    const scrollLeft = container.scrollLeft;
+    const scrollTop = container.scrollTop;
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+    
+    let newScrollLeft = scrollLeft;
+    let newScrollTop = scrollTop;
+    
+    // Adjust horizontal scroll if needed
+    if (minX < scrollLeft) {
+      newScrollLeft = Math.max(0, minX - 50);
+    } else if (maxX > scrollLeft + containerWidth) {
+      newScrollLeft = maxX - containerWidth + 50;
+    }
+    
+    // Adjust vertical scroll if needed
+    if (minY < scrollTop) {
+      newScrollTop = Math.max(0, minY - 50);
+    } else if (maxY > scrollTop + containerHeight) {
+      newScrollTop = maxY - containerHeight + 50;
+    }
+    
+    // Smooth scroll to the new position
+    if (newScrollLeft !== scrollLeft || newScrollTop !== scrollTop) {
+      container.scrollTo({
+        left: newScrollLeft,
+        top: newScrollTop,
+        behavior: 'smooth'
+      });
+    }
+  }, [calculateCardPosition]);
+
+  // Click for editing cards - enable editing both cards on click
   const initializeSimulation = useCallback(() => {
     if (!svgRef.current) return;
 
