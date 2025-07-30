@@ -222,14 +222,17 @@ const D3PhysicsTimeline = ({
     return links;
   }, []);
 
-  // Calculate card position based on node position and zigzag side - improved positioning for multiple nodes
+  // Calculate card position based on node position and zigzag side - stable positioning
   const calculateCardPosition = useCallback((node, cardType) => {
-    if (!node || !node.x || !node.y) return { x: 0, y: 0 };
+    if (!node) return { x: 0, y: 0 };
     
+    // Use target positions for stable card placement, fall back to current position
+    const nodeX = node.targetX || node.x || 0;
+    const nodeY = node.targetY || node.y || 0;
     const isLeftBend = node.side === 'left';
     const cardWidth = 280;
     const cardHeight = 120;
-    const cardOffset = 30; // Distance from node
+    const cardOffset = 35; // Increased offset for better separation
     
     let position = {};
 
@@ -237,16 +240,16 @@ const D3PhysicsTimeline = ({
       if (isLeftBend) {
         // Left bend: Patient card from bottom-right of node
         position = {
-          x: node.x + cardOffset,
-          y: node.y + cardOffset,
+          x: nodeX + cardOffset,
+          y: nodeY + cardOffset,
           anchorSide: 'left',
           anchorPosition: 'top'
         };
       } else {
         // Right bend: Patient card from top-right of node  
         position = {
-          x: node.x + cardOffset,
-          y: node.y - cardHeight - cardOffset,
+          x: nodeX + cardOffset,
+          y: nodeY - cardHeight - cardOffset,
           anchorSide: 'left', 
           anchorPosition: 'bottom'
         };
@@ -256,24 +259,24 @@ const D3PhysicsTimeline = ({
       if (isLeftBend) {
         // Left bend: Clinical card from top-left of node
         position = {
-          x: node.x - cardWidth - cardOffset,
-          y: node.y - cardHeight - cardOffset,
+          x: nodeX - cardWidth - cardOffset,
+          y: nodeY - cardHeight - cardOffset,
           anchorSide: 'right',
           anchorPosition: 'bottom'
         };
       } else {
         // Right bend: Clinical card from bottom-left of node
         position = {
-          x: node.x - cardWidth - cardOffset,
-          y: node.y + cardOffset,
+          x: nodeX - cardWidth - cardOffset,
+          y: nodeY + cardOffset,
           anchorSide: 'right',
           anchorPosition: 'top'
         };
       }
     }
 
-    // Ensure cards stay within bounds and are visible
-    const containerPadding = 20;
+    // Ensure cards stay within bounds and are visible - with better padding
+    const containerPadding = 30;
     position.x = Math.max(containerPadding, Math.min(position.x, width - cardWidth - containerPadding));
     position.y = Math.max(containerPadding, position.y);
 
