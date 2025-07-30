@@ -205,6 +205,39 @@ const D3PhysicsTimeline = ({
     }
   }, [undoStack, onEntryUpdate]);
 
+  // Handle saving current editing cards with content check
+  const handleSaveCurrentEditingCards = useCallback(async (closeAfterSave = true) => {
+    if (!editingCard) return;
+    
+    const node = nodesRef.current?.find(n => n.id === editingCard.nodeId);
+    if (!node) return;
+    
+    // Get current card content (this would come from the card components)
+    const currentEntry = entries.find(entry => entry.id === editingCard.nodeId);
+    if (!currentEntry) return;
+    
+    // Check if both cards are empty - if so, skip saving
+    const hasPatientContent = currentEntry.patient_narrative && currentEntry.patient_narrative.trim();
+    const hasClinicalContent = currentEntry.clinical_notes && currentEntry.clinical_notes.trim();
+    
+    if (!hasPatientContent && !hasClinicalContent) {
+      // Skip saving empty cards
+      if (closeAfterSave) {
+        setEditingCard(null);
+        setHoveredNode(null);
+      }
+      return;
+    }
+    
+    // Save the timeline changes
+    await saveTimelineChanges(editingCard.nodeId, entries, true);
+    
+    if (closeAfterSave) {
+      setEditingCard(null);
+      setHoveredNode(null);
+    }
+  }, [editingCard, entries, saveTimelineChanges]);
+
   // Delete node functionality
   const handleDeleteNode = useCallback(async (nodeId) => {
     const nodeToDelete = entries.find(entry => entry.id === nodeId);
