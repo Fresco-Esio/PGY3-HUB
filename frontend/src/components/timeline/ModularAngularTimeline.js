@@ -59,6 +59,10 @@ const TimelineHoverCard = ({
   const bgColor = type === 'patient' ? 'bg-green-800/95' : 'bg-blue-800/95';
   const borderColor = type === 'patient' ? 'border-green-400' : 'border-blue-400';
   const glowColor = type === 'patient' ? 'shadow-green-400/30' : 'shadow-blue-400/30';
+  
+  // Enhanced styling when editing
+  const editingStyles = isEditing ? 'ring-2 ring-yellow-400 ring-opacity-60' : '';
+  const cardOpacity = isEditing ? 'opacity-100' : 'opacity-90';
 
   if (!isVisible) return null;
 
