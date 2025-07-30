@@ -910,7 +910,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
               <div className="space-y-3">
                 {/* Create Blank Option */}
                 <button
-                  onClick={() => handleFinalSelect(null)}
+                  onClick={() => handleFinalSelect()}
                   className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
                 >
                   <div className="bg-gray-200 p-2 rounded-lg text-gray-600">
