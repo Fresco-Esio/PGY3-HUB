@@ -483,7 +483,7 @@ const D3PhysicsTimeline = ({
     });
 
     return simulation;
-  }, [entries, width, height, color, pinnedNodes, newNodeIds, calculateZigzagPositions, createTimelineLinks, handleNodeHover, handleNodeLeave, findNearestTimelinePosition, reorderTimelineStructure, insertNewNode]);
+  }, [entries, width, height, color, newNodeIds, calculateZigzagPositions, createTimelineLinks, handleNodeHover, handleNodeLeave, findNearestTimelinePosition, reorderTimelineStructure, insertNewNode]);
 
   // Helper functions
   const findNearestTimelinePosition = useCallback((x, y) => {
