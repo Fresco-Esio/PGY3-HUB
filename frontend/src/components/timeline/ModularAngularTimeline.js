@@ -640,10 +640,16 @@ const D3PhysicsTimeline = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* SVG Container - Centered timeline with scroll */}
+      {/* Timeline Container with Minimalist Scroll */}
       <div
-        className="relative border border-slate-700 rounded-lg bg-slate-900/50 mx-auto overflow-auto"
-        style={{ width, height, maxHeight: '70vh' }}
+        ref={containerRef}
+        className="relative border border-slate-700 rounded-lg bg-slate-900/50 mx-auto timeline-scroll-container"
+        style={{ 
+          width, 
+          height, 
+          maxHeight: '70vh',
+          overflow: 'auto'
+        }}
       >
         <svg
           ref={svgRef}
@@ -653,6 +659,39 @@ const D3PhysicsTimeline = ({
             height: `${Math.max(height, entries.length * 120 + 160)}px` // Dynamic height based on entries
           }}
         />
+
+        {/* Custom Minimalist Scrollbar Styles */}
+        <style jsx>{`
+          .timeline-scroll-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+          
+          .timeline-scroll-container::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 3px;
+          }
+          
+          .timeline-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.6);
+            border-radius: 3px;
+            transition: background 0.2s ease;
+          }
+          
+          .timeline-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.8);
+          }
+          
+          .timeline-scroll-container::-webkit-scrollbar-corner {
+            background: rgba(30, 41, 59, 0.3);
+          }
+          
+          /* Firefox scrollbar */
+          .timeline-scroll-container {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(100, 116, 139, 0.6) rgba(30, 41, 59, 0.3);
+          }
+        `}</style>
 
         {/* Hover Cards - Only visible on hover with improved positioning */}
         <AnimatePresence>
