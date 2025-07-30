@@ -2581,12 +2581,44 @@ useEffect(() => {
           >
             Add Sample Literature
           </LoadingButton>
-          <LoadingButton onClick={() => setIsEditing(!isEditing)} icon={isEditing ? Save : Edit3} className={`w-full px-4 py-2 rounded-md text-sm ${isEditing ? 'bg-teal-600' : 'bg-slate-600'}`}>
-            {isEditing ? 'Exit Edit Mode' : 'Edit Mind Map'}
-          </LoadingButton>
-          <LoadingButton onClick={() => setShowNodeSelector(true)} icon={Plus} className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
-            Add New Node
-          </LoadingButton>
+          
+          {/* Individual Node Creation Buttons */}
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Add Nodes</div>
+            <LoadingButton 
+              onClick={() => addNewNode('topic')} 
+              icon={Brain} 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <Brain size={16} />
+              Add Topic
+            </LoadingButton>
+            <LoadingButton 
+              onClick={() => addNewNode('case')} 
+              icon={Users} 
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <Users size={16} />
+              Add Case
+            </LoadingButton>
+            <LoadingButton 
+              onClick={() => addNewNode('task')} 
+              icon={CheckSquare} 
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <CheckSquare size={16} />
+              Add Task
+            </LoadingButton>
+            <LoadingButton 
+              onClick={() => addNewNode('literature')} 
+              icon={BookOpen} 
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <BookOpen size={16} />
+              Add Literature
+            </LoadingButton>
+          </div>
+          
           <LoadingButton onClick={handleClearMap} icon={Trash2} className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
             Clear All Data
           </LoadingButton>
