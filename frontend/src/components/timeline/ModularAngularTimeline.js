@@ -536,7 +536,7 @@ const D3PhysicsTimeline = ({
     // Apply drag behavior
     node.call(dragBehavior);
 
-    // Click for editing cards - enable editing on click
+    // Click for editing cards - enable editing both cards on click
     node.on("click", (event, d) => {
       event.stopPropagation();
       
@@ -544,10 +544,10 @@ const D3PhysicsTimeline = ({
       d.fx = d.x;
       d.fy = d.y;
       
-      // Start editing the patient card for this node
-      setEditingCard({ nodeId: d.id, type: 'patient' });
+      // Start editing mode for this node (both cards become editable)
+      setEditingCard({ nodeId: d.id, type: 'both' });
       
-      // Also show the node as hovered to display cards
+      // Show the node as hovered to display cards
       setHoveredNode(d.id);
       
       simulation.restart();
