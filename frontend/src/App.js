@@ -66,7 +66,7 @@ import {
 } from 'lucide-react';
 
 // Lazy load components for better initial load time
-import { RichTextEditor, TemplateManager, LiteratureModal } from './components/LazyComponents';
+import { RichTextEditor, LiteratureModal } from './components/LazyComponents';
 import CaseModal from './components/CaseModal';
 import TopicModal from './components/TopicModal';
 import TaskModal from './components/TaskModal';
