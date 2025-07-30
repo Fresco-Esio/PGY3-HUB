@@ -656,15 +656,18 @@ const D3PhysicsTimeline = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* SVG Container - Centered timeline */}
+      {/* SVG Container - Centered timeline with scroll */}
       <div
-        className="relative border border-slate-700 rounded-lg overflow-visible bg-slate-900/50 mx-auto"
-        style={{ width, height }}
+        className="relative border border-slate-700 rounded-lg bg-slate-900/50 mx-auto overflow-auto"
+        style={{ width, height, maxHeight: '70vh' }}
       >
         <svg
           ref={svgRef}
-          className="absolute inset-0"
-          style={{ width: `${width}px`, height: `${height}px` }}
+          className="min-h-full"
+          style={{ 
+            width: `${width}px`, 
+            height: `${Math.max(height, entries.length * 120 + 160)}px` // Dynamic height based on entries
+          }}
         />
 
         {/* Hover Cards - Only visible on hover with improved positioning */}
