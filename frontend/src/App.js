@@ -75,6 +75,9 @@ import EnhancedEdge from './components/EnhancedEdge'; // Import the enhanced edg
 import ConnectionLine from './components/ConnectionLine'; // Import the custom connection line for previews
 import OptimizedLoadingScreen from './components/OptimizedLoadingScreen';
 
+// Import node components
+import { nodeTypes } from './components/nodes';
+
 // Import performance utilities
 import { 
   useMemoizedNodeData, 
