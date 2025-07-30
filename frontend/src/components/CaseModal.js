@@ -1033,14 +1033,14 @@ const CaseModal = ({
                   >
                     <AngularTimeline
                       caseId={data?.id}
-                      initialEntries={editData.timeline || []}
+                      initialEntries={timelineEntries}
                       onEntryUpdate={updateTimeline}
                       onEntryAdd={(newEntry) => {
-                        const updatedTimeline = [...(editData.timeline || []), newEntry];
+                        const updatedTimeline = [...timelineEntries, newEntry];
                         updateTimeline(updatedTimeline);
                       }}
                       onEntryDelete={(entryId) => {
-                        const updatedTimeline = (editData.timeline || []).filter(entry => entry.id !== entryId);
+                        const updatedTimeline = timelineEntries.filter(entry => entry.id !== entryId);
                         updateTimeline(updatedTimeline);
                       }}
                       width={600}
