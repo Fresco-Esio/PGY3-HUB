@@ -1,22 +1,17 @@
-// Modular Angular Timeline - Refactored timeline using extracted components and hooks
+// D3 Physics-Based Timeline - Implementing proper force-directed simulation
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, RotateCcw } from 'lucide-react';
+import { Plus, RotateCcw, Pin, PinOff } from 'lucide-react';
+import { forceSimulation, forceLink, forceManyBody, forceX, forceY } from 'd3-force';
+import { drag } from 'd3-drag';
+import { select } from 'd3-selection';
+import { scaleOrdinal } from 'd3-scale';
+import { schemeCategory10 } from 'd3-scale-chromatic';
 
-// Import our modular components and hooks
-import { useD3Simulation } from './hooks/useD3Simulation';
-import { useCanvasRenderer } from './hooks/useCanvasRenderer';
-import { useTimelineData } from './hooks/useTimelineData';
+// Import hover cards for timeline entries
 import { PatientCard, ClinicianCard } from './components/HoverCards';
-import TimelineNode from './components/TimelineNode';
-import { 
-  calculateZigzagPositions, 
-  calculateCardPosition,
-  debounce,
-  throttle 
-} from './utils/timelineUtils';
 
-const ModularAngularTimeline = ({ 
+const D3PhysicsTimeline = ({ 
   caseId, 
   initialEntries = [],
   onEntryUpdate,
@@ -26,212 +21,341 @@ const ModularAngularTimeline = ({
   width = 800,
   height = 600
 }) => {
-  const canvasRef = useRef(null);
-  const containerRef = useRef(null);
+  const svgRef = useRef(null);
+  const simulationRef = useRef(null);
+  const nodesRef = useRef([]);
+  const linksRef = useRef([]);
   const [hoveredNode, setHoveredNode] = useState(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [pinnedNodes, setPinnedNodes] = useState(new Set());
+  const [entries, setEntries] = useState(initialEntries);
 
-  // Initialize our custom hooks
-  const {
-    entries,
-    sortedEntries,
-    selectedEntry,
-    editingEntry,
-    setSelectedEntry,
-    setEditingEntry,
-    addEntry,
-    updateEntry,
-    deleteEntry,
-    insertEntry
-  } = useTimelineData(initialEntries);
+  // Color scale for different entry types
+  const color = scaleOrdinal(schemeCategory10);
 
-  const { render, getNodeAtPosition, clearCanvas } = useCanvasRenderer(
-    canvasRef,
-    { width, height }
-  );
+  // Convert timeline entries to D3 nodes format
+  const convertEntriesToNodes = useCallback((timelineEntries) => {
+    return timelineEntries.map((entry, index) => ({
+      id: entry.id || `entry-${index}`,
+      title: entry.title || `Entry ${index + 1}`,
+      type: entry.type || 'note',
+      content: entry.content || '',
+      timestamp: entry.timestamp || new Date().toISOString(),
+      x: width / 2 + (Math.random() - 0.5) * 200, // Random initial position
+      y: height / 2 + (Math.random() - 0.5) * 200,
+      data: entry
+    }));
+  }, [width, height]);
 
-  const {
-    simulationData,
-    updateSimulation,
-    pinNode,
-    unpinNode,
-    createDragBehavior
-  } = useD3Simulation([], { width, height });
-
-  // Calculate timeline positions
-  const timelinePositions = React.useMemo(() => {
-    return calculateZigzagPositions(sortedEntries, width, height);
-  }, [sortedEntries, width, height]);
-
-  // Update D3 simulation when positions change
-  useEffect(() => {
-    if (timelinePositions.length > 0) {
-      updateSimulation(timelinePositions);
+  // Create timeline path links (connecting consecutive entries)
+  const createTimelineLinks = useCallback((nodes) => {
+    const sortedNodes = [...nodes].sort((a, b) => 
+      new Date(a.timestamp) - new Date(b.timestamp)
+    );
+    
+    const links = [];
+    for (let i = 0; i < sortedNodes.length - 1; i++) {
+      links.push({
+        source: sortedNodes[i].id,
+        target: sortedNodes[i + 1].id,
+        value: 1
+      });
     }
-  }, [timelinePositions, updateSimulation]);
-
-  // Render timeline on canvas
-  useEffect(() => {
-    if (simulationData.length > 0) {
-      render(simulationData, [], hoveredNode, selectedEntry, true);
-    }
-  }, [simulationData, hoveredNode, selectedEntry, render]);
-
-  // Handle mouse move for hover detection
-  const handleMouseMove = useCallback(
-    throttle((e) => {
-      if (!canvasRef.current || isPanning) return;
-
-      const rect = canvasRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      setMousePosition({ x: e.clientX, y: e.clientY });
-
-      const nodeAtPosition = getNodeAtPosition(x, y, simulationData);
-      setHoveredNode(nodeAtPosition?.id || null);
-    }, 16), // ~60 FPS
-    [simulationData, isPanning, getNodeAtPosition]
-  );
-
-  // Handle mouse leave
-  const handleMouseLeave = useCallback(() => {
-    setHoveredNode(null);
+    return links;
   }, []);
 
-  // Handle node click
-  const handleNodeClick = useCallback((nodeId) => {
-    setSelectedEntry(selectedEntry === nodeId ? null : nodeId);
-  }, [selectedEntry, setSelectedEntry]);
+  // Initialize D3 force simulation
+  const initializeSimulation = useCallback(() => {
+    if (!svgRef.current) return;
 
-  // Handle node edit
-  const handleNodeEdit = useCallback((nodeId) => {
-    setEditingEntry(nodeId);
-    // You could open a modal or inline editor here
-    if (onEntryUpdate) {
-      onEntryUpdate(nodeId, 'edit');
-    }
-  }, [setEditingEntry, onEntryUpdate]);
+    const nodes = convertEntriesToNodes(entries);
+    const links = createTimelineLinks(nodes);
+    
+    nodesRef.current = nodes;
+    linksRef.current = links;
 
-  // Handle node delete
-  const handleNodeDelete = useCallback((nodeId) => {
-    deleteEntry(nodeId);
-    if (onEntryDelete) {
-      onEntryDelete(nodeId);
-    }
-  }, [deleteEntry, onEntryDelete]);
+    // Create force simulation
+    const simulation = forceSimulation(nodes)
+      .force("link", forceLink(links).id(d => d.id).distance(80))
+      .force("charge", forceManyBody().strength(-300))
+      .force("x", forceX(width / 2).strength(0.1))
+      .force("y", forceY(height / 2).strength(0.1))
+      .velocityDecay(0.4)
+      .alphaDecay(0.02);
 
-  // Handle node pin/unpin
-  const handleNodePin = useCallback((nodeId, x, y) => {
-    pinNode(nodeId, x, y);
-  }, [pinNode]);
+    simulationRef.current = simulation;
 
-  const handleNodeUnpin = useCallback((nodeId) => {
-    unpinNode(nodeId);
-  }, [unpinNode]);
+    // Setup SVG
+    const svg = select(svgRef.current)
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height]);
 
-  // Add new entry
-  const handleAddEntry = useCallback(() => {
-    const newEntry = addEntry({
-      title: `Entry ${entries.length + 1}`,
-      patient_narrative: '',
-      clinical_notes: '',
-      timestamp: new Date().toISOString()
+    // Clear existing content
+    svg.selectAll("*").remove();
+
+    // Add timeline path (subtle guide)
+    const linkGroup = svg.append("g")
+      .attr("class", "timeline-links")
+      .attr("stroke", "#64748b")
+      .attr("stroke-opacity", 0.3)
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "5,5");
+
+    const link = linkGroup.selectAll("line")
+      .data(links)
+      .join("line");
+
+    // Add nodes
+    const nodeGroup = svg.append("g")
+      .attr("class", "timeline-nodes");
+
+    const node = nodeGroup.selectAll("circle")
+      .data(nodes)
+      .join("circle")
+      .attr("r", 12)
+      .attr("fill", d => color(d.type))
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 2)
+      .style("cursor", "pointer")
+      .style("transition", "all 0.2s ease");
+
+    // Add node labels
+    const labels = nodeGroup.selectAll("text")
+      .data(nodes)
+      .join("text")
+      .text(d => d.title)
+      .attr("text-anchor", "middle")
+      .attr("dy", -20)
+      .attr("font-size", "12px")
+      .attr("fill", "#374151")
+      .style("pointer-events", "none")
+      .style("opacity", 0)
+      .style("transition", "opacity 0.2s ease");
+
+    // Drag behavior implementation
+    const dragBehavior = drag()
+      .on("start", (event, d) => {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+        
+        // Visual feedback
+        select(event.sourceEvent.target)
+          .transition()
+          .duration(200)
+          .attr("r", 16)
+          .attr("stroke-width", 3);
+      })
+      .on("drag", (event, d) => {
+        d.fx = event.x;
+        d.fy = event.y;
+      })
+      .on("end", (event, d) => {
+        if (!event.active) simulation.alphaTarget(0);
+        
+        // Visual feedback
+        select(event.sourceEvent.target)
+          .transition()
+          .duration(200)
+          .attr("r", 12)
+          .attr("stroke-width", 2);
+      });
+
+    // Apply drag behavior to nodes
+    node.call(dragBehavior);
+
+    // Click to pin/unpin nodes
+    node.on("click", (event, d) => {
+      event.stopPropagation();
+      const isPinned = pinnedNodes.has(d.id);
+      
+      if (isPinned) {
+        // Unpin node
+        d.fx = null;
+        d.fy = null;
+        setPinnedNodes(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(d.id);
+          return newSet;
+        });
+        
+        // Visual feedback - remove pin indicator
+        select(event.target)
+          .transition()
+          .duration(300)
+          .attr("stroke", "#fff");
+          
+      } else {
+        // Pin node
+        d.fx = d.x;
+        d.fy = d.y;
+        setPinnedNodes(prev => new Set([...prev, d.id]));
+        
+        // Visual feedback - add pin indicator
+        select(event.target)
+          .transition()
+          .duration(300)
+          .attr("stroke", "#f59e0b")
+          .attr("stroke-width", 3);
+      }
+      
+      simulation.restart();
     });
 
+    // Hover effects
+    node
+      .on("mouseenter", (event, d) => {
+        setHoveredNode(d.id);
+        
+        // Smooth hover transition
+        select(event.target)
+          .transition()
+          .duration(200)
+          .attr("r", 16)
+          .style("filter", "drop-shadow(0 0 10px rgba(0,0,0,0.3))");
+          
+        // Show label
+        labels.filter(labelData => labelData.id === d.id)
+          .transition()
+          .duration(200)
+          .style("opacity", 1);
+      })
+      .on("mouseleave", (event, d) => {
+        if (hoveredNode === d.id) {
+          setHoveredNode(null);
+        }
+        
+        // Smooth hover out transition
+        select(event.target)
+          .transition()
+          .duration(200)
+          .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
+          .style("filter", "none");
+          
+        // Hide label
+        labels.filter(labelData => labelData.id === d.id)
+          .transition()
+          .duration(200)
+          .style("opacity", 0);
+      });
+
+    // Update positions on simulation tick
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+        
+      labels
+        .attr("x", d => d.x)
+        .attr("y", d => d.y - 20);
+    });
+
+    return simulation;
+  }, [entries, width, height, color, pinnedNodes, hoveredNode, convertEntriesToNodes, createTimelineLinks]);
+
+  // Initialize simulation when entries change
+  useEffect(() => {
+    if (entries.length > 0) {
+      initializeSimulation();
+    }
+    
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
+    };
+  }, [entries, initializeSimulation]);
+
+  // Handle adding new entry
+  const handleAddEntry = useCallback(() => {
+    const newEntry = {
+      id: `entry-${Date.now()}`,
+      title: `Entry ${entries.length + 1}`,
+      type: 'note',
+      content: '',
+      timestamp: new Date().toISOString(),
+      patient_narrative: '',
+      clinical_notes: ''
+    };
+    
+    const updatedEntries = [...entries, newEntry];
+    setEntries(updatedEntries);
+    
     if (onEntryAdd) {
       onEntryAdd(newEntry);
     }
-  }, [addEntry, entries.length, onEntryAdd]);
+  }, [entries, onEntryAdd]);
 
-  // Reset timeline layout
-  const handleReset = useCallback(() => {
-    // Reset all pinned nodes
-    simulationData.forEach(node => {
-      if (node.fx !== undefined || node.fy !== undefined) {
-        unpinNode(node.id);
-      }
-    });
+  // Handle reset layout
+  const handleResetLayout = useCallback(() => {
+    // Clear all pinned nodes
+    setPinnedNodes(new Set());
     
-    // Restart simulation
-    updateSimulation(timelinePositions);
-  }, [simulationData, unpinNode, updateSimulation, timelinePositions]);
+    // Reset node positions and restart simulation
+    if (simulationRef.current && nodesRef.current) {
+      nodesRef.current.forEach(node => {
+        node.fx = null;
+        node.fy = null;
+        node.x = width / 2 + (Math.random() - 0.5) * 200;
+        node.y = height / 2 + (Math.random() - 0.5) * 200;
+      });
+      
+      simulationRef.current.alpha(1).restart();
+    }
+  }, [width, height]);
+
+  // Get hovered node data for cards
+  const hoveredNodeData = hoveredNode ? 
+    nodesRef.current.find(node => node.id === hoveredNode) : null;
 
   return (
     <div className={`relative ${className}`}>
-      {/* Canvas Container */}
+      {/* SVG Container for D3 Physics Timeline */}
       <div
-        ref={containerRef}
         className="relative border border-slate-700 rounded-lg overflow-hidden bg-slate-900/50"
         style={{ width, height }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
       >
-        {/* Canvas */}
-        <canvas
-          ref={canvasRef}
-          width={width}
-          height={height}
-          className="absolute inset-0 cursor-grab active:cursor-grabbing"
+        <svg
+          ref={svgRef}
+          className="absolute inset-0"
           style={{ width: `${width}px`, height: `${height}px` }}
         />
 
-        {/* Interactive Node Overlays */}
-        <AnimatePresence>
-          {simulationData.map((node) => (
-            <TimelineNode
-              key={node.id}
-              node={node}
-              isSelected={selectedEntry === node.id}
-              isHovered={hoveredNode === node.id}
-              isPinned={node.fx !== undefined}
-              onSelect={handleNodeClick}
-              onEdit={handleNodeEdit}
-              onDelete={handleNodeDelete}
-              onPin={handleNodePin}
-              onUnpin={handleNodeUnpin}
-              canvasRef={canvasRef}
-            />
-          ))}
-        </AnimatePresence>
-
         {/* Hover Cards */}
         <AnimatePresence>
-          {hoveredNode && simulationData.map((node) => {
-            if (node.id !== hoveredNode) return null;
-            
-            const patientPosition = calculateCardPosition(node, 'patient');
-            const clinicianPosition = calculateCardPosition(node, 'clinical');
-            
-            return (
-              <React.Fragment key={`cards-${node.id}`}>
-                <PatientCard
-                  entry={node.data}
-                  position={patientPosition}
-                  isVisible={true}
-                  onEdit={handleNodeEdit}
-                  isLoading={isLoading}
-                />
-                <ClinicianCard
-                  entry={node.data}
-                  position={clinicianPosition}
-                  isVisible={true}
-                  onEdit={handleNodeEdit}
-                  isLoading={isLoading}
-                />
-              </React.Fragment>
-            );
-          })}
+          {hoveredNodeData && (
+            <React.Fragment>
+              <PatientCard
+                entry={hoveredNodeData.data}
+                position={{
+                  x: hoveredNodeData.x - 160,
+                  y: hoveredNodeData.y,
+                  side: 'left'
+                }}
+                isVisible={true}
+                onEdit={() => {}}
+                isLoading={false}
+              />
+              <ClinicianCard
+                entry={hoveredNodeData.data}
+                position={{
+                  x: hoveredNodeData.x + 20,
+                  y: hoveredNodeData.y,
+                  side: 'right'
+                }}
+                isVisible={true}
+                onEdit={() => {}}
+                isLoading={false}
+              />
+            </React.Fragment>
+          )}
         </AnimatePresence>
-
-        {/* Loading Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center">
-            <div className="text-white text-sm">Loading timeline data...</div>
-          </div>
-        )}
       </div>
 
       {/* Controls */}
@@ -250,7 +374,7 @@ const ModularAngularTimeline = ({
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleReset}
+            onClick={handleResetLayout}
             className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors flex items-center gap-2 text-sm"
           >
             <RotateCcw size={16} />
@@ -258,17 +382,25 @@ const ModularAngularTimeline = ({
           </motion.button>
         </div>
 
-        <div className="text-xs text-slate-400">
-          {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
-          {selectedEntry && ' • 1 selected'}
+        <div className="text-xs text-slate-400 flex items-center gap-4">
+          <span>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
+          <span className="flex items-center gap-1">
+            <Pin size={12} />
+            {pinnedNodes.size} pinned
+          </span>
         </div>
+      </div>
+
+      {/* Instructions */}
+      <div className="mt-2 text-xs text-slate-500">
+        <p>• <strong>Drag</strong> nodes to reposition • <strong>Click</strong> to pin/unpin • <strong>Hover</strong> for details</p>
       </div>
     </div>
   );
 };
 
 // For backward compatibility, export with original name
-const AngularTimeline = ModularAngularTimeline;
+const AngularTimeline = D3PhysicsTimeline;
 AngularTimeline.displayName = 'AngularTimeline';
 
 export default AngularTimeline;
