@@ -921,30 +921,6 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
                     <div className="text-sm text-gray-500">Start with an empty node.</div>
                   </div>
                 </button>
-
-                {/* Filtered Templates */}
-                {filteredTemplates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleFinalSelect(template.id)}
-                    className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
-                  >
-                    <div className="bg-indigo-100 p-2 rounded-lg text-indigo-600">
-                      <FileText size={20} />
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-800">{template.name}</div>
-                      <div className="text-sm text-gray-500 truncate">{template.data?.description || template.data?.abstract || template.data?.assessment_plan || 'No description'}</div>
-
-                    </div>
-                  </button>
-                ))}
-
-                {filteredTemplates.length === 0 && (
-                  <div className="text-center text-sm text-gray-500 py-4">
-                    No templates found for this node type.
-                  </div>
-                )}
               </div>
             )}
           </div>
