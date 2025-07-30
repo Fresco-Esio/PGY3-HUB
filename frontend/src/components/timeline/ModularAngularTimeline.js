@@ -73,7 +73,7 @@ const TimelineHoverCard = ({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
-      className={`absolute z-50 ${bgColor} backdrop-blur-md rounded-lg border-2 ${borderColor} shadow-xl ${glowColor} p-3 w-64 cursor-pointer`}
+      className={`absolute z-50 ${bgColor} ${cardOpacity} ${editingStyles} backdrop-blur-md rounded-lg border-2 ${borderColor} shadow-xl ${glowColor} p-3 w-64 cursor-pointer`}
       style={{
         left: position.x,
         top: position.y,
