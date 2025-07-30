@@ -2176,14 +2176,6 @@ useEffect(() => {
   useEffect(() => {
     // Load initial mind map data
     loadMindMapData();
-    
-    // Load templates from a source (e.g., API or localStorage)
-    // For now, using mock data
-    setTemplates([
-      { id: 'template1', name: 'Schizophrenia Workup', nodeType: 'case', data: { primary_diagnosis: 'Schizophrenia', chief_complaint: 'Auditory hallucinations' } },
-      { id: 'template2', name: 'MDD Follow-up', nodeType: 'case', data: { primary_diagnosis: 'Major Depressive Disorder', status: 'follow_up' } },
-      { id: 'template3', name: 'CBT for Anxiety', nodeType: 'topic', data: { title: 'CBT for Anxiety', category: 'Anxiety Disorders' } }
-    ]);
   }, []); // Run only once on mount
 
   // Helper function to check if a node matches the search query
