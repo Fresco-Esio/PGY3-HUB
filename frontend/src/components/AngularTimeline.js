@@ -11,7 +11,8 @@ import {
   Brain,
   Pin
 } from 'lucide-react';
-import { select, drag } from 'd3-selection';
+import { select } from 'd3-selection';
+import { drag } from 'd3-drag';
 import { forceSimulation, forceManyBody, forceCenter, forceCollide } from 'd3-force';
 
 // Minimal animation variants
