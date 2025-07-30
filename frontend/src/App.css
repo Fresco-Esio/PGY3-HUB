@@ -50,6 +50,38 @@ body {
   background: #94a3b8;
 }
 
+/* Minimalist Timeline Scrollbar */
+.timeline-scroll-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.timeline-scroll-container::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.3);
+  border-radius: 3px;
+}
+
+.timeline-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.6);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.timeline-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
+.timeline-scroll-container::-webkit-scrollbar-corner {
+  background: rgba(30, 41, 59, 0.3);
+}
+
+/* Firefox scrollbar for timeline */
+.timeline-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.6) rgba(30, 41, 59, 0.3);
+}
+}
+
 /* Timeline specific scrollbar styles */
 .timeline-scroll::-webkit-scrollbar {
   width: 12px;
