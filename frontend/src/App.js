@@ -1956,6 +1956,67 @@ useEffect(() => {
     addToast('Mind map cleared successfully', 'success');
   }, [setNodes, setEdges, autoSaveMindMapData, addToast]);
 
+  const addNewNode = useCallback((nodeType) => {
+    const dataId = Date.now();
+    const id = `${nodeType}-${dataId}`;
+    
+    // Create node data object with appropriate fields based on type
+    let nodeData = { id: dataId, label: `New ${nodeType}` };
+    
+    // For case nodes, add structured fields
+    if (nodeType === 'case') {
+      nodeData = {
+        ...nodeData,
+        chiefComplaint: '',
+        initialPresentation: '',
+        currentPresentation: '',
+        medicationHistory: '',
+        therapyProgress: '',
+        defensePatterns: '',
+        clinicalReflection: ''
+      };
+    }
+    
+    // Calculate grid-based position for new nodes to avoid clustering
+    // Use current data count instead of nodes.length for more accurate positioning
+    const currentDataCount = (mindMapData.topics?.length || 0) + 
+                           (mindMapData.cases?.length || 0) + 
+                           (mindMapData.tasks?.length || 0) + 
+                           (mindMapData.literature?.length || 0);
+    
+    const gridSize = Math.ceil(Math.sqrt(currentDataCount + 1));
+    const nodeSpacing = 280;
+    const offsetX = 400; // Offset from left sidebar
+    const offsetY = 150; // Offset from top
+    
+    const gridPosition = {
+      x: (currentDataCount % gridSize) * nodeSpacing + offsetX,
+      y: Math.floor(currentDataCount / gridSize) * nodeSpacing + offsetY
+    };
+    
+    const newNode = {
+      id,
+      type: nodeType,
+      position: gridPosition,
+      data: { ...nodeData, onDelete: () => handleDeleteNode(id) }
+    };
+
+    setMindMapData(d => {
+      const key = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
+      const dataToAdd = { ...newNode.data, position: newNode.position };
+      delete dataToAdd.onDelete;
+      const updatedData = {
+        ...d,
+        [key]: [...(d[key] || []), dataToAdd]
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+
+    setNodes(n => n.concat(newNode));
+    addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} added successfully`, 'success');
+  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, setNodes, addToast]);
+
   const handleNodesChange = useCallback((changes) => {
     // Apply the node changes to React Flow state immediately - this is critical!
     onNodesChange(changes);
