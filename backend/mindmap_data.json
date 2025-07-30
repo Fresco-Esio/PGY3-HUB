@@ -872,6 +872,864 @@
       "timeline": [],
       "created_at": "2025-07-30T02:32:42.833778",
       "updated_at": "2025-07-30T19:08:20.704000+00:00"
+    },
+    {
+      "id": "35d9ee30-20d6-48c1-ba8b-dacd85685cb7",
+      "case_id": "TEST-TIMELINE-1753902861",
+      "encounter_date": "2025-07-30T19:14:21.992719",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Generalized Anxiety Disorder"
+      ],
+      "age": 28,
+      "gender": "Female",
+      "chief_complaint": "Feeling depressed and anxious for the past 3 months",
+      "initial_presentation": "Patient presents with persistent low mood and anxiety",
+      "current_presentation": "Symptoms improving with treatment",
+      "medication_history": "No prior psychiatric medications",
+      "therapy_progress": "Engaged in CBT, showing good progress",
+      "defense_patterns": "Intellectualization, some avoidance",
+      "clinical_reflection": "Complex case requiring integrated approach",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 500.0,
+        "y": 300.0
+      },
+      "timeline": [
+        {
+          "id": "9b8cd94e-23ca-427d-96a3-034b4e7a495c",
+          "type": "Assessment",
+          "timestamp": "2025-07-30T19:14:21.992688",
+          "content": "Updated: Initial psychiatric evaluation completed with comprehensive assessment",
+          "patient_narrative": "Patient reports feeling overwhelmed and anxious",
+          "clinical_notes": "Updated: MSE shows significant improvement",
+          "author": "Dr. Smith",
+          "metadata": {
+            "session_duration": 60,
+            "location": "Outpatient Clinic",
+            "priority": "high"
+          }
+        },
+        {
+          "id": "ad80f04f-29a1-4787-9ce2-067c40a45b05",
+          "type": "Medication",
+          "timestamp": "2025-07-30T19:14:21.992702",
+          "content": "Started on Sertraline 50mg daily",
+          "patient_narrative": "Patient agrees to medication trial",
+          "clinical_notes": "Discussed side effects and monitoring plan",
+          "author": "Dr. Smith",
+          "metadata": {
+            "medication": "Sertraline",
+            "dosage": "50mg",
+            "frequency": "daily"
+          }
+        },
+        {
+          "id": "c65be782-af48-45b9-a429-917784dbac32",
+          "type": "Therapy",
+          "timestamp": "2025-07-30T19:14:21.992714",
+          "content": "CBT session focused on anxiety management",
+          "patient_narrative": "Patient engaged well, practiced breathing exercises",
+          "clinical_notes": "Good therapeutic alliance, homework assigned",
+          "author": "Dr. Johnson",
+          "metadata": {
+            "therapy_type": "CBT",
+            "session_number": 1,
+            "homework_assigned": true
+          }
+        },
+        {
+          "id": "0a138e39-568b-4971-bbb1-8ad340ee38cf",
+          "type": "Follow-up",
+          "timestamp": "2025-07-30T19:14:22.042637",
+          "content": "Two-week follow-up appointment",
+          "patient_narrative": "Patient reports improved mood and energy",
+          "clinical_notes": "Medication well-tolerated, continue current regimen",
+          "author": "Dr. Smith",
+          "metadata": {
+            "follow_up_type": "medication_check",
+            "weeks_since_start": 2,
+            "side_effects": "none_reported"
+          }
+        }
+      ],
+      "created_at": "2025-07-30T19:14:21.992724",
+      "updated_at": "2025-07-30T19:14:22.042649"
+    },
+    {
+      "id": "3baa11c1-f52f-40a6-9ae4-f09102c84498",
+      "case_id": "MALFORMED-TEST",
+      "encounter_date": "2025-07-30T19:14:22.095409",
+      "primary_diagnosis": "Test Diagnosis",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Test complaint",
+      "initial_presentation": null,
+      "current_presentation": null,
+      "medication_history": null,
+      "therapy_progress": null,
+      "defense_patterns": null,
+      "clinical_reflection": null,
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeline": [
+        {
+          "timestamp": "2025-07-30T19:14:22.095419",
+          "content": "Malformed entry"
+        }
+      ],
+      "created_at": "2025-07-30T19:14:22.095430",
+      "updated_at": "2025-07-30T19:14:22.095432"
+    },
+    {
+      "id": "358f4a6a-b002-42f4-a73b-2821d945787c",
+      "case_id": "LARGE-TIMELINE-TEST",
+      "encounter_date": "2025-07-30T19:14:22.120224",
+      "primary_diagnosis": "Test Diagnosis",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Test complaint",
+      "initial_presentation": null,
+      "current_presentation": null,
+      "medication_history": null,
+      "therapy_progress": null,
+      "defense_patterns": null,
+      "clinical_reflection": null,
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeline": [
+        {
+          "id": "4b3a4293-9747-452f-b48a-fcfd04dae5ea",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119877",
+          "content": "Timeline entry 1 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 1",
+          "clinical_notes": "Clinical notes for entry 1",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 1,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "f6876a3f-ce4e-478d-b333-8b46f6ac0663",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119895",
+          "content": "Timeline entry 2 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 2",
+          "clinical_notes": "Clinical notes for entry 2",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 2,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "a412e7b3-2395-4c17-b74e-deb41c823f12",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119902",
+          "content": "Timeline entry 3 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 3",
+          "clinical_notes": "Clinical notes for entry 3",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 3,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "1dd87856-9cd6-49f6-9f78-3171372a9f19",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119909",
+          "content": "Timeline entry 4 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 4",
+          "clinical_notes": "Clinical notes for entry 4",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 4,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "bdde27eb-7d77-4f1b-8b0a-a2beea51ea26",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119915",
+          "content": "Timeline entry 5 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 5",
+          "clinical_notes": "Clinical notes for entry 5",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 5,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "bbdc2336-b7ba-4dca-ab44-4093d5c4c3df",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119921",
+          "content": "Timeline entry 6 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 6",
+          "clinical_notes": "Clinical notes for entry 6",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 6,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "fe28407f-c031-4624-937b-32edc3030eb8",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119928",
+          "content": "Timeline entry 7 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 7",
+          "clinical_notes": "Clinical notes for entry 7",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 7,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "3dde9ab4-d50e-4606-b1c8-7604b2d2f2fd",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119938",
+          "content": "Timeline entry 8 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 8",
+          "clinical_notes": "Clinical notes for entry 8",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 8,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "2c8e717c-c788-470c-b1c9-5ff965f4ef35",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119945",
+          "content": "Timeline entry 9 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 9",
+          "clinical_notes": "Clinical notes for entry 9",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 9,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "51cf4cc8-b9cb-4178-991d-30b293718227",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119951",
+          "content": "Timeline entry 10 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 10",
+          "clinical_notes": "Clinical notes for entry 10",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 10,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "9bf3891d-4155-476a-bd97-72496fafaf0f",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119957",
+          "content": "Timeline entry 11 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 11",
+          "clinical_notes": "Clinical notes for entry 11",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 11,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "d3d3cff1-bedf-4b59-a457-394edb78d164",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119963",
+          "content": "Timeline entry 12 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 12",
+          "clinical_notes": "Clinical notes for entry 12",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 12,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "b9951794-0966-427e-a332-c4ce78317afa",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119969",
+          "content": "Timeline entry 13 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 13",
+          "clinical_notes": "Clinical notes for entry 13",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 13,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "75a0efce-9da2-4b13-a5d8-d962cbab90ad",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119975",
+          "content": "Timeline entry 14 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 14",
+          "clinical_notes": "Clinical notes for entry 14",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 14,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "a5561fe4-4031-41a0-9357-98754d4708eb",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119981",
+          "content": "Timeline entry 15 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 15",
+          "clinical_notes": "Clinical notes for entry 15",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 15,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "00c181ce-4dc7-4ad5-b7d0-5440921aed82",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.119998",
+          "content": "Timeline entry 16 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 16",
+          "clinical_notes": "Clinical notes for entry 16",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 16,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "27c1b66a-720c-4cb9-8023-66d783d468ad",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120004",
+          "content": "Timeline entry 17 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 17",
+          "clinical_notes": "Clinical notes for entry 17",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 17,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "0482e6da-97e4-4d3f-9a60-046a2f9faccf",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120011",
+          "content": "Timeline entry 18 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 18",
+          "clinical_notes": "Clinical notes for entry 18",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 18,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "0c7f86d7-a5c2-4bfd-bc4e-54f48d943565",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120017",
+          "content": "Timeline entry 19 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 19",
+          "clinical_notes": "Clinical notes for entry 19",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 19,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "a96fc7ce-1518-4169-b849-0efe4c527e87",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120023",
+          "content": "Timeline entry 20 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 20",
+          "clinical_notes": "Clinical notes for entry 20",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 20,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "bfc19677-8f30-4359-8ef6-23cb7ed06f23",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120029",
+          "content": "Timeline entry 21 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 21",
+          "clinical_notes": "Clinical notes for entry 21",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 21,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "dab99919-35b7-470b-b6e8-1cc5fc96a42e",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120035",
+          "content": "Timeline entry 22 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 22",
+          "clinical_notes": "Clinical notes for entry 22",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 22,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "ee223f79-8f2c-4107-91ef-0246c5ae24b2",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120041",
+          "content": "Timeline entry 23 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 23",
+          "clinical_notes": "Clinical notes for entry 23",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 23,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "c1502f96-f3c9-4695-bd5b-418156e373a5",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120047",
+          "content": "Timeline entry 24 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 24",
+          "clinical_notes": "Clinical notes for entry 24",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 24,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "a2d54ebf-5296-4105-a710-c59ba49a145b",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120067",
+          "content": "Timeline entry 25 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 25",
+          "clinical_notes": "Clinical notes for entry 25",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 25,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "3d54e233-d7f3-4dd7-99d8-ebb0407bf830",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120074",
+          "content": "Timeline entry 26 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 26",
+          "clinical_notes": "Clinical notes for entry 26",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 26,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "52a98b4d-048b-4243-8565-4bcac351e319",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120079",
+          "content": "Timeline entry 27 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 27",
+          "clinical_notes": "Clinical notes for entry 27",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 27,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "ad799697-a950-4e64-b4fd-db4116073130",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120085",
+          "content": "Timeline entry 28 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 28",
+          "clinical_notes": "Clinical notes for entry 28",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 28,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "3140d0b9-e689-4388-870a-d0fa350e936b",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120091",
+          "content": "Timeline entry 29 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 29",
+          "clinical_notes": "Clinical notes for entry 29",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 29,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "7dddb0dd-61fd-469c-b091-4adb233c238c",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120097",
+          "content": "Timeline entry 30 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 30",
+          "clinical_notes": "Clinical notes for entry 30",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 30,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "d6d4bacb-11f9-4c2a-b5ad-0abaac33c947",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120103",
+          "content": "Timeline entry 31 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 31",
+          "clinical_notes": "Clinical notes for entry 31",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 31,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "65851d58-979a-4150-8351-57b803fcee7a",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120109",
+          "content": "Timeline entry 32 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 32",
+          "clinical_notes": "Clinical notes for entry 32",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 32,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "14e5224b-30b6-4492-a326-91043a487f29",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120115",
+          "content": "Timeline entry 33 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 33",
+          "clinical_notes": "Clinical notes for entry 33",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 33,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "1816c065-7241-4934-b255-bae14a38c3ae",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120122",
+          "content": "Timeline entry 34 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 34",
+          "clinical_notes": "Clinical notes for entry 34",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 34,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "7c1c4ac1-7dae-45d0-a10d-bebc23331cfb",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120127",
+          "content": "Timeline entry 35 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 35",
+          "clinical_notes": "Clinical notes for entry 35",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 35,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "0ed11523-cbcc-443e-90e2-dc6c3f840d58",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120134",
+          "content": "Timeline entry 36 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 36",
+          "clinical_notes": "Clinical notes for entry 36",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 36,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "bb54a199-4639-4771-b1ee-a2ba9aa1bfbe",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120140",
+          "content": "Timeline entry 37 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 37",
+          "clinical_notes": "Clinical notes for entry 37",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 37,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "d7351292-a1c9-48b0-b9a8-97e4ff5cd186",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120146",
+          "content": "Timeline entry 38 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 38",
+          "clinical_notes": "Clinical notes for entry 38",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 38,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "7a5caf84-b57f-4be0-bee3-6ff2f20715f7",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120151",
+          "content": "Timeline entry 39 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 39",
+          "clinical_notes": "Clinical notes for entry 39",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 39,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "6632a4ba-57a1-431e-b03a-4d82223992d9",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120157",
+          "content": "Timeline entry 40 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 40",
+          "clinical_notes": "Clinical notes for entry 40",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 40,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "5918329a-0cb9-413f-b908-a7cd3711e827",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120163",
+          "content": "Timeline entry 41 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 41",
+          "clinical_notes": "Clinical notes for entry 41",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 41,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "544e5afa-a642-4212-a93b-0958c2c3fdf9",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120169",
+          "content": "Timeline entry 42 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 42",
+          "clinical_notes": "Clinical notes for entry 42",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 42,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "c379e860-4907-481b-b9dd-7cb4bd2c74a4",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120176",
+          "content": "Timeline entry 43 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 43",
+          "clinical_notes": "Clinical notes for entry 43",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 43,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "d4fb7133-2f3f-48d5-94dc-b9354daac0cd",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120182",
+          "content": "Timeline entry 44 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 44",
+          "clinical_notes": "Clinical notes for entry 44",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 44,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "3f6a6834-bba2-4d40-8a90-92796bc77df3",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120188",
+          "content": "Timeline entry 45 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 45",
+          "clinical_notes": "Clinical notes for entry 45",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 45,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "c7d3f7b3-30e4-431f-834f-4a2e88a446db",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120194",
+          "content": "Timeline entry 46 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 46",
+          "clinical_notes": "Clinical notes for entry 46",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 46,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "747d2594-878d-4154-8861-c243080ba118",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120199",
+          "content": "Timeline entry 47 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 47",
+          "clinical_notes": "Clinical notes for entry 47",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 47,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "31280426-a0e6-4c69-8cbe-1ca2fb9559fd",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120205",
+          "content": "Timeline entry 48 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 48",
+          "clinical_notes": "Clinical notes for entry 48",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 48,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "2120094b-0a7d-4b00-802a-14cb0f21b2f4",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120211",
+          "content": "Timeline entry 49 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 49",
+          "clinical_notes": "Clinical notes for entry 49",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 49,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "id": "83356b6e-5122-4492-9e1e-eb77eb341b86",
+          "type": "Note",
+          "timestamp": "2025-07-30T19:14:22.120217",
+          "content": "Timeline entry 50 with substantial content to test data handling capacity",
+          "patient_narrative": "Patient narrative for entry 50",
+          "clinical_notes": "Clinical notes for entry 50",
+          "author": "Dr. Test",
+          "metadata": {
+            "entry_number": 50,
+            "test_data": true,
+            "large_field": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        }
+      ],
+      "created_at": "2025-07-30T19:14:22.120226",
+      "updated_at": "2025-07-30T19:14:22.120227"
     }
   ],
   "tasks": [
@@ -955,6 +1813,14 @@
       "source": "c11fdd97-b59b-43c8-a53b-e5d42facd42e",
       "target": "6a36ecb7-e698-4b81-9683-2dd0825a6160",
       "label": "Task-Literature Connection"
+    },
+    {
+      "id": "eecb2d4b794fd499e9ee2eab237772cca",
+      "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
+      "target": "35d9ee30-20d6-48c1-ba8b-dacd85685cb7",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "label": "Topic-Case Timeline Connection"
     }
   ]
 }
