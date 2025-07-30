@@ -465,7 +465,7 @@ const D3PhysicsTimeline = ({
         handleNodeLeave();
         // Direct DOM manipulation without transitions
         select(event.target)
-          .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
+          .attr("r", 12)
           .style("filter", "none");
       });
 
