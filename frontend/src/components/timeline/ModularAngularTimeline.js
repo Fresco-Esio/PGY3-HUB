@@ -349,7 +349,7 @@ const D3PhysicsTimeline = ({
     }, 50); // Shorter delay for more responsive dismissal
   }, []);
 
-  // Initialize D3 force simulation - prevent unnecessary re-initializations
+  // Initialize D3 force simulation with zigzag constraints
   const initializeSimulation = useCallback(() => {
     if (!svgRef.current) return;
 
@@ -361,12 +361,18 @@ const D3PhysicsTimeline = ({
     nodes.forEach(node => {
       const existing = existingNodes.find(n => n.id === node.id);
       if (existing && !newNodeIds.has(node.id)) {
-        // Preserve existing position but remove any fixed constraints
-        node.x = existing.x || node.x;
-        node.y = existing.y || node.y;
-        // Remove any fixed positioning from previous pin states
-        node.fx = null;
-        node.fy = null;
+        // Preserve existing position but ensure it stays close to zigzag structure
+        const targetX = node.x;
+        const targetY = node.y;
+        node.x = existing.x || targetX;
+        node.y = existing.y || targetY;
+        // Store target positions for constraint forces
+        node.targetX = targetX;
+        node.targetY = targetY;
+      } else {
+        // New nodes start at target position
+        node.targetX = node.x;
+        node.targetY = node.y;
       }
     });
     
@@ -378,14 +384,23 @@ const D3PhysicsTimeline = ({
       simulationRef.current.stop();
     }
 
-    // Create force simulation with gentle physics
+    // Create force simulation with strong zigzag position constraints
     const simulation = forceSimulation(nodes)
-      .force("link", forceLink(links).id(d => d.id).distance(100).strength(0.3))
-      .force("charge", forceManyBody().strength(-200))
-      .force("x", forceX().strength(0.05))
-      .force("y", forceY().strength(0.02))
-      .velocityDecay(0.7)
-      .alphaDecay(0.02);
+      .force("link", forceLink(links)
+        .id(d => d.id)
+        .distance(120)
+        .strength(0.1) // Weaker link force
+      )
+      .force("charge", forceManyBody()
+        .strength(-50) // Weaker repulsion
+        .distanceMax(150)
+      )
+      // Strong position constraints to maintain zigzag
+      .force("x", forceX(d => d.targetX).strength(0.8))
+      .force("y", forceY(d => d.targetY).strength(0.8))
+      .velocityDecay(0.8)
+      .alphaDecay(0.05)
+      .alphaMin(0.001);
 
     simulationRef.current = simulation;
 
