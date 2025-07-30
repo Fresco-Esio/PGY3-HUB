@@ -80,6 +80,20 @@ const TimelineHoverCard = ({
         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
       }}
       onClick={handleCardClick}
+      onMouseEnter={(e) => {
+        e.stopPropagation();
+        // Keep the card visible when hovering over it
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.stopPropagation();
+        // Only dismiss if we're not in editing mode
+        if (!isEditing) {
+          handleNodeLeave();
+        }
+      }}
     >
       {/* Connection line to node - more visible */}
       <div 
