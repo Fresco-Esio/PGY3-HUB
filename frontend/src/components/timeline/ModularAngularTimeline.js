@@ -1,4 +1,4 @@
-// D3 Physics-Based Timeline - Refined implementation with proper UX behavior
+// D3 Physics Timeline - Refined with proper node interactions and card behavior  
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, RotateCcw, Pin, PinOff, Edit3, Save, X } from 'lucide-react';
@@ -9,19 +9,19 @@ import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
 import { easeElastic, easeBackOut } from 'd3-ease';
 
-// Enhanced Hover Cards with editing capabilities
-const EditableHoverCard = ({ 
+// Enhanced Hover Cards with precise corner positioning
+const TimelineHoverCard = ({ 
   entry, 
   position, 
   type, // 'patient' or 'clinical'
   isVisible, 
+  isEditing,
   onEdit,
   onSave,
-  isEditing,
   onCancel
 }) => {
   const [editContent, setEditContent] = useState('');
-  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     if (isEditing) {
@@ -29,113 +29,116 @@ const EditableHoverCard = ({
     }
   }, [isEditing, entry, type]);
 
+  // Handle click outside to save
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isEditing && cardRef.current && !cardRef.current.contains(event.target)) {
+        onSave(entry.id, type, editContent);
+      }
+    };
+
+    if (isEditing) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isEditing, editContent, entry.id, type, onSave]);
+
+  const handleCardClick = (e) => {
+    e.stopPropagation();
+    if (!isEditing) {
+      onEdit(entry.id, type);
+    }
+  };
+
   const handleSave = () => {
     onSave(entry.id, type, editContent);
   };
 
   const cardTitle = type === 'patient' ? 'Patient Narrative' : 'Clinical Notes';
   const cardContent = type === 'patient' ? entry.patient_narrative : entry.clinical_notes;
-  const bgColor = type === 'patient' ? 'bg-green-900/90' : 'bg-blue-900/90';
-  const borderColor = type === 'patient' ? 'border-green-600' : 'border-blue-600';
+  const bgColor = type === 'patient' ? 'bg-green-900/95' : 'bg-blue-900/95';
+  const borderColor = type === 'patient' ? 'border-green-500' : 'border-blue-500';
+  const glowColor = type === 'patient' ? 'shadow-green-500/20' : 'shadow-blue-500/20';
 
   if (!isVisible) return null;
 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 5 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className={`absolute z-50 ${bgColor} backdrop-blur-md rounded-xl border-2 ${borderColor} shadow-2xl p-4 min-w-[280px] max-w-[320px]`}
+        ref={cardRef}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className={`absolute z-50 ${bgColor} backdrop-blur-md rounded-lg border ${borderColor} shadow-xl ${glowColor} p-3 w-64 cursor-pointer`}
         style={{
           left: position.x,
           top: position.y,
-          transform: position.transform || 'translate(-50%, -100%)'
+          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))'
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleCardClick}
       >
-        {/* Connection indicator */}
+        {/* Connection line to node */}
         <div 
-          className={`absolute w-3 h-3 ${type === 'patient' ? 'bg-green-600' : 'bg-blue-600'} rotate-45`}
+          className={`absolute w-0.5 h-6 ${type === 'patient' ? 'bg-green-500' : 'bg-blue-500'}`}
           style={{
-            [position.anchorSide]: '-6px',
-            [position.anchorPosition]: '20px'
+            [position.anchorSide]: '-1px',
+            [position.anchorPosition]: '12px',
+            boxShadow: `0 0 4px ${type === 'patient' ? '#10b981' : '#3b82f6'}`
           }}
         />
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-xs font-semibold text-white flex items-center gap-1">
             {type === 'patient' ? '👤' : '🩺'} {cardTitle}
           </h4>
-          {!isEditing && (
+          {isEditing && (
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => onEdit(entry.id, type)}
-              className="text-slate-300 hover:text-white transition-colors p-1 rounded"
-              title={`Edit ${cardTitle.toLowerCase()}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSave();
+              }}
+              className="text-green-400 hover:text-green-300 transition-colors p-1 rounded"
+              title="Save changes"
             >
-              <Edit3 size={12} />
+              <Save size={10} />
             </motion.button>
           )}
         </div>
 
         {/* Content */}
         {isEditing ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full h-32 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              className="w-full h-20 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs placeholder-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
               placeholder={`Enter ${cardTitle.toLowerCase()}...`}
               autoFocus
+              onClick={(e) => e.stopPropagation()}
             />
-            <div className="flex justify-end gap-2">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onCancel}
-                className="px-3 py-1 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
-              >
-                Cancel
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleSave}
-                className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-1"
-              >
-                <Save size={12} />
-                Save
-              </motion.button>
-            </div>
+            <div className="text-xs text-slate-400">Click outside to save</div>
           </div>
         ) : (
-          <div className="text-slate-300 text-sm leading-relaxed">
+          <div className="text-slate-300 text-xs leading-relaxed">
             {cardContent ? (
-              <div className="max-h-32 overflow-y-auto">
+              <div className="max-h-16 overflow-y-auto">
                 <p>{cardContent}</p>
-                {type === 'patient' && entry.symptoms && (
-                  <div className="mt-2">
-                    <span className="text-xs text-slate-400">Symptoms: </span>
-                    <span className="text-xs">{entry.symptoms.join(', ')}</span>
-                  </div>
-                )}
               </div>
             ) : (
               <p className="text-slate-500 italic">
-                No {cardTitle.toLowerCase()} recorded. Click to add content.
+                Click to add {cardTitle.toLowerCase()}
               </p>
             )}
           </div>
         )}
 
         {/* Timestamp */}
-        {entry.timestamp && (
-          <div className="mt-3 pt-2 border-t border-slate-700">
+        {!isEditing && entry.timestamp && (
+          <div className="mt-2 pt-1 border-t border-slate-700">
             <span className="text-xs text-slate-500">
               {new Date(entry.timestamp).toLocaleString()}
             </span>
@@ -163,78 +166,100 @@ const D3PhysicsTimeline = ({
   const hoverTimeoutRef = useRef(null);
   
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [hoveredLink, setHoveredLink] = useState(null);
   const [pinnedNodes, setPinnedNodes] = useState(new Set());
   const [entries, setEntries] = useState(initialEntries);
   const [editingCard, setEditingCard] = useState(null); // {nodeId, type}
-  const [newNodeAnimations, setNewNodeAnimations] = useState(new Set());
+  const [newNodeIds, setNewNodeIds] = useState(new Set()); // Track genuinely new nodes
 
   // Color scale for different entry types
   const color = scaleOrdinal(schemeCategory10);
 
-  // Convert timeline entries to D3 nodes format
-  const convertEntriesToNodes = useCallback((timelineEntries) => {
-    return timelineEntries.map((entry, index) => ({
+  // Calculate zigzag positions based on chronological order
+  const calculateZigzagPositions = useCallback((timelineEntries) => {
+    const sortedEntries = [...timelineEntries].sort((a, b) => 
+      new Date(a.timestamp) - new Date(b.timestamp)
+    );
+    
+    return sortedEntries.map((entry, index) => ({
+      ...entry,
       id: entry.id || `entry-${index}`,
       title: entry.title || `Entry ${index + 1}`,
       type: entry.type || 'note',
-      content: entry.content || '',
-      timestamp: entry.timestamp || new Date().toISOString(),
+      orderIndex: index,
+      // Zigzag positioning
+      x: width / 2 + (index % 2 === 0 ? -120 : 120),
+      y: 80 + (index * 100),
+      side: index % 2 === 0 ? 'left' : 'right',
       patient_narrative: entry.patient_narrative || '',
       clinical_notes: entry.clinical_notes || '',
       symptoms: entry.symptoms || [],
-      // Position nodes in zigzag pattern for timeline
-      x: width / 2 + (index % 2 === 0 ? -150 : 150) + (Math.random() - 0.5) * 50,
-      y: 100 + (index * 100) + (Math.random() - 0.5) * 20,
-      side: index % 2 === 0 ? 'left' : 'right', // For card positioning
       data: entry
     }));
   }, [width]);
 
-  // Create timeline path links (connecting consecutive entries)
+  // Create timeline path links
   const createTimelineLinks = useCallback((nodes) => {
-    const sortedNodes = [...nodes].sort((a, b) => 
-      new Date(a.timestamp) - new Date(b.timestamp)
-    );
-    
     const links = [];
-    for (let i = 0; i < sortedNodes.length - 1; i++) {
+    for (let i = 0; i < nodes.length - 1; i++) {
       links.push({
-        source: sortedNodes[i].id,
-        target: sortedNodes[i + 1].id,
-        value: 1
+        id: `link-${i}`,
+        source: nodes[i].id,
+        target: nodes[i + 1].id,
+        insertIndex: i + 1 // For inserting new nodes
       });
     }
     return links;
   }, []);
 
-  // Calculate card position based on node position and timeline side
+  // Calculate card position based on node position and zigzag side
   const calculateCardPosition = useCallback((node, cardType) => {
-    const isLeftSide = node.side === 'left';
-    const offset = 25;
-    
-    let position = {
-      x: node.x,
-      y: node.y - 150, // Float above timeline
-    };
+    const isLeftBend = node.side === 'left';
+    let position = {};
 
     if (cardType === 'patient') {
-      // Patient card always goes to the left
-      position.x = node.x - 160;
-      position.transform = 'translate(0, 0)';
-      position.anchorSide = 'right';
-      position.anchorPosition = isLeftSide ? 'bottom' : 'top';
+      if (isLeftBend) {
+        // Left bend: Patient card from bottom-right of node
+        position = {
+          x: node.x + 15,
+          y: node.y + 15,
+          anchorSide: 'left',
+          anchorPosition: 'top'
+        };
+      } else {
+        // Right bend: Patient card from top-right of node  
+        position = {
+          x: node.x + 15,
+          y: node.y - 95,
+          anchorSide: 'left', 
+          anchorPosition: 'bottom'
+        };
+      }
     } else {
-      // Clinical card always goes to the right  
-      position.x = node.x + 25;
-      position.transform = 'translate(0, 0)';
-      position.anchorSide = 'left';
-      position.anchorPosition = isLeftSide ? 'bottom' : 'top';
+      // Clinical card
+      if (isLeftBend) {
+        // Left bend: Clinical card from top-left of node
+        position = {
+          x: node.x - 265,
+          y: node.y - 95,
+          anchorSide: 'right',
+          anchorPosition: 'bottom'
+        };
+      } else {
+        // Right bend: Clinical card from bottom-left of node
+        position = {
+          x: node.x - 265,
+          y: node.y + 15,
+          anchorSide: 'right',
+          anchorPosition: 'top'
+        };
+      }
     }
 
     return position;
   }, []);
 
-  // Handle hover with delay for dismissal
+  // Handle hover with proper timing
   const handleNodeHover = useCallback((nodeId) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
@@ -245,26 +270,26 @@ const D3PhysicsTimeline = ({
   const handleNodeLeave = useCallback(() => {
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredNode(null);
-    }, 150); // 150ms delay as requested
+    }, 100);
   }, []);
 
   // Initialize D3 force simulation
   const initializeSimulation = useCallback(() => {
     if (!svgRef.current) return;
 
-    const nodes = convertEntriesToNodes(entries);
+    const nodes = calculateZigzagPositions(entries);
     const links = createTimelineLinks(nodes);
     
     nodesRef.current = nodes;
     linksRef.current = links;
 
-    // Create force simulation with proper physics
+    // Create force simulation with gentle physics
     const simulation = forceSimulation(nodes)
-      .force("link", forceLink(links).id(d => d.id).distance(100).strength(0.5))
-      .force("charge", forceManyBody().strength(-400))
-      .force("x", forceX(width / 2).strength(0.1))
-      .force("y", forceY(height / 2).strength(0.05))
-      .velocityDecay(0.6)
+      .force("link", forceLink(links).id(d => d.id).distance(100).strength(0.3))
+      .force("charge", forceManyBody().strength(-200))
+      .force("x", forceX().strength(0.05))
+      .force("y", forceY().strength(0.02))
+      .velocityDecay(0.7)
       .alphaDecay(0.02);
 
     simulationRef.current = simulation;
@@ -278,9 +303,8 @@ const D3PhysicsTimeline = ({
     // Clear existing content
     svg.selectAll("*").remove();
 
-    // Add timeline path (subtle guide)
-    const linkGroup = svg.append("g")
-      .attr("class", "timeline-links");
+    // Add timeline path with hover effects
+    const linkGroup = svg.append("g").attr("class", "timeline-links");
 
     const link = linkGroup.selectAll("line")
       .data(links)
@@ -288,11 +312,32 @@ const D3PhysicsTimeline = ({
       .attr("stroke", "#64748b")
       .attr("stroke-opacity", 0.4)
       .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "5,5");
+      .attr("stroke-dasharray", "5,5")
+      .style("cursor", "pointer")
+      .style("transition", "all 0.2s ease")
+      .on("mouseenter", (event, d) => {
+        setHoveredLink(d.id);
+        select(event.target)
+          .attr("stroke-opacity", 0.8)
+          .attr("stroke-width", 3)
+          .style("filter", "drop-shadow(0 0 4px #64748b)");
+      })
+      .on("mouseleave", (event, d) => {
+        setHoveredLink(null);
+        select(event.target)
+          .attr("stroke-opacity", 0.4)
+          .attr("stroke-width", 2)
+          .style("filter", "none");
+      })
+      .on("click", (event, d) => {
+        // Insert new node at this position
+        const midX = (d.source.x + d.target.x) / 2;
+        const midY = (d.source.y + d.target.y) / 2;
+        insertNewNode(d.insertIndex, midX, midY);
+      });
 
     // Add nodes
-    const nodeGroup = svg.append("g")
-      .attr("class", "timeline-nodes");
+    const nodeGroup = svg.append("g").attr("class", "timeline-nodes");
 
     const node = nodeGroup.selectAll("circle")
       .data(nodes)
@@ -302,23 +347,23 @@ const D3PhysicsTimeline = ({
       .attr("stroke", "#fff")
       .attr("stroke-width", 2)
       .style("cursor", "pointer")
-      .style("transition", "all 0.25s ease");
+      .style("transition", "all 0.2s ease");
 
-    // Add subtle animation for new nodes (play once)
+    // ONLY animate genuinely new nodes
     nodes.forEach(nodeData => {
-      if (newNodeAnimations.has(nodeData.id)) {
+      if (newNodeIds.has(nodeData.id)) {
         const nodeElement = node.filter(d => d.id === nodeData.id);
         nodeElement
           .attr("r", 6)
           .attr("opacity", 0.7)
           .transition()
-          .duration(300)
+          .duration(400)
           .ease(easeElastic)
           .attr("r", 12)
           .attr("opacity", 1)
           .on("end", () => {
-            // Remove from animation set after playing once
-            setNewNodeAnimations(prev => {
+            // Remove from new nodes set after animation
+            setNewNodeIds(prev => {
               const newSet = new Set(prev);
               newSet.delete(nodeData.id);
               return newSet;
@@ -327,25 +372,18 @@ const D3PhysicsTimeline = ({
       }
     });
 
-    // Add tooltips on nodes
-    const tooltip = svg.append("g")
-      .attr("class", "tooltips");
-
-    // Drag behavior implementation
+    // Drag behavior with snap-to-zigzag logic
     const dragBehavior = drag()
       .on("start", (event, d) => {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         
-        // Only set fx/fy if not pinned - allow free dragging
         if (!pinnedNodes.has(d.id)) {
           d.fx = d.x;
           d.fy = d.y;
         }
         
-        // Visual feedback
+        // Visual feedback - NO ANIMATION for existing nodes
         select(event.sourceEvent.target)
-          .transition()
-          .duration(200)
           .attr("r", 16)
           .attr("stroke-width", 3)
           .style("filter", "drop-shadow(0 4px 8px rgba(0,0,0,0.3))");
@@ -357,31 +395,34 @@ const D3PhysicsTimeline = ({
       .on("end", (event, d) => {
         if (!event.active) simulation.alphaTarget(0);
         
-        // If not explicitly pinned, allow node to move freely
-        if (!pinnedNodes.has(d.id)) {
+        // Snap to nearest timeline position logic
+        const nearestPosition = findNearestTimelinePosition(event.x, event.y);
+        if (nearestPosition && !pinnedNodes.has(d.id)) {
+          d.fx = nearestPosition.x;
+          d.fy = nearestPosition.y;
+          // Update zigzag structure
+          reorderTimelineStructure(d.id, nearestPosition.index);
+        } else if (!pinnedNodes.has(d.id)) {
           d.fx = null;
           d.fy = null;
         }
         
-        // Visual feedback
+        // Reset visual feedback - NO TRANSITION for existing nodes
         select(event.sourceEvent.target)
-          .transition()
-          .duration(200)
           .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
           .attr("stroke-width", 2)
           .style("filter", "none");
       });
 
-    // Apply drag behavior to nodes
+    // Apply drag behavior
     node.call(dragBehavior);
 
-    // Click to pin/unpin nodes
+    // Click to pin/unpin
     node.on("click", (event, d) => {
       event.stopPropagation();
       const isPinned = pinnedNodes.has(d.id);
       
       if (isPinned) {
-        // Unpin node - allow free movement
         d.fx = null;
         d.fy = null;
         setPinnedNodes(prev => {
@@ -389,50 +430,28 @@ const D3PhysicsTimeline = ({
           newSet.delete(d.id);
           return newSet;
         });
-        
-        // Visual feedback - remove pin indicator
-        select(event.target)
-          .transition()
-          .duration(250)
-          .attr("stroke", "#fff")
-          .attr("stroke-width", 2);
-          
+        select(event.target).attr("stroke", "#fff").attr("stroke-width", 2);
       } else {
-        // Pin node in current position
         d.fx = d.x;
         d.fy = d.y;
         setPinnedNodes(prev => new Set([...prev, d.id]));
-        
-        // Visual feedback - add pin indicator
-        select(event.target)
-          .transition()
-          .duration(250)
-          .attr("stroke", "#f59e0b")
-          .attr("stroke-width", 3);
+        select(event.target).attr("stroke", "#f59e0b").attr("stroke-width", 3);
       }
       
       simulation.restart();
     });
 
-    // Hover effects with proper event handling
+    // Hover effects - NO ANIMATION for existing nodes
     node
       .on("mouseenter", (event, d) => {
         handleNodeHover(d.id);
-        
-        // Smooth hover transition
         select(event.target)
-          .transition()
-          .duration(200)
           .attr("r", 16)
           .style("filter", "drop-shadow(0 0 15px rgba(59, 130, 246, 0.5))");
       })
       .on("mouseleave", (event, d) => {
         handleNodeLeave();
-        
-        // Smooth hover out transition
         select(event.target)
-          .transition()
-          .duration(200)
           .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
           .style("filter", "none");
       });
@@ -451,7 +470,62 @@ const D3PhysicsTimeline = ({
     });
 
     return simulation;
-  }, [entries, width, height, color, pinnedNodes, handleNodeHover, handleNodeLeave, convertEntriesToNodes, createTimelineLinks, newNodeAnimations]);
+  }, [entries, width, height, color, pinnedNodes, newNodeIds, handleNodeHover, handleNodeLeave, calculateZigzagPositions, createTimelineLinks]);
+
+  // Helper functions
+  const findNearestTimelinePosition = useCallback((x, y) => {
+    // Logic to find nearest valid zigzag position
+    const zigzagPositions = calculateZigzagPositions(entries);
+    let nearest = null;
+    let minDistance = Infinity;
+    
+    zigzagPositions.forEach((pos, index) => {
+      const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+      if (distance < minDistance && distance < 100) { // Within snap range
+        minDistance = distance;
+        nearest = { ...pos, index };
+      }
+    });
+    
+    return nearest;
+  }, [entries, calculateZigzagPositions]);
+
+  const reorderTimelineStructure = useCallback((nodeId, newIndex) => {
+    // Reorder entries to maintain zigzag structure
+    const updatedEntries = [...entries];
+    const nodeIndex = updatedEntries.findIndex(entry => entry.id === nodeId);
+    
+    if (nodeIndex !== -1 && newIndex !== nodeIndex) {
+      const [movedEntry] = updatedEntries.splice(nodeIndex, 1);
+      updatedEntries.splice(newIndex, 0, movedEntry);
+      setEntries(updatedEntries);
+    }
+  }, [entries]);
+
+  const insertNewNode = useCallback((insertIndex, x, y) => {
+    const newEntry = {
+      id: `entry-${Date.now()}`,
+      title: `Entry ${entries.length + 1}`,
+      type: 'note',
+      content: '',
+      timestamp: new Date().toISOString(),
+      patient_narrative: '',
+      clinical_notes: '',
+      symptoms: []
+    };
+    
+    // Mark as new for animation
+    setNewNodeIds(prev => new Set([...prev, newEntry.id]));
+    
+    // Insert at specific position
+    const updatedEntries = [...entries];
+    updatedEntries.splice(insertIndex, 0, newEntry);
+    setEntries(updatedEntries);
+    
+    if (onEntryAdd) {
+      onEntryAdd(newEntry);
+    }
+  }, [entries, onEntryAdd]);
 
   // Initialize simulation when entries change
   useEffect(() => {
@@ -467,7 +541,7 @@ const D3PhysicsTimeline = ({
     };
   }, [entries, initializeSimulation]);
 
-  // Handle adding new entry
+  // Handle adding new entry at end
   const handleAddEntry = useCallback(() => {
     const newEntry = {
       id: `entry-${Date.now()}`,
@@ -480,8 +554,7 @@ const D3PhysicsTimeline = ({
       symptoms: []
     };
     
-    // Add to animation set for one-time animation
-    setNewNodeAnimations(prev => new Set([...prev, newEntry.id]));
+    setNewNodeIds(prev => new Set([...prev, newEntry.id]));
     
     const updatedEntries = [...entries, newEntry];
     setEntries(updatedEntries);
@@ -493,22 +566,23 @@ const D3PhysicsTimeline = ({
 
   // Handle reset layout
   const handleResetLayout = useCallback(() => {
-    // Clear all pinned nodes
     setPinnedNodes(new Set());
     
-    // Reset node positions and restart simulation
     if (simulationRef.current && nodesRef.current) {
+      const zigzagPositions = calculateZigzagPositions(entries);
+      
       nodesRef.current.forEach((node, index) => {
         node.fx = null;
         node.fy = null;
-        // Reset to zigzag pattern
-        node.x = width / 2 + (index % 2 === 0 ? -150 : 150) + (Math.random() - 0.5) * 50;
-        node.y = 100 + (index * 100) + (Math.random() - 0.5) * 20;
+        if (zigzagPositions[index]) {
+          node.x = zigzagPositions[index].x;
+          node.y = zigzagPositions[index].y;
+        }
       });
       
       simulationRef.current.alpha(1).restart();
     }
-  }, [width]);
+  }, [entries, calculateZigzagPositions]);
 
   // Handle card editing
   const handleEditCard = useCallback((nodeId, cardType) => {
@@ -534,17 +608,13 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryUpdate]);
 
-  const handleCancelEdit = useCallback(() => {
-    setEditingCard(null);
-  }, []);
-
   // Get hovered node data for cards
   const hoveredNodeData = hoveredNode ? 
     nodesRef.current.find(node => node.id === hoveredNode) : null;
 
   return (
     <div className={`relative ${className}`}>
-      {/* SVG Container for D3 Physics Timeline */}
+      {/* SVG Container */}
       <div
         className="relative border border-slate-700 rounded-lg overflow-visible bg-slate-900/50"
         style={{ width, height }}
@@ -555,29 +625,57 @@ const D3PhysicsTimeline = ({
           style={{ width: `${width}px`, height: `${height}px` }}
         />
 
-        {/* Hover Cards - Float above timeline */}
+        {/* Hover Cards - Only visible on hover */}
         <AnimatePresence>
-          {hoveredNodeData && (
+          {hoveredNodeData && !editingCard && (
             <React.Fragment>
-              <EditableHoverCard
+              <TimelineHoverCard
                 entry={hoveredNodeData}
                 position={calculateCardPosition(hoveredNodeData, 'patient')}
                 type="patient"
                 isVisible={true}
+                isEditing={false}
                 onEdit={handleEditCard}
                 onSave={handleSaveCard}
-                onCancel={handleCancelEdit}
-                isEditing={editingCard?.nodeId === hoveredNodeData.id && editingCard?.type === 'patient'}
+                onCancel={() => setEditingCard(null)}
               />
-              <EditableHoverCard
+              <TimelineHoverCard
                 entry={hoveredNodeData}
                 position={calculateCardPosition(hoveredNodeData, 'clinical')}
                 type="clinical"
                 isVisible={true}
+                isEditing={false}
                 onEdit={handleEditCard}
                 onSave={handleSaveCard}
-                onCancel={handleCancelEdit}
-                isEditing={editingCard?.nodeId === hoveredNodeData.id && editingCard?.type === 'clinical'}
+                onCancel={() => setEditingCard(null)}
+              />
+            </React.Fragment>
+          )}
+        </AnimatePresence>
+
+        {/* Editing Cards */}
+        <AnimatePresence>
+          {editingCard && hoveredNodeData && hoveredNodeData.id === editingCard.nodeId && (
+            <React.Fragment>
+              <TimelineHoverCard
+                entry={hoveredNodeData}
+                position={calculateCardPosition(hoveredNodeData, 'patient')}
+                type="patient"
+                isVisible={editingCard.type === 'patient'}
+                isEditing={editingCard.type === 'patient'}
+                onEdit={handleEditCard}
+                onSave={handleSaveCard}
+                onCancel={() => setEditingCard(null)}
+              />
+              <TimelineHoverCard
+                entry={hoveredNodeData}
+                position={calculateCardPosition(hoveredNodeData, 'clinical')}
+                type="clinical"
+                isVisible={editingCard.type === 'clinical'}
+                isEditing={editingCard.type === 'clinical'}
+                onEdit={handleEditCard}
+                onSave={handleSaveCard}
+                onCancel={() => setEditingCard(null)}
               />
             </React.Fragment>
           )}
@@ -617,10 +715,10 @@ const D3PhysicsTimeline = ({
         </div>
       </div>
 
-      {/* Instructions with improved UX hints */}
+      {/* Instructions */}
       <div className="mt-2 text-xs text-slate-500 space-y-1">
-        <p>• <strong>Drag</strong> nodes to reposition • <strong>Click</strong> to pin/unpin • <strong>Hover</strong> for details</p>
-        <p>• <strong>Edit</strong> content by clicking ✎ in hover cards • Cards float above timeline for better visibility</p>
+        <p>• <strong>Drag</strong> nodes to reposition with physics • <strong>Click</strong> to pin/unpin • <strong>Hover</strong> for editable cards</p>
+        <p>• <strong>Click connection lines</strong> to insert new entries • Cards auto-save when clicking outside</p>
       </div>
     </div>
   );
