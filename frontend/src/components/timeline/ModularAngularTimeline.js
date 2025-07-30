@@ -562,7 +562,7 @@ const D3PhysicsTimeline = ({
       const existingEntryIds = nodesRef.current.map(n => n.id).sort().join(',');
       
       // Only re-initialize if entries actually changed, not on hover or other state changes
-      if (currentEntryIds !== existingEntryIds) {
+      if (currentEntryIds !== existingEntryIds || !simulationRef.current) {
         initializeSimulation();
       }
     }
@@ -572,7 +572,7 @@ const D3PhysicsTimeline = ({
         clearTimeout(hoverTimeoutRef.current);
       }
     };
-  }, [entries]); // Remove other dependencies that cause unnecessary re-renders
+  }, [entries.length, entries.map(e => e.id).join(',')]); // Only depend on entry count and IDs, not full entries object
 
   // Separate effect for cleanup only
   useEffect(() => {
