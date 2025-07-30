@@ -292,6 +292,113 @@ const CaseModal = ({
     }, 300);
   }, [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]);
 
+  // Section editing functionality
+  const toggleEditSection = useCallback((sectionId) => {
+    setEditingSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+    
+    // Initialize section data if starting to edit
+    if (!editingSections[sectionId]) {
+      setSectionData(prev => ({
+        ...prev,
+        [sectionId]: {}
+      }));
+    }
+  }, [editingSections]);
+
+  const updateSectionData = useCallback((sectionId, field, value) => {
+    setSectionData(prev => ({
+      ...prev,
+      [sectionId]: {
+        ...prev[sectionId],
+        [field]: value
+      }
+    }));
+  }, []);
+
+  const cancelEdit = useCallback((sectionId) => {
+    setEditingSections(prev => ({
+      ...prev,
+      [sectionId]: false
+    }));
+    setSectionData(prev => {
+      const newData = { ...prev };
+      delete newData[sectionId];
+      return newData;
+    });
+  }, []);
+
+  const saveSection = useCallback(async (sectionId) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const sectionChanges = sectionData[sectionId] || {};
+      let updatedData = { ...editData };
+      
+      // Apply section-specific changes
+      if (sectionId === 'basic_info') {
+        if (sectionChanges.label) {
+          updatedData.label = sectionChanges.label;
+          updatedData.title = sectionChanges.label; // Also update title for compatibility
+        }
+        if (sectionChanges.primary_diagnosis) {
+          updatedData.primary_diagnosis = sectionChanges.primary_diagnosis;
+          updatedData.primaryDiagnosis = sectionChanges.primary_diagnosis;
+        }
+        if (sectionChanges.status) {
+          updatedData.status = sectionChanges.status;
+        }
+      } else if (sectionId === 'chief_complaint') {
+        if (sectionChanges.content !== undefined) {
+          updatedData.chief_complaint = sectionChanges.content;
+          updatedData.chiefComplaint = sectionChanges.content;
+        }
+      } else if (sectionId === 'initial_presentation') {
+        if (sectionChanges.content !== undefined) {
+          updatedData.initial_presentation = sectionChanges.content;
+          updatedData.initialPresentation = sectionChanges.content;
+        }
+      }
+      
+      updatedData.last_updated = new Date().toISOString();
+      
+      // Update editData immediately for instant feedback
+      setEditData(updatedData);
+      
+      // Update parent data
+      setMindMapData(prevData => {
+        const updatedCases = prevData.cases.map(caseItem =>
+          String(caseItem.id) === String(data?.id) ? { ...caseItem, ...updatedData } : caseItem
+        );
+        const newData = { ...prevData, cases: updatedCases };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      // Clear editing state
+      setEditingSections(prev => ({
+        ...prev,
+        [sectionId]: false
+      }));
+      setSectionData(prev => {
+        const newData = { ...prev };
+        delete newData[sectionId];
+        return newData;
+      });
+      
+      addToast('Case information updated successfully', 'success');
+      
+    } catch (error) {
+      console.error('Error saving section:', error);
+      addToast('Failed to save changes', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sectionData, editData, data?.id, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+
   const handleDelete = useCallback(async () => {
     if (isLoading) return;
     
