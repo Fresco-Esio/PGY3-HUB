@@ -1,5 +1,5 @@
 // D3 Physics Timeline - Refined with proper node interactions and card behavior  
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, RotateCcw, Edit3, Save, X } from 'lucide-react';
 import { forceSimulation, forceLink, forceManyBody, forceX, forceY } from 'd3-force';
