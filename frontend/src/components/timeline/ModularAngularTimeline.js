@@ -280,15 +280,33 @@ const D3PhysicsTimeline = ({
     }, 50); // Shorter delay for more responsive dismissal
   }, []);
 
-  // Initialize D3 force simulation
+  // Initialize D3 force simulation - prevent unnecessary re-initializations
   const initializeSimulation = useCallback(() => {
     if (!svgRef.current) return;
 
     const nodes = calculateZigzagPositions(entries);
     const links = createTimelineLinks(nodes);
     
+    // Preserve existing node positions if they exist
+    const existingNodes = nodesRef.current || [];
+    nodes.forEach(node => {
+      const existing = existingNodes.find(n => n.id === node.id);
+      if (existing && !newNodeIds.has(node.id)) {
+        // Preserve existing position and fixed state
+        node.x = existing.x || node.x;
+        node.y = existing.y || node.y;
+        node.fx = existing.fx;
+        node.fy = existing.fy;
+      }
+    });
+    
     nodesRef.current = nodes;
     linksRef.current = links;
+
+    // Stop existing simulation before creating new one
+    if (simulationRef.current) {
+      simulationRef.current.stop();
+    }
 
     // Create force simulation with gentle physics
     const simulation = forceSimulation(nodes)
@@ -351,10 +369,10 @@ const D3PhysicsTimeline = ({
       .join("circle")
       .attr("r", 12)
       .attr("fill", d => color(d.type))
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 2)
+      .attr("stroke", d => pinnedNodes.has(d.id) ? "#f59e0b" : "#fff")
+      .attr("stroke-width", d => pinnedNodes.has(d.id) ? 3 : 2)
       .style("cursor", "pointer")
-      .style("transition", "all 0.2s ease");
+      .style("transition", "none"); // Remove CSS transitions that can interfere
 
     // ONLY animate genuinely new nodes with shorter, single animation
     nodes.forEach(nodeData => {
@@ -389,7 +407,7 @@ const D3PhysicsTimeline = ({
           d.fy = d.y;
         }
         
-        // Visual feedback - NO ANIMATION for existing nodes
+        // Visual feedback - NO TRANSITIONS to avoid interfering with D3
         select(event.sourceEvent.target)
           .attr("r", 16)
           .attr("stroke-width", 3)
@@ -414,17 +432,17 @@ const D3PhysicsTimeline = ({
           d.fy = null;
         }
         
-        // Reset visual feedback - NO TRANSITION for existing nodes
+        // Reset visual feedback - NO TRANSITIONS
         select(event.sourceEvent.target)
           .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", pinnedNodes.has(d.id) ? 3 : 2)
           .style("filter", "none");
       });
 
     // Apply drag behavior
     node.call(dragBehavior);
 
-    // Click to pin/unpin
+    // Click to pin/unpin - prevent re-renders
     node.on("click", (event, d) => {
       event.stopPropagation();
       const isPinned = pinnedNodes.has(d.id);
@@ -448,16 +466,18 @@ const D3PhysicsTimeline = ({
       simulation.restart();
     });
 
-    // Hover effects - improved hover detection
+    // Hover effects - NO TRANSITIONS to prevent interference with D3
     node
       .on("mouseenter", (event, d) => {
         handleNodeHover(d.id);
+        // Direct DOM manipulation without transitions
         select(event.target)
           .attr("r", 16)
           .style("filter", "drop-shadow(0 0 15px rgba(59, 130, 246, 0.5))");
       })
       .on("mouseleave", (event, d) => {
         handleNodeLeave();
+        // Direct DOM manipulation without transitions
         select(event.target)
           .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
           .style("filter", "none");
@@ -477,7 +497,7 @@ const D3PhysicsTimeline = ({
     });
 
     return simulation;
-  }, [entries, width, height, color, pinnedNodes, newNodeIds, handleNodeHover, handleNodeLeave, calculateZigzagPositions, createTimelineLinks]);
+  }, [entries, width, height, color, pinnedNodes, newNodeIds, calculateZigzagPositions, createTimelineLinks, handleNodeHover, handleNodeLeave, findNearestTimelinePosition, reorderTimelineStructure, insertNewNode]);
 
   // Helper functions
   const findNearestTimelinePosition = useCallback((x, y) => {
