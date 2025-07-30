@@ -505,12 +505,20 @@ const D3PhysicsTimeline = ({
     // Apply drag behavior
     node.call(dragBehavior);
 
-    // Click for editing - remove pin/unpin functionality
+    // Click for editing cards - enable editing on click
     node.on("click", (event, d) => {
       event.stopPropagation();
-      // Just ensure proper positioning
+      
+      // Ensure proper positioning
       d.fx = d.x;
       d.fy = d.y;
+      
+      // Start editing the patient card for this node
+      setEditingCard({ nodeId: d.id, type: 'patient' });
+      
+      // Also show the node as hovered to display cards
+      setHoveredNode(d.id);
+      
       simulation.restart();
     });
 
