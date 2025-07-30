@@ -540,61 +540,6 @@ const D3PhysicsTimeline = ({
     return simulation;
   }, [entries, width, height, color, newNodeIds, calculateZigzagPositions, createTimelineLinks, handleNodeHover, handleNodeLeave, findNearestTimelinePosition, reorderTimelineStructure, insertNewNode]);
 
-  // Helper functions
-  const findNearestTimelinePosition = useCallback((x, y) => {
-    // Logic to find nearest valid zigzag position
-    const zigzagPositions = calculateZigzagPositions(entries);
-    let nearest = null;
-    let minDistance = Infinity;
-    
-    zigzagPositions.forEach((pos, index) => {
-      const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
-      if (distance < minDistance && distance < 100) { // Within snap range
-        minDistance = distance;
-        nearest = { ...pos, index };
-      }
-    });
-    
-    return nearest;
-  }, [entries, calculateZigzagPositions]);
-
-  const reorderTimelineStructure = useCallback((nodeId, newIndex) => {
-    // Reorder entries to maintain zigzag structure
-    const updatedEntries = [...entries];
-    const nodeIndex = updatedEntries.findIndex(entry => entry.id === nodeId);
-    
-    if (nodeIndex !== -1 && newIndex !== nodeIndex) {
-      const [movedEntry] = updatedEntries.splice(nodeIndex, 1);
-      updatedEntries.splice(newIndex, 0, movedEntry);
-      setEntries(updatedEntries);
-    }
-  }, [entries]);
-
-  const insertNewNode = useCallback((insertIndex, x, y) => {
-    const newEntry = {
-      id: `entry-${Date.now()}`,
-      title: `Entry ${entries.length + 1}`,
-      type: 'note',
-      content: '',
-      timestamp: new Date().toISOString(),
-      patient_narrative: '',
-      clinical_notes: '',
-      symptoms: []
-    };
-    
-    // Mark as new for animation
-    setNewNodeIds(prev => new Set([...prev, newEntry.id]));
-    
-    // Insert at specific position
-    const updatedEntries = [...entries];
-    updatedEntries.splice(insertIndex, 0, newEntry);
-    setEntries(updatedEntries);
-    
-    if (onEntryAdd) {
-      onEntryAdd(newEntry);
-    }
-  }, [entries, onEntryAdd]);
-
   // Initialize simulation when entries change - with proper state management to prevent resets
   useEffect(() => {
     // Only initialize if we have entries and the simulation doesn't exist or entries actually changed
