@@ -1070,11 +1070,7 @@ const DashboardComponent = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [edgeModal, setEdgeModal] = useState({ isOpen: false, edge: null });
-  const [templates, setTemplates] = useState([]);
-  const [exportProgress, setExportProgress] = useState({ show: false, progress: 0, message: '' });
-
   const [toasts, setToasts] = useState([]);
-  const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
   const [modalAnimationStates, setModalAnimationStates] = useState({
