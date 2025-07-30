@@ -457,7 +457,6 @@ const D3PhysicsTimeline = ({
           .style("filter", "drop-shadow(0 0 15px rgba(59, 130, 246, 0.5))");
       })
       .on("mouseleave", (event, d) => {
-        console.log('Node hover left:', d.id); // Debug log  
         handleNodeLeave();
         select(event.target)
           .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
