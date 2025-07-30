@@ -2707,6 +2707,7 @@ useEffect(() => {
             onEdgeMouseLeave={onEdgeMouseLeave}
             nodeTypes={nodeTypes}
             edgeTypes={{ floating: FloatingEdge, enhanced: EnhancedEdge }}
+            connectionLineComponent={ConnectionLine}
             nodesDraggable={true}
             nodesConnectable={true}
             elementsSelectable={true}
