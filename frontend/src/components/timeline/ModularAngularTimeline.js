@@ -764,10 +764,6 @@ const D3PhysicsTimeline = ({
 
         <div className="text-xs text-slate-400 flex items-center gap-4">
           <span>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
-          <span className="flex items-center gap-1">
-            <Pin size={12} />
-            {pinnedNodes.size} pinned
-          </span>
         </div>
       </div>
 
