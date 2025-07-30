@@ -103,16 +103,14 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Fix critical connection persistence issues and implement UX improvements for the psychiatry resident dashboard:
+  Fix critical timeline animation and scroll issues in the PGY-3 HQ application's Case Node modal:
   
-  CRITICAL FIXES:
-  1. Fix disappearing connection lines (edges) when exiting 'Edit Mind Map' mode or upon page refresh
-  2. Resolve difficulty loading data when trying to open subpages
-  
-  UX IMPROVEMENTS:
-  3. New nodes should generate in the center of the user's current view
-  4. On opening the app, nodes should already be positioned correctly (no jumping/shifting)
-  5. When "Realign Nodes" button is pressed, arrange nodes in columns by category type in the central viewing area
+  CRITICAL TIMELINE FIXES:
+  1. Fix node positions resetting and animation replaying on hover - prevent D3 simulation re-initialization
+  2. Ensure pop-in animation for new nodes doesn't cause all existing nodes to replay their animations  
+  3. Implement scroll functionality for timeline when it extends beyond modal's length
+  4. Remove pin functionality for nodes as requested - focus on editable cards on click
+  5. Add minimalist scrollbar that blends with current dark theme
 
 backend:
   - task: "Verify existing mind map API endpoints work correctly"
