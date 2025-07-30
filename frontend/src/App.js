@@ -2755,15 +2755,6 @@ useEffect(() => {
       </div>
       
       {/* --- Modals --- */}
-      {isTemplateManagerOpen && (
-        <TemplateManager
-          isOpen={isTemplateManagerOpen}
-          onClose={() => setIsTemplateManagerOpen(false)}
-          templates={templates}
-          setTemplates={setTemplates}
-        />
-      )}
-      
       {/* Literature Modal */}
       {literatureModal.isOpen && (
         <LiteratureModal
