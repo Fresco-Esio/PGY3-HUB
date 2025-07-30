@@ -603,10 +603,28 @@ const D3PhysicsTimeline = ({
       .join("circle")
       .attr("r", 12)
       .attr("fill", d => color(d.type))
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 2)
+      .attr("stroke", d => {
+        // Glowing highlight for editing node
+        if (editingCard && editingCard.nodeId === d.id) {
+          return "#fbbf24"; // Amber glow for editing
+        }
+        return "#fff";
+      })
+      .attr("stroke-width", d => {
+        if (editingCard && editingCard.nodeId === d.id) {
+          return 4; // Thicker stroke for editing
+        }
+        return 2;
+      })
       .style("cursor", "pointer")
-      .style("transition", "none"); // Remove CSS transitions that can interfere
+      .style("transition", "none") // Remove CSS transitions that can interfere
+      .style("filter", d => {
+        // Add glow effect for editing node
+        if (editingCard && editingCard.nodeId === d.id) {
+          return "drop-shadow(0 0 12px rgba(251, 191, 36, 0.8))";
+        }
+        return "none";
+      });
 
     // ONLY animate genuinely new nodes with shorter, single animation
     nodes.forEach(nodeData => {
