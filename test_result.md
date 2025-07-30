@@ -164,57 +164,74 @@ backend:
           comment: "CRITICAL ISSUE FOUND: Comprehensive frontend testing revealed that programmatic connection creation is NOT working. While handles are visible with 80% opacity and clicking shows 'Connection started' toast, clicking a second handle does not create visual connections on the canvas. Console logs show handle clicks are registered but no connections are created. The system reconstructs 3 stored connections from localStorage but new connections cannot be created through the UI. This is a critical functionality failure that prevents users from creating new connections between nodes. The connection creation logic appears to be broken in the current implementation."
 
 frontend:
-  - task: "Fix timeline animation replay on hover"
+  - task: "Implement editable Case Node basic properties and dynamic label updates"
     implemented: true
     working: true
-    file: "ModularAngularTimeline.js"
+    file: "CaseModal.js, CaseNode.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
         - working: false
           agent: "user"
-          comment: "User reported that on hover, node positions are resetting and animation is playing again. Pop-in animation for new nodes causes all nodes to replay animation."
+          comment: "Case node's basic properties are not editable and the Case Node label does not change based on the name of the case."
         - working: true
           agent: "main"
-          comment: "FIXED ANIMATION REPLAY ISSUE: 1) Modified useEffect dependencies to only depend on entry count and IDs, not full entries object. 2) This prevents D3 simulation re-initialization on hover or other state changes. 3) Added memoized timeline entries in CaseModal to prevent unnecessary re-renders. 4) Fixed function declaration order to prevent ReferenceError: 'findNearestTimelinePosition' before initialization."
+          comment: "IMPLEMENTED EDITABLE CASE PROPERTIES: 1) Added comprehensive editing functionality to Overview tab with edit buttons for each section. 2) Created toggleEditSection, updateSectionData, saveSection, and cancelEdit functions for managing editing state. 3) Added editable fields for case title/label, primary diagnosis, status, chief complaint, and initial presentation. 4) Implemented proper state management with sectionData and editingSections states. 5) Added visual feedback with Edit3 icons and form validation. 6) Ensured case node label updates when title/label is changed through both editData.label and editData.title synchronization."
 
-  - task: "Remove pin functionality from timeline nodes" 
+  - task: "Replace node creation wizard with individual type-specific buttons"
     implemented: true
     working: true
-    file: "ModularAngularTimeline.js"
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"  
+          comment: "Current wizard popup asks user to select node type. Want individual buttons for each node type (Topic, Case, Task, Literature) to replace the Add Node button."
+        - working: true
+          agent: "main"
+          comment: "REPLACED WIZARD WITH INDIVIDUAL BUTTONS: 1) Removed NodeSelector wizard modal completely. 2) Added individual LoadingButton components for each node type with proper icons (Brain for Topic, Users for Case, CheckSquare for Task, BookOpen for Literature). 3) Used distinct color schemes for each button type (blue, indigo, amber, purple). 4) Updated addNewNode function to accept nodeType parameter directly. 5) Removed showNodeSelector state and related functionality. 6) Updated sidebar with organized 'Add Nodes' section containing all type-specific buttons."
+
+  - task: "Remove Edit Mind Map button and template functionality"
+    implemented: true
+    working: true
+    file: "App.js, TemplateManager.js, index.html"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "Edit Map button does nothing because nodes are already editable without clicking it. Also remove template and template saving features completely."
+        - working: true
+          agent: "main"
+          comment: "REMOVED EDIT MODE AND TEMPLATES: 1) Removed 'Edit Mind Map' button from sidebar. 2) Set nodesConnectable to always true instead of depending on isEditing state. 3) Removed isEditing state management and related functionality. 4) Completely removed TemplateManager component and replaced with null export. 5) Removed 'Manage Templates' button from sidebar. 6) Removed isTemplateManagerOpen state and template-related modal rendering. 7) Removed templates state array. 8) Cleaned up all template-related imports and dependencies."
+
+  - task: "Add connection preview with dotted line following mouse cursor"
+    implemented: true
+    working: true
+    file: "App.js, ConnectionLine.js, App.css"
     stuck_count: 0
     priority: "medium"
     needs_retesting: true
     status_history:
         - working: true
           agent: "main"
-          comment: "REMOVED PIN FUNCTIONALITY: 1) Removed all pinnedNodes state and related functionality as requested by user. 2) Simplified drag behavior without pin logic. 3) Removed pin/unpin click handlers. 4) Updated instructions text to remove pin references. 5) Focus is now on editable cards on node click only."
+          comment: "IMPLEMENTED CONNECTION PREVIEW: 1) Added connectionLineComponent={ConnectionLine} prop to ReactFlow component. 2) ConnectionLine component already existed with proper dotted line styling (strokeDasharray: '5,3'). 3) Added flowingDash CSS animation with stroke-dashoffset transition. 4) Connection preview shows bright blue dotted line (#3b82f6) with drop-shadow effect that follows mouse cursor during connection creation. 5) Animation creates flowing dash effect for better visual feedback."
 
-  - task: "Fix timeline card positioning and click functionality"
+  - task: "Remove emergent badge/icon"
     implemented: true
     working: true
-    file: "ModularAngularTimeline.js"
+    file: "index.html"
     stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: false
-          agent: "user"
-          comment: "User reported issues with card positioning as more timeline nodes are added. Each node should have their own set of cards. First node should be fixed as reference point. Cards are not editable on node click."
-        - working: true
-          agent: "main"
-          comment: "FIXED CARD POSITIONING AND CLICK FUNCTIONALITY: 1) Updated calculateCardPosition to ensure each node gets properly positioned cards with improved bounds checking. 2) Fixed click handler to start editing and show cards when node is clicked. 3) Enhanced card rendering to show both cards when editing mode is active. 4) Added visual distinction for editing cards with yellow ring. 5) Improved card sizing (w-72 vs w-64) and positioning offsets. 6) Added null safety checks for node positioning. 7) Updated instructions to clarify click-to-edit behavior."
-    implemented: true
-    working: true  
-    file: "ModularAngularTimeline.js, App.css"
-    stuck_count: 0
-    priority: "high"
+    priority: "low"
     needs_retesting: true
     status_history:
         - working: true
           agent: "main"
-          comment: "IMPLEMENTED MINIMALIST SCROLL: 1) Added timeline-scroll-container class with custom CSS for minimalist scrollbar. 2) Scrollbar width: 6px with dark theme colors (rgba(100, 116, 139, 0.6) thumb, rgba(30, 41, 59, 0.3) track). 3) Added smooth hover transitions and Firefox scrollbar support. 4) Scroll container has proper overflow handling for long timelines. 5) Scrollbar blends seamlessly with current dark theme."
+          comment: "REMOVED EMERGENT BADGE: 1) Located emergent badge in /app/frontend/public/index.html file. 2) Removed entire <a> element with id='emergent-badge' that displayed 'Made with Emergent' text and logo. 3) Badge was positioned fixed at bottom: 20px, right: 20px with high z-index. 4) Completely removed from DOM - no longer visible in application interface."
   - task: "Fix programmatic connection system"
     implemented: true
     working: true
