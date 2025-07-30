@@ -843,14 +843,13 @@ const D3PhysicsTimeline = ({
     }
   }, [contextMenu]);
 
-  // Click outside detection to close editing mode
+  // Click outside detection to close editing mode with save
   useEffect(() => {
     const handleClickOutside = (event) => {
       // If we're in editing mode and the click is outside the timeline container
       if (editingCard && containerRef.current && !containerRef.current.contains(event.target)) {
-        // Close editing mode
-        setEditingCard(null);
-        setHoveredNode(null);
+        // Save and close editing mode
+        handleSaveCurrentEditingCards();
       }
     };
 
@@ -861,7 +860,7 @@ const D3PhysicsTimeline = ({
         document.removeEventListener('mousedown', handleClickOutside);
       };
     }
-  }, [editingCard]);
+  }, [editingCard, handleSaveCurrentEditingCards]);
 
   // Handle adding new entry at end
   const handleAddEntry = useCallback(() => {
