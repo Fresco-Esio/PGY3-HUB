@@ -158,6 +158,44 @@ backend:
           comment: "CRITICAL ISSUE FOUND: Comprehensive frontend testing revealed that programmatic connection creation is NOT working. While handles are visible with 80% opacity and clicking shows 'Connection started' toast, clicking a second handle does not create visual connections on the canvas. Console logs show handle clicks are registered but no connections are created. The system reconstructs 3 stored connections from localStorage but new connections cannot be created through the UI. This is a critical functionality failure that prevents users from creating new connections between nodes. The connection creation logic appears to be broken in the current implementation."
 
 frontend:
+  - task: "Fix timeline animation replay on hover"
+    implemented: true
+    working: true
+    file: "ModularAngularTimeline.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported that on hover, node positions are resetting and animation is playing again. Pop-in animation for new nodes causes all nodes to replay animation."
+        - working: true
+          agent: "main"
+          comment: "FIXED ANIMATION REPLAY ISSUE: 1) Modified useEffect dependencies to only depend on entry count and IDs, not full entries object. 2) This prevents D3 simulation re-initialization on hover or other state changes. 3) Added memoized timeline entries in CaseModal to prevent unnecessary re-renders. 4) Fixed function declaration order to prevent ReferenceError: 'findNearestTimelinePosition' before initialization."
+
+  - task: "Remove pin functionality from timeline nodes" 
+    implemented: true
+    working: true
+    file: "ModularAngularTimeline.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "REMOVED PIN FUNCTIONALITY: 1) Removed all pinnedNodes state and related functionality as requested by user. 2) Simplified drag behavior without pin logic. 3) Removed pin/unpin click handlers. 4) Updated instructions text to remove pin references. 5) Focus is now on editable cards on node click only."
+
+  - task: "Implement minimalist timeline scroll functionality"
+    implemented: true
+    working: true  
+    file: "ModularAngularTimeline.js, App.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "IMPLEMENTED MINIMALIST SCROLL: 1) Added timeline-scroll-container class with custom CSS for minimalist scrollbar. 2) Scrollbar width: 6px with dark theme colors (rgba(100, 116, 139, 0.6) thumb, rgba(30, 41, 59, 0.3) track). 3) Added smooth hover transitions and Firefox scrollbar support. 4) Scroll container has proper overflow handling for long timelines. 5) Scrollbar blends seamlessly with current dark theme."
   - task: "Fix programmatic connection system"
     implemented: true
     working: true
