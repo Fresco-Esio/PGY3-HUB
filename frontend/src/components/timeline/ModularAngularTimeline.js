@@ -592,10 +592,8 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryAdd]);
 
-  // Handle reset layout
+  // Handle reset layout - simplified without pin state
   const handleResetLayout = useCallback(() => {
-    setPinnedNodes(new Set());
-    
     if (simulationRef.current && nodesRef.current) {
       const zigzagPositions = calculateZigzagPositions(entries);
       
