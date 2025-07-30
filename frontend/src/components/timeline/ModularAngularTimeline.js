@@ -83,9 +83,6 @@ const TimelineHoverCard = ({
       onMouseEnter={(e) => {
         e.stopPropagation();
         // Keep the card visible when hovering over it
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-        }
       }}
       onMouseLeave={(e) => {
         e.stopPropagation();
