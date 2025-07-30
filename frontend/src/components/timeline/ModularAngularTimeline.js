@@ -660,39 +660,6 @@ const D3PhysicsTimeline = ({
           }}
         />
 
-        {/* Custom Minimalist Scrollbar Styles */}
-        <style jsx>{`
-          .timeline-scroll-container::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-          }
-          
-          .timeline-scroll-container::-webkit-scrollbar-track {
-            background: rgba(30, 41, 59, 0.3);
-            border-radius: 3px;
-          }
-          
-          .timeline-scroll-container::-webkit-scrollbar-thumb {
-            background: rgba(100, 116, 139, 0.6);
-            border-radius: 3px;
-            transition: background 0.2s ease;
-          }
-          
-          .timeline-scroll-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(100, 116, 139, 0.8);
-          }
-          
-          .timeline-scroll-container::-webkit-scrollbar-corner {
-            background: rgba(30, 41, 59, 0.3);
-          }
-          
-          /* Firefox scrollbar */
-          .timeline-scroll-container {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(100, 116, 139, 0.6) rgba(30, 41, 59, 0.3);
-          }
-        `}</style>
-
         {/* Hover Cards - Only visible on hover with improved positioning */}
         <AnimatePresence>
           {hoveredNodeData && !editingCard && (
