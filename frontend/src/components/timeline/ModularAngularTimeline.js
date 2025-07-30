@@ -597,7 +597,7 @@ const D3PhysicsTimeline = ({
     // Apply drag behavior
     node.call(dragBehavior);
 
-    // Click for editing cards - enable editing both cards on click
+    // Click for editing cards - enable editing both cards on click with auto-scroll
     node.on("click", (event, d) => {
       event.stopPropagation();
       
@@ -610,6 +610,11 @@ const D3PhysicsTimeline = ({
       
       // Show the node as hovered to display cards
       setHoveredNode(d.id);
+      
+      // Auto-scroll to ensure cards are visible
+      setTimeout(() => {
+        ensureCardsVisible(d.id);
+      }, 100); // Small delay to ensure state is updated
       
       simulation.restart();
     });
