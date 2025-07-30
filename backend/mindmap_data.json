@@ -149,6 +149,594 @@
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159579",
       "updated_at": "2025-07-30T02:29:15.943000+00:00"
+    },
+    {
+      "id": "38375636-9754-4700-b3ac-df00fd31fc6f",
+      "title": "Test Psychiatric Topic",
+      "description": "Test topic for node component compatibility",
+      "category": "Test Category",
+      "color": "#FF5733",
+      "position": {
+        "x": 100.0,
+        "y": 200.0
+      },
+      "flashcard_count": 5,
+      "completed_flashcards": 2,
+      "resources": [
+        {
+          "title": "Test Resource",
+          "url": "#",
+          "type": "reference"
+        }
+      ],
+      "notes": "Test notes for topic",
+      "tags": "test,compatibility",
+      "definition": "Test definition",
+      "diagnostic_criteria": [
+        "Criterion 1",
+        "Criterion 2"
+      ],
+      "comorbidities": [
+        "Comorbidity 1"
+      ],
+      "differential_diagnoses": [
+        "Differential 1"
+      ],
+      "medications": [
+        {
+          "name": "Test Med",
+          "dosage": "10mg"
+        }
+      ],
+      "psychotherapy_modalities": [
+        {
+          "name": "CBT",
+          "description": "Test therapy"
+        }
+      ],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:42.833746",
+      "updated_at": "2025-07-30T02:32:42.833759"
+    },
+    {
+      "id": "d0f6ac7f-5be9-49b4-ab13-6a5c1011579e",
+      "title": "Performance Test Topic 0",
+      "description": "Topic 0 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": "Performance test notes 0",
+      "tags": "performance,test,0",
+      "definition": "Performance test definition 0",
+      "diagnostic_criteria": [
+        "Criterion 0"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967280",
+      "updated_at": "2025-07-30T02:32:43.967288"
+    },
+    {
+      "id": "40bf7cc8-d7c4-427c-b27d-b38d80a18892",
+      "title": "Performance Test Topic 1",
+      "description": "Topic 1 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 50.0,
+        "y": 50.0
+      },
+      "flashcard_count": 1,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": "Performance test notes 1",
+      "tags": "performance,test,1",
+      "definition": "Performance test definition 1",
+      "diagnostic_criteria": [
+        "Criterion 1"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967299",
+      "updated_at": "2025-07-30T02:32:43.967300"
+    },
+    {
+      "id": "7a255c62-4676-4b07-90c4-580ec02512f0",
+      "title": "Performance Test Topic 2",
+      "description": "Topic 2 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "flashcard_count": 2,
+      "completed_flashcards": 1,
+      "resources": [],
+      "notes": "Performance test notes 2",
+      "tags": "performance,test,2",
+      "definition": "Performance test definition 2",
+      "diagnostic_criteria": [
+        "Criterion 2"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967308",
+      "updated_at": "2025-07-30T02:32:43.967310"
+    },
+    {
+      "id": "1fd3df9e-56aa-4f16-b541-5792070c5c88",
+      "title": "Performance Test Topic 3",
+      "description": "Topic 3 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 150.0,
+        "y": 150.0
+      },
+      "flashcard_count": 3,
+      "completed_flashcards": 1,
+      "resources": [],
+      "notes": "Performance test notes 3",
+      "tags": "performance,test,3",
+      "definition": "Performance test definition 3",
+      "diagnostic_criteria": [
+        "Criterion 3"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967318",
+      "updated_at": "2025-07-30T02:32:43.967319"
+    },
+    {
+      "id": "e7b815e0-00e0-421a-8f86-b750d88275a2",
+      "title": "Performance Test Topic 4",
+      "description": "Topic 4 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 200.0,
+        "y": 200.0
+      },
+      "flashcard_count": 4,
+      "completed_flashcards": 2,
+      "resources": [],
+      "notes": "Performance test notes 4",
+      "tags": "performance,test,4",
+      "definition": "Performance test definition 4",
+      "diagnostic_criteria": [
+        "Criterion 4"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967327",
+      "updated_at": "2025-07-30T02:32:43.967328"
+    },
+    {
+      "id": "769642d0-5ca0-450c-84d5-cf3dc312fd71",
+      "title": "Performance Test Topic 5",
+      "description": "Topic 5 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 250.0,
+        "y": 250.0
+      },
+      "flashcard_count": 5,
+      "completed_flashcards": 2,
+      "resources": [],
+      "notes": "Performance test notes 5",
+      "tags": "performance,test,5",
+      "definition": "Performance test definition 5",
+      "diagnostic_criteria": [
+        "Criterion 5"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967336",
+      "updated_at": "2025-07-30T02:32:43.967337"
+    },
+    {
+      "id": "2641a37d-dc6e-46e0-b44e-8975b59c7d5b",
+      "title": "Performance Test Topic 6",
+      "description": "Topic 6 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 300.0,
+        "y": 300.0
+      },
+      "flashcard_count": 6,
+      "completed_flashcards": 3,
+      "resources": [],
+      "notes": "Performance test notes 6",
+      "tags": "performance,test,6",
+      "definition": "Performance test definition 6",
+      "diagnostic_criteria": [
+        "Criterion 6"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967344",
+      "updated_at": "2025-07-30T02:32:43.967346"
+    },
+    {
+      "id": "b43bc844-7c48-4f03-b280-c4b731bc53ea",
+      "title": "Performance Test Topic 7",
+      "description": "Topic 7 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 350.0,
+        "y": 350.0
+      },
+      "flashcard_count": 7,
+      "completed_flashcards": 3,
+      "resources": [],
+      "notes": "Performance test notes 7",
+      "tags": "performance,test,7",
+      "definition": "Performance test definition 7",
+      "diagnostic_criteria": [
+        "Criterion 7"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967353",
+      "updated_at": "2025-07-30T02:32:43.967354"
+    },
+    {
+      "id": "3426e485-85df-4c0f-a8f4-5b363343ee4f",
+      "title": "Performance Test Topic 8",
+      "description": "Topic 8 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 400.0,
+        "y": 400.0
+      },
+      "flashcard_count": 8,
+      "completed_flashcards": 4,
+      "resources": [],
+      "notes": "Performance test notes 8",
+      "tags": "performance,test,8",
+      "definition": "Performance test definition 8",
+      "diagnostic_criteria": [
+        "Criterion 8"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967362",
+      "updated_at": "2025-07-30T02:32:43.967363"
+    },
+    {
+      "id": "0645928a-604e-48f3-8dcc-f73d5e2b26f8",
+      "title": "Performance Test Topic 9",
+      "description": "Topic 9 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 450.0,
+        "y": 450.0
+      },
+      "flashcard_count": 9,
+      "completed_flashcards": 4,
+      "resources": [],
+      "notes": "Performance test notes 9",
+      "tags": "performance,test,9",
+      "definition": "Performance test definition 9",
+      "diagnostic_criteria": [
+        "Criterion 9"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967380",
+      "updated_at": "2025-07-30T02:32:43.967381"
+    },
+    {
+      "id": "9e865489-57a9-49e7-a46b-a36a0bbc99f2",
+      "title": "Performance Test Topic 10",
+      "description": "Topic 10 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 500.0,
+        "y": 500.0
+      },
+      "flashcard_count": 10,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": "Performance test notes 10",
+      "tags": "performance,test,10",
+      "definition": "Performance test definition 10",
+      "diagnostic_criteria": [
+        "Criterion 10"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967390",
+      "updated_at": "2025-07-30T02:32:43.967392"
+    },
+    {
+      "id": "06a713d0-0260-4970-9793-0211b597277b",
+      "title": "Performance Test Topic 11",
+      "description": "Topic 11 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 550.0,
+        "y": 550.0
+      },
+      "flashcard_count": 11,
+      "completed_flashcards": 5,
+      "resources": [],
+      "notes": "Performance test notes 11",
+      "tags": "performance,test,11",
+      "definition": "Performance test definition 11",
+      "diagnostic_criteria": [
+        "Criterion 11"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967400",
+      "updated_at": "2025-07-30T02:32:43.967401"
+    },
+    {
+      "id": "c76c1d33-5a7b-418d-8f16-e7edb69055ef",
+      "title": "Performance Test Topic 12",
+      "description": "Topic 12 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 600.0,
+        "y": 600.0
+      },
+      "flashcard_count": 12,
+      "completed_flashcards": 6,
+      "resources": [],
+      "notes": "Performance test notes 12",
+      "tags": "performance,test,12",
+      "definition": "Performance test definition 12",
+      "diagnostic_criteria": [
+        "Criterion 12"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967408",
+      "updated_at": "2025-07-30T02:32:43.967410"
+    },
+    {
+      "id": "9804a4c8-2019-4ebf-b59a-5c53bd1f999b",
+      "title": "Performance Test Topic 13",
+      "description": "Topic 13 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 650.0,
+        "y": 650.0
+      },
+      "flashcard_count": 13,
+      "completed_flashcards": 6,
+      "resources": [],
+      "notes": "Performance test notes 13",
+      "tags": "performance,test,13",
+      "definition": "Performance test definition 13",
+      "diagnostic_criteria": [
+        "Criterion 13"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967417",
+      "updated_at": "2025-07-30T02:32:43.967419"
+    },
+    {
+      "id": "2205d140-6e92-44ad-9124-137c7c5e6c15",
+      "title": "Performance Test Topic 14",
+      "description": "Topic 14 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 700.0,
+        "y": 700.0
+      },
+      "flashcard_count": 14,
+      "completed_flashcards": 7,
+      "resources": [],
+      "notes": "Performance test notes 14",
+      "tags": "performance,test,14",
+      "definition": "Performance test definition 14",
+      "diagnostic_criteria": [
+        "Criterion 14"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967425",
+      "updated_at": "2025-07-30T02:32:43.967427"
+    },
+    {
+      "id": "59e11666-fd2d-442c-b96e-dab9f1d201a6",
+      "title": "Performance Test Topic 15",
+      "description": "Topic 15 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 750.0,
+        "y": 750.0
+      },
+      "flashcard_count": 15,
+      "completed_flashcards": 7,
+      "resources": [],
+      "notes": "Performance test notes 15",
+      "tags": "performance,test,15",
+      "definition": "Performance test definition 15",
+      "diagnostic_criteria": [
+        "Criterion 15"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967434",
+      "updated_at": "2025-07-30T02:32:43.967435"
+    },
+    {
+      "id": "db593d80-2ef2-4e85-abef-0dce08aac0ce",
+      "title": "Performance Test Topic 16",
+      "description": "Topic 16 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 800.0,
+        "y": 800.0
+      },
+      "flashcard_count": 16,
+      "completed_flashcards": 8,
+      "resources": [],
+      "notes": "Performance test notes 16",
+      "tags": "performance,test,16",
+      "definition": "Performance test definition 16",
+      "diagnostic_criteria": [
+        "Criterion 16"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967443",
+      "updated_at": "2025-07-30T02:32:43.967444"
+    },
+    {
+      "id": "46e6f117-1654-4b2b-97cb-d7a26892de1b",
+      "title": "Performance Test Topic 17",
+      "description": "Topic 17 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 850.0,
+        "y": 850.0
+      },
+      "flashcard_count": 17,
+      "completed_flashcards": 8,
+      "resources": [],
+      "notes": "Performance test notes 17",
+      "tags": "performance,test,17",
+      "definition": "Performance test definition 17",
+      "diagnostic_criteria": [
+        "Criterion 17"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967451",
+      "updated_at": "2025-07-30T02:32:43.967452"
+    },
+    {
+      "id": "215fcbca-7109-4433-a1e1-9e4f688386ec",
+      "title": "Performance Test Topic 18",
+      "description": "Topic 18 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 900.0,
+        "y": 900.0
+      },
+      "flashcard_count": 18,
+      "completed_flashcards": 9,
+      "resources": [],
+      "notes": "Performance test notes 18",
+      "tags": "performance,test,18",
+      "definition": "Performance test definition 18",
+      "diagnostic_criteria": [
+        "Criterion 18"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967460",
+      "updated_at": "2025-07-30T02:32:43.967461"
+    },
+    {
+      "id": "97023a7b-b5c2-40a9-b38f-c594e42b47fe",
+      "title": "Performance Test Topic 19",
+      "description": "Topic 19 for performance testing",
+      "category": "Performance Test",
+      "color": "#10B981",
+      "position": {
+        "x": 950.0,
+        "y": 950.0
+      },
+      "flashcard_count": 19,
+      "completed_flashcards": 9,
+      "resources": [],
+      "notes": "Performance test notes 19",
+      "tags": "performance,test,19",
+      "definition": "Performance test definition 19",
+      "diagnostic_criteria": [
+        "Criterion 19"
+      ],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-07-30T02:32:43.967468",
+      "updated_at": "2025-07-30T02:32:43.967469"
     }
   ],
   "cases": [
@@ -306,10 +894,105 @@
       "timeline": [],
       "created_at": "2025-07-30T02:29:15.943000+00:00",
       "updated_at": "2025-07-30T02:29:15.943000+00:00"
+    },
+    {
+      "id": "65dee679-fdb3-47e0-afa1-a0c954f235ce",
+      "case_id": "TEST-001",
+      "encounter_date": "2025-07-30T02:32:42.833768",
+      "primary_diagnosis": "Test Diagnosis",
+      "secondary_diagnoses": [
+        "Secondary Test"
+      ],
+      "age": 30,
+      "gender": "Test",
+      "chief_complaint": "Test complaint",
+      "initial_presentation": "Test initial presentation",
+      "current_presentation": "Test current presentation",
+      "medication_history": "Test medication history",
+      "therapy_progress": "Test therapy progress",
+      "defense_patterns": "Test defense patterns",
+      "clinical_reflection": "Test clinical reflection",
+      "history_present_illness": "Test HPI",
+      "medical_history": "Test medical history",
+      "medications": [
+        "Test medication"
+      ],
+      "mental_status_exam": "Test MSE",
+      "assessment_plan": "Test assessment",
+      "notes": "Test notes",
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 300.0,
+        "y": 400.0
+      },
+      "timeline": [
+        {
+          "id": "f1b8daae-5265-4b32-b9ef-da0e9dc95c41",
+          "type": "Assessment",
+          "timestamp": "2025-07-30T02:32:42.833776",
+          "content": "Test timeline entry",
+          "author": "Test Author",
+          "metadata": {
+            "test": "data"
+          }
+        },
+        {
+          "id": "c7361b16-57ef-4492-a13c-4639fcd8e429",
+          "type": "Medication",
+          "timestamp": "2025-07-30T02:32:42.882275",
+          "content": "Updated medication regimen",
+          "author": "Dr. Test",
+          "metadata": {
+            "medication": "Test Drug",
+            "dosage": "50mg",
+            "frequency": "daily"
+          }
+        }
+      ],
+      "created_at": "2025-07-30T02:32:42.833778",
+      "updated_at": "2025-07-30T02:32:42.833780"
     }
   ],
-  "tasks": [],
-  "literature": [],
+  "tasks": [
+    {
+      "id": "c11fdd97-b59b-43c8-a53b-e5d42facd42e",
+      "title": "Test Task",
+      "description": "Test task for compatibility",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2025-07-30T02:32:42.833793",
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": "Test task notes",
+      "position": {
+        "x": 500.0,
+        "y": 600.0
+      },
+      "created_at": "2025-07-30T02:32:42.833794",
+      "updated_at": "2025-07-30T02:32:42.833795"
+    }
+  ],
+  "literature": [
+    {
+      "id": "6a36ecb7-e698-4b81-9683-2dd0825a6160",
+      "title": "Test Literature",
+      "authors": "Test Author",
+      "publication": "Test Journal",
+      "year": 2024,
+      "doi": "10.1000/test",
+      "abstract": "Test abstract",
+      "notes": "Test literature notes",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 700.0,
+        "y": 800.0
+      },
+      "created_at": "2025-07-30T02:32:42.833803",
+      "updated_at": "2025-07-30T02:32:42.833804"
+    }
+  ],
   "connections": [
     {
       "id": "ea9a2ab228f1c41998873a3bf5ba6fcb3",
@@ -334,6 +1017,42 @@
       "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
       "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
       "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "eb9b4afef636e45d0965d83260c8b62cd",
+      "source": "65dee679-fdb3-47e0-afa1-a0c954f235ce",
+      "target": "c11fdd97-b59b-43c8-a53b-e5d42facd42e",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "label": "Case-Task Connection",
+      "style": {
+        "stroke": "#059669",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "e87310dce6e3940b2b26471bb9a4232d0",
+      "source": "6a36ecb7-e698-4b81-9683-2dd0825a6160",
+      "target": "38375636-9754-4700-b3ac-df00fd31fc6f",
+      "sourceHandle": "top",
+      "targetHandle": "bottom",
+      "label": "Literature-Topic Connection",
+      "style": {
+        "stroke": "#DC2626",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "ee8e6c94998d04a7eb90b04652a06fed4",
+      "source": "c11fdd97-b59b-43c8-a53b-e5d42facd42e",
+      "target": "6a36ecb7-e698-4b81-9683-2dd0825a6160",
+      "sourceHandle": "left",
+      "targetHandle": "right",
+      "label": "Task-Literature Connection",
+      "style": {
+        "stroke": "#7C3AED",
+        "strokeWidth": 2
+      }
     }
   ]
 }
