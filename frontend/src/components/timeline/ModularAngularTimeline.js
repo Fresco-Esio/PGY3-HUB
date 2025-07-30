@@ -173,6 +173,8 @@ const D3PhysicsTimeline = ({
   const [entries, setEntries] = useState(initialEntries);
   const [editingCard, setEditingCard] = useState(null); // {nodeId, type}
   const [newNodeIds, setNewNodeIds] = useState(new Set()); // Track genuinely new nodes
+  const [undoStack, setUndoStack] = useState([]); // Undo functionality
+  const [contextMenu, setContextMenu] = useState(null); // Right-click context menu
 
   // Color scale for different entry types
   const color = scaleOrdinal(schemeCategory10);
