@@ -1,4 +1,4 @@
-// Hybrid Angular Timeline - D3 Nodes with Scrollable Container
+// Canvas-based D3 Timeline with Hover-only Cards
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import { select } from 'd3-selection';
 import { drag } from 'd3-drag';
-import { forceSimulation, forceManyBody, forceCenter, forceCollide } from 'd3-force';
+import { forceSimulation, forceManyBody, forceCenter, forceCollide, forceLink } from 'd3-force';
+import { scaleOrdinal, schemeCategory10 } from 'd3-scale';
 
 // Minimal animation variants
 const containerVariants = {
@@ -30,23 +31,29 @@ const AngularTimeline = React.memo(({
   const [entries, setEntries] = useState([]);
   const [editingEntryId, setEditingEntryId] = useState(null);
   const [hoveredEntryId, setHoveredEntryId] = useState(null);
+  const [hoveredNodePosition, setHoveredNodePosition] = useState(null);
   const [pinnedNodes, setPinnedNodes] = useState(new Set());
   const timelineContainerRef = useRef(null);
-  const svgRef = useRef(null);
+  const canvasRef = useRef(null);
   const simulationRef = useRef(null);
   const nodesRef = useRef([]);
+  const linksRef = useRef([]);
+  const animationFrameRef = useRef(null);
 
-  // Layout constants - optimized for scrollable container
+  // Layout constants - optimized for canvas
   const TIMELINE_WIDTH = 600;
-  const TIMELINE_HEIGHT = 350; // Fixed visible height
-  const ZIGZAG_AMPLITUDE = 60;
-  const BASE_VERTICAL_SPACING = 100;
-  const NODE_RADIUS = 18;
-  const CARD_OFFSET = 35;
+  const TIMELINE_HEIGHT = 350;
+  const DYNAMIC_HEIGHT_FACTOR = 80;
+  const NODE_RADIUS = 8;
+  const CARD_OFFSET = 40;
+  const DPI = window.devicePixelRatio || 1;
 
-  // Calculate dynamic timeline height based on entries
+  // Color scale for nodes
+  const colorScale = scaleOrdinal(schemeCategory10);
+
+  // Calculate dynamic timeline height
   const dynamicTimelineHeight = useMemo(() => {
-    return Math.max(TIMELINE_HEIGHT, entries.length * BASE_VERTICAL_SPACING + 200);
+    return Math.max(TIMELINE_HEIGHT, entries.length * DYNAMIC_HEIGHT_FACTOR + 200);
   }, [entries.length]);
 
   // Process entries
@@ -66,294 +73,309 @@ const AngularTimeline = React.memo(({
     setEntries(processedEntries);
   }, [processedEntries]);
 
-  // D3 node positioning with constraints
-  const getInitialNodePosition = useCallback((index) => {
-    const isLeft = index % 2 === 0;
-    const x = TIMELINE_WIDTH / 2 + (isLeft ? -ZIGZAG_AMPLITUDE : ZIGZAG_AMPLITUDE);
-    const y = 80 + (index * BASE_VERTICAL_SPACING);
-    
-    return { x, y, side: isLeft ? 'left' : 'right' };
-  }, []);
-
-  // Initialize D3 simulation for nodes only
+  // Initialize canvas-based D3 simulation
   useEffect(() => {
-    if (entries.length === 0 || !svgRef.current) return;
+    if (entries.length === 0 || !canvasRef.current) return;
 
-    // Create D3 nodes with initial positions
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    
+    // Set canvas dimensions with DPI scaling
+    canvas.width = DPI * TIMELINE_WIDTH;
+    canvas.height = DPI * dynamicTimelineHeight;
+    canvas.style.width = `${TIMELINE_WIDTH}px`;
+    canvas.style.height = `${dynamicTimelineHeight}px`;
+    context.scale(DPI, DPI);
+
+    // Create nodes with initial zigzag positions
     const nodes = entries.map((entry, index) => {
-      const initialPos = getInitialNodePosition(index);
+      const isLeft = index % 2 === 0;
+      const initialX = TIMELINE_WIDTH / 2 + (isLeft ? -60 : 60);
+      const initialY = 80 + (index * DYNAMIC_HEIGHT_FACTOR);
+      
       return {
         id: entry.id,
         index,
-        x: initialPos.x,
-        y: initialPos.y,
-        fx: pinnedNodes.has(entry.id) ? initialPos.x : undefined,
-        fy: pinnedNodes.has(entry.id) ? initialPos.y : undefined,
+        x: initialX,
+        y: initialY,
+        fx: pinnedNodes.has(entry.id) ? initialX : undefined,
+        fy: pinnedNodes.has(entry.id) ? initialY : undefined,
         entry,
-        side: initialPos.side
+        side: isLeft ? 'left' : 'right',
+        group: index % 3, // For color variation
+        radius: NODE_RADIUS
       };
     });
 
+    // Create links for timeline path
+    const links = [];
+    for (let i = 0; i < nodes.length - 1; i++) {
+      links.push({
+        source: nodes[i],
+        target: nodes[i + 1],
+        distance: DYNAMIC_HEIGHT_FACTOR
+      });
+    }
+
     nodesRef.current = nodes;
+    linksRef.current = links;
 
     // Stop existing simulation
     if (simulationRef.current) {
       simulationRef.current.stop();
     }
 
-    // Create localized D3 simulation
+    // Create D3 force simulation
     simulationRef.current = forceSimulation(nodes)
-      .force('charge', forceManyBody().strength(-50))
+      .force('link', forceLink(links).id(d => d.id).distance(d => d.distance).strength(0.1))
+      .force('charge', forceManyBody().strength(-30))
       .force('center', forceCenter(TIMELINE_WIDTH / 2, dynamicTimelineHeight / 2))
-      .force('collision', forceCollide().radius(NODE_RADIUS + 10))
+      .force('collision', forceCollide().radius(NODE_RADIUS + 5))
       .alpha(0.1)
-      .alphaDecay(0.1);
+      .alphaDecay(0.05)
+      .on('tick', draw);
 
-    // Create SVG container
-    const svg = select(svgRef.current);
-    svg.selectAll('*').remove(); // Clear previous
+    // Canvas drawing functions
+    function draw() {
+      context.clearRect(0, 0, TIMELINE_WIDTH, dynamicTimelineHeight);
 
-    // Create timeline path
-    const pathData = nodes.map((node, i) => 
-      `${i === 0 ? 'M' : 'L'} ${node.x} ${node.y}`
-    ).join(' ');
+      // Draw timeline path
+      context.save();
+      context.globalAlpha = 0.6;
+      context.strokeStyle = '#3B82F6';
+      context.lineWidth = 2;
+      context.beginPath();
+      links.forEach(drawLink);
+      context.stroke();
+      context.restore();
 
-    svg.append('path')
-      .attr('d', pathData)
-      .attr('stroke', 'url(#timelineGradient)')
-      .attr('stroke-width', 2)
-      .attr('fill', 'none')
-      .attr('stroke-linecap', 'round')
-      .attr('opacity', 0.7);
+      // Draw nodes
+      context.save();
+      context.globalAlpha = 1;
+      
+      nodes.forEach(node => {
+        context.beginPath();
+        context.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+        
+        // Node colors based on state
+        if (editingEntryId === node.id) {
+          context.fillStyle = '#2563EB';
+          context.strokeStyle = '#60A5FA';
+        } else if (pinnedNodes.has(node.id)) {
+          context.fillStyle = '#7C3AED';
+          context.strokeStyle = '#A78BFA';
+        } else if (hoveredEntryId === node.id) {
+          context.fillStyle = '#374151';
+          context.strokeStyle = '#6B7280';
+        } else {
+          context.fillStyle = '#1E293B';
+          context.strokeStyle = '#475569';
+        }
+        
+        context.lineWidth = 2;
+        context.fill();
+        context.stroke();
 
-    // Create gradient
-    const defs = svg.append('defs');
-    const gradient = defs.append('linearGradient')
-      .attr('id', 'timelineGradient')
-      .attr('x1', '0%').attr('y1', '0%')
-      .attr('x2', '100%').attr('y2', '100%');
-    
-    gradient.append('stop').attr('offset', '0%').attr('stop-color', '#64748B');
-    gradient.append('stop').attr('offset', '50%').attr('stop-color', '#3B82F6');
-    gradient.append('stop').attr('offset', '100%').attr('stop-color', '#8B5CF6');
+        // Draw calendar icon (simplified)
+        context.fillStyle = (editingEntryId === node.id || pinnedNodes.has(node.id)) ? '#FFFFFF' : '#94A3B8';
+        context.font = '8px Arial';
+        context.textAlign = 'center';
+        context.fillText('📅', node.x, node.y + 2);
 
-    // Create draggable nodes
-    const nodeGroups = svg.selectAll('.timeline-node')
-      .data(nodes)
-      .enter()
-      .append('g')
-      .attr('class', 'timeline-node')
-      .attr('transform', d => `translate(${d.x}, ${d.y})`)
-      .style('cursor', 'move');
+        // Draw pin indicator
+        if (pinnedNodes.has(node.id)) {
+          context.beginPath();
+          context.arc(node.x + 6, node.y - 6, 3, 0, 2 * Math.PI);
+          context.fillStyle = '#A78BFA';
+          context.fill();
+        }
 
-    // Add node circles
-    nodeGroups.append('circle')
-      .attr('r', NODE_RADIUS)
-      .attr('fill', d => {
-        if (editingEntryId === d.id) return '#2563EB';
-        if (pinnedNodes.has(d.id)) return '#7C3AED';
-        if (hoveredEntryId === d.id) return '#374151';
-        return '#1E293B';
-      })
-      .attr('stroke', d => {
-        if (editingEntryId === d.id) return '#60A5FA';
-        if (pinnedNodes.has(d.id)) return '#A78BFA';
-        if (hoveredEntryId === d.id) return '#6B7280';
-        return '#475569';
-      })
-      .attr('stroke-width', 2);
+        // Draw date label
+        context.fillStyle = '#6B7280';
+        context.font = '10px Arial';
+        context.textAlign = 'center';
+        const dateText = new Date(node.entry.date).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        context.fillText(dateText, node.x, node.y + 25);
+      });
+      
+      context.restore();
+    }
 
-    // Add calendar icons (simplified as text)
-    nodeGroups.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('dy', '0.3em')
-      .attr('fill', d => (editingEntryId === d.id || pinnedNodes.has(d.id)) ? 'white' : '#94A3B8')
-      .attr('font-size', '10px')
-      .text('📅');
+    function drawLink(d) {
+      context.moveTo(d.source.x, d.source.y);
+      context.lineTo(d.target.x, d.target.y);
+    }
 
-    // Add pin indicators
-    nodeGroups.filter(d => pinnedNodes.has(d.id))
-      .append('circle')
-      .attr('r', 4)
-      .attr('cx', NODE_RADIUS - 5)
-      .attr('cy', -NODE_RADIUS + 5)  
-      .attr('fill', '#A78BFA');
+    // Canvas interaction handlers
+    const getPointerPosition = (event) => {
+      const rect = canvas.getBoundingClientRect();
+      return [
+        (event.clientX - rect.left) * (canvas.width / rect.width) / DPI,
+        (event.clientY - rect.top) * (canvas.height / rect.height) / DPI
+      ];
+    };
 
-    // Add date labels
-    nodeGroups.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('y', NODE_RADIUS + 20)
-      .attr('fill', '#6B7280')
-      .attr('font-size', '10px')
-      .text(d => new Date(d.entry.date).toLocaleDateString([], { month: 'short', day: 'numeric' }));
+    const findNearestNode = (px, py) => {
+      let closest = null;
+      let minDist = Infinity;
+      
+      nodes.forEach(node => {
+        const dist = Math.sqrt((node.x - px) ** 2 + (node.y - py) ** 2);
+        if (dist < 20 && dist < minDist) {
+          minDist = dist;
+          closest = node;
+        }
+      });
+      
+      return closest;
+    };
+
+    // Mouse event handlers
+    const handleMouseMove = (event) => {
+      const [px, py] = getPointerPosition(event);
+      const nearestNode = findNearestNode(px, py);
+      
+      if (nearestNode) {
+        setHoveredEntryId(nearestNode.id);
+        setHoveredNodePosition({ x: nearestNode.x, y: nearestNode.y, side: nearestNode.side });
+        canvas.style.cursor = 'move';
+      } else {
+        setHoveredEntryId(null);
+        setHoveredNodePosition(null);
+        canvas.style.cursor = 'default';
+      }
+    };
+
+    const handleClick = (event) => {
+      const [px, py] = getPointerPosition(event);
+      const nearestNode = findNearestNode(px, py);
+      
+      if (nearestNode) {
+        setEditingEntryId(editingEntryId === nearestNode.id ? null : nearestNode.id);
+        
+        // Scroll to show the clicked node
+        const container = timelineContainerRef.current;
+        if (container) {
+          const targetScrollTop = Math.max(0, nearestNode.y - container.clientHeight / 2);
+          container.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+        }
+      }
+    };
+
+    const handleDoubleClick = (event) => {
+      const [px, py] = getPointerPosition(event);
+      const nearestNode = findNearestNode(px, py);
+      
+      if (nearestNode) {
+        const newPinnedNodes = new Set(pinnedNodes);
+        if (pinnedNodes.has(nearestNode.id)) {
+          newPinnedNodes.delete(nearestNode.id);
+          delete nearestNode.fx;
+          delete nearestNode.fy;
+        } else {
+          newPinnedNodes.add(nearestNode.id);
+          nearestNode.fx = nearestNode.x;
+          nearestNode.fy = nearestNode.y;
+        }
+        setPinnedNodes(newPinnedNodes);
+      }
+    };
 
     // Add D3 drag behavior
     const dragBehavior = drag()
-      .on('start', function(event, d) {
-        if (!pinnedNodes.has(d.id)) {
-          d.fx = d.x;
-          d.fy = d.y;
-        }
-        if (simulationRef.current) {
-          simulationRef.current.alphaTarget(0.1).restart();
+      .subject((event) => {
+        const [px, py] = getPointerPosition(event);
+        return findNearestNode(px, py);
+      })
+      .on('start', (event) => {
+        if (!event.active) simulationRef.current.alphaTarget(0.1).restart();
+        if (event.subject) {
+          event.subject.fx = event.subject.x;
+          event.subject.fy = event.subject.y;
         }
       })
-      .on('drag', function(event, d) {
-        d.fx = Math.max(NODE_RADIUS, Math.min(TIMELINE_WIDTH - NODE_RADIUS, event.x));
-        d.fy = Math.max(NODE_RADIUS, Math.min(dynamicTimelineHeight - NODE_RADIUS, event.y));
-        
-        // Update visual position immediately
-        select(this).attr('transform', `translate(${d.fx}, ${d.fy})`);
-        
-        if (simulationRef.current) {
-          simulationRef.current.alpha(0.1).restart();
-        }
-        
-        // Scroll to follow dragged node
-        const container = timelineContainerRef.current;
-        if (container && d.fy) {
-          const containerHeight = container.clientHeight;
-          const scrollTop = container.scrollTop;
-          const nodeVisibleY = d.fy - scrollTop;
+      .on('drag', (event) => {
+        if (event.subject) {
+          event.subject.fx = Math.max(NODE_RADIUS, Math.min(TIMELINE_WIDTH - NODE_RADIUS, event.x));
+          event.subject.fy = Math.max(NODE_RADIUS, Math.min(dynamicTimelineHeight - NODE_RADIUS, event.y));
           
-          // Auto-scroll if node is near edges
-          if (nodeVisibleY < 50) {
-            container.scrollTop = Math.max(0, d.fy - 100);
-          } else if (nodeVisibleY > containerHeight - 50) {
-            container.scrollTop = d.fy - containerHeight + 100;
+          // Auto-scroll during drag
+          const container = timelineContainerRef.current;
+          if (container && event.subject.fy) {
+            const containerHeight = container.clientHeight;
+            const scrollTop = container.scrollTop;
+            const nodeVisibleY = event.subject.fy - scrollTop;
+            
+            if (nodeVisibleY < 50) {
+              container.scrollTop = Math.max(0, event.subject.fy - 100);
+            } else if (nodeVisibleY > containerHeight - 50) {
+              container.scrollTop = event.subject.fy - containerHeight + 100;
+            }
           }
         }
       })
-      .on('end', function(event, d) {
-        if (!pinnedNodes.has(d.id)) {
-          delete d.fx;
-          delete d.fy;
-        }
-        if (simulationRef.current) {
-          simulationRef.current.alphaTarget(0);
+      .on('end', (event) => {
+        if (!event.active) simulationRef.current.alphaTarget(0);
+        if (event.subject && !pinnedNodes.has(event.subject.id)) {
+          delete event.subject.fx;
+          delete event.subject.fy;
         }
       });
 
-    // Apply drag behavior and event handlers
-    nodeGroups
+    // Apply event listeners
+    select(canvas)
       .call(dragBehavior)
-      .on('mouseenter', function(event, d) {
-        setHoveredEntryId(d.id);
-        select(this).select('circle')
-          .attr('fill', '#374151')
-          .attr('stroke', '#6B7280');
-      })
-      .on('mouseleave', function(event, d) {
-        setHoveredEntryId(null);
-        const circle = select(this).select('circle');
-        if (editingEntryId === d.id) {
-          circle.attr('fill', '#2563EB').attr('stroke', '#60A5FA');
-        } else if (pinnedNodes.has(d.id)) {
-          circle.attr('fill', '#7C3AED').attr('stroke', '#A78BFA');
-        } else {
-          circle.attr('fill', '#1E293B').attr('stroke', '#475569');
-        }
-      })
-      .on('click', function(event, d) {
-        event.stopPropagation();
-        setEditingEntryId(editingEntryId === d.id ? null : d.id);
-        
-        // Scroll to show the clicked node
-        scrollToNode(d.id);
-      })
-      .on('dblclick', function(event, d) {
-        event.stopPropagation();
-        const newPinnedNodes = new Set(pinnedNodes);
-        if (pinnedNodes.has(d.id)) {
-          newPinnedNodes.delete(d.id);
-          delete d.fx;
-          delete d.fy;
-        } else {
-          newPinnedNodes.add(d.id);
-          d.fx = d.x;
-          d.fy = d.y;
-        }
-        setPinnedNodes(newPinnedNodes);
-        
-        // Update pin indicator
-        select(this).selectAll('circle').remove();
-        select(this).append('circle')
-          .attr('r', NODE_RADIUS)
-          .attr('fill', newPinnedNodes.has(d.id) ? '#7C3AED' : '#1E293B')
-          .attr('stroke', newPinnedNodes.has(d.id) ? '#A78BFA' : '#475569')
-          .attr('stroke-width', 2);
-          
-        if (newPinnedNodes.has(d.id)) {
-          select(this).append('circle')
-            .attr('r', 4)
-            .attr('cx', NODE_RADIUS - 5)
-            .attr('cy', -NODE_RADIUS + 5)  
-            .attr('fill', '#A78BFA');
-        }
-      });
+      .on('mousemove', handleMouseMove)
+      .on('click', handleClick)
+      .on('dblclick', handleDoubleClick);
 
-    // Update simulation tick
-    if (simulationRef.current) {
-      simulationRef.current.on('tick', () => {
-        nodeGroups.attr('transform', d => `translate(${d.x}, ${d.y})`);
-        
-        // Update timeline path
-        const newPathData = nodes.map((node, i) => 
-          `${i === 0 ? 'M' : 'L'} ${node.x} ${node.y}`
-        ).join(' ');
-        
-        svg.select('path').attr('d', newPathData);
-      });
-    }
+    // Initial draw
+    draw();
 
-  }, [entries, pinnedNodes, editingEntryId, hoveredEntryId, dynamicTimelineHeight, getInitialNodePosition]);
+    // Cleanup
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
 
-  // Scroll to specific node
-  const scrollToNode = useCallback((nodeId) => {
-    const node = nodesRef.current.find(n => n.id === nodeId);
-    const container = timelineContainerRef.current;
-    
-    if (node && container) {
-      const targetScrollTop = Math.max(0, node.y - container.clientHeight / 2);
-      container.scrollTo({
-        top: targetScrollTop,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
+  }, [entries, pinnedNodes, editingEntryId, hoveredEntryId, dynamicTimelineHeight]);
 
-  // Card positioning relative to nodes
-  const getCardPositions = useCallback((nodeId) => {
-    const node = nodesRef.current.find(n => n.id === nodeId);
-    if (!node) return null;
+  // Card positioning for hover cards
+  const getCardPositions = useCallback(() => {
+    if (!hoveredNodePosition) return null;
 
+    const { x: nodeX, y: nodeY, side } = hoveredNodePosition;
     const cardWidth = 180;
     const cardHeight = 90;
 
-    if (node.side === 'left') {
+    if (side === 'left') {
       return {
         patient: {
-          x: node.x - CARD_OFFSET - cardWidth,
-          y: node.y - cardHeight / 2 - 5
+          x: nodeX - CARD_OFFSET - cardWidth,
+          y: nodeY - cardHeight / 2 - 5
         },
         clinical: {
-          x: node.x + CARD_OFFSET,
-          y: node.y - cardHeight / 2 + 5
+          x: nodeX + CARD_OFFSET,
+          y: nodeY - cardHeight / 2 + 5
         }
       };
     } else {
       return {
         patient: {
-          x: node.x - CARD_OFFSET - cardWidth,
-          y: node.y - cardHeight / 2 + 5
+          x: nodeX - CARD_OFFSET - cardWidth,
+          y: nodeY - cardHeight / 2 + 5
         },
         clinical: {
-          x: node.x + CARD_OFFSET,
-          y: node.y - cardHeight / 2 - 5
+          x: nodeX + CARD_OFFSET,
+          y: nodeY - cardHeight / 2 - 5
         }
       };
     }
-  }, []);
+  }, [hoveredNodePosition]);
 
   // Entry management functions
   const updateEntry = useCallback((entryId, field, value) => {
@@ -396,37 +418,39 @@ const AngularTimeline = React.memo(({
     if (onUpdateTimeline) {
       onUpdateTimeline(updatedEntries);
     }
-    
-    // Scroll to new entry after it's rendered
+
+    // Scroll to new entry
     setTimeout(() => {
-      scrollToNode(newEntry.id);
+      const container = timelineContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
     }, 100);
-  }, [entries, onUpdateTimeline, scrollToNode]);
+  }, [entries, onUpdateTimeline]);
 
-  // Render floating cards
-  const renderFloatingCards = useCallback((entry) => {
-    if (hoveredEntryId !== entry.id && editingEntryId !== entry.id) return null;
+  // Render hover-only cards
+  const renderHoverCards = useCallback(() => {
+    if (!hoveredEntryId || editingEntryId) return null;
 
-    const cardPositions = getCardPositions(entry.id);
+    const cardPositions = getCardPositions();
     if (!cardPositions) return null;
 
-    const isEditing = editingEntryId === entry.id;
+    const entry = entries.find(e => e.id === hoveredEntryId);
+    if (!entry) return null;
 
     return (
       <motion.div
-        key={`cards-${entry.id}`}
+        key={`hover-cards-${hoveredEntryId}`}
         className="absolute pointer-events-none"
         style={{ left: 0, top: 0, width: '100%', height: '100%' }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.15 }}
       >
-        {/* Patient Card */}
+        {/* Patient Hover Card */}
         <div
-          className={`absolute bg-slate-800/95 border border-slate-600 rounded-lg p-2 shadow-lg pointer-events-auto ${
-            isEditing ? 'ring-1 ring-blue-400' : ''
-          }`}
+          className="absolute bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-lg p-2 shadow-lg pointer-events-auto"
           style={{
             left: cardPositions.patient.x,
             top: cardPositions.patient.y,
@@ -441,29 +465,16 @@ const AngularTimeline = React.memo(({
             <h4 className="font-medium text-white text-xs">Patient</h4>
           </div>
           
-          {isEditing ? (
-            <textarea
-              value={entry.patientNarrative}
-              onChange={(e) => updateEntry(entry.id, 'patientNarrative', e.target.value)}
-              rows={2}
-              className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white placeholder-slate-400 focus:ring-1 focus:ring-blue-400 resize-none text-xs"
-              placeholder="Patient narrative..."
-              autoFocus
-            />
-          ) : (
-            <p className="text-slate-300 text-xs leading-tight overflow-hidden">
-              {entry.patientNarrative || (
-                <span className="text-slate-500 italic">No content</span>
-              )}
-            </p>
-          )}
+          <p className="text-slate-300 text-xs leading-tight overflow-hidden">
+            {entry.patientNarrative || (
+              <span className="text-slate-500 italic">No content</span>
+            )}
+          </p>
         </div>
 
-        {/* Clinical Card */}
+        {/* Clinical Hover Card */}
         <div
-          className={`absolute bg-slate-800/95 border border-slate-600 rounded-lg p-2 shadow-lg pointer-events-auto ${
-            isEditing ? 'ring-1 ring-purple-400' : ''
-          }`}
+          className="absolute bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-lg p-2 shadow-lg pointer-events-auto"
           style={{
             left: cardPositions.clinical.x,
             top: cardPositions.clinical.y,
@@ -478,65 +489,139 @@ const AngularTimeline = React.memo(({
             <h4 className="font-medium text-white text-xs">Clinical</h4>
           </div>
           
-          {isEditing ? (
-            <textarea
-              value={entry.clinicalNotes}
-              onChange={(e) => updateEntry(entry.id, 'clinicalNotes', e.target.value)}
-              rows={2}
-              className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white placeholder-slate-400 focus:ring-1 focus:ring-purple-400 resize-none text-xs"
-              placeholder="Clinical notes..."
-            />
-          ) : (
-            <p className="text-slate-300 text-xs leading-tight overflow-hidden">
-              {entry.clinicalNotes || (
-                <span className="text-slate-500 italic">No notes</span>
-              )}
-            </p>
-          )}
+          <p className="text-slate-300 text-xs leading-tight overflow-hidden">
+            {entry.clinicalNotes || (
+              <span className="text-slate-500 italic">No notes</span>
+            )}
+          </p>
+        </div>
+      </motion.div>
+    );
+  }, [hoveredEntryId, editingEntryId, getCardPositions, entries]);
+
+  // Render edit cards (only when editing)
+  const renderEditCards = useCallback(() => {
+    if (!editingEntryId) return null;
+
+    const editingNode = nodesRef.current.find(n => n.id === editingEntryId);
+    if (!editingNode) return null;
+
+    const entry = entries.find(e => e.id === editingEntryId);
+    if (!entry) return null;
+
+    const cardWidth = 180;
+    const cardHeight = 120;
+
+    const cardPositions = editingNode.side === 'left' ? {
+      patient: { x: editingNode.x - CARD_OFFSET - cardWidth, y: editingNode.y - cardHeight / 2 - 5 },
+      clinical: { x: editingNode.x + CARD_OFFSET, y: editingNode.y - cardHeight / 2 + 5 }
+    } : {
+      patient: { x: editingNode.x - CARD_OFFSET - cardWidth, y: editingNode.y - cardHeight / 2 + 5 },
+      clinical: { x: editingNode.x + CARD_OFFSET, y: editingNode.y - cardHeight / 2 - 5 }
+    };
+
+    return (
+      <motion.div
+        key={`edit-cards-${editingEntryId}`}
+        className="absolute pointer-events-none"
+        style={{ left: 0, top: 0, width: '100%', height: '100%' }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.2 }}
+      >
+        {/* Patient Edit Card */}
+        <div
+          className="absolute bg-slate-800/95 border border-slate-600 rounded-lg p-2 shadow-lg pointer-events-auto ring-1 ring-blue-400"
+          style={{
+            left: cardPositions.patient.x,
+            top: cardPositions.patient.y,
+            width: 180,
+            height: 120
+          }}
+        >
+          <div className="flex items-center gap-1 mb-1">
+            <User size={12} className="text-blue-400" />
+            <h4 className="font-medium text-white text-xs">Patient</h4>
+          </div>
+          
+          <textarea
+            value={entry.patientNarrative}
+            onChange={(e) => updateEntry(entry.id, 'patientNarrative', e.target.value)}
+            rows={3}
+            className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white placeholder-slate-400 focus:ring-1 focus:ring-blue-400 resize-none text-xs"
+            placeholder="Patient narrative..."
+            autoFocus
+          />
+        </div>
+
+        {/* Clinical Edit Card */}
+        <div
+          className="absolute bg-slate-800/95 border border-slate-600 rounded-lg p-2 shadow-lg pointer-events-auto ring-1 ring-purple-400"
+          style={{
+            left: cardPositions.clinical.x,
+            top: cardPositions.clinical.y,
+            width: 180,
+            height: 120
+          }}
+        >
+          <div className="flex items-center gap-1 mb-1">
+            <Brain size={12} className="text-purple-400" />
+            <h4 className="font-medium text-white text-xs">Clinical</h4>
+          </div>
+          
+          <textarea
+            value={entry.clinicalNotes}
+            onChange={(e) => updateEntry(entry.id, 'clinicalNotes', e.target.value)}
+            rows={3}
+            className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white placeholder-slate-400 focus:ring-1 focus:ring-purple-400 resize-none text-xs"
+            placeholder="Clinical notes..."
+          />
         </div>
 
         {/* Edit Controls */}
-        {isEditing && (
-          <div 
-            className="absolute pointer-events-auto bg-slate-800 border border-slate-600 rounded p-1 shadow-lg z-50"
-            style={{
-              left: (nodesRef.current.find(n => n.id === entry.id)?.x || 0) - 40,
-              top: (nodesRef.current.find(n => n.id === entry.id)?.y || 0) + 35
-            }}
-          >
-            <div className="flex gap-1">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingEntryId(null);
-                }}
-                className="px-2 py-1 text-slate-300 hover:text-white border border-slate-600 rounded hover:bg-slate-700 text-xs"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  saveEntry(entry.id);
-                }}
-                disabled={isLoading}
-                className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs flex items-center gap-1"
-              >
-                {isLoading ? <Loader2 size={8} className="animate-spin" /> : <Save size={8} />}
-                Save
-              </button>
-            </div>
+        <div 
+          className="absolute pointer-events-auto bg-slate-800 border border-slate-600 rounded p-1 shadow-lg z-50"
+          style={{
+            left: editingNode.x - 40,
+            top: editingNode.y + 40
+          }}
+        >
+          <div className="flex gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingEntryId(null);
+              }}
+              className="px-2 py-1 text-slate-300 hover:text-white border border-slate-600 rounded hover:bg-slate-700 text-xs"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                saveEntry(entry.id);
+              }}
+              disabled={isLoading}
+              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs flex items-center gap-1"
+            >
+              {isLoading ? <Loader2 size={8} className="animate-spin" /> : <Save size={8} />}
+              Save
+            </button>
           </div>
-        )}
+        </div>
       </motion.div>
     );
-  }, [hoveredEntryId, editingEntryId, getCardPositions, updateEntry, saveEntry, isLoading]);
+  }, [editingEntryId, entries, updateEntry, saveEntry, isLoading]);
 
   // Cleanup
   useEffect(() => {
     return () => {
       if (simulationRef.current) {
         simulationRef.current.stop();
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, []);
@@ -553,7 +638,7 @@ const AngularTimeline = React.memo(({
         <h3 className="text-sm font-medium text-white flex items-center gap-2">
           <Clock size={14} className="text-cyan-400" />
           Timeline
-          <span className="text-xs text-slate-500">Drag • Double-click to pin</span>
+          <span className="text-xs text-slate-500">Hover • Drag • Double-click to pin</span>
         </h3>
         <button
           onClick={addEntry}
@@ -564,7 +649,7 @@ const AngularTimeline = React.memo(({
         </button>
       </div>
 
-      {/* Scrollable Timeline Container */}
+      {/* Scrollable Canvas Timeline Container */}
       <div 
         ref={timelineContainerRef}
         className="relative bg-slate-900/40 rounded border border-slate-700 mx-auto overflow-y-auto"
@@ -576,18 +661,19 @@ const AngularTimeline = React.memo(({
       >
         {entries.length > 0 ? (
           <>
-            {/* D3 SVG Container */}
-            <svg
-              ref={svgRef}
-              width={TIMELINE_WIDTH}
-              height={dynamicTimelineHeight}
+            {/* Canvas Timeline */}
+            <canvas
+              ref={canvasRef}
               className="absolute top-0 left-0"
               style={{ zIndex: 1 }}
             />
             
-            {/* Floating Cards Layer */}
+            {/* Hover Cards Layer */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
-              {entries.map((entry) => renderFloatingCards(entry))}
+              <AnimatePresence>
+                {renderHoverCards()}
+                {renderEditCards()}
+              </AnimatePresence>
             </div>
           </>
         ) : (
