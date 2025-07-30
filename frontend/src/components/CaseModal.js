@@ -548,40 +548,83 @@ const CaseModal = ({
     addToast('Medication removed successfully', 'success');
   }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Timeline management functions - with stable reference
+  // Enhanced timeline management with debounced auto-save and better backend integration
   const timelineEntries = useMemo(() => editData.timeline || [], [editData.timeline]);
   
-  const updateTimeline = useCallback(async (updatedTimeline) => {
-    if (isLoading) return;
+  // Debounced timeline save function
+  const debouncedTimelineSave = useCallback(
+    debounce(async (updatedTimeline, retryCount = 0) => {
+      try {
+        const updatedData = {
+          ...editData,
+          timeline: updatedTimeline,
+          last_updated: new Date().toISOString()
+        };
+        
+        // Update editData immediately for instant feedback
+        setEditData(updatedData);
+        
+        // Enhanced mind map data update with better timeline integration
+        setMindMapData(prevData => {
+          const updatedCases = prevData.cases.map(caseItem => {
+            if (String(caseItem.id) === String(data?.id)) {
+              return { 
+                ...caseItem, 
+                ...updatedData,
+                // Ensure timeline data is properly structured for backend
+                timeline: updatedTimeline.map(entry => ({
+                  id: entry.id,
+                  title: entry.title || `Entry ${entry.orderIndex + 1}`,
+                  type: entry.type || 'note',
+                  content: entry.content || '',
+                  timestamp: entry.timestamp,
+                  patient_narrative: entry.patient_narrative || '',
+                  clinical_notes: entry.clinical_notes || '',
+                  symptoms: entry.symptoms || [],
+                  orderIndex: entry.orderIndex || 0,
+                  created_at: entry.created_at || new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                }))
+              };
+            }
+            return caseItem;
+          });
+          const newData = { ...prevData, cases: updatedCases };
+          autoSaveMindMapData(newData);
+          return newData;
+        });
+        
+        return { success: true, data: updatedData };
+      } catch (error) {
+        console.error('Timeline save error:', error);
+        
+        // Retry logic - up to 3 attempts
+        if (retryCount < 3) {
+          console.log(`Retrying timeline save (attempt ${retryCount + 1}/3)`);
+          return debouncedTimelineSave(updatedTimeline, retryCount + 1);
+        }
+        
+        return { success: false, error };
+      }
+    }, 500), // 500ms debounce
+    [editData, data?.id, setMindMapData, autoSaveMindMapData]
+  );
+  
+  const updateTimeline = useCallback(async (updatedTimeline, options = {}) => {
+    if (isLoading && !options.force) return;
     
-    setIsLoading(true);
-    try {
-      const updatedData = {
-        ...editData,
-        timeline: updatedTimeline,
-        last_updated: new Date().toISOString()
-      };
-      
-      // Update editData immediately for instant feedback
-      setEditData(updatedData);
-      
-      setMindMapData(prevData => {
-        const updatedCases = prevData.cases.map(caseItem =>
-          String(caseItem.id) === String(data?.id) ? { ...caseItem, ...updatedData } : caseItem
-        );
-        const newData = { ...prevData, cases: updatedCases };
-        autoSaveMindMapData(newData);
-        return newData;
-      });
-      
-      return updatedData;
-    } catch (error) {
-      console.error('Error updating timeline:', error);
-      addToast('Failed to update timeline', 'error');
-    } finally {
-      setIsLoading(false);
+    // Skip saving if both patient_narrative and clinical_notes are empty for all entries
+    const hasContent = updatedTimeline.some(entry => 
+      (entry.patient_narrative && entry.patient_narrative.trim()) ||
+      (entry.clinical_notes && entry.clinical_notes.trim())
+    );
+    
+    if (!hasContent && !options.force) {
+      return { success: true, skipped: true };
     }
-  }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast, isLoading]);
+    
+    return debouncedTimelineSave(updatedTimeline);
+  }, [debouncedTimelineSave, isLoading]);
 
   // Get connected nodes for Related tab
   const connectedNodes = useMemo(() => {
