@@ -826,7 +826,7 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
     </div>
   );
 };
-const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
+const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   const [selectedNodeType, setSelectedNodeType] = useState(null);
 
   // When the modal is closed, reset the internal state
@@ -855,8 +855,6 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
     onSelect(selectedNodeType, templateId);
     onClose();
   };
-
-  const filteredTemplates = selectedNodeType ? (templates || []).filter(t => t.nodeType === selectedNodeType) : [];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm animate-in fade-in-25 duration-300">
