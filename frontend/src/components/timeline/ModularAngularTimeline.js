@@ -175,11 +175,17 @@ const D3PhysicsTimeline = ({
   // Color scale for different entry types
   const color = scaleOrdinal(schemeCategory10);
 
-  // Calculate zigzag positions based on chronological order
+  // Calculate zigzag positions based on chronological order - centered in modal
   const calculateZigzagPositions = useCallback((timelineEntries) => {
     const sortedEntries = [...timelineEntries].sort((a, b) => 
       new Date(a.timestamp) - new Date(b.timestamp)
     );
+    
+    // Center the timeline in the available space
+    const centerX = width / 2;
+    const startY = 80;
+    const verticalSpacing = 120;
+    const horizontalOffset = 140;
     
     return sortedEntries.map((entry, index) => ({
       ...entry,
@@ -187,9 +193,9 @@ const D3PhysicsTimeline = ({
       title: entry.title || `Entry ${index + 1}`,
       type: entry.type || 'note',
       orderIndex: index,
-      // Zigzag positioning
-      x: width / 2 + (index % 2 === 0 ? -120 : 120),
-      y: 80 + (index * 100),
+      // Centered zigzag positioning
+      x: centerX + (index % 2 === 0 ? -horizontalOffset : horizontalOffset),
+      y: startY + (index * verticalSpacing),
       side: index % 2 === 0 ? 'left' : 'right',
       patient_narrative: entry.patient_narrative || '',
       clinical_notes: entry.clinical_notes || '',
