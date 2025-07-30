@@ -623,9 +623,9 @@ const D3PhysicsTimeline = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* SVG Container */}
+      {/* SVG Container - Centered timeline */}
       <div
-        className="relative border border-slate-700 rounded-lg overflow-visible bg-slate-900/50"
+        className="relative border border-slate-700 rounded-lg overflow-visible bg-slate-900/50 mx-auto"
         style={{ width, height }}
       >
         <svg
