@@ -162,10 +162,10 @@ const D3PhysicsTimeline = ({
   const nodesRef = useRef([]);
   const linksRef = useRef([]);
   const hoverTimeoutRef = useRef(null);
+  const containerRef = useRef(null);
   
   const [hoveredNode, setHoveredNode] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
-  const [pinnedNodes, setPinnedNodes] = useState(new Set());
   const [entries, setEntries] = useState(initialEntries);
   const [editingCard, setEditingCard] = useState(null); // {nodeId, type}
   const [newNodeIds, setNewNodeIds] = useState(new Set()); // Track genuinely new nodes
