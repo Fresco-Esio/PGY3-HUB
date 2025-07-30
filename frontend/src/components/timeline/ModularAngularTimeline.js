@@ -448,15 +448,17 @@ const D3PhysicsTimeline = ({
       simulation.restart();
     });
 
-    // Hover effects - NO ANIMATION for existing nodes
+    // Hover effects - NO ANIMATION for existing nodes, improved hover detection
     node
       .on("mouseenter", (event, d) => {
+        console.log('Node hover entered:', d.id); // Debug log
         handleNodeHover(d.id);
         select(event.target)
           .attr("r", 16)
           .style("filter", "drop-shadow(0 0 15px rgba(59, 130, 246, 0.5))");
       })
       .on("mouseleave", (event, d) => {
+        console.log('Node hover left:', d.id); // Debug log  
         handleNodeLeave();
         select(event.target)
           .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
