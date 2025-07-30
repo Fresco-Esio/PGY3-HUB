@@ -443,27 +443,12 @@ const D3PhysicsTimeline = ({
     // Apply drag behavior
     node.call(dragBehavior);
 
-    // Click to pin/unpin - prevent re-renders
+    // Click for editing - remove pin/unpin functionality
     node.on("click", (event, d) => {
       event.stopPropagation();
-      const isPinned = pinnedNodes.has(d.id);
-      
-      if (isPinned) {
-        d.fx = null;
-        d.fy = null;
-        setPinnedNodes(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(d.id);
-          return newSet;
-        });
-        select(event.target).attr("stroke", "#fff").attr("stroke-width", 2);
-      } else {
-        d.fx = d.x;
-        d.fy = d.y;
-        setPinnedNodes(prev => new Set([...prev, d.id]));
-        select(event.target).attr("stroke", "#f59e0b").attr("stroke-width", 3);
-      }
-      
+      // Just ensure proper positioning
+      d.fx = d.x;
+      d.fy = d.y;
       simulation.restart();
     });
 
