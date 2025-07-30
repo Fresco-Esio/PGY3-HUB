@@ -653,7 +653,7 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryUpdate]);
 
-  // Get hovered node data for cards
+  // Get hovered node data for cards - ensure proper node lookup
   const hoveredNodeData = hoveredNode ? 
     nodesRef.current.find(node => node.id === hoveredNode) : null;
 
