@@ -19,17 +19,18 @@ const TopicNode = ({ data, selected }) => {
 
   return (
     <div
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-700 min-w-[220px] relative hover:shadow-2xl transform hover:scale-105 backdrop-blur-sm ${selected
-          ? 'border-teal-400 shadow-xl scale-105 ring-4 ring-teal-200 animate-pulse'
+      className={`group px-4 py-3 rounded-xl border-2 transition-all duration-700 min-w-[220px] relative hover:scale-105 backdrop-blur-sm ${selected
+          ? 'border-teal-400 scale-105 ring-4 ring-teal-200 animate-pulse'
           : 'border-transparent hover:border-teal-300 hover:ring-2 hover:ring-teal-100'
         } ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-8'}`}
       style={{
         backgroundColor: data.color || '#3B82F6',
         color: 'white',
         boxShadow: selected
-          ? `0 0 20px ${data.color || '#3B82F6'}40`
-          : `0 4px 20px ${data.color || '#3B82F6'}20`,
-        transition: 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease'
+          ? `0 0 20px ${data.color || '#3B82F6'}40, 0 8px 32px rgba(0,0,0,0.3)`
+          : `0 4px 20px ${data.color || '#3B82F6'}20, 0 4px 16px rgba(0,0,0,0.15)`,
+        transition: 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease',
+        filter: selected ? 'none' : `drop-shadow(0 4px 12px rgba(0,0,0,0.2))`
       }}
     >
       {/* Connection Hotspots - Stacked source and target handles for all four sides */}
