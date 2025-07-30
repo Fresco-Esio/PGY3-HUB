@@ -370,8 +370,8 @@ const D3PhysicsTimeline = ({
       .join("circle")
       .attr("r", 12)
       .attr("fill", d => color(d.type))
-      .attr("stroke", d => pinnedNodes.has(d.id) ? "#f59e0b" : "#fff")
-      .attr("stroke-width", d => pinnedNodes.has(d.id) ? 3 : 2)
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 2)
       .style("cursor", "pointer")
       .style("transition", "none"); // Remove CSS transitions that can interfere
 
