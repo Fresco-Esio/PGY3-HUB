@@ -222,7 +222,18 @@ const CaseModal = ({
     }
   }, [data, isOpen, hasInitialized]);
 
-  // Escape key handling to close modal
+  const handleClose = useCallback(() => {
+    if (isAnimating || isClosing) return;
+    
+    setIsAnimating(true);
+    setIsClosing(true);
+    if (onAnimationStart) onAnimationStart();
+    
+    // Set visibility to false to trigger exit animation
+    setIsVisible(false);
+  }, [onAnimationStart, isAnimating, isClosing]);
+
+  // Escape key handling to close modal - MOVED AFTER handleClose definition
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -237,17 +248,6 @@ const CaseModal = ({
       };
     }
   }, [isOpen, handleClose]);
-
-  const handleClose = useCallback(() => {
-    if (isAnimating || isClosing) return;
-    
-    setIsAnimating(true);
-    setIsClosing(true);
-    if (onAnimationStart) onAnimationStart();
-    
-    // Set visibility to false to trigger exit animation
-    setIsVisible(false);
-  }, [onAnimationStart, isAnimating, isClosing]);
 
   const handleSave = useCallback(async () => {
     if (isLoading) return;
