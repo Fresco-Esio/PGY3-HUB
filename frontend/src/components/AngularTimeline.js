@@ -14,7 +14,8 @@ import {
 import { select } from 'd3-selection';
 import { drag } from 'd3-drag';
 import { forceSimulation, forceManyBody, forceCenter, forceCollide, forceLink } from 'd3-force';
-import { scaleOrdinal, schemeCategory10 } from 'd3-scale';
+import { scaleOrdinal } from 'd3-scale';
+import { schemeCategory10 } from 'd3-scale-chromatic';
 
 // Minimal animation variants
 const containerVariants = {
