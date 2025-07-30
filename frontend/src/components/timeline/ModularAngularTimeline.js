@@ -769,7 +769,7 @@ const D3PhysicsTimeline = ({
 
       {/* Instructions */}
       <div className="mt-2 text-xs text-slate-500 space-y-1">
-        <p>• <strong>Drag</strong> nodes to reposition with physics • <strong>Click</strong> to pin/unpin • <strong>Hover</strong> for editable cards</p>
+        <p>• <strong>Drag</strong> nodes to reposition with physics • <strong>Click</strong> nodes to edit cards • <strong>Hover</strong> for patient/clinical cards</p>
         <p>• <strong>Click connection lines</strong> to insert new entries • Cards auto-save when clicking outside</p>
       </div>
     </div>
