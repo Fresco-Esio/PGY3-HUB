@@ -113,9 +113,17 @@ user_problem_statement: |
   5. Add minimalist scrollbar that blends with current dark theme
 
 backend:
-  - task: "Verify existing mind map API endpoints work correctly"
+  - task: "Timeline data persistence and API compatibility"
     implemented: true
     working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Backend API endpoints should support timeline data persistence for case nodes. Need to verify timeline entries can be saved and retrieved properly."
     file: "server.py"
     stuck_count: 0
     priority: "high"
