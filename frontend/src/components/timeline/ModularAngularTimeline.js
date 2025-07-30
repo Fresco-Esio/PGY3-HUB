@@ -7,6 +7,7 @@ import { drag } from 'd3-drag';
 import { select } from 'd3-selection';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
+import { easeElastic, easeBackOut } from 'd3-ease';
 
 // Enhanced Hover Cards with editing capabilities
 const EditableHoverCard = ({ 
