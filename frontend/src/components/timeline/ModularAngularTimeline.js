@@ -1053,10 +1053,31 @@ const D3PhysicsTimeline = ({
             <RotateCcw size={16} />
             Reset Layout
           </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleUndo}
+            disabled={undoStack.length === 0}
+            className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm ${
+              undoStack.length > 0 
+                ? 'bg-amber-600 text-white hover:bg-amber-700' 
+                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+            }`}
+          >
+            <RotateCcw size={16} />
+            Undo ({undoStack.length})
+          </motion.button>
         </div>
 
         <div className="text-xs text-slate-400 flex items-center gap-4">
           <span>{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
+          {editingCard && (
+            <span className="text-amber-400 flex items-center gap-1">
+              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+              Editing
+            </span>
+          )}
         </div>
       </div>
 
