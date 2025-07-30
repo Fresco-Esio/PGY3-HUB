@@ -613,28 +613,103 @@ const CaseModal = ({
                     transition={{ duration: 0.3 }}
                     className="h-full overflow-y-auto p-6 space-y-6"
                   >
-                    {/* Case Title */}
+                    {/* Case Title and Basic Info */}
                     <motion.div 
                       variants={cardVariants}
                       initial="hidden"
                       animate="visible"
                       className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
                     >
-                      <h3 className="text-lg font-semibold text-white mb-4">Case Information</h3>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-2">Primary Diagnosis</label>
-                          <div className="text-white bg-slate-700/50 rounded-lg p-3">
-                            {editData.primaryDiagnosis || editData.primary_diagnosis || editData.title || 'No diagnosis specified'}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
-                          <div className="text-white bg-slate-700/50 rounded-lg p-3">
-                            {editData.status || 'Active'}
-                          </div>
-                        </div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white">Case Information</h3>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => toggleEditSection('basic_info')}
+                          className="text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-slate-700/50"
+                          title="Edit case information"
+                        >
+                          <Edit3 size={16} />
+                        </motion.button>
                       </div>
+                      
+                      {editingSections.basic_info ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Case Title/Label</label>
+                            <input
+                              type="text"
+                              value={sectionData.basic_info?.label || editData.label || editData.title || ''}
+                              onChange={(e) => updateSectionData('basic_info', 'label', e.target.value)}
+                              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                              placeholder="Enter case title/label"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Primary Diagnosis</label>
+                            <input
+                              type="text"
+                              value={sectionData.basic_info?.primary_diagnosis || editData.primaryDiagnosis || editData.primary_diagnosis || ''}
+                              onChange={(e) => updateSectionData('basic_info', 'primary_diagnosis', e.target.value)}
+                              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                              placeholder="Enter primary diagnosis"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
+                            <select
+                              value={sectionData.basic_info?.status || editData.status || 'active'}
+                              onChange={(e) => updateSectionData('basic_info', 'status', e.target.value)}
+                              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                            >
+                              <option value="active">Active</option>
+                              <option value="archived">Archived</option>
+                              <option value="follow_up">Follow-up</option>
+                              <option value="completed">Completed</option>
+                            </select>
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => cancelEdit('basic_info')}
+                              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                            >
+                              Cancel
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => saveSection('basic_info')}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            >
+                              <Save size={16} />
+                              Save Changes
+                            </motion.button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Case Title/Label</label>
+                            <div className="text-white bg-slate-700/50 rounded-lg p-3">
+                              {editData.label || editData.title || 'Untitled case'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Primary Diagnosis</label>
+                            <div className="text-white bg-slate-700/50 rounded-lg p-3">
+                              {editData.primaryDiagnosis || editData.primary_diagnosis || 'No diagnosis specified'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
+                            <div className="text-white bg-slate-700/50 rounded-lg p-3">
+                              {editData.status || 'Active'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
 
                     {/* Chief Complaint */}
@@ -644,10 +719,53 @@ const CaseModal = ({
                       animate="visible"
                       className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
                     >
-                      <h4 className="text-lg font-semibold text-white mb-3">Chief Complaint</h4>
-                      <div className="text-slate-300 leading-relaxed bg-slate-700/30 rounded-lg p-4">
-                        {editData.chiefComplaint || 'No chief complaint documented'}
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-lg font-semibold text-white">Chief Complaint</h4>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => toggleEditSection('chief_complaint')}
+                          className="text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-slate-700/50"
+                          title="Edit chief complaint"
+                        >
+                          <Edit3 size={16} />
+                        </motion.button>
                       </div>
+                      
+                      {editingSections.chief_complaint ? (
+                        <div className="space-y-4">
+                          <textarea
+                            value={sectionData.chief_complaint?.content || editData.chiefComplaint || editData.chief_complaint || ''}
+                            onChange={(e) => updateSectionData('chief_complaint', 'content', e.target.value)}
+                            rows={4}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                            placeholder="Enter chief complaint..."
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => cancelEdit('chief_complaint')}
+                              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                            >
+                              Cancel
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => saveSection('chief_complaint')}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            >
+                              <Save size={16} />
+                              Save Changes
+                            </motion.button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-slate-300 leading-relaxed bg-slate-700/30 rounded-lg p-4">
+                          {editData.chiefComplaint || editData.chief_complaint || 'No chief complaint documented'}
+                        </div>
+                      )}
                     </motion.div>
 
                     {/* Initial Presentation */}
@@ -657,10 +775,53 @@ const CaseModal = ({
                       animate="visible"
                       className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700"
                     >
-                      <h4 className="text-lg font-semibold text-white mb-3">Initial Presentation</h4>
-                      <div className="text-slate-300 leading-relaxed bg-slate-700/30 rounded-lg p-4">
-                        {editData.initialPresentation || 'No initial presentation documented'}
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-lg font-semibold text-white">Initial Presentation</h4>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => toggleEditSection('initial_presentation')}
+                          className="text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-slate-700/50"
+                          title="Edit initial presentation"
+                        >
+                          <Edit3 size={16} />
+                        </motion.button>
                       </div>
+                      
+                      {editingSections.initial_presentation ? (
+                        <div className="space-y-4">
+                          <textarea
+                            value={sectionData.initial_presentation?.content || editData.initialPresentation || editData.initial_presentation || ''}
+                            onChange={(e) => updateSectionData('initial_presentation', 'content', e.target.value)}
+                            rows={4}
+                            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                            placeholder="Enter initial presentation details..."
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => cancelEdit('initial_presentation')}
+                              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                            >
+                              Cancel
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => saveSection('initial_presentation')}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            >
+                              <Save size={16} />
+                              Save Changes
+                            </motion.button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-slate-300 leading-relaxed bg-slate-700/30 rounded-lg p-4">
+                          {editData.initialPresentation || editData.initial_presentation || 'No initial presentation documented'}
+                        </div>
+                      )}
                     </motion.div>
 
                     {/* Last Updated */}
