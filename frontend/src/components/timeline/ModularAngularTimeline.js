@@ -1029,6 +1029,34 @@ const D3PhysicsTimeline = ({
             </>
           )}
         </AnimatePresence>
+
+        {/* Right-click Context Menu */}
+        <AnimatePresence>
+          {contextMenu && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute z-50 bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-2 min-w-[150px]"
+              style={{
+                left: `${contextMenu.x}px`,
+                top: `${contextMenu.y}px`
+              }}
+            >
+              <div className="px-3 py-1 text-xs text-slate-400 border-b border-slate-600 mb-1">
+                {contextMenu.nodeTitle}
+              </div>
+              <button
+                onClick={() => handleDeleteNode(contextMenu.nodeId)}
+                className="w-full px-3 py-2 text-sm text-red-300 hover:bg-red-600/20 transition-colors flex items-center gap-2"
+              >
+                <Trash2 size={14} />
+                Delete Node
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Controls */}
