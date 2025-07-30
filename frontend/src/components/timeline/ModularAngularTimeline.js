@@ -619,11 +619,6 @@ const D3PhysicsTimeline = ({
   const hoveredNodeData = hoveredNode ? 
     nodesRef.current.find(node => node.id === hoveredNode) : null;
 
-  // Debug log for hover state
-  useEffect(() => {
-    console.log('Hovered node:', hoveredNode, 'Node data:', hoveredNodeData);
-  }, [hoveredNode, hoveredNodeData]);
-
   return (
     <div className={`relative ${className}`}>
       {/* SVG Container - Centered timeline */}
