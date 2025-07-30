@@ -17,6 +17,11 @@ export const LazyRichTextEditor = lazy(() => import('./RichTextEditor'));
 export const LazyTemplateManager = lazy(() => import('./TemplateManager'));
 export const LazyLiteratureModal = lazy(() => import('./LiteratureModal'));
 
+// Lazy load modals for better initial load performance
+export const LazyCaseModal = lazy(() => import('./CaseModal'));
+export const LazyTopicModal = lazy(() => import('./TopicModal'));
+export const LazyTaskModal = lazy(() => import('./TaskModal'));
+
 // HOC for wrapping lazy components with suspense
 export const withLazyLoading = (LazyComponent, fallbackMessage) => (props) => (
   <Suspense fallback={<LoadingSpinner message={fallbackMessage} />}>
@@ -28,3 +33,8 @@ export const withLazyLoading = (LazyComponent, fallbackMessage) => (props) => (
 export const RichTextEditor = withLazyLoading(LazyRichTextEditor, "Loading editor...");
 export const TemplateManager = withLazyLoading(LazyTemplateManager, "Loading templates...");
 export const LiteratureModal = withLazyLoading(LazyLiteratureModal, "Loading literature viewer...");
+
+// Pre-wrapped modal components
+export const CaseModal = withLazyLoading(LazyCaseModal, "Loading case details...");
+export const TopicModal = withLazyLoading(LazyTopicModal, "Loading topic details...");
+export const TaskModal = withLazyLoading(LazyTaskModal, "Loading task details...");
