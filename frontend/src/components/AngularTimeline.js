@@ -1,80 +1,51 @@
-// Angular Timeline Component with D3-Inspired Physics
+// Angular Timeline Component with D3-Inspired Physics - Optimized
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
   Calendar, 
   Clock, 
-  Edit3,
   Save,
-  X,
   Loader2,
   User,
   Brain,
-  GripVertical,
-  Pin,
-  PinOff
+  Pin
 } from 'lucide-react';
 import { forceSimulation, forceManyBody, forceCenter, forceLink, forceCollide } from 'd3-force';
 
-// Animation variants
+// Optimized animation variants - reduced complexity
 const timelineVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0 },
   visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-      staggerChildren: 0.1
-    }
+    opacity: 1,
+    transition: { duration: 0.2, staggerChildren: 0.05 }
   }
 };
 
 const nodeVariants = {
-  hidden: { opacity: 0, scale: 0.8, y: 20 },
+  hidden: { opacity: 0, scale: 0.9 },
   visible: { 
     opacity: 1, 
-    scale: 1, 
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut"
-    }
+    scale: 1,
+    transition: { duration: 0.2 }
   },
   popIn: {
-    scale: [0.3, 1.1, 1],
-    opacity: [0, 1, 1],
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
+    scale: [0.8, 1.05, 1],
+    opacity: [0, 1],
+    transition: { duration: 0.3 }
   }
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, scale: 0.9, y: 10 },
+  hidden: { opacity: 0, scale: 0.95 },
   visible: { 
     opacity: 1, 
-    scale: 1, 
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut"
-    }
-  },
-  hover: {
-    scale: 1.02,
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.4)",
-    backdropFilter: "blur(10px)",
-    transition: {
-      duration: 0.2,
-      ease: "easeOut"
-    }
+    scale: 1,
+    transition: { duration: 0.2 }
   }
 };
 
-const AngularTimeline = ({ 
+const AngularTimeline = React.memo(({ 
   timeline = [], 
   onUpdateTimeline, 
   isLoading = false,
@@ -83,8 +54,6 @@ const AngularTimeline = ({
   const [entries, setEntries] = useState([]);
   const [editingEntryId, setEditingEntryId] = useState(null);
   const [hoveredEntryId, setHoveredEntryId] = useState(null);
-  const [hoveredConnectorIndex, setHoveredConnectorIndex] = useState(null);
-  const [draggedEntry, setDraggedEntry] = useState(null);
   const [pinnedNodes, setPinnedNodes] = useState(new Set());
   const [nodePositions, setNodePositions] = useState(new Map());
   const timelineRef = useRef(null);
@@ -92,17 +61,19 @@ const AngularTimeline = ({
   const nodesRef = useRef([]);
   const linksRef = useRef([]);
   const isDraggingRef = useRef(false);
+  const updateTimeoutRef = useRef(null);
 
-  // Timeline layout constants
-  const TIMELINE_WIDTH = 800;
-  const TIMELINE_HEIGHT = 600;
-  const ZIGZAG_AMPLITUDE = 150; // How far left/right the zigzag goes
-  const VERTICAL_SPACING = 120; // Base vertical spacing
-  const NODE_RADIUS = 24;
+  // Optimized layout constants - smaller to fit modal better
+  const TIMELINE_WIDTH = 600;
+  const TIMELINE_HEIGHT = 350;
+  const ZIGZAG_AMPLITUDE = 80; // Reduced from 150
+  const VERTICAL_SPACING = 80; // Reduced from 120
+  const NODE_RADIUS = 20; // Reduced from 24
+  const CARD_OFFSET = 40; // Reduced from 100 - brings cards closer
 
-  // Initialize entries and create D3 simulation
-  useEffect(() => {
-    const sortedEntries = (timeline || []).map((entry, index) => ({
+  // Memoized entries processing
+  const processedEntries = useMemo(() => {
+    return (timeline || []).map((entry, index) => ({
       id: entry.id || `entry-${Date.now()}-${index}`,
       date: entry.date || new Date().toISOString(),
       patientNarrative: entry.patientNarrative || '',
@@ -110,20 +81,31 @@ const AngularTimeline = ({
       orderIndex: entry.orderIndex || index,
       ...entry
     })).sort((a, b) => a.orderIndex - b.orderIndex);
-    
-    setEntries(sortedEntries);
-    initializeSimulation(sortedEntries);
   }, [timeline]);
 
-  // Initialize D3 force simulation
+  // Initialize entries
+  useEffect(() => {
+    setEntries(processedEntries);
+    if (processedEntries.length > 0) {
+      // Debounce simulation initialization
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+      updateTimeoutRef.current = setTimeout(() => {
+        initializeSimulation(processedEntries);
+      }, 100);
+    }
+  }, [processedEntries]);
+
+  // Optimized simulation initialization
   const initializeSimulation = useCallback((entriesData) => {
     if (entriesData.length === 0) return;
 
-    // Create nodes with initial zigzag positions
+    // Create nodes with initial positions
     const nodes = entriesData.map((entry, index) => {
       const zigzagSide = index % 2 === 0 ? -1 : 1;
       const baseX = TIMELINE_WIDTH / 2 + (zigzagSide * ZIGZAG_AMPLITUDE);
-      const baseY = 80 + (index * VERTICAL_SPACING);
+      const baseY = 60 + (index * VERTICAL_SPACING);
       
       return {
         id: entry.id,
@@ -137,13 +119,13 @@ const AngularTimeline = ({
       };
     });
 
-    // Create links between consecutive nodes
+    // Create simplified links
     const links = [];
     for (let i = 0; i < nodes.length - 1; i++) {
       links.push({
         source: nodes[i],
         target: nodes[i + 1],
-        distance: VERTICAL_SPACING
+        distance: VERTICAL_SPACING * 0.8
       });
     }
 
@@ -155,35 +137,42 @@ const AngularTimeline = ({
       simulationRef.current.stop();
     }
 
-    // Create new simulation
+    // Optimized simulation with reduced forces
     simulationRef.current = forceSimulation(nodes)
-      .force('charge', forceManyBody().strength(-100))
+      .force('charge', forceManyBody().strength(-30)) // Reduced from -100
       .force('center', forceCenter(TIMELINE_WIDTH / 2, TIMELINE_HEIGHT / 2))
-      .force('link', forceLink(links).distance(d => d.distance).strength(0.3))
-      .force('collision', forceCollide().radius(NODE_RADIUS + 10))
-      .on('tick', () => {
-        // Update node positions
-        const newPositions = new Map();
-        nodes.forEach(node => {
-          newPositions.set(node.id, { x: node.x, y: node.y });
-        });
-        setNodePositions(newPositions);
-      })
-      .alpha(0.3)
-      .alphaDecay(0.05);
+      .force('link', forceLink(links).distance(d => d.distance).strength(0.1)) // Reduced strength
+      .force('collision', forceCollide().radius(NODE_RADIUS + 5))
+      .on('tick', throttledTick)
+      .alpha(0.2) // Reduced from 0.3
+      .alphaDecay(0.1); // Faster decay
 
-  }, [pinnedNodes]);
+  }, [pinnedNodes, TIMELINE_WIDTH, TIMELINE_HEIGHT, ZIGZAG_AMPLITUDE, VERTICAL_SPACING, NODE_RADIUS]);
 
-  // Handle node dragging
+  // Throttled tick function for better performance
+  const throttledTick = useCallback(() => {
+    if (updateTimeoutRef.current) return;
+    
+    updateTimeoutRef.current = setTimeout(() => {
+      const newPositions = new Map();
+      nodesRef.current.forEach(node => {
+        newPositions.set(node.id, { x: node.x, y: node.y });
+      });
+      setNodePositions(newPositions);
+      updateTimeoutRef.current = null;
+    }, 16); // ~60fps
+  }, []);
+
+  // Optimized drag handlers
   const handleDragStart = useCallback((e, nodeId) => {
+    e.preventDefault();
     isDraggingRef.current = true;
     const node = nodesRef.current.find(n => n.id === nodeId);
     if (node && simulationRef.current) {
       node.fx = node.x;
       node.fy = node.y;
-      simulationRef.current.alphaTarget(0.3).restart();
+      simulationRef.current.alphaTarget(0.1).restart();
     }
-    e.preventDefault();
   }, []);
 
   const handleDrag = useCallback((e, nodeId) => {
@@ -197,13 +186,12 @@ const AngularTimeline = ({
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      // Clamp to timeline bounds
       node.fx = Math.max(NODE_RADIUS, Math.min(TIMELINE_WIDTH - NODE_RADIUS, x));
       node.fy = Math.max(NODE_RADIUS, Math.min(TIMELINE_HEIGHT - NODE_RADIUS, y));
       
-      simulationRef.current.alpha(0.3).restart();
+      simulationRef.current.alpha(0.1).restart();
     }
-  }, []);
+  }, [NODE_RADIUS, TIMELINE_WIDTH, TIMELINE_HEIGHT]);
 
   const handleDragEnd = useCallback((e, nodeId) => {
     isDraggingRef.current = false;
@@ -217,23 +205,23 @@ const AngularTimeline = ({
     }
   }, [pinnedNodes]);
 
-  // Handle node click to pin/unpin
+  // Optimized node click handler
   const handleNodeClick = useCallback((nodeId) => {
+    if (isDraggingRef.current) return;
+    
     const node = nodesRef.current.find(n => n.id === nodeId);
     if (!node) return;
 
     const newPinnedNodes = new Set(pinnedNodes);
     
     if (pinnedNodes.has(nodeId)) {
-      // Unpin the node
       newPinnedNodes.delete(nodeId);
       delete node.fx;
       delete node.fy;
       if (simulationRef.current) {
-        simulationRef.current.alpha(0.3).restart();
+        simulationRef.current.alpha(0.1).restart();
       }
     } else {
-      // Pin the node
       newPinnedNodes.add(nodeId);
       node.fx = node.x;
       node.fy = node.y;
@@ -242,7 +230,7 @@ const AngularTimeline = ({
     setPinnedNodes(newPinnedNodes);
   }, [pinnedNodes]);
 
-  // Calculate card positions based on node position and side
+  // Optimized card positions - closer to nodes
   const getCardPositions = useCallback((nodeId) => {
     const position = nodePositions.get(nodeId);
     if (!position) return null;
@@ -251,58 +239,52 @@ const AngularTimeline = ({
     if (!node) return null;
 
     const { x: nodeX, y: nodeY } = position;
-    const cardWidth = 280;
-    const cardHeight = 120;
-    const offsetDistance = 100;
+    const cardWidth = 200; // Reduced from 280
+    const cardHeight = 100; // Reduced from 120
 
     if (node.side === 'left') {
       return {
         patient: {
-          x: nodeX - offsetDistance - cardWidth,
-          y: nodeY - cardHeight / 2 - 10,
+          x: nodeX - CARD_OFFSET - cardWidth,
+          y: nodeY - cardHeight / 2 - 5,
           anchorX: nodeX - NODE_RADIUS * 0.7,
-          anchorY: nodeY + NODE_RADIUS * 0.7,
-          connectionCorner: 'bottom-right'
+          anchorY: nodeY + NODE_RADIUS * 0.7
         },
         clinical: {
-          x: nodeX + offsetDistance,
-          y: nodeY + 10,
-          anchorX: nodeX - NODE_RADIUS * 0.7,
-          anchorY: nodeY - NODE_RADIUS * 0.7,
-          connectionCorner: 'top-left'
+          x: nodeX + CARD_OFFSET,
+          y: nodeY - cardHeight / 2 + 5,
+          anchorX: nodeX + NODE_RADIUS * 0.7,
+          anchorY: nodeY - NODE_RADIUS * 0.7
         }
       };
     } else {
       return {
         patient: {
-          x: nodeX - offsetDistance - cardWidth,
-          y: nodeY + 10,
-          anchorX: nodeX + NODE_RADIUS * 0.7,
-          anchorY: nodeY + NODE_RADIUS * 0.7,
-          connectionCorner: 'bottom-right'
+          x: nodeX - CARD_OFFSET - cardWidth,
+          y: nodeY - cardHeight / 2 + 5,
+          anchorX: nodeX - NODE_RADIUS * 0.7,
+          anchorY: nodeY + NODE_RADIUS * 0.7
         },
         clinical: {
-          x: nodeX + offsetDistance,
-          y: nodeY - cardHeight / 2 - 10,
+          x: nodeX + CARD_OFFSET,
+          y: nodeY - cardHeight / 2 - 5,
           anchorX: nodeX + NODE_RADIUS * 0.7,
-          anchorY: nodeY - NODE_RADIUS * 0.7,
-          connectionCorner: 'top-right'
+          anchorY: nodeY - NODE_RADIUS * 0.7
         }
       };
     }
-  }, [nodePositions]);
+  }, [nodePositions, NODE_RADIUS, CARD_OFFSET]);
 
-  // Handle entry updates
+  // Memoized update and save functions
   const updateEntry = useCallback((entryId, field, value) => {
     setEntries(prev => prev.map(entry => 
       entry.id === entryId ? { ...entry, [field]: value } : entry
     ));
   }, []);
 
-  // Save entry changes
   const saveEntry = useCallback(async (entryId) => {
     const entry = entries.find(e => e.id === entryId);
-    if (!entry) return;
+    if (!entry || isLoading) return;
 
     try {
       const updatedTimeline = entries.map(e => e.id === entryId ? entry : e);
@@ -315,9 +297,8 @@ const AngularTimeline = ({
       console.error('Error saving timeline entry:', error);
       addToast?.('Failed to save timeline entry', 'error');
     }
-  }, [entries, onUpdateTimeline, addToast]);
+  }, [entries, onUpdateTimeline, addToast, isLoading]);
 
-  // Add new entry
   const addEntry = useCallback(() => {
     const newEntry = {
       id: `entry-${Date.now()}`,
@@ -337,26 +318,21 @@ const AngularTimeline = ({
     }
   }, [entries, onUpdateTimeline]);
 
-  // Generate SVG path for timeline backbone
-  const generateTimelinePath = useCallback(() => {
+  // Optimized path generation
+  const timelinePath = useMemo(() => {
     if (nodesRef.current.length === 0) return '';
     
     let pathData = '';
     nodesRef.current.forEach((node, index) => {
       const position = nodePositions.get(node.id);
       if (position) {
-        if (index === 0) {
-          pathData += `M ${position.x} ${position.y}`;
-        } else {
-          pathData += ` L ${position.x} ${position.y}`;
-        }
+        pathData += index === 0 ? `M ${position.x} ${position.y}` : ` L ${position.x} ${position.y}`;
       }
     });
-    
     return pathData;
   }, [nodePositions]);
 
-  // Render floating cards
+  // Optimized floating cards render
   const renderFloatingCards = useCallback((entry) => {
     if (hoveredEntryId !== entry.id && editingEntryId !== entry.id) return null;
 
@@ -366,230 +342,188 @@ const AngularTimeline = ({
     const isEditing = editingEntryId === entry.id;
 
     return (
-      <AnimatePresence key={`cards-${entry.id}`}>
+      <motion.div
+        key={`cards-${entry.id}`}
+        className="absolute inset-0 pointer-events-none"
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+        variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+        transition={{ duration: 0.2 }}
+      >
+        {/* Patient Card */}
         <motion.div
-          className="absolute inset-0 pointer-events-none"
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1 }
+          className={`absolute bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-lg p-3 shadow-lg pointer-events-auto ${
+            isEditing ? 'ring-1 ring-blue-500' : ''
+          }`}
+          style={{
+            left: cardPositions.patient.x,
+            top: cardPositions.patient.y,
+            width: 200,
+            minHeight: 100
           }}
-          transition={{ duration: 0.3 }}
+          variants={cardVariants}
         >
-          {/* Patient Narrative Card */}
-          <motion.div
-            className={`absolute bg-slate-800/95 backdrop-blur-md border border-slate-600 rounded-xl p-4 shadow-2xl pointer-events-auto ${
-              isEditing ? 'ring-2 ring-blue-500' : ''
-            }`}
+          {/* Simplified connection indicator */}
+          <div
+            className="absolute w-1 h-1 bg-blue-400 rounded-full"
             style={{
-              left: cardPositions.patient.x,
-              top: cardPositions.patient.y,
-              width: 280,
-              minHeight: 120
+              right: -2,
+              bottom: -2
             }}
-            variants={cardVariants}
-            whileHover={!isEditing ? "hover" : undefined}
-          >
-            {/* Connection line */}
-            <svg 
-              className="absolute pointer-events-none"
-              style={{
-                left: cardPositions.patient.connectionCorner === 'bottom-right' ? '100%' : '0%',
-                top: cardPositions.patient.connectionCorner === 'bottom-right' ? '100%' : '0%',
-                transform: 'translate(-50%, -50%)'
-              }}
-              width="60"
-              height="60"
-            >
-              <line
-                x1="30"
-                y1="30"
-                x2={cardPositions.patient.anchorX - cardPositions.patient.x + (cardPositions.patient.connectionCorner === 'bottom-right' ? -280 : 0)}
-                y2={cardPositions.patient.anchorY - cardPositions.patient.y + (cardPositions.patient.connectionCorner === 'bottom-right' ? -120 : 0)}
-                stroke="#3B82F6"
-                strokeWidth="2"
-                strokeDasharray="4,4"
-                opacity="0.7"
-              />
-              <circle cx="30" cy="30" r="3" fill="#3B82F6" />
-            </svg>
-            
-            <div className="flex items-center gap-2 mb-3">
-              <User size={16} className="text-blue-400" />
-              <h4 className="font-semibold text-white text-sm">Patient Narrative</h4>
-            </div>
-            
-            {isEditing ? (
-              <textarea
-                value={entry.patientNarrative}
-                onChange={(e) => updateEntry(entry.id, 'patientNarrative', e.target.value)}
-                rows={4}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
-                placeholder="Enter patient narrative or session content..."
-                autoFocus
-              />
-            ) : (
-              <p className="text-slate-300 text-sm leading-relaxed">
-                {entry.patientNarrative || (
-                  <span className="text-slate-500 italic">No patient narrative documented</span>
-                )}
-              </p>
-            )}
-          </motion.div>
-
-          {/* Clinical Notes Card */}
-          <motion.div
-            className={`absolute bg-slate-800/95 backdrop-blur-md border border-slate-600 rounded-xl p-4 shadow-2xl pointer-events-auto ${
-              isEditing ? 'ring-2 ring-purple-500' : ''
-            }`}
-            style={{
-              left: cardPositions.clinical.x,
-              top: cardPositions.clinical.y,
-              width: 280,
-              minHeight: 120
-            }}
-            variants={cardVariants}
-            whileHover={!isEditing ? "hover" : undefined}
-          >
-            {/* Connection line */}
-            <svg 
-              className="absolute pointer-events-none"
-              style={{
-                left: cardPositions.clinical.connectionCorner.includes('left') ? '0%' : '100%',
-                top: cardPositions.clinical.connectionCorner.includes('top') ? '0%' : '100%',
-                transform: 'translate(-50%, -50%)'
-              }}
-              width="60"
-              height="60"
-            >
-              <line
-                x1="30"
-                y1="30"
-                x2={cardPositions.clinical.anchorX - cardPositions.clinical.x - (cardPositions.clinical.connectionCorner.includes('right') ? 280 : 0)}
-                y2={cardPositions.clinical.anchorY - cardPositions.clinical.y - (cardPositions.clinical.connectionCorner.includes('bottom') ? 120 : 0)}
-                stroke="#A855F7"
-                strokeWidth="2"
-                strokeDasharray="4,4"
-                opacity="0.7"
-              />
-              <circle cx="30" cy="30" r="3" fill="#A855F7" />
-            </svg>
-            
-            <div className="flex items-center gap-2 mb-3">
-              <Brain size={16} className="text-purple-400" />
-              <h4 className="font-semibold text-white text-sm">Clinical Process Notes</h4>
-            </div>
-            
-            {isEditing ? (
-              <textarea
-                value={entry.clinicalNotes}
-                onChange={(e) => updateEntry(entry.id, 'clinicalNotes', e.target.value)}
-                rows={4}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none text-sm"
-                placeholder="Enter clinical insights, countertransference, hypotheses..."
-              />
-            ) : (
-              <p className="text-slate-300 text-sm leading-relaxed">
-                {entry.clinicalNotes || (
-                  <span className="text-slate-500 italic">No clinical notes documented</span>
-                )}
-              </p>
-            )}
-          </motion.div>
-
-          {/* Edit Controls */}
-          {isEditing && (
-            <motion.div 
-              className="absolute pointer-events-auto bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-lg p-3 shadow-xl z-50"
-              style={{
-                left: nodePositions.get(entry.id)?.x - 80 || 0,
-                top: (nodePositions.get(entry.id)?.y || 0) + 80
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <div className="flex gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingEntryId(null);
-                  }}
-                  className="px-3 py-2 text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors text-sm"
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    saveEntry(entry.id);
-                  }}
-                  disabled={isLoading}
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
-                >
-                  {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                  Save
-                </motion.button>
-              </div>
-            </motion.div>
+          />
+          
+          <div className="flex items-center gap-2 mb-2">
+            <User size={14} className="text-blue-400" />
+            <h4 className="font-medium text-white text-xs">Patient Narrative</h4>
+          </div>
+          
+          {isEditing ? (
+            <textarea
+              value={entry.patientNarrative}
+              onChange={(e) => updateEntry(entry.id, 'patientNarrative', e.target.value)}
+              rows={3}
+              className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white placeholder-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none text-xs"
+              placeholder="Patient narrative..."
+              autoFocus
+            />
+          ) : (
+            <p className="text-slate-300 text-xs leading-relaxed">
+              {entry.patientNarrative || (
+                <span className="text-slate-500 italic">No narrative documented</span>
+              )}
+            </p>
           )}
         </motion.div>
-      </AnimatePresence>
+
+        {/* Clinical Card */}
+        <motion.div
+          className={`absolute bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-lg p-3 shadow-lg pointer-events-auto ${
+            isEditing ? 'ring-1 ring-purple-500' : ''
+          }`}
+          style={{
+            left: cardPositions.clinical.x,
+            top: cardPositions.clinical.y,
+            width: 200,
+            minHeight: 100
+          }}
+          variants={cardVariants}
+        >
+          {/* Simplified connection indicator */}
+          <div
+            className="absolute w-1 h-1 bg-purple-400 rounded-full"
+            style={{
+              left: -2,
+              top: -2
+            }}
+          />
+          
+          <div className="flex items-center gap-2 mb-2">
+            <Brain size={14} className="text-purple-400" />
+            <h4 className="font-medium text-white text-xs">Clinical Notes</h4>
+          </div>
+          
+          {isEditing ? (
+            <textarea
+              value={entry.clinicalNotes}
+              onChange={(e) => updateEntry(entry.id, 'clinicalNotes', e.target.value)}
+              rows={3}
+              className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white placeholder-slate-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 resize-none text-xs"
+              placeholder="Clinical insights..."
+            />
+          ) : (
+            <p className="text-slate-300 text-xs leading-relaxed">
+              {entry.clinicalNotes || (
+                <span className="text-slate-500 italic">No notes documented</span>
+              )}
+            </p>
+          )}
+        </motion.div>
+
+        {/* Compact Edit Controls */}
+        {isEditing && (
+          <motion.div 
+            className="absolute pointer-events-auto bg-slate-800/95 border border-slate-600 rounded-lg p-2 shadow-lg z-50"
+            style={{
+              left: (nodePositions.get(entry.id)?.x || 0) - 50,
+              top: (nodePositions.get(entry.id)?.y || 0) + 40
+            }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingEntryId(null);
+                }}
+                className="px-2 py-1 text-slate-300 hover:text-white border border-slate-600 rounded hover:bg-slate-700 transition-colors text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  saveEntry(entry.id);
+                }}
+                disabled={isLoading}
+                className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs flex items-center gap-1"
+              >
+                {isLoading ? <Loader2 size={10} className="animate-spin" /> : <Save size={10} />}
+                Save
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
     );
   }, [hoveredEntryId, editingEntryId, getCardPositions, nodePositions, updateEntry, saveEntry, isLoading]);
 
-  // Cleanup simulation on unmount
+  // Cleanup
   useEffect(() => {
     return () => {
       if (simulationRef.current) {
         simulationRef.current.stop();
+      }
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
       }
     };
   }, []);
 
   return (
     <motion.div
-      className="h-full overflow-hidden p-6 relative"
+      className="h-full p-4 relative"
       variants={timelineVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Clock size={20} className="text-cyan-400" />
+      {/* Compact Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-semibold text-white flex items-center gap-2">
+          <Clock size={16} className="text-cyan-400" />
           Clinical Timeline
-          <span className="text-xs text-slate-400 ml-2">Drag nodes • Click to pin/unpin</span>
+          <span className="text-xs text-slate-500 ml-1">Drag • Click to pin</span>
         </h3>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={addEntry}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+          className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
         >
-          <Plus size={16} />
+          <Plus size={14} />
           Add Entry
-        </motion.button>
+        </button>
       </div>
 
-      {/* Timeline Simulation Container */}
+      {/* Compact Timeline Container */}
       <div 
         ref={timelineRef}
-        className="relative bg-slate-900/50 rounded-xl border border-slate-700"
-        style={{ width: TIMELINE_WIDTH, height: TIMELINE_HEIGHT, margin: '0 auto' }}
+        className="relative bg-slate-900/50 rounded-lg border border-slate-700 mx-auto"
+        style={{ width: TIMELINE_WIDTH, height: TIMELINE_HEIGHT }}
       >
         {/* Timeline Path */}
         {entries.length > 0 && (
-          <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{ zIndex: 1 }}
-          >
+          <svg className="absolute inset-0 w-full h-full pointer-events-none">
             <defs>
               <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#64748B" />
@@ -598,12 +532,11 @@ const AngularTimeline = ({
               </linearGradient>
             </defs>
             <path
-              d={generateTimelinePath()}
+              d={timelinePath}
               stroke="url(#timelineGradient)"
-              strokeWidth="3"
+              strokeWidth="2"
               fill="none"
               strokeLinecap="round"
-              strokeLinejoin="round"
               opacity="0.8"
             />
           </svg>
@@ -621,7 +554,6 @@ const AngularTimeline = ({
 
             return (
               <React.Fragment key={entry.id}>
-                {/* Timeline Node */}
                 <motion.div
                   className="absolute cursor-move select-none"
                   style={{ 
@@ -640,99 +572,83 @@ const AngularTimeline = ({
                   onMouseLeave={() => setHoveredEntryId(null)}
                   onClick={() => {
                     if (!isDraggingRef.current) {
-                      if (isEditing) {
-                        setEditingEntryId(null);
-                      } else {
-                        setEditingEntryId(entry.id);
-                      }
+                      setEditingEntryId(isEditing ? null : entry.id);
                     }
                   }}
                   onDoubleClick={() => handleNodeClick(entry.id)}
                 >
-                  <motion.div
-                    className={`relative w-12 h-12 rounded-full border-4 flex items-center justify-center transition-all ${
+                  <div
+                    className={`relative rounded-full border-3 flex items-center justify-center transition-all ${
                       isEditing
-                        ? 'bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/50' 
+                        ? 'bg-blue-600 border-blue-400 shadow-md shadow-blue-500/50' 
                         : isPinned
-                        ? 'bg-purple-600 border-purple-400 shadow-lg shadow-purple-500/50'
+                        ? 'bg-purple-600 border-purple-400 shadow-md shadow-purple-500/50'
                         : isHovered
-                        ? 'bg-slate-700 border-slate-500 shadow-lg'
+                        ? 'bg-slate-700 border-slate-500 shadow-md'
                         : 'bg-slate-800 border-slate-600'
                     }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
+                    style={{ width: NODE_RADIUS * 2, height: NODE_RADIUS * 2 }}
                   >
-                    <Calendar size={18} className={
+                    <Calendar size={12} className={
                       isEditing || isPinned ? 'text-white' : 'text-slate-400'
                     } />
                     
-                    {/* Pin indicator */}
                     {isPinned && (
-                      <div className="absolute -top-1 -right-1">
-                        <Pin size={12} className="text-purple-400" />
+                      <div className="absolute -top-0.5 -right-0.5">
+                        <Pin size={8} className="text-purple-400" />
                       </div>
                     )}
-                  </motion.div>
+                  </div>
 
-                  {/* Date Label */}
-                  <div className="absolute top-14 left-1/2 transform -translate-x-1/2 text-center">
+                  {/* Compact Date Label */}
+                  <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-center">
                     <div className="text-xs text-slate-400 font-medium">
-                      {new Date(entry.date).toLocaleDateString()}
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {new Date(entry.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(entry.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Floating Cards */}
                 {renderFloatingCards(entry)}
               </React.Fragment>
             );
           })}
         </AnimatePresence>
 
-        {/* Empty State */}
+        {/* Compact Empty State */}
         {entries.length === 0 && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           >
             <div className="text-center">
-              <Clock size={48} className="text-slate-600 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-slate-400 mb-2">No Timeline Entries</h4>
-              <p className="text-slate-500 text-sm mb-6">Add your first timeline entry to start the physics simulation</p>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <Clock size={32} className="text-slate-600 mx-auto mb-2" />
+              <h4 className="text-sm font-medium text-slate-400 mb-1">No Timeline Entries</h4>
+              <p className="text-slate-500 text-xs mb-3">Add your first entry to start</p>
+              <button
                 onClick={addEntry}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg mx-auto"
+                className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs mx-auto"
               >
-                <Plus size={16} />
+                <Plus size={12} />
                 Add First Entry
-              </motion.button>
+              </button>
             </div>
           </motion.div>
         )}
       </div>
 
-      {/* Instructions */}
-      <div className="mt-4 text-center text-xs text-slate-500">
-        <p>Drag nodes to reposition • Click to edit • Double-click to pin/unpin • Hover for cards</p>
-      </div>
-
-      {/* Click outside to close edit mode */}
+      {/* Click outside to close edit */}
       {editingEntryId && (
         <div 
-          className="fixed inset-0 z-30" 
+          className="fixed inset-0 z-20" 
           onClick={() => setEditingEntryId(null)}
         />
       )}
     </motion.div>
   );
-};
+});
+
+AngularTimeline.displayName = 'AngularTimeline';
 
 export default AngularTimeline;
