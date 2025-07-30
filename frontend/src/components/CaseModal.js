@@ -28,6 +28,15 @@ import {
 // Import the Angular Timeline component
 import AngularTimeline from './timeline/ModularAngularTimeline';
 
+// Utility function for debouncing
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(null, args), delay);
+  };
+};
+
 // Animation variants for Framer Motion
 const modalVariants = {
   hidden: {
