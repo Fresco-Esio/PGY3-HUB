@@ -188,7 +188,20 @@ frontend:
           agent: "main"
           comment: "REMOVED PIN FUNCTIONALITY: 1) Removed all pinnedNodes state and related functionality as requested by user. 2) Simplified drag behavior without pin logic. 3) Removed pin/unpin click handlers. 4) Updated instructions text to remove pin references. 5) Focus is now on editable cards on node click only."
 
-  - task: "Implement minimalist timeline scroll functionality"
+  - task: "Fix timeline card positioning and click functionality"
+    implemented: true
+    working: true
+    file: "ModularAngularTimeline.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported issues with card positioning as more timeline nodes are added. Each node should have their own set of cards. First node should be fixed as reference point. Cards are not editable on node click."
+        - working: true
+          agent: "main"
+          comment: "FIXED CARD POSITIONING AND CLICK FUNCTIONALITY: 1) Updated calculateCardPosition to ensure each node gets properly positioned cards with improved bounds checking. 2) Fixed click handler to start editing and show cards when node is clicked. 3) Enhanced card rendering to show both cards when editing mode is active. 4) Added visual distinction for editing cards with yellow ring. 5) Improved card sizing (w-72 vs w-64) and positioning offsets. 6) Added null safety checks for node positioning. 7) Updated instructions to clarify click-to-edit behavior."
     implemented: true
     working: true  
     file: "ModularAngularTimeline.js, App.css"
