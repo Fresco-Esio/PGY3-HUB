@@ -224,10 +224,12 @@ const D3PhysicsTimeline = ({
 
   // Calculate card position based on node position and zigzag side - improved positioning for multiple nodes
   const calculateCardPosition = useCallback((node, cardType) => {
+    if (!node || !node.x || !node.y) return { x: 0, y: 0 };
+    
     const isLeftBend = node.side === 'left';
-    const cardWidth = 260;
-    const cardHeight = 100;
-    const cardOffset = 25; // Distance from node
+    const cardWidth = 280;
+    const cardHeight = 120;
+    const cardOffset = 30; // Distance from node
     
     let position = {};
 
@@ -270,9 +272,10 @@ const D3PhysicsTimeline = ({
       }
     }
 
-    // Ensure cards don't go outside container bounds
-    position.x = Math.max(10, Math.min(position.x, width - cardWidth - 10));
-    position.y = Math.max(10, position.y);
+    // Ensure cards stay within bounds and are visible
+    const containerPadding = 20;
+    position.x = Math.max(containerPadding, Math.min(position.x, width - cardWidth - containerPadding));
+    position.y = Math.max(containerPadding, position.y);
 
     return position;
   }, [width]);
