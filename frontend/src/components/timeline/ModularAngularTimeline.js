@@ -176,6 +176,54 @@ const D3PhysicsTimeline = ({
   const [undoStack, setUndoStack] = useState([]); // Undo functionality
   const [contextMenu, setContextMenu] = useState(null); // Right-click context menu
 
+  // Enhanced save functionality with undo support
+  const saveTimelineChanges = useCallback(async (nodeId, updatedEntries, createUndoPoint = true) => {
+    if (createUndoPoint) {
+      // Create undo point before making changes
+      setUndoStack(prev => [...prev.slice(-9), entries]); // Keep last 10 states
+    }
+    
+    setEntries(updatedEntries);
+    
+    if (onEntryUpdate) {
+      return await onEntryUpdate(updatedEntries, { force: false });
+    }
+    return { success: true };
+  }, [entries, onEntryUpdate]);
+
+  // Undo functionality
+  const handleUndo = useCallback(() => {
+    if (undoStack.length > 0) {
+      const previousState = undoStack[undoStack.length - 1];
+      setUndoStack(prev => prev.slice(0, -1));
+      setEntries(previousState);
+      setEditingCard(null); // Close any editing
+      
+      if (onEntryUpdate) {
+        onEntryUpdate(previousState, { force: true });
+      }
+    }
+  }, [undoStack, onEntryUpdate]);
+
+  // Delete node functionality
+  const handleDeleteNode = useCallback(async (nodeId) => {
+    const nodeToDelete = entries.find(entry => entry.id === nodeId);
+    if (!nodeToDelete) return;
+    
+    // Create undo point
+    setUndoStack(prev => [...prev.slice(-9), entries]);
+    
+    // Remove the node
+    const updatedEntries = entries.filter(entry => entry.id !== nodeId);
+    setEntries(updatedEntries);
+    setEditingCard(null); // Close any editing
+    setContextMenu(null); // Close context menu
+    
+    if (onEntryUpdate) {
+      await onEntryUpdate(updatedEntries, { force: true });
+    }
+  }, [entries, onEntryUpdate]);
+
   // Color scale for different entry types
   const color = scaleOrdinal(schemeCategory10);
 
