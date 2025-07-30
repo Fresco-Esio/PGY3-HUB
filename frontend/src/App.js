@@ -2571,9 +2571,6 @@ useEffect(() => {
           <LoadingButton onClick={applyForceLayout} icon={Shuffle} className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm">
             Realign Nodes
           </LoadingButton>
-          <LoadingButton onClick={() => setIsTemplateManagerOpen(true)} icon={Bookmark} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">
-            Manage Templates
-          </LoadingButton>
           <LoadingButton 
             onClick={() => populateSampleLiteratureData(setMindMapData, autoSaveMindMapData, addToast)} 
             icon={BookOpen} 
