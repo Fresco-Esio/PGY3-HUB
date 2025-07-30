@@ -429,10 +429,6 @@ const csvUtils = {
 
 // Enhanced Custom Node Components - extracted to separate files for better maintainability
 
-  task: TaskNode,
-  literature: LiteratureNode,
-};
-
 
 
 // Enhanced Dedicated Editing Form Component
