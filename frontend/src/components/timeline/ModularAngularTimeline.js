@@ -398,15 +398,14 @@ const D3PhysicsTimeline = ({
       }
     });
 
-    // Drag behavior with snap-to-zigzag logic
+    // Drag behavior - simplified without pin logic
     const dragBehavior = drag()
       .on("start", (event, d) => {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         
-        if (!pinnedNodes.has(d.id)) {
-          d.fx = d.x;
-          d.fy = d.y;
-        }
+        // Always allow dragging
+        d.fx = d.x;
+        d.fy = d.y;
         
         // Visual feedback - NO TRANSITIONS to avoid interfering with D3
         select(event.sourceEvent.target)
@@ -423,20 +422,21 @@ const D3PhysicsTimeline = ({
         
         // Snap to nearest timeline position logic
         const nearestPosition = findNearestTimelinePosition(event.x, event.y);
-        if (nearestPosition && !pinnedNodes.has(d.id)) {
+        if (nearestPosition) {
           d.fx = nearestPosition.x;
           d.fy = nearestPosition.y;
           // Update zigzag structure
           reorderTimelineStructure(d.id, nearestPosition.index);
-        } else if (!pinnedNodes.has(d.id)) {
+        } else {
+          // Allow free positioning
           d.fx = null;
           d.fy = null;
         }
         
         // Reset visual feedback - NO TRANSITIONS
         select(event.sourceEvent.target)
-          .attr("r", pinnedNodes.has(d.id) ? 14 : 12)
-          .attr("stroke-width", pinnedNodes.has(d.id) ? 3 : 2)
+          .attr("r", 12)
+          .attr("stroke-width", 2)
           .style("filter", "none");
       });
 
