@@ -173,7 +173,7 @@ const D3PhysicsTimeline = ({
   // Color scale for different entry types
   const color = scaleOrdinal(schemeCategory10);
 
-  // Calculate zigzag positions based on chronological order - centered in modal
+  // Calculate zigzag positions based on chronological order - with fixed first node
   const calculateZigzagPositions = useCallback((timelineEntries) => {
     const sortedEntries = [...timelineEntries].sort((a, b) => 
       new Date(a.timestamp) - new Date(b.timestamp)
@@ -191,14 +191,16 @@ const D3PhysicsTimeline = ({
       title: entry.title || `Entry ${index + 1}`,
       type: entry.type || 'note',
       orderIndex: index,
-      // Centered zigzag positioning
+      // First node is always on the left, then alternates
       x: centerX + (index % 2 === 0 ? -horizontalOffset : horizontalOffset),
       y: startY + (index * verticalSpacing),
       side: index % 2 === 0 ? 'left' : 'right',
       patient_narrative: entry.patient_narrative || '',
       clinical_notes: entry.clinical_notes || '',
       symptoms: entry.symptoms || [],
-      data: entry
+      data: entry,
+      // Add positioning info for cards
+      isFirstNode: index === 0
     }));
   }, [width]);
 
