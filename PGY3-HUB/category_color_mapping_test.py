@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 # Use the production backend URL for testing (from frontend/.env)
-BASE_URL = "https://39409560-62b0-4839-a8c9-4bc285999ef7.preview.emergentagent.com/api"
+BASE_URL = "https://494a8381-0596-45ab-a70d-c4430e97d812.preview.emergentagent.com/api"
 
 class CategoryColorMappingTester:
     def __init__(self, base_url):
