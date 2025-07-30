@@ -851,8 +851,8 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
     setSelectedNodeType(nodeType);
   };
 
-  const handleFinalSelect = (templateId = null) => {
-    onSelect(selectedNodeType, templateId);
+  const handleFinalSelect = () => {
+    onSelect(selectedNodeType);
     onClose();
   };
 
