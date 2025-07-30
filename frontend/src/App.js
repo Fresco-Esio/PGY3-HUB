@@ -2281,11 +2281,10 @@ useEffect(() => {
         setTaskModal({ isOpen: false, data: null });
         setLiteratureModal({ isOpen: false, data: null });
         setShowNodeSelector(false);
-        setIsTemplateManagerOpen(false);
         
         // Clear search if no modals are open
         if (!caseModal.isOpen && !topicModal.isOpen && !taskModal.isOpen && 
-            !literatureModal.isOpen && !showNodeSelector && !isTemplateManagerOpen) {
+            !literatureModal.isOpen && !showNodeSelector) {
           // Search functionality removed
         }
       }
