@@ -1,6 +1,9 @@
 // TemplateManager component has been removed as requested by user
+// All template functionality has been deprecated
 
-const NODE_TYPE_FIELDS = {
+export default function TemplateManager() {
+  return null;
+}
   topic: [
     { name: 'title', label: 'Title', type: 'text', placeholder: 'e.g., Major Depressive Disorder' },
     { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Enter a detailed description...' },
