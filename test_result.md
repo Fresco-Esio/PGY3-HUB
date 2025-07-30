@@ -103,14 +103,17 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Fix critical timeline animation and scroll issues in the PGY-3 HQ application's Case Node modal:
+  Comprehensive app improvements for better user experience in the PGY-3 HQ application:
   
-  CRITICAL TIMELINE FIXES:
-  1. Fix node positions resetting and animation replaying on hover - prevent D3 simulation re-initialization
-  2. Ensure pop-in animation for new nodes doesn't cause all existing nodes to replay their animations  
-  3. Implement scroll functionality for timeline when it extends beyond modal's length
-  4. Remove pin functionality for nodes as requested - focus on editable cards on click
-  5. Add minimalist scrollbar that blends with current dark theme
+  CRITICAL FIXES AND IMPROVEMENTS:
+  1. Fix Case Node editing functionality - Case Node basic properties are not editable and node label doesn't update based on case name
+  2. Remove useless "Edit Mind Map" button - nodes are already editable without clicking it
+  3. Replace node creation wizard with individual buttons on dashboard for each node type (Topic, Case, Task, Literature)
+  4. Completely remove template and template saving functionality
+  5. Add ghost/preview image to guide connection creation with dotted line following mouse cursor
+  6. Fix sharp corners on Topic nodes - should be rounded corners
+  7. Remove emergent icon/badge from the application
+  8. Review JavaScript and syntax for code architecture understanding and update documentation accordingly
 
 backend:
   - task: "Timeline data persistence and API compatibility"
