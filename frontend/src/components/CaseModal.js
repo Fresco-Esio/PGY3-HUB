@@ -642,7 +642,7 @@ const CaseModal = ({
             style={{ 
               willChange: 'transform, opacity, scale',
               backfaceVisibility: 'hidden'
-            }}}
+            }}
             onClick={(e) => e.stopPropagation()}
             onAnimationStart={() => {
               setIsAnimating(true);
