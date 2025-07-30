@@ -904,7 +904,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
             </div>
           </div>
 
-          {/* View 2: Template Selection */}
+          {/* View 2: Node Creation */}
           <div className={`absolute top-0 left-0 w-full transition-transform duration-300 ease-in-out ${selectedNodeType ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
             {selectedNodeType && (
               <div className="space-y-3">
