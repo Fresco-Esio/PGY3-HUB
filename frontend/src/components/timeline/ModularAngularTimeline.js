@@ -675,7 +675,7 @@ const D3PhysicsTimeline = ({
           }}
         />
 
-        {/* Hover Cards - Only visible on hover with improved positioning */}
+        {/* Hover Cards - Only visible on hover when not editing */}
         <AnimatePresence>
           {hoveredNodeData && !editingCard && (
             <>
@@ -703,19 +703,33 @@ const D3PhysicsTimeline = ({
           )}
         </AnimatePresence>
 
-        {/* Editing Cards - Show only the card being edited */}
+        {/* Editing Cards - Show both cards when editing, highlight the active one */}
         <AnimatePresence>
           {editingCard && hoveredNodeData && hoveredNodeData.id === editingCard.nodeId && (
-            <TimelineHoverCard
-              entry={hoveredNodeData}
-              position={calculateCardPosition(hoveredNodeData, editingCard.type)}
-              type={editingCard.type}
-              isVisible={true}
-              isEditing={true}
-              onEdit={handleEditCard}
-              onSave={handleSaveCard}
-              onCancel={() => setEditingCard(null)}
-            />
+            <>
+              {/* Patient Card */}
+              <TimelineHoverCard
+                entry={hoveredNodeData}
+                position={calculateCardPosition(hoveredNodeData, 'patient')}
+                type="patient"
+                isVisible={true}
+                isEditing={editingCard.type === 'patient'}
+                onEdit={handleEditCard}
+                onSave={handleSaveCard}
+                onCancel={() => setEditingCard(null)}
+              />
+              {/* Clinical Card */}
+              <TimelineHoverCard
+                entry={hoveredNodeData}
+                position={calculateCardPosition(hoveredNodeData, 'clinical')}
+                type="clinical"
+                isVisible={true}
+                isEditing={editingCard.type === 'clinical'}
+                onEdit={handleEditCard}
+                onSave={handleSaveCard}
+                onCancel={() => setEditingCard(null)}
+              />
+            </>
           )}
         </AnimatePresence>
       </div>
