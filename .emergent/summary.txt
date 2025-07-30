@@ -1,94 +1,56 @@
 <analysis>
-The previous AI engineer was tasked with validating, fixing, and enhancing the PGY3-HUB mind mapping application. The initial focus was on addressing critical functional issues, specifically the search functionality which caused a Maximum update depth exceeded error and interfered with node dragging and positioning. After multiple attempts to fix the search by reimplementing it with CSS classes, the user explicitly requested its complete removal if issues persisted, which was then successfully executed.
-
-Following this, the focus shifted to the Clear All Data function, which was found to be fully operational. The main body of work then centered on the 's Timeline tab. This involved progressively refactoring the timeline to support inline editing, ensure entries were fully visible upon expansion (addressing persistent cut-off issues), and resolve  routing problems caused by event propagation. The latest task was to implement smooth hover animations on timeline entries. The engineer meticulously addressed each problem, leveraging  when stuck, and validated fixes via testing agents, often encountering and resolving new issues that arose from previous changes (e.g., event propagation blocking double-clicks).
+The previous AI engineer successfully initiated development of a complex interactive timeline feature for the PGY-3 HQ application's Case Node modal. Initially, the engineer established the project's tech stack (React, FastAPI, MongoDB) and integrated a new  component into the . The feature evolved from a basic animated zigzag layout to a D3.js-driven force-directed simulation for dynamic node interactions, including drag-and-drop and pinning. Performance was a recurring concern, leading to iterations: simplifying D3, then reintroducing it in a localized, scrollable context. Most recently, the engineer transitioned the D3 rendering to an HTML Canvas for improved performance and implemented hover-only loading for the associated node cards. The current task is to verify this latest canvas-based D3 implementation.
 </analysis>
 
 <product_requirements>
-The PGY3-HUB is a mind-mapping application for psychiatry residents to organize knowledge, cases, tasks, and literature. It features a React frontend with  for visualization, Tailwind CSS for styling, and a FastAPI/Python backend using local JSON storage.
-
-Initial requirements included:
-*   Reviewing the existing repository for functionality.
-*   Completing and fixing existing features.
-*   Maintaining theme consistency.
-
-Specific functional fixes and enhancements required were:
-*   Ensuring all nodes are visible and correctly positioned.
-*   Enabling and persisting node dragging.
-*   Addressing node clustering and off-screen appearance.
-*   Repairing/reimplementing search functionality to avoid interference with node interactions (later requested to be completely removed if issues persisted).
-*   Restoring and verifying Clear All Data function (found to be working).
-*   Making the 's Timeline tab editable with:
-    *   An add entry form (later refactored to inline creation).
-    *   Auto-saving updated case objects.
-    *   Maintaining existing design, animations, and scrollability.
-    *   Inline editing and dynamic expansion for each timeline entry.
-    *   Ensuring expanded entries are fully visible via auto-scroll, preventing cut-offs.
-    *   Implementing smooth Framer Motion animations for expansion/collapse and hover effects.
+The goal is to redesign the Timeline tab within the Case Node modal of the PGY-3 HQ application. This dynamic, editable vertical timeline should display paired insights. Each timeline entry is a hoverable node with two floating panes: patient content (left) and clinician's process note (right). On hover, nodes expand previews; clicking expands fully into edit mode, allowing only one node to be editable at a time. An “+ Add Entry” button adds a new node to the bottom, opening it in edit mode. Double-clicking glowing areas between nodes should insert new nodes with a pop-in effect. Nodes must be drag-and-drop reorderable, preserving . The visual style demands a zigzag angular path, with cards anchored to node corners based on the bend. Animations should be smooth (pop-in, 300ms then optimized). Performance on desktop is critical. The latest iteration requires D3-inspired force simulation for nodes (within a scrollable, localized modal view), rendered on a canvas for performance, and node-associated cards should only load/appear on hover.
 </product_requirements>
 
 <key_technical_concepts>
--   **React 19**: Frontend framework.
--   **FastAPI**: Backend framework.
--   **@xyflow/react (React Flow)**: Mind mapping visualization library.
--   **Framer Motion**: Animation library for smooth UI transitions.
--   **Tailwind CSS**: Utility-first CSS framework.
--   **D3-force**: Force-directed graph layouts (initially, then removed).
--   **State Management**: React hooks (useState, useCallback, useRef) with debounced auto-save.
+- **React.js**: Frontend UI development.
+- **FastAPI**: Python backend API.
+- **MongoDB**: Database for data persistence.
+- **D3.js (d3-force, d3-drag)**: For force-directed graph simulations, node interaction (drag, pin), and data visualization.
+- **HTML Canvas**: High-performance 2D graphics rendering for D3.js, replacing SVG.
+- **Performance Optimization**: React memoization, debouncing, reduced D3 simulation complexity.
+- **Tailwind CSS**: Styling framework.
 </key_technical_concepts>
 
 <code_architecture>
-The application has a standard full-stack structure:
+The application utilizes a standard full-stack setup:
 
 
--   **/app/backend/server.py**:
-    -   **Summary**: Main FastAPI application handling RESTful API endpoints for mind map data.
-    -   **Changes**: No explicit changes mentioned in the provided trajectory, but it's the target for frontend API calls.
--   **/app/frontend/package.json**:
-    -   **Summary**: Manages frontend Node.js dependencies.
-    -   **Changes**:  was added as a dependency (later removed implicitly by search removal).
--   **/app/frontend/.env**:
-    -   **Summary**: Stores frontend environment variables, primarily .
-    -   **Changes**:  was corrected to  for local backend communication.
--   **/app/frontend/src/App.js**:
-    -   **Summary**: The main React component for mind map visualization and interaction. Integrates React Flow, handles state, node operations, and backend communication.
-    -   **Changes**:
-        *   **Search Functionality**: Initially, attempts were made to fix  and  circular dependencies. Ultimately, the *entire search functionality (state, effects, UI elements)* was completely removed due to persistent Maximum update depth exceeded errors and interference with node interactions.
-        *   **Node Interaction**:  handler was fixed by modifying  calls in various node delete buttons (, , , etc.) to prevent blocking double-click events, allowing the CaseModal to open correctly. This involved distinguishing single vs. double clicks and adding timeouts.
-        *   **Case ID Parsing**: The parsing logic for  in  was adjusted to correctly extract IDs for complex case node formats (e.g., case-12345-0-case).
-        *   **Clear All Data**: The existing  function, which leverages , was verified and confirmed to be working correctly, clearing both UI and backend data.
--   **/app/frontend/src/components/CaseModal.js**:
-    -   **Summary**: React component for displaying and editing patient case details, including a Timeline tab.
-    -   **Changes**:
-        *   **Timeline Editable Functionality (Initial)**: An input form was added for new entries (text, timestamp), along with auto-save to backend, preserving existing animations and scroll.
-        *   **Timeline Refactoring (Inline Editing)**: The static Add Entry form was removed, replaced by a + Add Entry button that appends a blank, expanded, editable node. Each existing entry also became inline-editable upon click (type, timestamp, content fields).
-        *   **Scroll Behavior**: Extensive work was done to ensure expanded entries (new or existing) are fully visible within the modal, preventing cut-offs. This involved  function, ,  for timing, precise  calculations, and dynamic padding adjustments.
-        *   **Animation Smoothness**: Framer Motion  prop, custom easing, reduced delays, and  CSS property were used to improve animation fluidity and eliminate choppiness during expansion/collapse.
-        *   **Mock Data**: The mock timeline data was expanded to 10 entries to ensure proper scroll triggering during testing.
-        *   **CSS Styling**: Custom scrollbar styling (width, track, thumb colors) was added to  and applied to the timeline container to make scrolling visible and functional.
-        *   **Hover Effects**: Initial implementation for hover effects (height expansion, subtle glow) using Framer Motion was added.
--   **/app/frontend/src/App.css**:
-    -   **Summary**: Global CSS file for application-wide styling, including scrollbars.
-    -   **Changes**: Specific CSS for  class was added to customize the scrollbar appearance.
--   **/app/frontend/src/utils/performanceUtils.js**:
-    -   **Summary**: Contains utility functions for performance optimization, including  for grid-based node positioning.
-    -   **Changes**: This file was read and its  function was leveraged in  for node positioning.
+- ****:
+    - **Summary**: Main FastAPI application handling API endpoints and MongoDB interactions. It's responsible for persisting timeline entry data for cases.
+    - **Changes**: No direct code changes were explicitly shown for this file in the trajectory, but it implicitly supports the timeline's data persistence.
+- ****:
+    - **Summary**: Defines frontend dependencies. Confirmed  was present, enabling D3.js functionalities.
+    - **Changes**: No explicit modifications shown, primarily used for dependency checks.
+- ****:
+    - **Summary**: The core modal component where the new timeline feature is integrated. It manages the various tabs (Overview, Narrative, etc.).
+    - **Changes**: Modified to add a new Timeline tab and conditionally render the  component when this tab is active.
+- ****:
+    - **Summary**: The primary component responsible for rendering and managing the interactive timeline. This file has seen extensive modifications throughout the development trajectory.
+    - **Changes**:
+        - Implemented the initial zigzag visual layout with associated patient and clinician cards.
+        - Refined card positioning and connection logic based on node's left/right bend.
+        - Integrated D3.js for force-directed node simulation, including drag-and-drop, and pin/unpin functionality (, ).
+        - Underwent performance optimization iterations, initially simplifying away D3 then reintroducing it in a localized, scrollable context.
+        - The most recent significant change involves shifting the D3 rendering from SVG elements to an HTML Canvas for improved performance.
+        - Modified to ensure that the detailed Patient Narrative and Clinical Notes cards only load and appear on node hover, rather than being rendered upfront.
 
 </code_architecture>
 
 <pending_tasks>
-- Implement the subtle height expansion and glow animation for timeline entries on hover, using Framer Motion.
+- Verify the successful implementation of the canvas-based D3 timeline rendering.
+- Confirm that the associated node cards only load and appear when a node is hovered over.
+- Assess overall application performance and fluidity with the latest optimizations.
 </pending_tasks>
 
 <current_work>
-The AI engineer is currently working on enhancing the user experience of the 's Timeline tab. The immediate task involves adding sophisticated hover effects to each timeline entry. The goal is that when a user hovers over an entry, it should:
-1.  Slightly expand in height (e.g., 10-15% larger).
-2.  Glow subtly, providing a visual cue of interactivity.
-3.  Utilize  to ensure these scaling and glow animations are smooth and fluid.
-
-This is the very last explicit request from the user, and the engineer has just implemented the initial code for this change (as per Chat Message 351). The next step in the trajectory is to test this new hover animation, indicating that the implementation for the hover effect is the immediate focus.
+The immediate previous work involved a significant refactoring of the  component within the frontend. The core D3.js-based interactive timeline, which allows for dynamic node positioning, dragging, and pinning, has been transitioned from an SVG-based rendering approach to an HTML Canvas-based approach. This change was initiated by the user's explicit request to improve performance and provide a more fluid interaction experience, citing a D3 canvas example. Concurrently, the rendering of the detailed Patient Narrative and Clinical Notes cards associated with each timeline node has been optimized. These windows are now designed to only load and appear when the user hovers over the corresponding node, reducing initial rendering overhead and improving responsiveness. The AI engineer has just completed the code modifications in  for these two features and is poised to execute a test to validate their functionality and performance.
 </current_work>
 
 <optional_next_step>
-Test the newly implemented hover effects on timeline entries to ensure smooth animation and correct visual feedback.
+Test the canvas-based D3 timeline with hover-only cards.
 </optional_next_step>
