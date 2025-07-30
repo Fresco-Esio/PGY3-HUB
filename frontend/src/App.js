@@ -1698,66 +1698,6 @@ useEffect(() => {
     });
   }, [setEdges, setMindMapData, autoSaveMindMapData]);
 
-  // Add new node of specific type directly
-  const addNewNode = useCallback((nodeType) => {
-    const dataId = Date.now();
-    const id = `${nodeType}-${dataId}`;
-    
-    // Create node data object with appropriate fields based on type
-    let nodeData = { id: dataId, label: `New ${nodeType}` };
-    
-    // For case nodes, add structured fields
-    if (nodeType === 'case') {
-      nodeData = {
-        ...nodeData,
-        chiefComplaint: '',
-        initialPresentation: '',
-        currentPresentation: '',
-        medicationHistory: '',
-        therapyProgress: '',
-        defensePatterns: '',
-        clinicalReflection: ''
-      };
-    }
-    
-    // Calculate grid-based position for new nodes to avoid clustering
-    const currentDataCount = (mindMapData.topics?.length || 0) + 
-                           (mindMapData.cases?.length || 0) + 
-                           (mindMapData.tasks?.length || 0) + 
-                           (mindMapData.literature?.length || 0);
-    
-    const gridSize = Math.ceil(Math.sqrt(currentDataCount + 1));
-    const nodeSpacing = 280;
-    const offsetX = 400; // Offset from left sidebar
-    const offsetY = 150; // Offset from top
-    
-    const gridPosition = {
-      x: (currentDataCount % gridSize) * nodeSpacing + offsetX,
-      y: Math.floor(currentDataCount / gridSize) * nodeSpacing + offsetY
-    };
-    
-    const newNode = {
-      id,
-      type: nodeType,
-      position: gridPosition,
-      data: { ...nodeData, onDelete: () => handleDeleteNode(id) }
-    };
-
-    setMindMapData(d => {
-      const key = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
-      const dataToAdd = { ...newNode.data, position: newNode.position };
-      delete dataToAdd.onDelete;
-      const updatedData = {
-        ...d,
-        [key]: [...(d[key] || []), dataToAdd]
-      };
-      autoSaveMindMapData(updatedData);
-      return updatedData;
-    });
-
-    setNodes(n => n.concat(newNode));
-  }, [mindMapData, autoSaveMindMapData, handleDeleteNode]);
-
   const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
     // Visual feedback - highlight selected node
