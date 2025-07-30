@@ -2292,7 +2292,7 @@ useEffect(() => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal, isTemplateManagerOpen]);
+  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal]);
 
   useEffect(() => {
     // DISABLED automatic force layout to prevent overriding individual node positions
