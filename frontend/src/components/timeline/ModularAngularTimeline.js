@@ -1111,8 +1111,8 @@ const D3PhysicsTimeline = ({
 
       {/* Instructions */}
       <div className="mt-2 text-xs text-slate-500 space-y-1">
-        <p>• <strong>Click</strong> nodes to edit both cards • <strong>Hover</strong> to preview patient/clinical cards • <strong>Drag</strong> to reposition</p>
-        <p>• <strong>Click connection lines</strong> to insert new entries • <strong>Click outside cards</strong> to finish editing</p>
+        <p>• <strong>Click</strong> nodes to edit both cards • <strong>Same node click</strong> saves & closes • <strong>Right-click</strong> to delete</p>
+        <p>• <strong>Tab</strong> moves between cards • <strong>Escape</strong> closes modal • <strong>Click outside</strong> saves & closes editing</p>
       </div>
     </div>
   );
