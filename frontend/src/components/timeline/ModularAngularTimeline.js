@@ -756,7 +756,9 @@ const D3PhysicsTimeline = ({
                 type="patient"
                 isVisible={true}
                 isEditing={false}
-                onEdit={handleEditCard}
+                onEdit={(nodeId, type) => {
+                  setEditingCard({ nodeId, type: 'both' });
+                }}
                 onSave={handleSaveCard}
                 onCancel={() => setEditingCard(null)}
               />
@@ -766,7 +768,9 @@ const D3PhysicsTimeline = ({
                 type="clinical"
                 isVisible={true}
                 isEditing={false}
-                onEdit={handleEditCard}
+                onEdit={(nodeId, type) => {
+                  setEditingCard({ nodeId, type: 'both' });
+                }}
                 onSave={handleSaveCard}
                 onCancel={() => setEditingCard(null)}
               />
