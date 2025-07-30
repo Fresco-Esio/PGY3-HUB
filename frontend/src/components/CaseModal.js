@@ -1313,8 +1313,8 @@ const CaseModal = ({
                         const updatedTimeline = timelineEntries.filter(entry => entry.id !== entryId);
                         updateTimeline(updatedTimeline);
                       }}
-                      width={600}
-                      height={400}
+                      width={950} // Increased width to use expanded modal space
+                      height={500} // Increased height for better layout
                     />
                   </motion.div>
                 )}
