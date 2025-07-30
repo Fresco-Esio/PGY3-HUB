@@ -750,6 +750,8 @@ const D3PhysicsTimeline = ({
                 onEdit={handleEditCard}
                 onSave={handleSaveCard}
                 onCancel={() => setEditingCard(null)}
+                hoverTimeoutRef={hoverTimeoutRef}
+                handleNodeLeave={handleNodeLeave}
               />
               <TimelineHoverCard
                 entry={hoveredNodeData}
@@ -760,6 +762,8 @@ const D3PhysicsTimeline = ({
                 onEdit={handleEditCard}
                 onSave={handleSaveCard}
                 onCancel={() => setEditingCard(null)}
+                hoverTimeoutRef={hoverTimeoutRef}
+                handleNodeLeave={handleNodeLeave}
               />
             </>
           )}
