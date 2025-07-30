@@ -615,6 +615,26 @@ const D3PhysicsTimeline = ({
     };
   }, []);
 
+  // Click outside detection to close editing mode
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // If we're in editing mode and the click is outside the timeline container
+      if (editingCard && containerRef.current && !containerRef.current.contains(event.target)) {
+        // Close editing mode
+        setEditingCard(null);
+        setHoveredNode(null);
+      }
+    };
+
+    // Add event listener when in editing mode
+    if (editingCard) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [editingCard]);
+
   // Handle adding new entry at end
   const handleAddEntry = useCallback(() => {
     const newEntry = {
