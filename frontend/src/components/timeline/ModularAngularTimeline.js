@@ -769,7 +769,7 @@ const D3PhysicsTimeline = ({
           )}
         </AnimatePresence>
 
-        {/* Editing Cards - Show both cards when editing, highlight the active one */}
+        {/* Editing Cards - Show both cards when editing */}
         <AnimatePresence>
           {editingCard && hoveredNodeData && hoveredNodeData.id === editingCard.nodeId && (
             <>
@@ -779,7 +779,7 @@ const D3PhysicsTimeline = ({
                 position={calculateCardPosition(hoveredNodeData, 'patient')}
                 type="patient"
                 isVisible={true}
-                isEditing={editingCard.type === 'patient'}
+                isEditing={editingCard.type === 'both' || editingCard.type === 'patient'}
                 onEdit={handleEditCard}
                 onSave={handleSaveCard}
                 onCancel={() => setEditingCard(null)}
@@ -790,7 +790,7 @@ const D3PhysicsTimeline = ({
                 position={calculateCardPosition(hoveredNodeData, 'clinical')}
                 type="clinical"
                 isVisible={true}
-                isEditing={editingCard.type === 'clinical'}
+                isEditing={editingCard.type === 'both' || editingCard.type === 'clinical'}
                 onEdit={handleEditCard}
                 onSave={handleSaveCard}
                 onCancel={() => setEditingCard(null)}
