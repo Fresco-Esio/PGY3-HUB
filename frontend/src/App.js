@@ -871,7 +871,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
               </button>
             )}
             <h3 className="text-xl font-semibold text-gray-800">
-              {selectedNodeType ? `Select a ${selectedNodeType} template` : 'Add New Node'}
+              {selectedNodeType ? `Create ${selectedNodeType}` : 'Add New Node'}
             </h3>
           </div>
           <button
