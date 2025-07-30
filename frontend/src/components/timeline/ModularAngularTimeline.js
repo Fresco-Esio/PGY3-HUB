@@ -287,16 +287,17 @@ const D3PhysicsTimeline = ({
     const nodes = calculateZigzagPositions(entries);
     const links = createTimelineLinks(nodes);
     
-    // Preserve existing node positions if they exist
+    // Preserve existing node positions if they exist (but don't use pinned state)
     const existingNodes = nodesRef.current || [];
     nodes.forEach(node => {
       const existing = existingNodes.find(n => n.id === node.id);
       if (existing && !newNodeIds.has(node.id)) {
-        // Preserve existing position and fixed state
+        // Preserve existing position but remove any fixed constraints
         node.x = existing.x || node.x;
         node.y = existing.y || node.y;
-        node.fx = existing.fx;
-        node.fy = existing.fy;
+        // Remove any fixed positioning from previous pin states
+        node.fx = null;
+        node.fy = null;
       }
     });
     
