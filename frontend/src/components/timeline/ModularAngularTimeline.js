@@ -218,25 +218,28 @@ const D3PhysicsTimeline = ({
     return links;
   }, []);
 
-  // Calculate card position based on node position and zigzag side
+  // Calculate card position based on node position and zigzag side - improved positioning
   const calculateCardPosition = useCallback((node, cardType) => {
     const isLeftBend = node.side === 'left';
+    const cardWidth = 250;
+    const cardHeight = 80;
+    
     let position = {};
 
     if (cardType === 'patient') {
       if (isLeftBend) {
         // Left bend: Patient card from bottom-right of node
         position = {
-          x: node.x + 15,
-          y: node.y + 15,
+          x: node.x + 20,
+          y: node.y + 20,
           anchorSide: 'left',
           anchorPosition: 'top'
         };
       } else {
         // Right bend: Patient card from top-right of node  
         position = {
-          x: node.x + 15,
-          y: node.y - 95,
+          x: node.x + 20,
+          y: node.y - cardHeight - 20,
           anchorSide: 'left', 
           anchorPosition: 'bottom'
         };
@@ -246,16 +249,16 @@ const D3PhysicsTimeline = ({
       if (isLeftBend) {
         // Left bend: Clinical card from top-left of node
         position = {
-          x: node.x - 265,
-          y: node.y - 95,
+          x: node.x - cardWidth - 20,
+          y: node.y - cardHeight - 20,
           anchorSide: 'right',
           anchorPosition: 'bottom'
         };
       } else {
         // Right bend: Clinical card from bottom-left of node
         position = {
-          x: node.x - 265,
-          y: node.y + 15,
+          x: node.x - cardWidth - 20,
+          y: node.y + 20,
           anchorSide: 'right',
           anchorPosition: 'top'
         };
