@@ -313,7 +313,7 @@ const D3PhysicsTimeline = ({
           .attr("opacity", 0.7)
           .transition()
           .duration(300)
-          .ease("elastic")
+          .ease(easeElastic)
           .attr("r", 12)
           .attr("opacity", 1)
           .on("end", () => {
