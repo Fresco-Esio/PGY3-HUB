@@ -338,18 +338,20 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryAdd]);
 
-  // Handle hover with proper timing
+  // Handle hover with improved stability
   const handleNodeHover = useCallback((nodeId) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
+    // Set immediately without delay for more responsive hover
     setHoveredNode(nodeId);
   }, []);
 
   const handleNodeLeave = useCallback(() => {
+    // Use a slightly longer delay to prevent flashing when moving between cards and nodes
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredNode(null);
-    }, 50); // Shorter delay for more responsive dismissal
+    }, 150); // Increased delay for more stable hover
   }, []);
 
   // Initialize D3 force simulation with zigzag constraints
