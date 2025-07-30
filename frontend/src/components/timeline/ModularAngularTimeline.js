@@ -218,11 +218,12 @@ const D3PhysicsTimeline = ({
     return links;
   }, []);
 
-  // Calculate card position based on node position and zigzag side - improved positioning
+  // Calculate card position based on node position and zigzag side - improved positioning for multiple nodes
   const calculateCardPosition = useCallback((node, cardType) => {
     const isLeftBend = node.side === 'left';
-    const cardWidth = 250;
-    const cardHeight = 80;
+    const cardWidth = 260;
+    const cardHeight = 100;
+    const cardOffset = 25; // Distance from node
     
     let position = {};
 
@@ -230,16 +231,16 @@ const D3PhysicsTimeline = ({
       if (isLeftBend) {
         // Left bend: Patient card from bottom-right of node
         position = {
-          x: node.x + 20,
-          y: node.y + 20,
+          x: node.x + cardOffset,
+          y: node.y + cardOffset,
           anchorSide: 'left',
           anchorPosition: 'top'
         };
       } else {
         // Right bend: Patient card from top-right of node  
         position = {
-          x: node.x + 20,
-          y: node.y - cardHeight - 20,
+          x: node.x + cardOffset,
+          y: node.y - cardHeight - cardOffset,
           anchorSide: 'left', 
           anchorPosition: 'bottom'
         };
@@ -249,24 +250,28 @@ const D3PhysicsTimeline = ({
       if (isLeftBend) {
         // Left bend: Clinical card from top-left of node
         position = {
-          x: node.x - cardWidth - 20,
-          y: node.y - cardHeight - 20,
+          x: node.x - cardWidth - cardOffset,
+          y: node.y - cardHeight - cardOffset,
           anchorSide: 'right',
           anchorPosition: 'bottom'
         };
       } else {
         // Right bend: Clinical card from bottom-left of node
         position = {
-          x: node.x - cardWidth - 20,
-          y: node.y + 20,
+          x: node.x - cardWidth - cardOffset,
+          y: node.y + cardOffset,
           anchorSide: 'right',
           anchorPosition: 'top'
         };
       }
     }
 
+    // Ensure cards don't go outside container bounds
+    position.x = Math.max(10, Math.min(position.x, width - cardWidth - 10));
+    position.y = Math.max(10, position.y);
+
     return position;
-  }, []);
+  }, [width]);
 
   // Helper functions - defined before initializeSimulation
   const findNearestTimelinePosition = useCallback((x, y) => {
