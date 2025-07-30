@@ -441,7 +441,9 @@ const CaseModal = ({
     addToast('Medication removed successfully', 'success');
   }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Timeline management functions
+  // Timeline management functions - with stable reference
+  const timelineEntries = useMemo(() => editData.timeline || [], [editData.timeline]);
+  
   const updateTimeline = useCallback(async (updatedTimeline) => {
     if (isLoading) return;
     
