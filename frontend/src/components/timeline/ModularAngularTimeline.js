@@ -88,7 +88,7 @@ const TimelineHoverCard = ({
         e.stopPropagation();
         // Only dismiss if we're not in editing mode
         if (!isEditing) {
-          handleNodeLeave();
+          // Handle node leave logic here if needed
         }
       }}
     >
