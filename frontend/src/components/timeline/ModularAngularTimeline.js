@@ -10,17 +10,15 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import { easeElastic, easeBackOut } from 'd3-ease';
 
 // Enhanced Hover Cards with precise corner positioning
-const TimelineHoverCard = ({ 
-  entry, 
-  position, 
-  type, // 'patient' or 'clinical'
-  isVisible, 
+const TimelineHoverCard = ({
+  entry,
+  position,
+  type,
+  isVisible,
   isEditing,
   onEdit,
   onSave,
-  onCancel,
-  hoverTimeoutRef,
-  handleNodeLeave
+  onCancel
 }) => {
   const [editContent, setEditContent] = useState('');
   const cardRef = useRef(null);
