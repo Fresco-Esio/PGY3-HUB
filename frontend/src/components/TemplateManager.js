@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { X, Bookmark, Plus, Save, Edit3, ChevronDown, ChevronRight } from 'lucide-react';
-import RichTextEditor from './RichTextEditor';
+// TemplateManager component has been removed as requested by user
 
 const NODE_TYPE_FIELDS = {
   topic: [
