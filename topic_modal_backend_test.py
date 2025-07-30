@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 
 # Use the production backend URL for testing (from frontend/.env)
-BASE_URL = "https://494a8381-0596-45ab-a70d-c4430e97d812.preview.emergentagent.com/api"
+BASE_URL = "https://2dfe9b59-ae06-48cd-aaa6-476baf8e16c7.preview.emergentagent.com/api"
 
 class TopicModalBackendTester:
     def __init__(self, base_url):
