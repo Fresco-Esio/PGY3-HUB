@@ -787,14 +787,14 @@ const D3PhysicsTimeline = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Timeline Container with Minimalist Scroll */}
+      {/* Timeline Container with Minimalist Scroll - Expanded for better card visibility */}
       <div
         ref={containerRef}
         className="relative border border-slate-700 rounded-lg bg-slate-900/50 mx-auto timeline-scroll-container"
         style={{ 
-          width, 
-          height, 
-          maxHeight: '70vh',
+          width: Math.max(width, 1000), // Minimum width for card visibility
+          height: Math.max(height, 500), // Minimum height for better layout
+          maxHeight: '75vh', // Increased max height
           overflow: 'auto'
         }}
       >
@@ -802,8 +802,8 @@ const D3PhysicsTimeline = ({
           ref={svgRef}
           className="min-h-full"
           style={{ 
-            width: `${width}px`, 
-            height: `${Math.max(height, entries.length * 120 + 160)}px` // Dynamic height based on entries
+            width: `${Math.max(width, 1000)}px`, // Ensure SVG matches container width
+            height: `${Math.max(height, entries.length * 150 + 200)}px` // Increased spacing for better card positioning
           }}
         />
 
