@@ -348,11 +348,16 @@ const D3PhysicsTimeline = ({
   }, []);
 
   const handleNodeLeave = useCallback(() => {
+    // Don't hide cards if we're in editing mode
+    if (editingCard) {
+      return;
+    }
+    
     // Use a slightly longer delay to prevent flashing when moving between cards and nodes
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredNode(null);
     }, 150); // Increased delay for more stable hover
-  }, []);
+  }, [editingCard]);
 
   // Initialize D3 force simulation with zigzag constraints
   const initializeSimulation = useCallback(() => {
