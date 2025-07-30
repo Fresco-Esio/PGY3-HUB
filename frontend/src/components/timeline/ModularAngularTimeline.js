@@ -647,9 +647,20 @@ const D3PhysicsTimeline = ({
     // Apply drag behavior
     node.call(dragBehavior);
 
-    // Click for editing cards - enable editing both cards on click with auto-scroll
+    // Enhanced click for editing cards - auto-save and switch behavior
     node.on("click", (event, d) => {
       event.stopPropagation();
+      
+      // If clicking the same node that's already being edited, save and close
+      if (editingCard && editingCard.nodeId === d.id) {
+        handleSaveCurrentEditingCards();
+        return;
+      }
+      
+      // If editing a different node, save current node first
+      if (editingCard && editingCard.nodeId !== d.id) {
+        handleSaveCurrentEditingCards(false); // Don't close, we're switching
+      }
       
       // Ensure proper positioning
       d.fx = d.x;
@@ -667,6 +678,20 @@ const D3PhysicsTimeline = ({
       }, 100); // Small delay to ensure state is updated
       
       simulation.restart();
+    });
+
+    // Right-click context menu for node deletion
+    node.on("contextmenu", (event, d) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      setContextMenu({
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+        nodeId: d.id,
+        nodeTitle: d.title || `Entry ${d.orderIndex + 1}`
+      });
     });
 
     // Hover effects - NO TRANSITIONS to prevent interference with D3
