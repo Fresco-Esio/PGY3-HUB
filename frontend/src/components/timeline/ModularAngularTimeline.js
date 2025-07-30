@@ -807,6 +807,42 @@ const D3PhysicsTimeline = ({
     };
   }, []);
 
+  // Keyboard navigation for Tab between cards
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (!editingCard) return;
+      
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        // Tab navigation between cards would be handled by the card components
+        // This is a placeholder for the tab navigation logic
+      }
+    };
+
+    if (editingCard) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [editingCard]);
+
+  // Close context menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contextMenu) {
+        setContextMenu(null);
+      }
+    };
+
+    if (contextMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [contextMenu]);
+
   // Click outside detection to close editing mode
   useEffect(() => {
     const handleClickOutside = (event) => {
