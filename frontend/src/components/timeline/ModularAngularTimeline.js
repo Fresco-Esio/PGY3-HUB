@@ -485,12 +485,12 @@ const D3PhysicsTimeline = ({
       }
     });
 
-    // Drag behavior - simplified without pin logic
+    // Drag behavior - with improved constraint handling
     const dragBehavior = drag()
       .on("start", (event, d) => {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
+        if (!event.active) simulation.alphaTarget(0.1).restart();
         
-        // Always allow dragging
+        // Temporarily fix position for dragging
         d.fx = d.x;
         d.fy = d.y;
         
@@ -510,14 +510,18 @@ const D3PhysicsTimeline = ({
         // Snap to nearest timeline position logic
         const nearestPosition = findNearestTimelinePosition(event.x, event.y);
         if (nearestPosition) {
+          // Update both current and target positions
           d.fx = nearestPosition.x;
           d.fy = nearestPosition.y;
+          d.targetX = nearestPosition.x;
+          d.targetY = nearestPosition.y;
           // Update zigzag structure
           reorderTimelineStructure(d.id, nearestPosition.index);
         } else {
-          // Allow free positioning
+          // Return to constraint position
           d.fx = null;
           d.fy = null;
+          // Let constraints pull it back to target position
         }
         
         // Reset visual feedback - NO TRANSITIONS
