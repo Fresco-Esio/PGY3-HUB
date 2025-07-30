@@ -448,10 +448,9 @@ const D3PhysicsTimeline = ({
       simulation.restart();
     });
 
-    // Hover effects - NO ANIMATION for existing nodes, improved hover detection
+    // Hover effects - improved hover detection
     node
       .on("mouseenter", (event, d) => {
-        console.log('Node hover entered:', d.id); // Debug log
         handleNodeHover(d.id);
         select(event.target)
           .attr("r", 16)
