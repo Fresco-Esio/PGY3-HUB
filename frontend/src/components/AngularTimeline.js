@@ -1,5 +1,5 @@
-// Optimized Angular Timeline - Simplified High Performance Version
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+// Hybrid Angular Timeline - D3 Nodes with Scrollable Container
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -11,16 +11,13 @@ import {
   Brain,
   Pin
 } from 'lucide-react';
+import { select, drag } from 'd3-selection';
+import { forceSimulation, forceManyBody, forceCenter, forceCollide } from 'd3-force';
 
-// Minimal animation variants for maximum performance
+// Minimal animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.15 } }
-};
-
-const nodeVariants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.15 } }
 };
 
 const AngularTimeline = React.memo(({ 
@@ -33,17 +30,25 @@ const AngularTimeline = React.memo(({
   const [editingEntryId, setEditingEntryId] = useState(null);
   const [hoveredEntryId, setHoveredEntryId] = useState(null);
   const [pinnedNodes, setPinnedNodes] = useState(new Set());
-  const [draggedNode, setDraggedNode] = useState(null);
+  const timelineContainerRef = useRef(null);
+  const svgRef = useRef(null);
+  const simulationRef = useRef(null);
+  const nodesRef = useRef([]);
 
-  // Optimized layout constants
+  // Layout constants - optimized for scrollable container
   const TIMELINE_WIDTH = 600;
-  const TIMELINE_HEIGHT = 350;
-  const ZIGZAG_AMPLITUDE = 60; // Further reduced for better card positioning
-  const VERTICAL_SPACING = 70; // Reduced spacing
-  const NODE_RADIUS = 18; // Smaller nodes
-  const CARD_OFFSET = 30; // Very close to nodes
+  const TIMELINE_HEIGHT = 350; // Fixed visible height
+  const ZIGZAG_AMPLITUDE = 60;
+  const BASE_VERTICAL_SPACING = 100;
+  const NODE_RADIUS = 18;
+  const CARD_OFFSET = 35;
 
-  // Memoized entries processing - no D3, just simple positioning
+  // Calculate dynamic timeline height based on entries
+  const dynamicTimelineHeight = useMemo(() => {
+    return Math.max(TIMELINE_HEIGHT, entries.length * BASE_VERTICAL_SPACING + 200);
+  }, [entries.length]);
+
+  // Process entries
   const processedEntries = useMemo(() => {
     return (timeline || []).map((entry, index) => ({
       id: entry.id || `entry-${Date.now()}-${index}`,
@@ -55,68 +60,301 @@ const AngularTimeline = React.memo(({
     })).sort((a, b) => a.orderIndex - b.orderIndex);
   }, [timeline]);
 
-  // Simple static positioning - no physics simulation
-  const getNodePosition = useCallback((index) => {
-    const isLeft = index % 2 === 0;
-    const x = TIMELINE_WIDTH / 2 + (isLeft ? -ZIGZAG_AMPLITUDE : ZIGZAG_AMPLITUDE);
-    const y = 60 + (index * VERTICAL_SPACING);
-    
-    return {
-      x,
-      y,
-      side: isLeft ? 'left' : 'right'
-    };
-  }, [TIMELINE_WIDTH, ZIGZAG_AMPLITUDE, VERTICAL_SPACING]);
-
   // Initialize entries
   useEffect(() => {
     setEntries(processedEntries);
   }, [processedEntries]);
 
-  // Simple card positioning - much closer to nodes
-  const getCardPositions = useCallback((index) => {
-    const nodePos = getNodePosition(index);
-    const cardWidth = 180; // Even smaller cards
+  // D3 node positioning with constraints
+  const getInitialNodePosition = useCallback((index) => {
+    const isLeft = index % 2 === 0;
+    const x = TIMELINE_WIDTH / 2 + (isLeft ? -ZIGZAG_AMPLITUDE : ZIGZAG_AMPLITUDE);
+    const y = 80 + (index * BASE_VERTICAL_SPACING);
+    
+    return { x, y, side: isLeft ? 'left' : 'right' };
+  }, []);
+
+  // Initialize D3 simulation for nodes only
+  useEffect(() => {
+    if (entries.length === 0 || !svgRef.current) return;
+
+    // Create D3 nodes with initial positions
+    const nodes = entries.map((entry, index) => {
+      const initialPos = getInitialNodePosition(index);
+      return {
+        id: entry.id,
+        index,
+        x: initialPos.x,
+        y: initialPos.y,
+        fx: pinnedNodes.has(entry.id) ? initialPos.x : undefined,
+        fy: pinnedNodes.has(entry.id) ? initialPos.y : undefined,
+        entry,
+        side: initialPos.side
+      };
+    });
+
+    nodesRef.current = nodes;
+
+    // Stop existing simulation
+    if (simulationRef.current) {
+      simulationRef.current.stop();
+    }
+
+    // Create localized D3 simulation
+    simulationRef.current = forceSimulation(nodes)
+      .force('charge', forceManyBody().strength(-50))
+      .force('center', forceCenter(TIMELINE_WIDTH / 2, dynamicTimelineHeight / 2))
+      .force('collision', forceCollide().radius(NODE_RADIUS + 10))
+      .alpha(0.1)
+      .alphaDecay(0.1);
+
+    // Create SVG container
+    const svg = select(svgRef.current);
+    svg.selectAll('*').remove(); // Clear previous
+
+    // Create timeline path
+    const pathData = nodes.map((node, i) => 
+      `${i === 0 ? 'M' : 'L'} ${node.x} ${node.y}`
+    ).join(' ');
+
+    svg.append('path')
+      .attr('d', pathData)
+      .attr('stroke', 'url(#timelineGradient)')
+      .attr('stroke-width', 2)
+      .attr('fill', 'none')
+      .attr('stroke-linecap', 'round')
+      .attr('opacity', 0.7);
+
+    // Create gradient
+    const defs = svg.append('defs');
+    const gradient = defs.append('linearGradient')
+      .attr('id', 'timelineGradient')
+      .attr('x1', '0%').attr('y1', '0%')
+      .attr('x2', '100%').attr('y2', '100%');
+    
+    gradient.append('stop').attr('offset', '0%').attr('stop-color', '#64748B');
+    gradient.append('stop').attr('offset', '50%').attr('stop-color', '#3B82F6');
+    gradient.append('stop').attr('offset', '100%').attr('stop-color', '#8B5CF6');
+
+    // Create draggable nodes
+    const nodeGroups = svg.selectAll('.timeline-node')
+      .data(nodes)
+      .enter()
+      .append('g')
+      .attr('class', 'timeline-node')
+      .attr('transform', d => `translate(${d.x}, ${d.y})`)
+      .style('cursor', 'move');
+
+    // Add node circles
+    nodeGroups.append('circle')
+      .attr('r', NODE_RADIUS)
+      .attr('fill', d => {
+        if (editingEntryId === d.id) return '#2563EB';
+        if (pinnedNodes.has(d.id)) return '#7C3AED';
+        if (hoveredEntryId === d.id) return '#374151';
+        return '#1E293B';
+      })
+      .attr('stroke', d => {
+        if (editingEntryId === d.id) return '#60A5FA';
+        if (pinnedNodes.has(d.id)) return '#A78BFA';
+        if (hoveredEntryId === d.id) return '#6B7280';
+        return '#475569';
+      })
+      .attr('stroke-width', 2);
+
+    // Add calendar icons (simplified as text)
+    nodeGroups.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '0.3em')
+      .attr('fill', d => (editingEntryId === d.id || pinnedNodes.has(d.id)) ? 'white' : '#94A3B8')
+      .attr('font-size', '10px')
+      .text('📅');
+
+    // Add pin indicators
+    nodeGroups.filter(d => pinnedNodes.has(d.id))
+      .append('circle')
+      .attr('r', 4)
+      .attr('cx', NODE_RADIUS - 5)
+      .attr('cy', -NODE_RADIUS + 5)  
+      .attr('fill', '#A78BFA');
+
+    // Add date labels
+    nodeGroups.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('y', NODE_RADIUS + 20)
+      .attr('fill', '#6B7280')
+      .attr('font-size', '10px')
+      .text(d => new Date(d.entry.date).toLocaleDateString([], { month: 'short', day: 'numeric' }));
+
+    // Add D3 drag behavior
+    const dragBehavior = drag()
+      .on('start', function(event, d) {
+        if (!pinnedNodes.has(d.id)) {
+          d.fx = d.x;
+          d.fy = d.y;
+        }
+        if (simulationRef.current) {
+          simulationRef.current.alphaTarget(0.1).restart();
+        }
+      })
+      .on('drag', function(event, d) {
+        d.fx = Math.max(NODE_RADIUS, Math.min(TIMELINE_WIDTH - NODE_RADIUS, event.x));
+        d.fy = Math.max(NODE_RADIUS, Math.min(dynamicTimelineHeight - NODE_RADIUS, event.y));
+        
+        // Update visual position immediately
+        select(this).attr('transform', `translate(${d.fx}, ${d.fy})`);
+        
+        if (simulationRef.current) {
+          simulationRef.current.alpha(0.1).restart();
+        }
+        
+        // Scroll to follow dragged node
+        const container = timelineContainerRef.current;
+        if (container && d.fy) {
+          const containerHeight = container.clientHeight;
+          const scrollTop = container.scrollTop;
+          const nodeVisibleY = d.fy - scrollTop;
+          
+          // Auto-scroll if node is near edges
+          if (nodeVisibleY < 50) {
+            container.scrollTop = Math.max(0, d.fy - 100);
+          } else if (nodeVisibleY > containerHeight - 50) {
+            container.scrollTop = d.fy - containerHeight + 100;
+          }
+        }
+      })
+      .on('end', function(event, d) {
+        if (!pinnedNodes.has(d.id)) {
+          delete d.fx;
+          delete d.fy;
+        }
+        if (simulationRef.current) {
+          simulationRef.current.alphaTarget(0);
+        }
+      });
+
+    // Apply drag behavior and event handlers
+    nodeGroups
+      .call(dragBehavior)
+      .on('mouseenter', function(event, d) {
+        setHoveredEntryId(d.id);
+        select(this).select('circle')
+          .attr('fill', '#374151')
+          .attr('stroke', '#6B7280');
+      })
+      .on('mouseleave', function(event, d) {
+        setHoveredEntryId(null);
+        const circle = select(this).select('circle');
+        if (editingEntryId === d.id) {
+          circle.attr('fill', '#2563EB').attr('stroke', '#60A5FA');
+        } else if (pinnedNodes.has(d.id)) {
+          circle.attr('fill', '#7C3AED').attr('stroke', '#A78BFA');
+        } else {
+          circle.attr('fill', '#1E293B').attr('stroke', '#475569');
+        }
+      })
+      .on('click', function(event, d) {
+        event.stopPropagation();
+        setEditingEntryId(editingEntryId === d.id ? null : d.id);
+        
+        // Scroll to show the clicked node
+        scrollToNode(d.id);
+      })
+      .on('dblclick', function(event, d) {
+        event.stopPropagation();
+        const newPinnedNodes = new Set(pinnedNodes);
+        if (pinnedNodes.has(d.id)) {
+          newPinnedNodes.delete(d.id);
+          delete d.fx;
+          delete d.fy;
+        } else {
+          newPinnedNodes.add(d.id);
+          d.fx = d.x;
+          d.fy = d.y;
+        }
+        setPinnedNodes(newPinnedNodes);
+        
+        // Update pin indicator
+        select(this).selectAll('circle').remove();
+        select(this).append('circle')
+          .attr('r', NODE_RADIUS)
+          .attr('fill', newPinnedNodes.has(d.id) ? '#7C3AED' : '#1E293B')
+          .attr('stroke', newPinnedNodes.has(d.id) ? '#A78BFA' : '#475569')
+          .attr('stroke-width', 2);
+          
+        if (newPinnedNodes.has(d.id)) {
+          select(this).append('circle')
+            .attr('r', 4)
+            .attr('cx', NODE_RADIUS - 5)
+            .attr('cy', -NODE_RADIUS + 5)  
+            .attr('fill', '#A78BFA');
+        }
+      });
+
+    // Update simulation tick
+    if (simulationRef.current) {
+      simulationRef.current.on('tick', () => {
+        nodeGroups.attr('transform', d => `translate(${d.x}, ${d.y})`);
+        
+        // Update timeline path
+        const newPathData = nodes.map((node, i) => 
+          `${i === 0 ? 'M' : 'L'} ${node.x} ${node.y}`
+        ).join(' ');
+        
+        svg.select('path').attr('d', newPathData);
+      });
+    }
+
+  }, [entries, pinnedNodes, editingEntryId, hoveredEntryId, dynamicTimelineHeight, getInitialNodePosition]);
+
+  // Scroll to specific node
+  const scrollToNode = useCallback((nodeId) => {
+    const node = nodesRef.current.find(n => n.id === nodeId);
+    const container = timelineContainerRef.current;
+    
+    if (node && container) {
+      const targetScrollTop = Math.max(0, node.y - container.clientHeight / 2);
+      container.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth'
+      });
+    }
+  }, []);
+
+  // Card positioning relative to nodes
+  const getCardPositions = useCallback((nodeId) => {
+    const node = nodesRef.current.find(n => n.id === nodeId);
+    if (!node) return null;
+
+    const cardWidth = 180;
     const cardHeight = 90;
 
-    if (nodePos.side === 'left') {
+    if (node.side === 'left') {
       return {
         patient: {
-          x: nodePos.x - CARD_OFFSET - cardWidth,
-          y: nodePos.y - cardHeight / 2 - 5
+          x: node.x - CARD_OFFSET - cardWidth,
+          y: node.y - cardHeight / 2 - 5
         },
         clinical: {
-          x: nodePos.x + CARD_OFFSET,
-          y: nodePos.y - cardHeight / 2 + 5
+          x: node.x + CARD_OFFSET,
+          y: node.y - cardHeight / 2 + 5
         }
       };
     } else {
       return {
         patient: {
-          x: nodePos.x - CARD_OFFSET - cardWidth,
-          y: nodePos.y - cardHeight / 2 + 5
+          x: node.x - CARD_OFFSET - cardWidth,
+          y: node.y - cardHeight / 2 + 5
         },
         clinical: {
-          x: nodePos.x + CARD_OFFSET,
-          y: nodePos.y - cardHeight / 2 - 5
+          x: node.x + CARD_OFFSET,
+          y: node.y - cardHeight / 2 - 5
         }
       };
     }
-  }, [getNodePosition, CARD_OFFSET]);
+  }, []);
 
-  // Simple zigzag path generation
-  const timelinePath = useMemo(() => {
-    if (entries.length === 0) return '';
-    
-    let pathData = '';
-    entries.forEach((entry, index) => {
-      const pos = getNodePosition(index);
-      pathData += index === 0 ? `M ${pos.x} ${pos.y}` : ` L ${pos.x} ${pos.y}`;
-    });
-    return pathData;
-  }, [entries, getNodePosition]);
-
-  // Optimized update and save functions
+  // Entry management functions
   const updateEntry = useCallback((entryId, field, value) => {
     setEntries(prev => prev.map(entry => 
       entry.id === entryId ? { ...entry, [field]: value } : entry
@@ -157,39 +395,31 @@ const AngularTimeline = React.memo(({
     if (onUpdateTimeline) {
       onUpdateTimeline(updatedEntries);
     }
-  }, [entries, onUpdateTimeline]);
+    
+    // Scroll to new entry after it's rendered
+    setTimeout(() => {
+      scrollToNode(newEntry.id);
+    }, 100);
+  }, [entries, onUpdateTimeline, scrollToNode]);
 
-  // Simple drag handling without physics
-  const handleMouseDown = useCallback((e, entryId) => {
-    setDraggedNode(entryId);
-    e.preventDefault();
-  }, []);
-
-  const handleDoubleClick = useCallback((entryId) => {
-    const newPinnedNodes = new Set(pinnedNodes);
-    if (pinnedNodes.has(entryId)) {
-      newPinnedNodes.delete(entryId);
-    } else {
-      newPinnedNodes.add(entryId);
-    }
-    setPinnedNodes(newPinnedNodes);
-  }, [pinnedNodes]);
-
-  // Simplified floating cards render
-  const renderFloatingCards = useCallback((entry, index) => {
+  // Render floating cards
+  const renderFloatingCards = useCallback((entry) => {
     if (hoveredEntryId !== entry.id && editingEntryId !== entry.id) return null;
 
-    const cardPositions = getCardPositions(index);
+    const cardPositions = getCardPositions(entry.id);
+    if (!cardPositions) return null;
+
     const isEditing = editingEntryId === entry.id;
 
     return (
       <motion.div
         key={`cards-${entry.id}`}
-        className="absolute inset-0 pointer-events-none"
+        className="absolute pointer-events-none"
+        style={{ left: 0, top: 0, width: '100%', height: '100%' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.1 }} // Very fast transitions
+        transition={{ duration: 0.1 }}
       >
         {/* Patient Card */}
         <div
@@ -264,13 +494,13 @@ const AngularTimeline = React.memo(({
           )}
         </div>
 
-        {/* Compact Edit Controls */}
+        {/* Edit Controls */}
         {isEditing && (
           <div 
             className="absolute pointer-events-auto bg-slate-800 border border-slate-600 rounded p-1 shadow-lg z-50"
             style={{
-              left: getNodePosition(index).x - 40,
-              top: getNodePosition(index).y + 30
+              left: (nodesRef.current.find(n => n.id === entry.id)?.x || 0) - 40,
+              top: (nodesRef.current.find(n => n.id === entry.id)?.y || 0) + 35
             }}
           >
             <div className="flex gap-1">
@@ -299,7 +529,16 @@ const AngularTimeline = React.memo(({
         )}
       </motion.div>
     );
-  }, [hoveredEntryId, editingEntryId, getCardPositions, getNodePosition, updateEntry, saveEntry, isLoading]);
+  }, [hoveredEntryId, editingEntryId, getCardPositions, updateEntry, saveEntry, isLoading]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
+    };
+  }, []);
 
   return (
     <motion.div
@@ -308,7 +547,7 @@ const AngularTimeline = React.memo(({
       initial="hidden"
       animate="visible"
     >
-      {/* Minimal Header */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-white flex items-center gap-2">
           <Clock size={14} className="text-cyan-400" />
@@ -324,98 +563,34 @@ const AngularTimeline = React.memo(({
         </button>
       </div>
 
-      {/* Simplified Timeline Container */}
+      {/* Scrollable Timeline Container */}
       <div 
-        className="relative bg-slate-900/40 rounded border border-slate-700 mx-auto"
-        style={{ width: TIMELINE_WIDTH, height: TIMELINE_HEIGHT }}
+        ref={timelineContainerRef}
+        className="relative bg-slate-900/40 rounded border border-slate-700 mx-auto overflow-y-auto"
+        style={{ 
+          width: TIMELINE_WIDTH, 
+          height: TIMELINE_HEIGHT,
+          scrollBehavior: 'smooth'
+        }}
       >
-        {/* Simple Timeline Path */}
-        {entries.length > 0 && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            <defs>
-              <linearGradient id="simpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#64748B" />
-                <stop offset="50%" stopColor="#3B82F6" />
-                <stop offset="100%" stopColor="#8B5CF6" />
-              </linearGradient>
-            </defs>
-            <path
-              d={timelinePath}
-              stroke="url(#simpleGradient)"
-              strokeWidth="2"
-              fill="none"
-              strokeLinecap="round"
-              opacity="0.7"
+        {entries.length > 0 ? (
+          <>
+            {/* D3 SVG Container */}
+            <svg
+              ref={svgRef}
+              width={TIMELINE_WIDTH}
+              height={dynamicTimelineHeight}
+              className="absolute top-0 left-0"
+              style={{ zIndex: 1 }}
             />
-          </svg>
-        )}
-
-        {/* Simple Timeline Nodes */}
-        <AnimatePresence>
-          {entries.map((entry, index) => {
-            const nodePos = getNodePosition(index);
-            const isPinned = pinnedNodes.has(entry.id);
-            const isHovered = hoveredEntryId === entry.id;
-            const isEditing = editingEntryId === entry.id;
-
-            return (
-              <React.Fragment key={entry.id}>
-                <motion.div
-                  className="absolute cursor-move select-none"
-                  style={{ 
-                    left: nodePos.x - NODE_RADIUS, 
-                    top: nodePos.y - NODE_RADIUS,
-                    zIndex: isEditing ? 10 : 5
-                  }}
-                  variants={nodeVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  onMouseDown={(e) => handleMouseDown(e, entry.id)}
-                  onMouseEnter={() => setHoveredEntryId(entry.id)}
-                  onMouseLeave={() => setHoveredEntryId(null)}
-                  onClick={() => setEditingEntryId(isEditing ? null : entry.id)}
-                  onDoubleClick={() => handleDoubleClick(entry.id)}
-                >
-                  <div
-                    className={`relative rounded-full border-2 flex items-center justify-center transition-colors ${
-                      isEditing
-                        ? 'bg-blue-600 border-blue-400' 
-                        : isPinned
-                        ? 'bg-purple-600 border-purple-400'
-                        : isHovered
-                        ? 'bg-slate-700 border-slate-400'
-                        : 'bg-slate-800 border-slate-600'
-                    }`}
-                    style={{ width: NODE_RADIUS * 2, height: NODE_RADIUS * 2 }}
-                  >
-                    <Calendar size={10} className={
-                      isEditing || isPinned ? 'text-white' : 'text-slate-400'
-                    } />
-                    
-                    {isPinned && (
-                      <div className="absolute -top-0.5 -right-0.5">
-                        <Pin size={6} className="text-purple-300" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Compact Date */}
-                  <div className="absolute top-6 left-1/2 transform -translate-x-1/2 text-center">
-                    <div className="text-xs text-slate-400 font-medium">
-                      {new Date(entry.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                    </div>
-                  </div>
-                </motion.div>
-
-                {renderFloatingCards(entry, index)}
-              </React.Fragment>
-            );
-          })}
-        </AnimatePresence>
-
-        {/* Simple Empty State */}
-        {entries.length === 0 && (
+            
+            {/* Floating Cards Layer */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
+              {entries.map((entry) => renderFloatingCards(entry))}
+            </div>
+          </>
+        ) : (
+          // Empty State
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <Clock size={24} className="text-slate-600 mx-auto mb-2" />
