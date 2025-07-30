@@ -634,10 +634,10 @@ const D3PhysicsTimeline = ({
           style={{ width: `${width}px`, height: `${height}px` }}
         />
 
-        {/* Hover Cards - Only visible on hover */}
+        {/* Hover Cards - Only visible on hover with improved positioning */}
         <AnimatePresence>
           {hoveredNodeData && !editingCard && (
-            <React.Fragment>
+            <>
               <TimelineHoverCard
                 entry={hoveredNodeData}
                 position={calculateCardPosition(hoveredNodeData, 'patient')}
@@ -658,35 +658,23 @@ const D3PhysicsTimeline = ({
                 onSave={handleSaveCard}
                 onCancel={() => setEditingCard(null)}
               />
-            </React.Fragment>
+            </>
           )}
         </AnimatePresence>
 
-        {/* Editing Cards */}
+        {/* Editing Cards - Show only the card being edited */}
         <AnimatePresence>
           {editingCard && hoveredNodeData && hoveredNodeData.id === editingCard.nodeId && (
-            <React.Fragment>
-              <TimelineHoverCard
-                entry={hoveredNodeData}
-                position={calculateCardPosition(hoveredNodeData, 'patient')}
-                type="patient"
-                isVisible={editingCard.type === 'patient'}
-                isEditing={editingCard.type === 'patient'}
-                onEdit={handleEditCard}
-                onSave={handleSaveCard}
-                onCancel={() => setEditingCard(null)}
-              />
-              <TimelineHoverCard
-                entry={hoveredNodeData}
-                position={calculateCardPosition(hoveredNodeData, 'clinical')}
-                type="clinical"
-                isVisible={editingCard.type === 'clinical'}
-                isEditing={editingCard.type === 'clinical'}
-                onEdit={handleEditCard}
-                onSave={handleSaveCard}
-                onCancel={() => setEditingCard(null)}
-              />
-            </React.Fragment>
+            <TimelineHoverCard
+              entry={hoveredNodeData}
+              position={calculateCardPosition(hoveredNodeData, editingCard.type)}
+              type={editingCard.type}
+              isVisible={true}
+              isEditing={true}
+              onEdit={handleEditCard}
+              onSave={handleSaveCard}
+              onCancel={() => setEditingCard(null)}
+            />
           )}
         </AnimatePresence>
       </div>
