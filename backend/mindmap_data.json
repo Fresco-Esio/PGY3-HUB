@@ -23,7 +23,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159494",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
@@ -48,7 +48,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159508",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "a9c0a2ec-bdb8-4043-adf7-b4d761c1dabe",
@@ -73,7 +73,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159519",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "bf0ca57b-4ce6-48f0-a77f-a10394dc7cc7",
@@ -98,7 +98,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159534",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "e3f00945-e7d6-48c9-9044-53ee940b7bce",
@@ -123,7 +123,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159552",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "fe743542-0af5-4889-b77a-744ed7a7eeda",
@@ -148,17 +148,18 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159579",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     }
   ],
   "cases": [
     {
       "id": "1753397759699",
       "case_id": "CASE-1753397761406-0",
-      "case_name": "Sarah M. - Depression Following Job Loss",
       "encounter_date": "2025-07-24T22:56:01.406000+00:00",
       "primary_diagnosis": "Major Depressive Disorder, Moderate",
-      "secondary_diagnoses": ["Generalized Anxiety Disorder"],
+      "secondary_diagnoses": [
+        "Generalized Anxiety Disorder"
+      ],
       "age": 28,
       "gender": "Female",
       "chief_complaint": "I can't get out of bed and feel hopeless",
@@ -180,45 +181,9 @@
         "x": 400.0,
         "y": 710.0
       },
-      "timeline": [
-        {
-          "id": "timeline-1",
-          "type": "Assessment",
-          "timestamp": "2025-07-24T22:56:01.406000+00:00",
-          "content": "Initial psychiatric assessment completed. Patient presents with symptoms consistent with major depressive episode. Expressed feelings of hopelessness and decreased energy for the past 3 months.",
-          "author": "Dr. Smith",
-          "metadata": {
-            "severity": "moderate",
-            "duration": "3 months"
-          }
-        },
-        {
-          "id": "timeline-2", 
-          "type": "Medication",
-          "timestamp": "2025-07-24T23:15:00.000000+00:00",
-          "content": "Started on Sertraline 50mg daily. Patient counseled on potential side effects including nausea, headache, and sexual dysfunction. Discussed timeline for therapeutic effect (4-6 weeks).",
-          "author": "Dr. Smith",
-          "metadata": {
-            "medication": "Sertraline",
-            "dosage": "50mg daily",
-            "route": "oral"
-          }
-        },
-        {
-          "id": "timeline-3",
-          "type": "Therapy", 
-          "timestamp": "2025-07-25T10:00:00.000000+00:00",
-          "content": "First CBT session focused on psychoeducation about depression and identifying automatic negative thoughts. Patient demonstrated good insight and engagement.",
-          "author": "Dr. Johnson",
-          "metadata": {
-            "session_type": "CBT",
-            "session_number": 1,
-            "duration": "50 minutes"
-          }
-        }
-      ],
+      "timeline": [],
       "created_at": "2025-07-24T22:56:01.406000+00:00",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "1753397837568",
@@ -249,7 +214,7 @@
       },
       "timeline": [],
       "created_at": "2025-07-24T22:57:17.987000+00:00",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "1753398442218",
@@ -280,7 +245,7 @@
       },
       "timeline": [],
       "created_at": "2025-07-24T23:07:22.694000+00:00",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     },
     {
       "id": "1753398664975",
@@ -311,7 +276,7 @@
       },
       "timeline": [],
       "created_at": "2025-07-24T23:11:05.486000+00:00",
-      "updated_at": "2025-07-25T01:02:02.817000+00:00"
+      "updated_at": "2025-07-31T04:45:44.509000+00:00"
     }
   ],
   "tasks": [],
