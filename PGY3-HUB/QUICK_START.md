@@ -1,172 +1,168 @@
-# Quick Development Scripts for PGY3-HUB
+# PGY3-HUB Quick Start Guide v0.2.0
 
-## Quick Start (After Installing Node.js and Python)
+## 🚀 Quick Build (Windows)
 
-### 1. Install Everything
+### Option 1: PowerShell (Recommended)
 ```powershell
-# Run this script to install all dependencies
-cd "c:\Users\Obioe\OneDrive - Montefiore Medicine (1)\Projects\PGY3-HUB-main\PGY3-HUB-main"
-
-# Frontend dependencies
-cd frontend
-npm install
-
-# Backend Python dependencies
-cd ..\backend
-python -m pip install -r requirements.txt
-
-# Backend Node.js dependencies (optional)
-npm install
+.\build-windows.ps1
 ```
 
-### 2. Start Development (Choose One)
-
-#### Option A: Automatic (Both Frontend & Backend)
-```powershell
-cd "c:\Users\Obioe\OneDrive - Montefiore Medicine (1)\Projects\PGY3-HUB-main\PGY3-HUB-main\frontend"
-npm run dev
+### Option 2: Command Prompt  
+```cmd
+build-windows.bat
 ```
 
-#### Option B: Manual (Separate Terminals)
-Terminal 1 - Backend:
+## 📦 What You'll Get
+
+After successful build, check `frontend/dist/` for:
+
+- **PGY3-HUB-Setup-0.2.0.exe** - Full Windows installer
+  - Creates desktop shortcut
+  - Adds to Start Menu  
+  - Proper uninstaller
+  
+- **PGY3-HUB-0.2.0-portable.exe** - Portable version
+  - No installation required
+  - Can run from any folder/USB drive
+  - Includes embedded Python backend
+
+## 🛠️ Development Mode
+
+### Start Development Environment
+```cmd
+start-dev.bat
+```
+or
 ```powershell
-cd "c:\Users\Obioe\OneDrive - Montefiore Medicine (1)\Projects\PGY3-HUB-main\PGY3-HUB-main\backend"
-uvicorn server:app --reload --port 8001
+.\start-dev.ps1
 ```
 
-Terminal 2 - Frontend:
-```powershell
-cd "c:\Users\Obioe\OneDrive - Montefiore Medicine (1)\Projects\PGY3-HUB-main\PGY3-HUB-main\frontend"
-npm start
+This will:
+- Start Python backend on http://localhost:8001
+- Start React dev server on http://localhost:3000  
+- Launch Electron with hot reload enabled
+
+## 🧪 Testing Your Build
+
+### Test Build Integrity
+```cmd
+test-build.bat
 ```
 
-## Testing URLs
-- **Application**: http://localhost:3000
-- **API Docs**: http://localhost:8001/docs
-- **API Health**: http://localhost:8001/health
+### Manual Testing
+1. Run the installer: `frontend/dist/PGY3-HUB-Setup-0.2.0.exe`
+2. Launch from desktop shortcut
+3. Verify app works offline
+4. Test mind mapping features
 
-## Development Commands
+## 🔧 Prerequisites
 
-### Frontend Commands
-```powershell
-cd frontend
+### Required Software
+- **Node.js** 16+ (for React and Electron)
+- **Python** 3.9+ (for FastAPI backend)
+- **npm** or **yarn** (package management)
 
-# Start development server
-npm start
-
-# Build for production
-npm run build
-
-# Run tests
-npm test
-
-# Start both frontend and backend
-npm run dev
+### Windows Build Tools (for native modules)
+```cmd
+npm install -g windows-build-tools
 ```
 
-### Backend Commands (Python)
-```powershell
-cd backend
+## 📁 Project Structure
 
-# Start with auto-reload
-uvicorn server:app --reload --port 8001
-
-# Start in production mode
-uvicorn server:app --host 0.0.0.0 --port 8001
-
-# Install new package
-pip install package_name
-pip freeze > requirements.txt
+```
+PGY3-HUB/
+├── frontend/                 # React + Electron app
+│   ├── build/               # React production build
+│   ├── dist/                # Electron build outputs
+│   ├── public/electron.js   # Electron main process
+│   ├── public/preload.js    # Security preload script
+│   └── package.json         # Frontend dependencies & build config
+├── backend/                 # Python FastAPI backend
+│   ├── server.py           # Main API server
+│   ├── pgy3-hub-backend.spec # PyInstaller configuration
+│   ├── pgy3-hub-backend.exe # Compiled backend (after build)
+│   └── requirements.txt     # Python dependencies
+├── build-windows.ps1       # Main build script (PowerShell)
+├── build-windows.bat       # Main build script (Batch)
+├── start-dev.ps1          # Development mode (PowerShell)
+├── start-dev.bat          # Development mode (Batch)
+└── test-build.bat         # Build testing script
 ```
 
-### Backend Commands (Node.js Alternative)
-```powershell
-cd backend
+## 🎯 Key Features
 
-# Start server
-node server.js
+### Desktop Integration
+- ✅ Native Windows installer with shortcuts
+- ✅ Start Menu integration
+- ✅ File associations (.pgy3 files)
+- ✅ Native menus (File, Edit, View, Help)
+- ✅ Native file dialogs (Save/Open)
 
-# Install new package
-npm install package_name
-```
+### Backend Integration  
+- ✅ Auto-start Python backend on app launch
+- ✅ Embedded Python executable (no installation required)
+- ✅ Graceful fallback to Python script if executable fails
+- ✅ Clean shutdown when app closes
 
-## Debugging Features
+### Security & Performance
+- ✅ Context isolation and preload scripts
+- ✅ No remote module access
+- ✅ Optimized React build
+- ✅ Hot reload in development mode
 
-### Browser DevTools
-1. Open Chrome/Edge DevTools (F12)
-2. **Console**: Check for JavaScript errors
-3. **Network**: Monitor API calls
-4. **Application**: Inspect Local Storage data
-5. **Sources**: Set breakpoints in React code
+## 🚨 Troubleshooting
 
-### Backend Debugging
-1. **FastAPI Docs**: http://localhost:8001/docs - Interactive API testing
-2. **Server Logs**: Check terminal output for errors
-3. **Data Files**: Monitor `backend/mindmap_data.json` for changes
+### Build Issues
 
-### React DevTools (Recommended)
-Install React Developer Tools browser extension for advanced React debugging.
+#### "Python not found"
+- Install Python 3.9+ and ensure it's in PATH
+- Or download from: https://python.org/downloads/
 
-## Quick Test Checklist
+#### "Node.js not found"  
+- Install Node.js 16+ from: https://nodejs.org/
+- Restart terminal after installation
 
-### Basic Functionality
-- [ ] Application loads at http://localhost:3000
-- [ ] Can create new nodes (Ctrl+N)
-- [ ] Can edit node content
-- [ ] Can create connections between nodes
-- [ ] Data saves automatically
-- [ ] Data persists after page refresh
+#### "PyInstaller failed"
+- The build will continue with Python script fallback
+- Backend will work but require Python on target machine
 
-### Advanced Features
-- [ ] Rich text editor works in node content
-- [ ] PDF upload works in literature nodes
-- [ ] Keyboard shortcuts work (Ctrl+R, Esc)
-- [ ] Force layout algorithm works
-- [ ] Templates can be created and used
+#### "Electron build failed"
+- Try: `npm install -g electron-builder`
+- Enable Windows Developer Mode for symbolic links
+- Or run PowerShell as Administrator
 
-## Common Issues & Quick Fixes
+### Runtime Issues
 
-### 1. "npm command not found"
-**Solution**: Install Node.js from https://nodejs.org/
+#### "App won't start"
+- Check if antivirus is blocking the executable
+- Try running as administrator
+- Check Windows Event Viewer for error details
 
-### 2. "python command not found"
-**Solution**: Install Python and add to PATH
+#### "Backend not starting"  
+- Ensure ports 8001 is available
+- Check if Windows Firewall is blocking
+- Look for backend logs in app console (Ctrl+Shift+I)
 
-### 3. "Port 3000 already in use"
-**Solution**: 
-```powershell
-# Find process using port
-netstat -ano | findstr :3000
-# Kill process (replace PID)
-taskkill /PID <PID> /F
-```
+## 📊 Build Output Sizes
 
-### 4. "CORS Error"
-**Solution**: Ensure backend is running on port 8001 and CORS is configured
+Typical build sizes:
+- **Installer**: ~200-300 MB (includes Electron runtime + Python)
+- **Portable**: ~180-250 MB (no installer overhead)
+- **Unpacked**: ~400-500 MB (includes all dependencies)
 
-### 5. "Module not found"
-**Solution**: 
-```powershell
-# Frontend
-cd frontend && npm install
+## 🔄 Version History
 
-# Backend
-cd backend && pip install -r requirements.txt
-```
+- **v0.2.0**: Enhanced build system with PyInstaller backend packaging
+- **v0.1.0**: Initial Electron setup with Node.js fallback
 
-### 6. API Connection Failed
-**Solution**: Check if backend is running and accessible at http://localhost:8001/health
+## 🆘 Support
 
-## Performance Tips
+If you encounter issues:
+1. Check this guide first
+2. Run `test-build.bat` to verify your setup
+3. Check the console logs (Ctrl+Shift+I in the app)
+4. Review the troubleshooting section above
 
-### For Development
-- Use `npm run dev` to start both services together
-- Keep browser devtools open to monitor performance
-- Use React DevTools Profiler for component performance
-- Monitor network tab for API call optimization
+---
 
-### For Production
-- Run `npm run build` to create optimized build
-- Use production environment variables
-- Enable gzip compression
-- Consider CDN for static assets
+**Ready to build?** Run `.\build-windows.ps1` and you'll have a standalone Windows .exe in minutes! 🚀
