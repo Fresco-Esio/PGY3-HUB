@@ -424,7 +424,7 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryAdd]);
 
-  // Handle hover with improved stability
+  // Enhanced hover handling with card persistence
   const handleNodeHover = useCallback((nodeId) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
@@ -439,10 +439,30 @@ const D3PhysicsTimeline = ({
       return;
     }
     
-    // Use a slightly longer delay to prevent flashing when moving between cards and nodes
+    // Use a delay to allow moving from node to cards
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredNode(null);
-    }, 150); // Increased delay for more stable hover
+    }, 200); // Increased delay for moving between node and cards
+  }, [editingCard]);
+
+  // Handle card hover - keep cards visible when hovering over them
+  const handleCardHover = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    // Cards stay visible when hovering over them
+  }, []);
+
+  const handleCardLeave = useCallback(() => {
+    // Don't hide cards if we're in editing mode
+    if (editingCard) {
+      return;
+    }
+    
+    // Use a delay to allow moving between cards or back to node
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredNode(null);
+    }, 200);
   }, [editingCard]);
 
   // Auto-scroll to ensure cards are visible
