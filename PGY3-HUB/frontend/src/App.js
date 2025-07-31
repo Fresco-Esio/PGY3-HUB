@@ -66,7 +66,7 @@ import {
 } from 'lucide-react';
 
 // Lazy load components for better initial load time
-import { RichTextEditor, TemplateManager, LiteratureModal } from './components/LazyComponents';
+import { RichTextEditor, LiteratureModal } from './components/LazyComponents';
 import CaseModal from './components/CaseModal';
 import TopicModal from './components/TopicModal';
 import TaskModal from './components/TaskModal';
@@ -74,6 +74,9 @@ import FloatingEdge from './components/FloatingEdge'; // Import the custom Float
 import EnhancedEdge from './components/EnhancedEdge'; // Import the enhanced edge component
 import ConnectionLine from './components/ConnectionLine'; // Import the custom connection line for previews
 import OptimizedLoadingScreen from './components/OptimizedLoadingScreen';
+
+// Import node components
+import { nodeTypes } from './components/nodes';
 
 // Import performance utilities
 import { 
@@ -424,859 +427,7 @@ const csvUtils = {
   }
 };
 
-// Enhanced Custom Node Components with better visual effects and data
-const TopicNode = ({ data, selected }) => {
-  const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
-  
-  // Entry animation - only if not skipping animations
-  useEffect(() => {
-    if (!data.skipAnimation) {
-      const timer = setTimeout(() => setIsVisible(true), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [data.skipAnimation]);
-
-  const completionPercentage = data.flashcard_count > 0
-    ? ((data.completed_flashcards || 0) / data.flashcard_count) * 100
-    : 0;
-
-  return (
-    <div
-      className={`group px-4 py-3 shadow-lg border-2 transition-all duration-700 min-w-[220px] relative hover:shadow-2xl transform hover:scale-105 backdrop-blur-sm ${selected
-          ? 'border-teal-400 shadow-xl scale-105 ring-4 ring-teal-200 animate-pulse'
-          : 'border-transparent hover:border-teal-300 hover:ring-2 hover:ring-teal-100'
-        } ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-8'}`}
-      style={{
-        backgroundColor: data.color || '#3B82F6',
-        color: 'white',
-        borderRadius: '12px !important', // Force border radius with !important
-        WebkitBorderRadius: '12px', // Safari compatibility
-        MozBorderRadius: '12px', // Firefox compatibility
-        overflow: 'hidden', // Ensure child elements respect border radius
-        boxShadow: selected
-          ? `0 0 20px ${data.color || '#3B82F6'}40`
-          : `0 4px 20px ${data.color || '#3B82F6'}20`,
-        transition: 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease'
-      }}
-    >
-      {/* Connection Hotspots - Stacked source and target handles for all four sides */}
-      {/* Top handles */}
-      <Handle
-        id="top"
-        type="source"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="top"
-        type="target"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Right handles */}
-      <Handle
-        id="right"
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="right"
-        type="target"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Bottom handles */}
-      <Handle
-        id="bottom"
-        type="source"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="bottom"
-        type="target"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Left handles */}
-      <Handle
-        id="left"
-        type="source"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="left"
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Priority indicator */}
-      {data.priority && (
-        <div className="absolute -top-2 -right-2">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white ${data.priority === 'high' ? 'bg-red-500' :
-              data.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-            }`}>
-            {data.priority === 'high' ? '!' : data.priority === 'medium' ? '•' : '✓'}
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 mb-2">
-        <div className="flex items-center gap-1">
-          <Brain size={16} className="drop-shadow-sm" />
-          {data.tags && data.tags.length > 0 && (
-            <Tag size={12} className="opacity-75" />
-          )}
-        </div>
-        <div className="font-semibold text-sm truncate flex-1">{data.label}</div>
-        {data.onDelete && (
-          <button
-            onClick={(e) => {
-              // Don't stop propagation immediately - delay the action to allow double-clicks
-              e.preventDefault(); // Prevent any default behavior but allow bubbling
-              
-              // Use a longer timeout to distinguish between single click and double-click
-              const deleteTimeout = setTimeout(() => {
-                // Only execute delete if this wasn't part of a double-click sequence
-                e.stopPropagation(); // Stop propagation only when actually deleting
-                data.onDelete();
-              }, 300); // Increased timeout
-              
-              // Store timeout ID on the button to cancel it if double-click occurs
-              e.currentTarget.deleteTimeout = deleteTimeout;
-            }}
-            onDoubleClick={(e) => {
-              // Cancel the pending delete action
-              if (e.currentTarget.deleteTimeout) {
-                clearTimeout(e.currentTarget.deleteTimeout);
-                e.currentTarget.deleteTimeout = null;
-              }
-              
-              // Don't prevent default - allow the double-click to bubble up for modal opening
-              // The parent node will handle the double-click to open the modal
-            }}
-            className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
-          >
-            <X size={12} />
-          </button>
-        )}
-      </div>
-
-      <div className="text-xs opacity-90 mb-2">{data.category}</div>
-
-      {/* Enhanced progress display */}
-      {data.flashcard_count > 0 && (
-        <div className="text-xs mt-2 space-y-1">
-          <div className="flex justify-between items-center">
-            <span className="opacity-90">{data.completed_flashcards}/{data.flashcard_count} flashcards</span>
-            <span className="font-semibold">{Math.round(completionPercentage)}%</span>
-          </div>
-          <div className="w-full bg-white bg-opacity-20 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full transition-all duration-1000 ease-out"
-              style={{ width: `${completionPercentage}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Tags display */}
-      {data.tags && data.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {data.tags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs"
-            >
-              {tag}
-            </span>
-          ))}
-          {data.tags.length > 3 && (
-            <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
-              +{data.tags.length - 3}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Last updated indicator */}
-      {data.updated_at && (
-        <div className="absolute bottom-1 right-1 opacity-50">
-          <Clock size={10} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const CaseNode = ({ data, selected }) => {
-  const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
-  
-  // Entry animation with slight delay for staggered effect - only if not skipping animations
-  useEffect(() => {
-    if (!data.skipAnimation) {
-      const timer = setTimeout(() => setIsVisible(true), 150);
-      return () => clearTimeout(timer);
-    }
-  }, [data.skipAnimation]);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200';
-      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'follow_up': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-blue-100 text-blue-800 border-blue-200';
-    }
-  };
-
-  const getUrgencyLevel = (data) => {
-    // Simple urgency calculation based on keywords
-    const urgentKeywords = ['emergency', 'urgent', 'crisis', 'acute', 'severe'];
-    const complaint = data.chief_complaint?.toLowerCase() || '';
-    const diagnosis = data.diagnosis?.toLowerCase() || '';
-
-    if (urgentKeywords.some(keyword => complaint.includes(keyword) || diagnosis.includes(keyword))) {
-      return 'high';
-    }
-    return 'normal';
-  };
-
-  const urgency = getUrgencyLevel(data);
-
-  return (
-    <div
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-600 min-w-[220px] bg-white relative hover:shadow-2xl transform hover:scale-105 ${selected
-          ? 'border-blue-400 shadow-xl scale-105 ring-4 ring-blue-200'
-          : 'border-gray-200 hover:border-blue-300 hover:ring-2 hover:ring-blue-100'
-        } ${urgency === 'high' ? 'ring-2 ring-red-300' : ''} ${isVisible ? 'opacity-100 scale-100 translate-y-0 rotate-0' : 'opacity-0 scale-90 translate-y-6 rotate-1'}`}
-      style={{
-        transition: 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s ease'
-      }}
-    >
-      {/* Connection Hotspots - Stacked source and target handles for all four sides */}
-      {/* Top handles */}
-      <Handle
-        id="top"
-        type="source"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="top"
-        type="target"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Right handles */}
-      <Handle
-        id="right"
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="right"
-        type="target"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Bottom handles */}
-      <Handle
-        id="bottom"
-        type="source"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="bottom"
-        type="target"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Left handles */}
-      <Handle
-        id="left"
-        type="source"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="left"
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Urgency indicator */}
-      {urgency === 'high' && (
-        <div className="absolute -top-2 -right-2">
-          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
-            <AlertCircle size={14} className="text-white" />
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 mb-2">
-        <div className="flex items-center gap-1">
-          <Users size={16} className="text-blue-600" />
-          {data.linked_topics && data.linked_topics.length > 0 && (
-            <div className="text-xs bg-blue-100 text-blue-600 px-1 rounded">
-              {data.linked_topics.length}
-            </div>
-          )}
-        </div>
-        <div className="font-semibold text-sm text-gray-800 truncate flex-1">{data.label}</div>
-        {data.onDelete && (
-          <button
-            onClick={(e) => {
-              // Don't stop propagation immediately - delay the action to allow double-clicks
-              e.preventDefault(); // Prevent any default behavior but allow bubbling
-              
-              // Use a longer timeout to distinguish between single click and double-click
-              const deleteTimeout = setTimeout(() => {
-                // Only execute delete if this wasn't part of a double-click sequence
-                e.stopPropagation(); // Stop propagation only when actually deleting
-                data.onDelete();
-              }, 300); // Increased timeout
-              
-              // Store timeout ID on the button to cancel it if double-click occurs
-              e.currentTarget.deleteTimeout = deleteTimeout;
-            }}
-            onDoubleClick={(e) => {
-              // Cancel the pending delete action
-              if (e.currentTarget.deleteTimeout) {
-                clearTimeout(e.currentTarget.deleteTimeout);
-                e.currentTarget.deleteTimeout = null;
-              }
-              
-              // Don't prevent default - allow the double-click to bubble up for modal opening
-              // The parent node will handle the double-click to open the modal
-            }}
-            className="ml-auto p-1 hover:bg-gray-200 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
-          >
-            <X size={12} />
-          </button>
-        )}
-      </div>
-
-      <div className="text-xs text-gray-600 mb-2 truncate">{data.case_name || data.label}</div>
-
-      {/* Enhanced patient info */}
-      <div className="space-y-1">
-        {data.age && (
-          <div className="text-xs text-blue-600 flex items-center gap-1">
-            <Calendar size={10} />
-            Age: {data.age}
-          </div>
-        )}
-
-        {/* Status badge */}
-        {data.status && (
-          <span className={`inline-block px-2 py-1 rounded-full text-xs border ${getStatusColor(data.status)}`}>
-            {data.status}
-          </span>
-        )}
-      </div>
-
-      {/* Progress indicators */}
-      {data.tasks_count && data.tasks_count > 0 && (
-        <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
-          <CheckSquare size={10} />
-          {data.completed_tasks || 0}/{data.tasks_count} tasks
-        </div>
-      )}
-
-      {/* Last updated indicator */}
-      {data.updated_at && (
-        <div className="absolute bottom-1 right-1 opacity-30">
-          <Clock size={10} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const TaskNode = ({ data, selected }) => {
-  const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
-  
-  // Entry animation with different timing for variety - only if not skipping animations
-  useEffect(() => {
-    if (!data.skipAnimation) {
-      const timer = setTimeout(() => setIsVisible(true), 200);
-      return () => clearTimeout(timer);
-    }
-  }, [data.skipAnimation]);
-
-  const statusClasses = {
-    pending: 'bg-yellow-500',
-    in_progress: 'bg-blue-600',
-    completed: 'bg-green-700 opacity-60'
-  };
-
-  return (
-    <div
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-500 min-w-[200px] text-white relative hover:shadow-2xl transform hover:scale-105 ${selected
-          ? 'border-yellow-400 shadow-xl scale-105 ring-4 ring-yellow-200'
-          : 'border-transparent hover:border-yellow-300 hover:ring-2 hover:ring-yellow-100'
-        } ${statusClasses[data.status] || 'bg-gray-500'} ${isVisible ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-85 -translate-x-4'}`}
-      style={{
-        transition: 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 0.3s ease'
-      }}
-    >
-      {/* Connection Hotspots - Stacked source and target handles for all four sides */}
-      {/* Top handles */}
-      <Handle
-        id="top"
-        type="source"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="top"
-        type="target"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Right handles */}
-      <Handle
-        id="right"
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="right"
-        type="target"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Bottom handles */}
-      <Handle
-        id="bottom"
-        type="source"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="bottom"
-        type="target"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Left handles */}
-      <Handle
-        id="left"
-        type="source"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="left"
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      <div className="flex items-center gap-2 mb-1">
-        <CheckSquare size={16} />
-        <div className="font-semibold text-sm">{data.label}</div>
-        {data.onDelete && (
-          <button
-            onClick={(e) => {
-              // Don't stop propagation immediately - delay the action to allow double-clicks
-              e.preventDefault(); // Prevent any default behavior but allow bubbling
-              
-              // Use a longer timeout to distinguish between single click and double-click
-              const deleteTimeout = setTimeout(() => {
-                // Only execute delete if this wasn't part of a double-click sequence
-                e.stopPropagation(); // Stop propagation only when actually deleting
-                data.onDelete();
-              }, 300); // Increased timeout
-              
-              // Store timeout ID on the button to cancel it if double-click occurs
-              e.currentTarget.deleteTimeout = deleteTimeout;
-            }}
-            onDoubleClick={(e) => {
-              // Cancel the pending delete action
-              if (e.currentTarget.deleteTimeout) {
-                clearTimeout(e.currentTarget.deleteTimeout);
-                e.currentTarget.deleteTimeout = null;
-              }
-              
-              // Don't prevent default - allow the double-click to bubble up for modal opening
-              // The parent node will handle the double-click to open the modal
-            }}
-            className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
-          >
-            <X size={12} />
-          </button>
-        )}
-      </div>
-      <div className="text-xs opacity-90">Priority: {data.priority}</div>
-      {data.due_date && (
-        <div className="text-xs mt-1 opacity-90">Due: {new Date(data.due_date).toLocaleDateString()}</div>
-      )}
-    </div>
-  );
-};
-
-const LiteratureNode = ({ data, selected }) => {
-  const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
-  
-  // Entry animation with the longest delay for final polish - only if not skipping animations
-  useEffect(() => {
-    if (!data.skipAnimation) {
-      const timer = setTimeout(() => setIsVisible(true), 250);
-      return () => clearTimeout(timer);
-    }
-  }, [data.skipAnimation]);
-
-  return (
-    <div
-      className={`group px-4 py-3 rounded-xl shadow-lg border-2 transition-all duration-650 min-w-[200px] bg-purple-50 relative hover:shadow-2xl transform hover:scale-105 ${selected
-          ? 'border-purple-400 shadow-xl scale-105 ring-4 ring-purple-200'
-          : 'border-purple-200 hover:border-purple-300 hover:ring-2 hover:ring-purple-100'
-        } ${isVisible ? 'opacity-100 scale-100 translate-x-0 rotate-0' : 'opacity-0 scale-95 translate-x-4 -rotate-1'}`}
-      style={{
-        transition: 'all 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s ease'
-      }}
-    >
-      {/* Connection Hotspots - Stacked source and target handles for all four sides */}
-      {/* Top handles */}
-      <Handle
-        id="top"
-        type="source"
-        position={Position.Top}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="top"
-        type="target"
-        position={Position.Top}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Right handles */}
-      <Handle
-        id="right"
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="right"
-        type="target"
-        position={Position.Right}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Bottom handles */}
-      <Handle
-        id="bottom"
-        type="source"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="bottom"
-        type="target"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      {/* Left handles */}
-      <Handle
-        id="left"
-        type="source"
-        position={Position.Left}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="left"
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 !bg-purple-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
-
-      <div 
-        className="flex items-center gap-2 mb-1 cursor-pointer"
-        onClick={(e) => {
-          // Don't stop propagation immediately - delay the action to allow double-clicks
-          e.preventDefault(); // Prevent any default behavior but allow bubbling
-          
-          // Use a longer timeout to distinguish between single click and double-click
-          const clickTimeout = setTimeout(() => {
-            // Only execute click if this wasn't part of a double-click sequence
-            e.stopPropagation(); // Stop propagation only when actually handling the click
-            if (data.onLiteratureClick) {
-              data.onLiteratureClick(data);
-            }
-          }, 300); // Increased timeout
-          
-          // Store timeout ID on the element to cancel it if double-click occurs
-          e.currentTarget.clickTimeout = clickTimeout;
-        }}
-        onDoubleClick={(e) => {
-          // Cancel the pending click action
-          if (e.currentTarget.clickTimeout) {
-            clearTimeout(e.currentTarget.clickTimeout);
-            e.currentTarget.clickTimeout = null;
-          }
-          
-          // Don't prevent default - allow the double-click to bubble up for modal opening
-          // The parent node will handle the double-click to open the modal
-        }}
-      >
-        <BookOpen size={16} className="text-purple-600" />
-        <div className="font-semibold text-sm text-gray-800">{data.label}</div>
-        {data.onDelete && (
-          <button
-            onClick={(e) => {
-              // Don't stop propagation immediately - delay the action to allow double-clicks
-              e.preventDefault(); // Prevent any default behavior but allow bubbling
-              
-              // Use a longer timeout to distinguish between single click and double-click
-              const deleteTimeout = setTimeout(() => {
-                // Only execute delete if this wasn't part of a double-click sequence
-                e.stopPropagation(); // Stop propagation only when actually deleting
-                data.onDelete();
-              }, 300); // Increased timeout
-              
-              // Store timeout ID on the button to cancel it if double-click occurs
-              e.currentTarget.deleteTimeout = deleteTimeout;
-            }}
-            onDoubleClick={(e) => {
-              // Cancel the pending delete action
-              if (e.currentTarget.deleteTimeout) {
-                clearTimeout(e.currentTarget.deleteTimeout);
-                e.currentTarget.deleteTimeout = null;
-              }
-              
-              // Don't prevent default - allow the double-click to bubble up for modal opening
-              // The parent node will handle the double-click to open the modal
-            }}
-            className="ml-auto p-1 hover:bg-purple-200 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
-          >
-            <X size={12} />
-          </button>
-        )}
-      </div>
-      <div className="text-xs text-gray-600">{data.authors}</div>
-      <div className="text-xs text-purple-600 mt-1">{data.year}</div>
-    </div>
-  );
-};
-
-const nodeTypes = {
-  topic: TopicNode,
-  case: CaseNode,
-  task: TaskNode,
-  literature: LiteratureNode,
-};
+// Enhanced Custom Node Components - extracted to separate files for better maintainability
 
 
 
@@ -1675,7 +826,7 @@ const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
     </div>
   );
 };
-const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
+const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   const [selectedNodeType, setSelectedNodeType] = useState(null);
 
   // When the modal is closed, reset the internal state
@@ -1700,12 +851,10 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
     setSelectedNodeType(nodeType);
   };
 
-  const handleFinalSelect = (templateId = null) => {
-    onSelect(selectedNodeType, templateId);
+  const handleFinalSelect = () => {
+    onSelect(selectedNodeType);
     onClose();
   };
-
-  const filteredTemplates = selectedNodeType ? (templates || []).filter(t => t.nodeType === selectedNodeType) : [];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm animate-in fade-in-25 duration-300">
@@ -1722,7 +871,7 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
               </button>
             )}
             <h3 className="text-xl font-semibold text-gray-800">
-              {selectedNodeType ? `Select a ${selectedNodeType} template` : 'Add New Node'}
+              {selectedNodeType ? `Create ${selectedNodeType}` : 'Add New Node'}
             </h3>
           </div>
           <button
@@ -1755,13 +904,13 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
             </div>
           </div>
 
-          {/* View 2: Template Selection */}
+          {/* View 2: Node Creation */}
           <div className={`absolute top-0 left-0 w-full transition-transform duration-300 ease-in-out ${selectedNodeType ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
             {selectedNodeType && (
               <div className="space-y-3">
                 {/* Create Blank Option */}
                 <button
-                  onClick={() => handleFinalSelect(null)}
+                  onClick={() => handleFinalSelect()}
                   className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
                 >
                   <div className="bg-gray-200 p-2 rounded-lg text-gray-600">
@@ -1772,30 +921,6 @@ const NodeSelector = ({ isOpen, onClose, onSelect, templates }) => {
                     <div className="text-sm text-gray-500">Start with an empty node.</div>
                   </div>
                 </button>
-
-                {/* Filtered Templates */}
-                {filteredTemplates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleFinalSelect(template.id)}
-                    className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
-                  >
-                    <div className="bg-indigo-100 p-2 rounded-lg text-indigo-600">
-                      <FileText size={20} />
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-800">{template.name}</div>
-                      <div className="text-sm text-gray-500 truncate">{template.data?.description || template.data?.abstract || template.data?.assessment_plan || 'No description'}</div>
-
-                    </div>
-                  </button>
-                ))}
-
-                {filteredTemplates.length === 0 && (
-                  <div className="text-center text-sm text-gray-500 py-4">
-                    No templates found for this node type.
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -1919,11 +1044,7 @@ const DashboardComponent = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [edgeModal, setEdgeModal] = useState({ isOpen: false, edge: null });
-  const [templates, setTemplates] = useState([]);
-  const [exportProgress, setExportProgress] = useState({ show: false, progress: 0, message: '' });
-
   const [toasts, setToasts] = useState([]);
-  const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
   const [modalAnimationStates, setModalAnimationStates] = useState({
@@ -2805,6 +1926,67 @@ useEffect(() => {
     addToast('Mind map cleared successfully', 'success');
   }, [setNodes, setEdges, autoSaveMindMapData, addToast]);
 
+  const addNewNode = useCallback((nodeType) => {
+    const dataId = Date.now();
+    const id = `${nodeType}-${dataId}`;
+    
+    // Create node data object with appropriate fields based on type
+    let nodeData = { id: dataId, label: `New ${nodeType}` };
+    
+    // For case nodes, add structured fields
+    if (nodeType === 'case') {
+      nodeData = {
+        ...nodeData,
+        chiefComplaint: '',
+        initialPresentation: '',
+        currentPresentation: '',
+        medicationHistory: '',
+        therapyProgress: '',
+        defensePatterns: '',
+        clinicalReflection: ''
+      };
+    }
+    
+    // Calculate grid-based position for new nodes to avoid clustering
+    // Use current data count instead of nodes.length for more accurate positioning
+    const currentDataCount = (mindMapData.topics?.length || 0) + 
+                           (mindMapData.cases?.length || 0) + 
+                           (mindMapData.tasks?.length || 0) + 
+                           (mindMapData.literature?.length || 0);
+    
+    const gridSize = Math.ceil(Math.sqrt(currentDataCount + 1));
+    const nodeSpacing = 280;
+    const offsetX = 400; // Offset from left sidebar
+    const offsetY = 150; // Offset from top
+    
+    const gridPosition = {
+      x: (currentDataCount % gridSize) * nodeSpacing + offsetX,
+      y: Math.floor(currentDataCount / gridSize) * nodeSpacing + offsetY
+    };
+    
+    const newNode = {
+      id,
+      type: nodeType,
+      position: gridPosition,
+      data: { ...nodeData, onDelete: () => handleDeleteNode(id) }
+    };
+
+    setMindMapData(d => {
+      const key = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
+      const dataToAdd = { ...newNode.data, position: newNode.position };
+      delete dataToAdd.onDelete;
+      const updatedData = {
+        ...d,
+        [key]: [...(d[key] || []), dataToAdd]
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+
+    setNodes(n => n.concat(newNode));
+    addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} added successfully`, 'success');
+  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, setNodes, addToast]);
+
   const handleNodesChange = useCallback((changes) => {
     // Apply the node changes to React Flow state immediately - this is critical!
     onNodesChange(changes);
@@ -2968,14 +2150,6 @@ useEffect(() => {
   useEffect(() => {
     // Load initial mind map data
     loadMindMapData();
-    
-    // Load templates from a source (e.g., API or localStorage)
-    // For now, using mock data
-    setTemplates([
-      { id: 'template1', name: 'Schizophrenia Workup', nodeType: 'case', data: { primary_diagnosis: 'Schizophrenia', chief_complaint: 'Auditory hallucinations' } },
-      { id: 'template2', name: 'MDD Follow-up', nodeType: 'case', data: { primary_diagnosis: 'Major Depressive Disorder', status: 'follow_up' } },
-      { id: 'template3', name: 'CBT for Anxiety', nodeType: 'topic', data: { title: 'CBT for Anxiety', category: 'Anxiety Disorders' } }
-    ]);
   }, []); // Run only once on mount
 
   // Helper function to check if a node matches the search query
@@ -3081,11 +2255,10 @@ useEffect(() => {
         setTaskModal({ isOpen: false, data: null });
         setLiteratureModal({ isOpen: false, data: null });
         setShowNodeSelector(false);
-        setIsTemplateManagerOpen(false);
         
         // Clear search if no modals are open
         if (!caseModal.isOpen && !topicModal.isOpen && !taskModal.isOpen && 
-            !literatureModal.isOpen && !showNodeSelector && !isTemplateManagerOpen) {
+            !literatureModal.isOpen && !showNodeSelector) {
           // Search functionality removed
         }
       }
@@ -3093,7 +2266,7 @@ useEffect(() => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isEditing, applyForceLayout, caseModal, topicModal, taskModal, literatureModal, showNodeSelector, isTemplateManagerOpen]);
+  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal]);
 
   useEffect(() => {
     // DISABLED automatic force layout to prevent overriding individual node positions
@@ -3359,9 +2532,6 @@ useEffect(() => {
           <LoadingButton onClick={applyForceLayout} icon={Shuffle} className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm">
             Realign Nodes
           </LoadingButton>
-          <LoadingButton onClick={() => setIsTemplateManagerOpen(true)} icon={Bookmark} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">
-            Manage Templates
-          </LoadingButton>
           <LoadingButton 
             onClick={() => populateSampleLiteratureData(setMindMapData, autoSaveMindMapData, addToast)} 
             icon={BookOpen} 
@@ -3369,12 +2539,44 @@ useEffect(() => {
           >
             Add Sample Literature
           </LoadingButton>
-          <LoadingButton onClick={() => setIsEditing(!isEditing)} icon={isEditing ? Save : Edit3} className={`w-full px-4 py-2 rounded-md text-sm ${isEditing ? 'bg-teal-600' : 'bg-slate-600'}`}>
-            {isEditing ? 'Exit Edit Mode' : 'Edit Mind Map'}
-          </LoadingButton>
-          <LoadingButton onClick={() => setShowNodeSelector(true)} icon={Plus} className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
-            Add New Node
-          </LoadingButton>
+          
+          {/* Individual Node Creation Buttons */}
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Add Nodes</div>
+            <LoadingButton 
+              onClick={() => addNewNode('topic')} 
+              icon={Brain} 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <Brain size={16} />
+              Add Topic
+            </LoadingButton>
+            <LoadingButton 
+              onClick={() => addNewNode('case')} 
+              icon={Users} 
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <Users size={16} />
+              Add Case
+            </LoadingButton>
+            <LoadingButton 
+              onClick={() => addNewNode('task')} 
+              icon={CheckSquare} 
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <CheckSquare size={16} />
+              Add Task
+            </LoadingButton>
+            <LoadingButton 
+              onClick={() => addNewNode('literature')} 
+              icon={BookOpen} 
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <BookOpen size={16} />
+              Add Literature
+            </LoadingButton>
+          </div>
+          
           <LoadingButton onClick={handleClearMap} icon={Trash2} className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
             Clear All Data
           </LoadingButton>
@@ -3463,8 +2665,9 @@ useEffect(() => {
             onEdgeMouseLeave={onEdgeMouseLeave}
             nodeTypes={nodeTypes}
             edgeTypes={{ floating: FloatingEdge, enhanced: EnhancedEdge }}
+            connectionLineComponent={ConnectionLine}
             nodesDraggable={true}
-            nodesConnectable={isEditing}
+            nodesConnectable={true}
             elementsSelectable={true}
             onInit={(reactFlowInstance) => {
               setIsReactFlowReady(true);
@@ -3513,15 +2716,6 @@ useEffect(() => {
       </div>
       
       {/* --- Modals --- */}
-      {isTemplateManagerOpen && (
-        <TemplateManager
-          isOpen={isTemplateManagerOpen}
-          onClose={() => setIsTemplateManagerOpen(false)}
-          templates={templates}
-          setTemplates={setTemplates}
-        />
-      )}
-      
       {/* Literature Modal */}
       {literatureModal.isOpen && (
         <LiteratureModal
@@ -3542,74 +2736,6 @@ useEffect(() => {
           addToast={addToast}
         />
       )}
-      {showNodeSelector && (
-        <NodeSelector
-          isOpen={showNodeSelector}
-          onClose={() => setShowNodeSelector(false)}
-          onSelect={(nodeType, templateId) => {
-            setShowNodeSelector(false);
-            const dataId = Date.now();
-            const id = `${nodeType}-${dataId}`;
-            
-            // Create node data object with appropriate fields based on type
-            let nodeData = { id: dataId, label: `New ${nodeType}` };
-            
-            // For case nodes, add structured fields
-            if (nodeType === 'case') {
-              nodeData = {
-                ...nodeData,
-                chiefComplaint: '',
-                initialPresentation: '',
-                currentPresentation: '',
-                medicationHistory: '',
-                therapyProgress: '',
-                defensePatterns: '',
-                clinicalReflection: ''
-              };
-            }
-            
-            // Calculate grid-based position for new nodes to avoid clustering
-            // Use current data count instead of nodes.length for more accurate positioning
-            const currentDataCount = (mindMapData.topics?.length || 0) + 
-                                   (mindMapData.cases?.length || 0) + 
-                                   (mindMapData.tasks?.length || 0) + 
-                                   (mindMapData.literature?.length || 0);
-            
-            const gridSize = Math.ceil(Math.sqrt(currentDataCount + 1));
-            const nodeSpacing = 280;
-            const offsetX = 400; // Offset from left sidebar
-            const offsetY = 150; // Offset from top
-            
-            const gridPosition = {
-              x: (currentDataCount % gridSize) * nodeSpacing + offsetX,
-              y: Math.floor(currentDataCount / gridSize) * nodeSpacing + offsetY
-            };
-            
-            const newNode = {
-              id,
-              type: nodeType,
-              position: gridPosition,
-              data: { ...nodeData, onDelete: () => handleDeleteNode(id) }
-            };
-
-            setMindMapData(d => {
-              const key = nodeType === 'literature' ? 'literature' : `${nodeType}s`;
-              const dataToAdd = { ...newNode.data, position: newNode.position };
-              delete dataToAdd.onDelete;
-              const updatedData = {
-                ...d,
-                [key]: [...(d[key] || []), dataToAdd]
-              };
-              autoSaveMindMapData(updatedData);
-              return updatedData;
-            });
-
-            setNodes(n => n.concat(newNode));
-          }}
-          templates={templates}
-        />
-      )}
-
       {/* Specialized Modals with optimized rendering */}
       <AnimatePresence mode="wait">
         {caseModal.isOpen && (
