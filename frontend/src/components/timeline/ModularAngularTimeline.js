@@ -82,6 +82,18 @@ const TimelineHoverCard = ({
         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
       }}
       onClick={handleCardClick}
+      onMouseEnter={(e) => {
+        e.stopPropagation();
+        if (onCardHover) {
+          onCardHover();
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.stopPropagation();
+        if (onCardLeave) {
+          onCardLeave();
+        }
+      }}
     >
       {/* Connection line to node - more visible */}
       <div 
