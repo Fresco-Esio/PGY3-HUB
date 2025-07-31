@@ -1,75 +1,83 @@
 <analysis>
-The previous AI engineer meticulously developed and refined a complex interactive timeline feature for the PGY-3 HQ application's Case Node modal. Initially, the project established a React, FastAPI, and MongoDB stack, integrating a basic  component. The trajectory shows a strong focus on performance and dynamic user experience, transitioning from a basic zigzag layout to a D3.js-driven force-directed simulation, and later to an HTML Canvas rendering for performance. Significant architectural refactoring was undertaken in two phases: first, extracting monolithic node components from  and establishing a context-based state management, then modularizing the timeline and creating a unified modal system. Key challenges involved resolving D3 dependency issues, fixing prop mismatches post-refactoring, and iteratively refining D3 physics, animations, and card behaviors based on detailed user feedback. The current task revolves around finalizing animation behavior and integrating scroll functionality.
+The previous AI engineer effectively transformed the PGY-3 HQ application, focusing on a complex interactive timeline within the Case Node modal. The work evolved from fixing fundamental D3.js re-initialization and prop-mismatch issues to implementing sophisticated UI/UX features. Key achievements include a D3.js force-directed simulation with constrained zigzag structure, dynamic modal expansion, comprehensive card editing (click-to-edit, persist on hover, auto-save), and enhanced node creation. Significant effort was dedicated to debugging, refactoring, and iteratively addressing user feedback, including critical fixes for runtime errors (e.g.,  before initialization) and refining hover persistence. The trajectory concludes with a detailed review affirming all requested features are implemented.
 </analysis>
 
 <product_requirements>
-The primary objective is to redesign the Timeline tab within the Case Node modal of the PGY-3 HQ application. This feature requires a dynamic, editable vertical timeline displaying paired insights. Each timeline entry must be a hoverable node with two floating panels (Patient Narrative on left, Clinical Notes on right). Hovering expands previews; clicking expands fully into an editable mode (only one node editable at a time). An “+ Add Entry” button should add new nodes in edit mode, and double-clicking between nodes should insert new nodes with a pop-in effect. Nodes must be drag-and-drop reorderable, preserving , while maintaining a zigzag angular path. Cards should be anchored to node corners based on the bend (e.g., left bend: Patient Narrative connects bottom-right, Clinical Notes top-left; right bend: Patient Narrative top-right, Clinical Notes bottom-left) with subtle visual connections and float above the timeline. The timeline must feature D3.js-inspired force simulation for nodes (draggable, repellable, click-to-pin/unpin), smooth transitions (200-300ms) for interactions, and node-associated cards that appear only on hover (with a slight dismissal delay) and become editable on click (saving on click outside). The pop-in animation should only occur for *newly added* nodes. The timeline must also support scrolling when its length exceeds the modal height.
+The core requirement was to redesign the Timeline tab in the Case Node modal to be a dynamic, editable vertical timeline displaying paired insights. Each entry needed to be a hoverable node with two floating panels (Patient Narrative, Clinical Notes). Hovering should show previews, clicking should expand fully into an editable mode (one node editable at a time). Features included adding new entries, double-clicking to insert nodes with a pop-in effect for new nodes only, drag-and-drop reordering, maintaining a zigzag path, and card anchoring relative to node bends with subtle visual connections. D3.js force simulation was required for draggable, repellable nodes with click-to-pin/unpin functionality (later changed to editable on click). Smooth transitions (200-300ms) for interactions, cards appearing on hover (with dismissal delay), saving on click outside. The timeline must also support scrolling. Later requests included: animation not replaying on hover, minimalist scrollbar, no pin function, cards editable on node click. Subsequent feedback introduced requirements for: Case Node overall window editing, removal of Edit Map button and template features, node creation buttons on dashboard, ghost line for connection creation, rounded corners for nodes, removal of emergent ico. Further refinements demanded: cards align with nodes, view shifts for card visibility (auto-scroll), modal expands smoothly for timeline, cards persist on hover in edit mode, auto-save and switch to new node's cards on different node click, undo functionality, node delete on right-click, glowing highlight for editing node, debounced auto-save, and improved backend handling for timeline data.
 </product_requirements>
 
 <key_technical_concepts>
-- **React.js**: Frontend UI development, component architecture, Context API, Hooks.
+- **React.js**: Frontend UI, Context API, Hooks.
 - **FastAPI**: Python backend API for data persistence.
-- **MongoDB**: Database for timeline entry data storage.
-- **D3.js (d3-force, d3-drag, d3-scale, d3-scale-chromatic, d3-ease)**: Force-directed graph simulations, node interactions, data visualization.
-- **HTML Canvas / SVG**: Rendering D3.js visuals. Initial plan was canvas, but D3 physics implementation shifted back to SVG.
-- **Performance Optimization**: Component modularization, lazy loading, debouncing/throttling.
+- **MongoDB**: Database for timeline entries.
+- **D3.js (d3-force, d3-drag, d3-scale, d3-ease)**: Force-directed graphs, node interactions, data visualization.
+- **HTML Canvas / SVG**: Rendering D3.js visuals.
+- **Performance Optimization**: Modularization, memoization, debouncing.
 - **Tailwind CSS**: Styling framework.
 </key_technical_concepts>
 
 <code_architecture>
-The application utilizes a standard full-stack setup:
+The application uses a standard full-stack setup with React for the frontend, FastAPI for the backend, and MongoDB for data storage.
 
 
--   ****:
-    -   **Summary**: Main FastAPI application. Handles API endpoints for data persistence, implicitly supporting timeline entries.
-    -   **Changes**: No explicit changes mentioned, but its existence is crucial for data saving.
--   ****:
-    -   **Summary**: Manages frontend dependencies. Critical for D3.js libraries (, , , ).
-    -   **Changes**:  and ,  were explicitly added during the debugging phase.
--   ****:
-    -   **Summary**: The main application entry point. Previously monolithic, it contained all node component definitions.
-    -   **Changes**: Underwent significant refactoring to extract , , , and  into dedicated files in . Its size was reduced from 3,773 to 2,928 lines. Now imports node definitions from the new .
--   ****:
-    -   **Summary**: The modal where the timeline feature is integrated. It manages various tabs including Timeline.
-    -   **Changes**: Modified to render the  component when the Timeline tab is active. Later, updated to import and use the new  from . Required fixing prop mismatches ( to ,  to ).
--   ****:
-    -   **Summary**: The original timeline component.
-    -   **Changes**: Its functionality was progressively refactored and moved into the new  structure, although the file itself still exists in the old location. The  now imports  from the new structure.
--   ** (new directory)**:
-    -   **Summary**: Contains modularized React components for different node types.
-    -   **Changes**: , , ,  were extracted from . An  was created to export them.
--   ** (new file)**:
-    -   **Summary**: Centralizes mind map state management to reduce prop drilling.
-    -   **Changes**: Newly created to implement context-based state management.
--   ** (new file)**:
-    -   **Summary**: A custom hook for abstracting common mind map logic patterns.
-    -   **Changes**: Newly created to implement custom hooks.
--   ** (new directory)**:
-    -   **Summary**: Contains a new unified modal system.
-    -   **Changes**: , , , and  were created to standardize modal structure and reduce duplication.
--   ** (new directory)**:
-    -   **Summary**: Contains the completely refactored and modularized D3.js-based timeline component.
-    -   **Changes**:
-        -   ****: The new main timeline component (orchestrates others).
-        -   ****: Manages patient and clinician cards with hover-only loading and edit functionality.
-        -   ****: Handles individual node interactions and rendering.
-        -   ****: Encapsulates D3 force-directed graph simulation logic.
-        -   ****: Originally for canvas rendering, now implicitly part of the D3 SVG rendering.
-        -   ****: Manages timeline data operations and transformations.
-        -   ****: Contains utility functions like zigzag calculations and card positioning.
-        -   An  was created for exporting.
+
+- ****:
+    - **Summary**: Main FastAPI application handling API endpoints.
+    - **Changes**: Modified to better handle structured timeline data persistence as part of the mind map save structure.
+- ****:
+    - **Summary**: Manages frontend dependencies, including D3.js libraries.
+    - **Changes**: , ,  were explicitly added.
+- ****:
+    - **Summary**: Main application entry. Manages overall mind map state, node rendering, and sidebar controls.
+    - **Changes**: Extensively refactored to extract node components. The Edit Mind Map button was removed. The Add New Node wizard was replaced by individual node creation buttons (Add Topic, Add Case, Add Task, Add Literature). NodeSelector modal was completely removed.  always true.
+- ****:
+    - **Summary**: Global CSS file for styling.
+    - **Changes**: Added minimalist scrollbar styles ( and ) and CSS animation for the flowing dash ().
+- ****:
+    - **Summary**: The modal where the interactive timeline is integrated, along with other case details.
+    - **Changes**: Updated to use . Refactored to make the Overview tab editable, handling basic case properties like label. Implemented dynamic modal expansion ( to ) with smooth transitions when the Timeline tab is active. Memoized  to prevent unnecessary timeline re-renders. Added Escape key handling to close the modal. Implemented a  function for auto-saving timeline data.
+- ****:
+    - **Summary**: Original timeline component, largely replaced by .
+    - **Changes**: Its functionality has been migrated, but the file remains.
+- ****:
+    - **Summary**: Directory for modularized node components.
+    - **Changes**:  drop shadow issue fixed, ensuring proper rounded corners.  now dynamically updates its label based on the case name in the modal.
+- ****:
+    - **Summary**: Centralizes mind map state management.
+    - **Changes**: Newly created to support context-based state.
+- ****:
+    - **Summary**: Unified modal system.
+    - **Changes**: , ,  were created to standardize modal structure.
+- ** (new directory)**:
+    - **Summary**: Contains the primary refactored D3.js timeline component.
+    - **Changes**:
+        - ****: The main timeline component. D3 force simulation was redesigned to use  with strong position constraints to maintain a zigzag structure. Enhanced click handling to make both patient and clinical cards editable. Implemented auto-scroll to ensure cards are always visible. Added 10-level undo system, right-click delete context menu, and keyboard navigation (Tab between cards). Visual glowing highlight for the currently editing node. Improved card positioning calculation for better alignment and persistence on hover.
+        - ****: Manages patient and clinician cards. Updated to handle new hover logic (preventing dismissal) and receive enhanced props for editing.
+        - ****: Encapsulates D3 force-directed graph simulation. Updated to reflect new constraint-based physics.
+- ****:
+    - **Summary**: Custom component for rendering ReactFlow connections.
+    - **Changes**: Used to provide the ghost/preview image for connection creation, which appears as a dotted line following the cursor.
+- ****:
+    - **Summary**: Previously managed node templates.
+    - **Changes**: Completely removed as per user request to remove template features.
+- ****:
+    - **Summary**: Main HTML file.
+    - **Changes**: Removed the emergent branding icon.
 </code_architecture>
 
 <pending_tasks>
-- Debug and fix the issue where nodes reset position and animation replays on hover.
-- Ensure the save deferring function does not cause node instability.
-- Integrate scroll functionality for the timeline when it extends beyond the modal's length.
+The explicit pending tasks identified at the start of the trajectory (animation replay issue, save deferring instability, scroll integration) have all been addressed through subsequent development work and user feedback. As of the end of the trajectory, all user-requested features and fixes are claimed to be implemented and working.
 </pending_tasks>
 
 <current_work>
-The immediate previous work involved debugging and attempting to fix persistent issues with the D3 physics timeline despite significant refactoring and prior fixes. Specifically, the user reported that On hover, the node positions are resetting then the animation is playing again and that The pop-in animation for new nodes causes all of the nodes to replay their animation, but that is not what we wanted. The AI engineer identified the root cause as the D3 simulation being re-initialized on every state change, likely exacerbated by the save deferring function causing re-renders, and is currently working on preventing this. Additionally, the user explicitly requested a scroll feature for the timeline when its content exceeds the modal's visible area. The AI engineer has made initial edits to address the animation and node resetting, and has just begun implementing the scroll functionality by creating new directories or modifying existing files to support this feature. The last action was an  command to add scroll functionality.
+Immediately prior to this summary request, the AI engineer successfully addressed the user's explicit request to ensure timeline cards persist when the mouse is hovering over them, preventing them from disappearing mid-interaction. This involved:
+1.  **Enhanced Hover Handler Logic**: Modifying  to extend the hover delay (from 150ms to 200ms) and adding separate  and  functions.
+2.  **Card Mouse Event Integration**: Implementing  and  directly on the card components ( and within ) to clear pending hide timers and control event propagation.
+3.  **Timeline Card Component Updates**: Passing new hover handlers as props to ensure consistent behavior for both preview and editing cards.
+
+The AI engineer confirmed Card Hover Persistence - IMPLEMENTED SUCCESSFULLY based on testing. The very last action performed was providing a comprehensive review of the entire program, including architecture, feature implementations, UX improvements, and current functionality status, in response to the user's request for an in depth review.
 </current_work>
 
 <optional_next_step>
-Complete the implementation of scroll functionality for the timeline within the modal.
+The last explicit development task (card hover persistence) was successfully implemented. The last user request was for a detailed review, which has been provided. There are no immediate development steps explicitly requested by the user.
 </optional_next_step>
