@@ -36,7 +36,8 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      sandbox: false // Allow preload script access
     },
     show: false, // Don't show until ready
     titleBarStyle: 'default',
