@@ -181,23 +181,36 @@ function startBackend() {
       ? path.join(process.resourcesPath, 'app', 'backend')
       : path.join(__dirname, '../../backend');
     
-    const pythonScript = path.join(backendPath, 'server.py');
-    
     console.log('Backend path:', backendPath);
-    console.log('Python script:', pythonScript);
+    console.log('Is packaged:', isPackaged);
     
     try {
-      // Try to start Python backend
-      const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-      backendProcess = spawn(pythonCmd, ['-m', 'uvicorn', 'server:app', '--port', '8001'], {
-        cwd: backendPath,
-        stdio: 'pipe',
-        shell: true
-      });
+      // Try to start packaged Python backend executable first
+      const backendExe = path.join(backendPath, 'pgy3-hub-backend.exe');
+      
+      if (require('fs').existsSync(backendExe)) {
+        console.log('Starting packaged Python backend:', backendExe);
+        backendProcess = spawn(backendExe, ['--port', '8001'], {
+          cwd: backendPath,
+          stdio: 'pipe',
+          shell: false
+        });
+      } else {
+        // Fallback to uvicorn if packaged executable not found
+        const pythonScript = path.join(backendPath, 'server.py');
+        console.log('Starting Python backend with uvicorn:', pythonScript);
+        
+        const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+        backendProcess = spawn(pythonCmd, ['-m', 'uvicorn', 'server:app', '--host', '127.0.0.1', '--port', '8001'], {
+          cwd: backendPath,
+          stdio: 'pipe',
+          shell: true
+        });
+      }
 
       backendProcess.on('error', (err) => {
         console.log('Failed to start Python backend:', err);
-        // Could fallback to Node.js backend here
+        // Fallback to Node.js backend
         tryNodeBackend(backendPath);
       });
 
@@ -208,6 +221,12 @@ function startBackend() {
       backendProcess.stderr.on('data', (data) => {
         console.log(`Backend Error: ${data}`);
       });
+
+      // Give backend time to start
+      setTimeout(() => {
+        console.log('Backend should be running on http://127.0.0.1:8001');
+      }, 2000);
+
     } catch (error) {
       console.log('Could not start backend:', error);
       tryNodeBackend(backendPath);
