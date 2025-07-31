@@ -18,7 +18,9 @@ const TimelineHoverCard = ({
   isEditing,
   onEdit,
   onSave,
-  onCancel
+  onCancel,
+  onCardHover,
+  onCardLeave
 }) => {
   const [editContent, setEditContent] = useState('');
   const cardRef = useRef(null);
