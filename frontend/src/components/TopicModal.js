@@ -154,7 +154,8 @@ const TopicModal = ({
   autoSaveMindMapData,
   addToast,
   syncNodeData,
-  forceNodeUpdate
+  forceNodeUpdate,
+  customColors
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -179,8 +180,8 @@ const TopicModal = ({
   const [newResource, setNewResource] = useState('');
   const [showResourceForm, setShowResourceForm] = useState(false);
 
-  // Category color mapping
-  const categoryColors = {
+  // Category color mapping - use custom colors if provided, otherwise fallback to defaults
+  const categoryColors = customColors || {
     'Mood Disorders': { primary: '#ef4444', secondary: '#fca5a5' }, // red
     'Anxiety Disorders': { primary: '#f59e0b', secondary: '#fbbf24' }, // amber
     'Psychotic Disorders': { primary: '#8b5cf6', secondary: '#c4b5fd' }, // violet

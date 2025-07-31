@@ -114,7 +114,8 @@ const LiteratureModal = ({
   autoSaveMindMapData,
   addToast,
   onAnimationStart,
-  onAnimationEnd
+  onAnimationEnd,
+  customColors
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,6 +124,9 @@ const LiteratureModal = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Custom color utility for literature nodes
+  const literatureColor = customColors || '#8b5cf6'; // Default to purple-500 if no custom color
   
   // Editable form data
   const [formData, setFormData] = useState({

@@ -47,12 +47,33 @@ Use subtle animation to provide context without distraction:
 
 ### Color Palette
 
-| Semantic Group | Role                     | Suggested Hue       |
-|----------------|--------------------------|---------------------|
-| **Case**       | Core clinical info       | Cool Slate Blue     |
-| **Topic**      | Conceptual hubs          | Soft Emerald Green  |
-| **Literature** | Academic references      | Deep Plum           |
-| **Task**       | Action items             | Golden Ochre        |
+| Node Type      | Primary Color    | Hex Code   | Tailwind Class | Visual Description |
+|----------------|------------------|------------|----------------|-------------------|
+| **Case**       | Indigo Blue      | `#4F46E5`  | `bg-indigo-600` | Medical chart blue |
+| **Topic**      | Dynamic Category | Variable   | `bg-blue-600` (default) | Category-specific colors |
+| **Literature** | Purple           | `#7C3AED`  | `bg-purple-600` | Academic purple |
+| **Task**       | Amber            | `#D97706`  | `bg-amber-600` | Action amber |
+
+#### Topic Category Colors
+- **Mood Disorders**: Red (`#ef4444`)
+- **Anxiety Disorders**: Amber (`#f59e0b`)
+- **Psychotic Disorders**: Violet (`#8b5cf6`)
+- **Personality Disorders**: Emerald (`#10b981`)
+- **Neurodevelopmental**: Blue (`#3b82f6`)
+- **Trauma Related**: Red-600 (`#dc2626`)
+- **Substance Use**: Emerald-600 (`#059669`)
+- **Eating Disorders**: Fuchsia (`#d946ef`)
+- **Sleep Disorders**: Indigo (`#6366f1`)
+- **Cognitive Disorders**: Orange-600 (`#ea580c`)
+- **Other**: Gray (`#6b7280`)
+
+#### Task Status Colors
+- **Pending**: Yellow (`bg-yellow-500`)
+- **In Progress**: Blue (`bg-blue-600`)
+- **Completed**: Green (`bg-green-700`)
+
+#### UI Color Palette
+Available colors for user selection: `#3B82F6`, `#EF4444`, `#10B981`, `#F59E0B`, `#8B5CF6`, `#EC4899`
 
 - Background: `#F7F9FC` or soft off-white
 - Accent: Limited use of bright colors (e.g., orange for overdue)

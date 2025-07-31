@@ -115,7 +115,8 @@ const TaskModal = ({
   onAnimationEnd,
   setMindMapData,
   autoSaveMindMapData,
-  addToast
+  addToast,
+  customColors
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -126,6 +127,9 @@ const TaskModal = ({
   const [hasInitialized, setHasInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+
+  // Custom color utility for task nodes
+  const taskColor = customColors || '#10b981'; // Default to green-500 if no custom color
 
   useEffect(() => {
     if (isOpen && data && !hasInitialized) {

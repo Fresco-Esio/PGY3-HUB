@@ -1,4 +1,12 @@
 {
+  "name": "pgy3-hub-dev",
+  "version": "1.0.0",
+  "description": "Development environment for PGY3-HUB mind mapping tool for psychiatry residents",
+  "scripts": {
+    "dev": "echo 'Use quick-start scripts for development'",
+    "quick-start": "echo 'Run quick-start.bat (Windows) or quick-start.sh (Linux/Mac)'",
+    "test": "echo 'Tests are in frontend and backend directories'"
+  },
   "dependencies": {
     "d3-force": "^3.0.0"
   },

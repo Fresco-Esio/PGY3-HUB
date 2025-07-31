@@ -157,7 +157,8 @@ const CaseModal = ({
   onAnimationEnd,
   setMindMapData,
   autoSaveMindMapData,
-  addToast
+  addToast,
+  customColors
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -179,6 +180,9 @@ const CaseModal = ({
   // Form states for different tabs
   const [newMedication, setNewMedication] = useState({ name: '', dosage: '', frequency: '', effect: '' });
   const [showMedicationForm, setShowMedicationForm] = useState(false);
+
+  // Custom color utility for case nodes
+  const caseColor = customColors || '#3b82f6'; // Default to blue-500 if no custom color
 
   useEffect(() => {
     if (isOpen && data && !hasInitialized) {
@@ -803,7 +807,10 @@ const CaseModal = ({
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => toggleEditSection('basic_info')}
-                          className="text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-slate-700/50"
+                          className="transition-colors p-2 rounded-lg hover:bg-slate-700/50"
+                          style={{ color: caseColor }}
+                          onMouseEnter={(e) => e.target.style.color = `${caseColor}cc`}
+                          onMouseLeave={(e) => e.target.style.color = caseColor}
                           title="Edit case information"
                         >
                           <Edit3 size={16} />

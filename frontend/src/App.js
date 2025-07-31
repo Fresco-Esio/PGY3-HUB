@@ -62,7 +62,9 @@ import {
   Paperclip,
   ChevronDown,
   ChevronUp,
-  ArrowDown
+  ArrowDown,
+  Palette,
+  RotateCcw
 } from 'lucide-react';
 
 // Lazy load components for better initial load time
@@ -1053,6 +1055,30 @@ const DashboardComponent = () => {
     task: false,
     literature: false
   });
+  
+  // Settings state
+  const [showSettings, setShowSettings] = useState(false);
+  const [customColors, setCustomColors] = useState({
+    categoryColors: {
+      'Mood Disorders': { primary: '#ef4444', secondary: '#fca5a5' },
+      'Anxiety Disorders': { primary: '#f59e0b', secondary: '#fbbf24' },
+      'Psychotic Disorders': { primary: '#8b5cf6', secondary: '#c4b5fd' },
+      'Personality Disorders': { primary: '#10b981', secondary: '#6ee7b7' },
+      'Neurodevelopmental Disorders': { primary: '#3b82f6', secondary: '#93c5fd' },
+      'Trauma Related Disorders': { primary: '#dc2626', secondary: '#f87171' },
+      'Substance Use Disorders': { primary: '#059669', secondary: '#34d399' },
+      'Eating Disorders': { primary: '#d946ef', secondary: '#e879f9' },
+      'Sleep Disorders': { primary: '#6366f1', secondary: '#a5b4fc' },
+      'Cognitive Disorders': { primary: '#ea580c', secondary: '#fb923c' },
+      'Other': { primary: '#6b7280', secondary: '#9ca3af' }
+    },
+    nodeTypeColors: {
+      case: '#4F46E5',
+      task: '#D97706',
+      literature: '#7C3AED'
+    }
+  });
+
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
@@ -1063,6 +1089,7 @@ const DashboardComponent = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
+  // Auto-save functions
   const autoSaveMindMapData = useCallback((data) => {
     // Enhanced animation and modal state checking
     const anyModalOpen = caseModal.isOpen || topicModal.isOpen || taskModal.isOpen || literatureModal.isOpen;
@@ -1129,6 +1156,114 @@ const DashboardComponent = () => {
       autoSaveMindMapData(data);
     }, 800); // 800ms delay to batch multiple position changes
   }, [isAnimating, modalAnimationStates, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen, autoSaveMindMapData]);
+
+  // Color management functions
+  const updateCategoryColor = useCallback((category, color) => {
+    setCustomColors(prev => ({
+      ...prev,
+      categoryColors: {
+        ...prev.categoryColors,
+        [category]: {
+          ...prev.categoryColors[category],
+          primary: color
+        }
+      }
+    }));
+
+    // Update any existing topic nodes with this category
+    setMindMapData(prevData => {
+      const updatedTopics = prevData.topics.map(topic =>
+        topic.category === category
+          ? { ...topic, color: color, last_updated: new Date().toISOString() }
+          : topic
+      );
+      const newData = { ...prevData, topics: updatedTopics };
+      autoSaveMindMapData(newData);
+      return newData;
+    });
+
+    // Save to localStorage
+    localStorage.setItem('pgy3-hub-custom-colors', JSON.stringify({
+      ...customColors,
+      categoryColors: {
+        ...customColors.categoryColors,
+        [category]: { ...customColors.categoryColors[category], primary: color }
+      }
+    }));
+
+    addToast(`Updated ${category} color`, 'success', 2000);
+  }, [customColors, setMindMapData, autoSaveMindMapData, addToast]);
+
+  const updateNodeTypeColor = useCallback((nodeType, color) => {
+    setCustomColors(prev => ({
+      ...prev,
+      nodeTypeColors: {
+        ...prev.nodeTypeColors,
+        [nodeType]: color
+      }
+    }));
+
+    // Save to localStorage
+    localStorage.setItem('pgy3-hub-custom-colors', JSON.stringify({
+      ...customColors,
+      nodeTypeColors: { ...customColors.nodeTypeColors, [nodeType]: color }
+    }));
+
+    addToast(`Updated ${nodeType} node color`, 'success', 2000);
+  }, [customColors, addToast]);
+
+  const resetColorsToDefault = useCallback(() => {
+    const defaultColors = {
+      categoryColors: {
+        'Mood Disorders': { primary: '#ef4444', secondary: '#fca5a5' },
+        'Anxiety Disorders': { primary: '#f59e0b', secondary: '#fbbf24' },
+        'Psychotic Disorders': { primary: '#8b5cf6', secondary: '#c4b5fd' },
+        'Personality Disorders': { primary: '#10b981', secondary: '#6ee7b7' },
+        'Neurodevelopmental Disorders': { primary: '#3b82f6', secondary: '#93c5fd' },
+        'Trauma Related Disorders': { primary: '#dc2626', secondary: '#f87171' },
+        'Substance Use Disorders': { primary: '#059669', secondary: '#34d399' },
+        'Eating Disorders': { primary: '#d946ef', secondary: '#e879f9' },
+        'Sleep Disorders': { primary: '#6366f1', secondary: '#a5b4fc' },
+        'Cognitive Disorders': { primary: '#ea580c', secondary: '#fb923c' },
+        'Other': { primary: '#6b7280', secondary: '#9ca3af' }
+      },
+      nodeTypeColors: {
+        case: '#4F46E5',
+        task: '#D97706',
+        literature: '#7C3AED'
+      }
+    };
+
+    setCustomColors(defaultColors);
+    localStorage.setItem('pgy3-hub-custom-colors', JSON.stringify(defaultColors));
+    
+    // Update existing nodes with default colors
+    setMindMapData(prevData => {
+      const updatedTopics = prevData.topics.map(topic => ({
+        ...topic,
+        color: defaultColors.categoryColors[topic.category]?.primary || defaultColors.categoryColors.Other.primary,
+        last_updated: new Date().toISOString()
+      }));
+      const newData = { ...prevData, topics: updatedTopics };
+      autoSaveMindMapData(newData);
+      return newData;
+    });
+
+    addToast('Reset all colors to defaults', 'success', 2000);
+  }, [setMindMapData, autoSaveMindMapData, addToast]);
+
+  // Load custom colors from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('pgy3-hub-custom-colors');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setCustomColors(parsed);
+      } catch (error) {
+        console.error('Failed to parse saved colors:', error);
+      }
+    }
+  }, []);
 
   // Stable data effects to prevent modal re-renders during auto-save
   useEffect(() => {
@@ -2582,6 +2717,94 @@ useEffect(() => {
           </LoadingButton>
         </div>
 
+        {/* --- Settings Section --- */}
+        <div className="mb-4">
+          <button 
+            onClick={() => setShowSettings(!showSettings)} 
+            className={`w-full px-4 py-2 rounded-md text-sm transition-all flex items-center gap-2 ${
+              showSettings 
+                ? 'bg-slate-600 text-white' 
+                : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+            }`}
+          >
+            <Settings size={16} />
+            Appearance Settings
+            <ChevronDown size={14} className={`ml-auto transform transition-transform ${showSettings ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {/* --- Settings Panel --- */}
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="mb-4 overflow-hidden"
+            >
+              <div className="p-4 bg-slate-700 bg-opacity-50 rounded-lg space-y-4">
+                <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                  <Palette size={14} />
+                  Node Colors
+                </h3>
+                
+                {/* Topic Category Colors */}
+                <div className="space-y-2">
+                  <label className="text-xs text-slate-400 font-medium">Topic Categories</label>
+                  <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-slate-700">
+                    {Object.entries(customColors.categoryColors).map(([category, colors]) => (
+                      <div key={category} className="group">
+                        <input
+                          type="color"
+                          value={colors.primary}
+                          onChange={(e) => updateCategoryColor(category, e.target.value)}
+                          className="w-full h-8 rounded border-2 border-slate-600 cursor-pointer hover:border-slate-500 transition-colors"
+                          title={category}
+                        />
+                        <span className="text-xs text-slate-400 mt-1 block truncate" title={category}>
+                          {category.replace(/([A-Z])/g, ' $1').trim()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Node Type Default Colors */}
+                <div className="space-y-2">
+                  <label className="text-xs text-slate-400 font-medium">Default Node Colors</label>
+                  <div className="space-y-2">
+                    {[
+                      { type: 'case', label: 'Case Nodes', current: customColors.nodeTypeColors.case },
+                      { type: 'task', label: 'Task Nodes', current: customColors.nodeTypeColors.task },
+                      { type: 'literature', label: 'Literature Nodes', current: customColors.nodeTypeColors.literature }
+                    ].map(({ type, label, current }) => (
+                      <div key={type} className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={current}
+                          onChange={(e) => updateNodeTypeColor(type, e.target.value)}
+                          className="w-8 h-8 rounded border-2 border-slate-600 cursor-pointer"
+                        />
+                        <span className="text-xs text-slate-300">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Reset Button */}
+                <button
+                  onClick={resetColorsToDefault}
+                  className="w-full px-3 py-2 bg-slate-600 hover:bg-slate-500 text-slate-300 hover:text-white text-xs rounded transition-all flex items-center gap-2 justify-center"
+                >
+                  <RotateCcw size={12} />
+                  Reset to Defaults
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* --- Selected Node Panel --- */}
         {selectedNode && (
           <div className="mt-auto p-4 bg-slate-700 bg-opacity-50 rounded-lg">
@@ -2685,16 +2908,15 @@ useEffect(() => {
             snapToGrid={false}
             snapGrid={[15, 15]}
             elevateEdgesOnSelect={false}
-            connectionLineComponent={ConnectionLine}
-          connectionLineStyle={{
-            stroke: '#3b82f6', // Use a bright blue color for better visibility during connection
-            strokeWidth: 3.5, // Slightly thicker than regular edges
-            opacity: 0.9,
-            strokeLinecap: 'round',
-            strokeDasharray: '5,3', // Shorter dash pattern for more modern look
-            filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))', // Softer glow
-            animation: 'flowingDash 1s linear infinite' // Add flowing animation
-          }}
+            connectionLineStyle={{
+              stroke: '#3b82f6', // Use a bright blue color for better visibility during connection
+              strokeWidth: 3.5, // Slightly thicker than regular edges
+              opacity: 0.9,
+              strokeLinecap: 'round',
+              strokeDasharray: '5,3', // Shorter dash pattern for more modern look
+              filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))', // Softer glow
+              animation: 'flowingDash 1s linear infinite' // Add flowing animation
+            }}
           defaultEdgeOptions={{
             type: 'enhanced', // Use our enhanced edge with proper prop handling
             style: { 
@@ -2734,6 +2956,7 @@ useEffect(() => {
           setMindMapData={setMindMapData}
           autoSaveMindMapData={autoSaveMindMapData}
           addToast={addToast}
+          customColors={customColors.nodeTypeColors.literature}
         />
       )}
       {/* Specialized Modals with optimized rendering */}
@@ -2758,6 +2981,7 @@ useEffect(() => {
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
+            customColors={customColors.nodeTypeColors.case}
           />
         )}
       </AnimatePresence>
@@ -2785,6 +3009,7 @@ useEffect(() => {
             addToast={addToast}
             syncNodeData={syncNodeData}
             forceNodeUpdate={() => setNodeUpdateTrigger(prev => prev + 1)}
+            customColors={customColors.categoryColors}
           />
         )}
       </AnimatePresence>
@@ -2810,6 +3035,7 @@ useEffect(() => {
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
+            customColors={customColors.nodeTypeColors.task}
           />
         )}
       </AnimatePresence>
