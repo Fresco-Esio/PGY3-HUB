@@ -199,6 +199,31 @@
       "last_updated": null,
       "created_at": "2025-08-04T00:24:00.106000+00:00",
       "updated_at": "2025-08-04T00:26:56.017000+00:00"
+    },
+    {
+      "id": "f1aaeed6-ce6e-406d-add5-4d1b51d55580",
+      "title": "Test Anxiety Disorder",
+      "description": "Test topic for API validation",
+      "category": "Anxiety Disorders",
+      "color": "#10B981",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": "This is a test topic created by automated testing",
+      "tags": "test,api,anxiety",
+      "definition": null,
+      "diagnostic_criteria": [],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-08-04T00:29:24.429417",
+      "updated_at": "2025-08-04T00:29:24.429418"
     }
   ],
   "cases": [
@@ -391,6 +416,39 @@
       "timeline": [],
       "created_at": "2025-08-04T00:24:27.328000+00:00",
       "updated_at": "2025-08-04T00:26:56.017000+00:00"
+    },
+    {
+      "id": "a06c928f-7224-42b7-bdf0-3ba7eb00e4f0",
+      "case_id": "TEST-CASE-20250804-002924",
+      "encounter_date": "2025-08-04T00:29:24.408839+00:00",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Generalized Anxiety Disorder"
+      ],
+      "age": 28,
+      "gender": "Female",
+      "chief_complaint": "Feeling depressed and anxious for the past month",
+      "initial_presentation": "Patient presented with low mood and worry",
+      "current_presentation": "Symptoms have improved with treatment",
+      "medication_history": "Started on sertraline 50mg",
+      "therapy_progress": "Engaged in CBT sessions",
+      "defense_patterns": "Intellectualization, avoidance",
+      "clinical_reflection": "Good therapeutic alliance established",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeline": [],
+      "created_at": "2025-08-04T00:29:24.429484",
+      "updated_at": "2025-08-04T00:29:24.429485"
     }
   ],
   "tasks": [
@@ -427,6 +485,23 @@
       },
       "created_at": "2025-08-04T00:24:27.328000+00:00",
       "updated_at": "2025-08-04T00:26:56.017000+00:00"
+    },
+    {
+      "id": "a6ab6c5c-cf87-4202-b383-99ebfc6095bd",
+      "title": "Review Test Case Documentation",
+      "description": "Complete documentation review for test case",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2025-08-04T00:29:24.408853+00:00",
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": "This is a test task for API validation",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "created_at": "2025-08-04T00:29:24.429509",
+      "updated_at": "2025-08-04T00:29:24.429510"
     }
   ],
   "literature": [
@@ -465,6 +540,24 @@
       },
       "created_at": "2025-08-04T00:24:27.328000+00:00",
       "updated_at": "2025-08-04T00:26:56.017000+00:00"
+    },
+    {
+      "id": "9040406e-6a22-4835-9a0d-c2fcf0bc894a",
+      "title": "Test Study on Depression Treatment",
+      "authors": "Smith, J., Johnson, A.",
+      "publication": "Journal of Test Psychiatry",
+      "year": 2024,
+      "doi": "10.1000/test.doi.123",
+      "abstract": "This is a test abstract for API validation purposes",
+      "notes": "Test literature entry for automated testing",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "created_at": "2025-08-04T00:29:24.429535",
+      "updated_at": "2025-08-04T00:29:24.429535"
     }
   ],
   "connections": [
