@@ -438,10 +438,11 @@ const D3PhysicsTimeline = ({
     }
   }, [entries, onEntryAdd]);
 
-  // Enhanced hover handling with card persistence
+  // Enhanced hover handling with card persistence - Fixed to prevent disappearing cards
   const handleNodeHover = useCallback((nodeId) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
     }
     // Set immediately without delay for more responsive hover
     setHoveredNode(nodeId);
@@ -453,18 +454,22 @@ const D3PhysicsTimeline = ({
       return;
     }
     
-    // Use a delay to allow moving from node to cards
+    // Use a longer delay to allow moving from node to cards
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredNode(null);
-    }, 200); // Increased delay for moving between node and cards
+    }, 300); // Increased delay for smoother transition to cards
   }, [editingCard]);
 
   // Handle card hover - keep cards visible when hovering over them
   const handleCardHover = useCallback(() => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
     }
-    // Cards stay visible when hovering over them
+    // Cards stay visible when hovering over them - no timeout needed
   }, []);
 
   const handleCardLeave = useCallback(() => {
@@ -473,10 +478,13 @@ const D3PhysicsTimeline = ({
       return;
     }
     
-    // Use a delay to allow moving between cards or back to node
+    // Use a longer delay to allow moving between cards or back to node
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredNode(null);
-    }, 200);
+    }, 300); // Increased delay for smoother transitions
   }, [editingCard]);
 
   // Auto-scroll to ensure cards are visible
