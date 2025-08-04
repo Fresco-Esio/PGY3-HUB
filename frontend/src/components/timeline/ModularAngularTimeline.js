@@ -882,6 +882,10 @@ const D3PhysicsTimeline = ({
       if (simulationRef.current) {
         simulationRef.current.stop();
       }
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
+      }
     };
   }, []);
 
