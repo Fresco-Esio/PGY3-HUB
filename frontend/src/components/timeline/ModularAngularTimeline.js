@@ -95,13 +95,49 @@ const TimelineHoverCard = ({
         }
       }}
     >
+      {/* Invisible hover bridge to prevent gaps between node and card */}
+      <div 
+        className="absolute bg-transparent pointer-events-auto"
+        style={{
+          [position.anchorSide]: '-20px',
+          [position.anchorPosition]: '0px',
+          width: position.anchorSide === 'left' ? '22px' : '22px',
+          height: '100%',
+          zIndex: -1
+        }}
+        onMouseEnter={(e) => {
+          e.stopPropagation();
+          if (onCardHover) {
+            onCardHover();
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.stopPropagation();
+          if (onCardLeave) {
+            onCardLeave();
+          }
+        }}
+      />
+      
       {/* Connection line to node - more visible */}
       <div 
-        className={`absolute w-1 h-8 ${type === 'patient' ? 'bg-green-400' : 'bg-blue-400'} shadow-lg`}
+        className={`absolute w-1 h-8 ${type === 'patient' ? 'bg-green-400' : 'bg-blue-400'} shadow-lg pointer-events-auto`}
         style={{
           [position.anchorSide]: '-2px',
           [position.anchorPosition]: '16px',
           boxShadow: `0 0 8px ${type === 'patient' ? '#34d399' : '#60a5fa'}`
+        }}
+        onMouseEnter={(e) => {
+          e.stopPropagation();
+          if (onCardHover) {
+            onCardHover();
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.stopPropagation();
+          if (onCardLeave) {
+            onCardLeave();
+          }
         }}
       />
 
