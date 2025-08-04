@@ -299,6 +299,31 @@
       "last_updated": null,
       "created_at": "2025-08-04T00:49:54.542448",
       "updated_at": "2025-08-04T00:51:51.898000+00:00"
+    },
+    {
+      "id": "baabc68f-ca37-44ab-8351-aff932341c59",
+      "title": "Test Anxiety Disorder",
+      "description": "Test topic for API validation",
+      "category": "Anxiety Disorders",
+      "color": "#10B981",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": "This is a test topic created by automated testing",
+      "tags": "test,api,anxiety",
+      "definition": null,
+      "diagnostic_criteria": [],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-08-04T01:14:31.837775",
+      "updated_at": "2025-08-04T01:14:31.837777"
     }
   ],
   "cases": [
@@ -339,7 +364,12 @@
           "type": "assessment",
           "patient_narrative": "Patient reports feeling hopeless and unable to get out of bed for the past 3 months. She describes overwhelming sadness that started after losing her job. Has difficulty sleeping and has withdrawn from friends and family.",
           "clinical_notes": "PHQ-9 score: 18 (severe depression). MSE: Depressed mood, congruent affect, no psychosis. Denies SI/HI currently but reports passive thoughts of death. Good insight and judgment. Started on sertraline 50mg daily.",
-          "symptoms": ["depressed mood", "anhedonia", "sleep disturbance", "social withdrawal"]
+          "symptoms": [
+            "depressed mood",
+            "anhedonia",
+            "sleep disturbance",
+            "social withdrawal"
+          ]
         },
         {
           "id": "timeline-2",
@@ -348,7 +378,12 @@
           "type": "follow_up",
           "patient_narrative": "Patient reports some improvement in sleep - able to fall asleep easier but still waking early. Mood remains low but noticed she was able to enjoy watching a movie with her sister over the weekend. Still finds it hard to motivate for daily activities.",
           "clinical_notes": "PHQ-9 score: 15 (moderate-severe). Sertraline appears to be helping with sleep onset. Some early signs of improvement in anhedonia. Increased dose to 75mg daily. Discussed CBT referral - patient interested.",
-          "symptoms": ["improved sleep onset", "early morning awakening", "mild improvement in anhedonia", "low motivation"]
+          "symptoms": [
+            "improved sleep onset",
+            "early morning awakening",
+            "mild improvement in anhedonia",
+            "low motivation"
+          ]
         },
         {
           "id": "timeline-3",
@@ -357,7 +392,12 @@
           "type": "follow_up",
           "patient_narrative": "Patient reports feeling 'a bit more like myself.' Started going for short walks in the morning and was able to meet a friend for coffee last week - first social outing in months. Still struggles with energy and concentration at times.",
           "clinical_notes": "PHQ-9 score: 12 (moderate). Significant improvement noted. Sleep pattern normalizing. Started CBT sessions 2 weeks ago - good engagement. Maintaining sertraline 75mg. Discussed gradual return to work activities.",
-          "symptoms": ["improved mood", "increased social activity", "better sleep pattern", "mild concentration issues"]
+          "symptoms": [
+            "improved mood",
+            "increased social activity",
+            "better sleep pattern",
+            "mild concentration issues"
+          ]
         },
         {
           "id": "timeline-4",
@@ -366,7 +406,12 @@
           "type": "review",
           "patient_narrative": "Patient reports significant improvement overall. Back to work part-time and managing well. Feels more optimistic about the future and has been maintaining regular exercise routine. Occasional low days but much more manageable.",
           "clinical_notes": "PHQ-9 score: 7 (mild). Excellent response to treatment. CBT skills being utilized effectively. Patient demonstrates good understanding of relapse prevention strategies. Plan to continue current regimen and monitor.",
-          "symptoms": ["stable mood", "good functional improvement", "occasional mild low mood", "good coping strategies"]
+          "symptoms": [
+            "stable mood",
+            "good functional improvement",
+            "occasional mild low mood",
+            "good coping strategies"
+          ]
         }
       ],
       "created_at": "2025-07-24T22:56:01.406000+00:00",
@@ -625,6 +670,39 @@
       "timeline": [],
       "created_at": "2025-08-04T00:49:54.542522",
       "updated_at": "2025-08-04T00:51:51.898000+00:00"
+    },
+    {
+      "id": "bb39dbdb-1f34-43ed-94d9-9d4b60a51ff3",
+      "case_id": "TEST-CASE-20250804-011431",
+      "encounter_date": "2025-08-04T01:14:31.820470+00:00",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Generalized Anxiety Disorder"
+      ],
+      "age": 28,
+      "gender": "Female",
+      "chief_complaint": "Feeling depressed and anxious for the past month",
+      "initial_presentation": "Patient presented with low mood and worry",
+      "current_presentation": "Symptoms have improved with treatment",
+      "medication_history": "Started on sertraline 50mg",
+      "therapy_progress": "Engaged in CBT sessions",
+      "defense_patterns": "Intellectualization, avoidance",
+      "clinical_reflection": "Good therapeutic alliance established",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeline": [],
+      "created_at": "2025-08-04T01:14:31.837865",
+      "updated_at": "2025-08-04T01:14:31.837865"
     }
   ],
   "tasks": [
@@ -712,6 +790,23 @@
       },
       "created_at": "2025-08-04T00:49:54.542574",
       "updated_at": "2025-08-04T00:51:51.898000+00:00"
+    },
+    {
+      "id": "ee282262-6a7d-44e8-bd95-7aa9a192937d",
+      "title": "Review Test Case Documentation",
+      "description": "Complete documentation review for test case",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2025-08-04T01:14:31.820486+00:00",
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": "This is a test task for API validation",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "created_at": "2025-08-04T01:14:31.837900",
+      "updated_at": "2025-08-04T01:14:31.837900"
     }
   ],
   "literature": [
@@ -804,6 +899,24 @@
       },
       "created_at": "2025-08-04T00:49:54.542609",
       "updated_at": "2025-08-04T00:51:51.898000+00:00"
+    },
+    {
+      "id": "2fd72495-ca76-4003-b2f9-7ef6e3eb1262",
+      "title": "Test Study on Depression Treatment",
+      "authors": "Smith, J., Johnson, A.",
+      "publication": "Journal of Test Psychiatry",
+      "year": 2024,
+      "doi": "10.1000/test.doi.123",
+      "abstract": "This is a test abstract for API validation purposes",
+      "notes": "Test literature entry for automated testing",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "created_at": "2025-08-04T01:14:31.837960",
+      "updated_at": "2025-08-04T01:14:31.837961"
     }
   ],
   "connections": [
