@@ -1,0 +1,1193 @@
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Custom scrollbar styles
+const scrollbarStyles = `
+  .timeline-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .timeline-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .timeline-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+  
+  .timeline-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.8);
+  }
+  
+  .timeline-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+`;
+
+const VerticalTimeline = ({ 
+  data, 
+  onNodeClick, 
+  onNodeHover, 
+  onDataChange,
+  // Mind map integration props
+  caseId,
+  autoSaveMindMapData,
+  setMindMapData 
+}) => {
+  const [nodes, setNodes] = useState([]);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [editingCards, setEditingCards] = useState({}); // Track which cards are being edited
+  const [cardTexts, setCardTexts] = useState({}); // Store card text content
+  const [isDragging, setIsDragging] = useState(false);
+  const [isAnimatingNewNode, setIsAnimatingNewNode] = useState(false); // Track new node animation
+  const [isSaving, setIsSaving] = useState(false); // Track save state
+  const [lastSaved, setLastSaved] = useState(null); // Track last save time
+  const timelineRef = useRef(null);
+  const nodeRefs = useRef({}); // Refs for direct DOM manipulation
+  const dragState = useRef({ isDragging: false, draggedNodeId: null }); // Ref-based drag state
+  const scrollContainerRef = useRef(null); // Ref for scroll container
+  const saveTimeoutRef = useRef(null); // Ref for auto-save debounce
+
+  // Constants for layout
+  const NODE_SPACING = 200; // Vertical spacing between nodes
+  const TIMELINE_WIDTH = 800;
+  const CENTER_X = TIMELINE_WIDTH / 2;
+  const CARD_WIDTH = 320;
+  const CARD_OFFSET = 200; // Distance from center line to card
+
+  // Physics constants for rope simulation
+  const ROPE_LENGTH = NODE_SPACING * 1.5; // Longer rope for less tension (was 1.2)
+  const ROPE_STIFFNESS = 0.15; // Reduced stiffness for smoother movement (was 0.3)
+  const DAMPING = 0.9; // Higher damping for more stable movement (was 0.8)
+  const MIN_FORCE_THRESHOLD = 1; // Lower threshold for more responsive movement (was 2)
+
+  // Store initial positions and physics data in ref
+  const initialPositions = useRef({});
+  const nodePhysics = useRef({}); // Store velocity and forces for each node
+
+  // Auto-save functionality with mind map integration - enhanced for case-specific data
+  const saveTimelineData = useCallback(async (force = false) => {
+    if (isSaving && !force) return;
+    
+    setIsSaving(true);
+    
+    try {
+      // Prepare timeline data in the format expected by the mind map case structure
+      const timelineData = nodes.map((node, index) => ({
+        id: node.id || `timeline-${caseId}-${Date.now()}-${index}`,
+        title: node.title || `Timeline Entry ${index + 1}`,
+        type: 'timeline_entry',
+        timestamp: node.date || new Date().toISOString(),
+        date: node.date || new Date().toISOString(),
+        orderIndex: index,
+        // Patient narrative from card text or existing data
+        patient_narrative: cardTexts[node.id]?.patient || node.patientData?.notes || node.patient_narrative || '',
+        // Clinical notes from card text or existing data  
+        clinical_notes: cardTexts[node.id]?.clinical || node.clinicalData?.notes || node.clinical_notes || '',
+        // Combined content for search/display
+        content: cardTexts[node.id]?.patient || cardTexts[node.id]?.clinical || node.content || '',
+        // Preserve existing patient and clinical data structures
+        patientData: {
+          ...node.patientData,
+          notes: cardTexts[node.id]?.patient || node.patientData?.notes || ''
+        },
+        clinicalData: {
+          ...node.clinicalData,
+          notes: cardTexts[node.id]?.clinical || node.clinicalData?.notes || ''
+        },
+        // Position and metadata
+        symptoms: node.symptoms || [],
+        x: node.x || CENTER_X,
+        y: node.y || (100 + (index * NODE_SPACING)),
+        created_at: node.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
+
+      console.log(`Saving timeline data for case ${caseId}:`, timelineData);
+
+      // If integrated with mind map, update the case data
+      if (caseId && setMindMapData && autoSaveMindMapData) {
+        setMindMapData(prevData => {
+          const updatedCases = prevData.cases.map(caseItem => {
+            if (String(caseItem.id) === String(caseId)) {
+              return {
+                ...caseItem,
+                timeline: timelineData,
+                last_updated: new Date().toISOString()
+              };
+            }
+            return caseItem;
+          });
+          const newData = { ...prevData, cases: updatedCases };
+          autoSaveMindMapData(newData);
+          return newData;
+        });
+      } else {
+        // Fallback to localStorage for standalone usage
+        const standaloneData = {
+          nodes: nodes.map(node => ({
+            ...node,
+            patientData: {
+              ...node.patientData,
+              notes: cardTexts[node.id]?.patient || node.patientData?.notes || ''
+            },
+            clinicalData: {
+              ...node.clinicalData,
+              notes: cardTexts[node.id]?.clinical || node.clinicalData?.notes || ''
+            }
+          })),
+          cardTexts,
+          timestamp: new Date().toISOString(),
+          version: '1.0'
+        };
+        localStorage.setItem('timeline-data', JSON.stringify(standaloneData));
+      }
+      
+      // Call parent callback if provided
+      if (onDataChange) {
+        await onDataChange(timelineData);
+      }
+      
+      setLastSaved(new Date());
+      console.log('Timeline data saved successfully');
+    } catch (error) {
+      console.error('Failed to save timeline data:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [nodes, cardTexts, isSaving, onDataChange, caseId, setMindMapData, autoSaveMindMapData]);
+
+  // Debounced auto-save
+  const triggerAutoSave = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      saveTimelineData();
+    }, 800); // 800ms debounce
+  }, [saveTimelineData]);
+
+  // Load timeline data from localStorage or mind map data on mount - enhanced for case-specific integration
+  useEffect(() => {
+    const loadTimelineData = () => {
+      try {
+        console.log(`Loading timeline data for case ${caseId}:`, data);
+        
+        // Priority 1: Load from mind map case data if integrated
+        if (caseId && data && Array.isArray(data)) {
+          console.log(`Loading ${data.length} timeline entries from case integration for case ${caseId}`);
+          
+          const timelineNodes = data.map((entry, index) => {
+            const nodeId = entry.id || `timeline-${caseId}-${Date.now()}-${index}`;
+            const baseY = 100 + (index * NODE_SPACING);
+            
+            // Initialize card texts from timeline entry data
+            setCardTexts(prev => ({
+              ...prev,
+              [nodeId]: {
+                patient: entry.patient_narrative || entry.patientData?.notes || '',
+                clinical: entry.clinical_notes || entry.clinicalData?.notes || ''
+              }
+            }));
+            
+            // Store initial position in ref
+            initialPositions.current[nodeId] = {
+              x: entry.x || CENTER_X,
+              y: entry.y || baseY,
+              index: index
+            };
+
+            // Initialize physics data
+            nodePhysics.current[nodeId] = {
+              velocityX: 0,
+              velocityY: 0,
+              forceX: 0,
+              forceY: 0,
+              mass: 1.0,
+              isBeingDragged: false
+            };
+            
+            return {
+              id: nodeId,
+              title: entry.title || `Timeline Entry ${index + 1}`,
+              date: entry.timestamp || entry.date || new Date().toISOString(),
+              type: entry.type || 'timeline_entry',
+              patient_narrative: entry.patient_narrative || '',
+              clinical_notes: entry.clinical_notes || '',
+              content: entry.content || entry.patient_narrative || entry.clinical_notes || '',
+              patientData: {
+                notes: entry.patient_narrative || '',
+                ...entry.patientData
+              },
+              clinicalData: {
+                notes: entry.clinical_notes || '',
+                ...entry.clinicalData
+              },
+              symptoms: entry.symptoms || [],
+              x: entry.x || CENTER_X,
+              y: entry.y || baseY,
+              originalY: baseY,
+              orderIndex: entry.orderIndex !== undefined ? entry.orderIndex : index,
+              created_at: entry.created_at || new Date().toISOString(),
+              updated_at: entry.updated_at || new Date().toISOString()
+            };
+          });
+          
+          if (timelineNodes.length > 0) {
+            setNodes(timelineNodes);
+            console.log(`Successfully loaded ${timelineNodes.length} timeline nodes for case ${caseId}`);
+            return true;
+          }
+        }
+        
+        // Priority 2: Fallback to localStorage for standalone usage or case with no timeline data
+        if (!caseId) {
+          const savedData = localStorage.getItem('timeline-data');
+          if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            console.log('Loading saved timeline data from localStorage:', parsedData);
+            
+            if (parsedData.nodes && parsedData.nodes.length > 0 && nodes.length === 0) {
+              setNodes(parsedData.nodes);
+              if (parsedData.cardTexts) {
+                setCardTexts(parsedData.cardTexts);
+              }
+              
+              // Update refs for saved nodes
+              parsedData.nodes.forEach((node, index) => {
+                initialPositions.current[node.id] = {
+                  x: node.x || CENTER_X,
+                  y: node.y || (100 + (index * NODE_SPACING)),
+                  index: index
+                };
+                
+                nodePhysics.current[node.id] = {
+                  velocityX: 0,
+                velocityY: 0,
+                forceX: 0,
+                forceY: 0,
+                mass: 1.0,
+                isBeingDragged: false
+              };
+            });
+            
+            setLastSaved(new Date(parsedData.timestamp));
+            return true;
+          }
+        }
+        
+        // If no data found, initialize empty timeline for new cases
+        console.log(`No existing timeline data found for case ${caseId || 'standalone'}, initializing empty timeline`);
+        return false;
+        
+      } catch (error) {
+        console.error('Failed to load timeline data:', error);
+      }
+      return false;
+    };
+
+    // Try to load saved data first, then fall back to prop data
+    const dataLoaded = loadTimelineData();
+    if (!dataLoaded && data && data.length > 0 && nodes.length === 0 && !caseId) {
+      // Initialize with prop data if no saved data and not integrated with mind map
+      const initialNodes = data.map((item, index) => {
+        const baseY = 100 + (index * NODE_SPACING);
+        const nodeId = item.id;
+        
+        // Store initial position in ref
+        initialPositions.current[nodeId] = {
+          x: CENTER_X,
+          y: baseY,
+          index: index
+        };
+
+        // Initialize physics data
+        nodePhysics.current[nodeId] = {
+          velocityX: 0,
+          velocityY: 0,
+          forceX: 0,
+          forceY: 0,
+          mass: 1.0,
+          isBeingDragged: false
+        };
+        
+        // Initialize card texts from data
+        setCardTexts(prev => ({
+          ...prev,
+          [nodeId]: {
+            patient: item.patientData?.notes || item.patientData?.chiefComplaint || '',
+            clinical: item.clinicalData?.notes || item.clinicalData?.chiefComplaint || ''
+          }
+        }));
+        
+        return {
+          ...item,
+          x: CENTER_X,
+          y: baseY,
+          originalY: baseY
+        };
+      });
+      setNodes(initialNodes);
+    }
+  }, [data, caseId]); // Include caseId in dependencies
+
+  const totalHeight = Math.max(600, (nodes.length * NODE_SPACING) + 200);
+
+  // Calculate forces between connected nodes (rope physics)
+  const calculateRopeForces = useCallback((draggedNodeId, draggedPosition) => {
+    const forces = {};
+    
+    // Find all nodes that should be connected to the dragged node
+    const draggedIndex = initialPositions.current[draggedNodeId]?.index;
+    if (draggedIndex === undefined) return forces;
+    
+    // Connect to adjacent nodes (previous and next in timeline)
+    const connectionsToCheck = [];
+    if (draggedIndex > 0) {
+      const prevNode = nodes[draggedIndex - 1];
+      if (prevNode) connectionsToCheck.push(prevNode.id);
+    }
+    if (draggedIndex < nodes.length - 1) {
+      const nextNode = nodes[draggedIndex + 1];
+      if (nextNode) connectionsToCheck.push(nextNode.id);
+    }
+    
+    // Calculate forces for each connected node
+    connectionsToCheck.forEach(connectedNodeId => {
+      const connectedNode = nodes.find(n => n.id === connectedNodeId);
+      if (!connectedNode) return;
+      
+      // Calculate distance between nodes
+      const dx = draggedPosition.x - connectedNode.x;
+      const dy = draggedPosition.y - connectedNode.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Skip if nodes are too close (avoid division by zero)
+      if (distance < 5) return;
+      
+      // Calculate rope tension (spring force)
+      const extension = distance - ROPE_LENGTH;
+      const forceStrength = extension * ROPE_STIFFNESS;
+      
+      // Only apply force if extension exceeds threshold
+      if (Math.abs(forceStrength) > MIN_FORCE_THRESHOLD) {
+        // Normalize direction vector
+        const directionX = dx / distance;
+        const directionY = dy / distance;
+        
+        // Apply force toward the dragged node (spring pulls connected node)
+        forces[connectedNodeId] = {
+          x: directionX * forceStrength * 0.5, // Reduce force for smoother movement
+          y: directionY * forceStrength * 0.5
+        };
+      }
+    });
+    
+    return forces;
+  }, [nodes]);
+
+  // Apply rope physics to connected nodes
+  const applyRopePhysics = useCallback((draggedNodeId, draggedPosition) => {
+    const forces = calculateRopeForces(draggedNodeId, draggedPosition);
+    
+    // Apply forces to connected nodes
+    Object.entries(forces).forEach(([nodeId, force]) => {
+      const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
+      const patientCard = document.querySelector(`[data-patient-card="${nodeId}"]`);
+      const clinicalCard = document.querySelector(`[data-clinical-card="${nodeId}"]`);
+      
+      if (nodeElement) {
+        // Update physics state
+        const physics = nodePhysics.current[nodeId];
+        if (physics && !physics.isBeingDragged) {
+          // Apply force with damping
+          physics.forceX = force.x;
+          physics.forceY = force.y;
+          physics.velocityX = (physics.velocityX + force.x) * DAMPING;
+          physics.velocityY = (physics.velocityY + force.y) * DAMPING;
+          
+          // Update node position based on velocity
+          const currentNode = nodes.find(n => n.id === nodeId);
+          if (currentNode) {
+            const newX = currentNode.x + physics.velocityX;
+            const newY = currentNode.y + physics.velocityY;
+            
+            // Apply position to DOM immediately using left/top instead of transform
+            nodeElement.style.left = `${newX - 30}px`; // Updated for bigger nodes
+            nodeElement.style.top = `${newY - 30}px`; // Updated for bigger nodes
+            nodeElement.style.transform = '';
+            
+            // Update card positions to follow with correct offsets
+            if (patientCard) {
+              patientCard.style.left = `${newX - CARD_OFFSET - CARD_WIDTH}px`;
+              patientCard.style.top = `${newY - 60}px`;
+              patientCard.style.transform = '';
+            }
+            if (clinicalCard) {
+              clinicalCard.style.left = `${newX + CARD_OFFSET}px`;
+              clinicalCard.style.top = `${newY - 60}px`;
+              clinicalCard.style.transform = '';
+            }
+            
+            // Update node state
+            setNodes(prevNodes => prevNodes.map(node => 
+              node.id === nodeId 
+                ? { ...node, x: newX, y: newY }
+                : node
+            ));
+          }
+        }
+      }
+    });
+  }, [calculateRopeForces, nodes]);
+
+  // Native drag handling for instant response
+  const handleMouseDown = useCallback((event, nodeId) => {
+    event.preventDefault();
+    
+    dragState.current.isDragging = true;
+    dragState.current.draggedNodeId = nodeId;
+    setIsDragging(true);
+
+    const currentNodeRef = nodeRefs.current[nodeId];
+    if (!currentNodeRef) return;
+
+    const rect = timelineRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const initialPos = initialPositions.current[nodeId];
+    if (!initialPos) return;
+
+    // Calculate initial offset between mouse and node center
+    const startMouseX = event.clientX;
+    const startMouseY = event.clientY;
+    const startNodeX = initialPos.x;
+    const startNodeY = initialPos.y;
+
+    const handleMouseMove = (moveEvent) => {
+      // Calculate exact mouse position relative to timeline container
+      const rect = timelineRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const mouseX = moveEvent.clientX - rect.left;
+      const mouseY = moveEvent.clientY - rect.top;
+
+      // Apply constraints
+      const constrainedX = Math.max(50, Math.min(TIMELINE_WIDTH - 50, mouseX));
+      const constrainedY = Math.max(50, Math.min(totalHeight - 50, mouseY));
+
+      // Mark this node as being dragged in physics system
+      if (nodePhysics.current[nodeId]) {
+        nodePhysics.current[nodeId].isBeingDragged = true;
+      }
+
+      // Position node directly at mouse position (accounting for node center offset)
+      currentNodeRef.style.left = `${constrainedX - 30}px`; // Updated for bigger nodes (60x60)
+      currentNodeRef.style.top = `${constrainedY - 30}px`; // Updated for bigger nodes (60x60)
+      currentNodeRef.style.transform = '';
+
+      // Update node state immediately for cards to follow
+      setNodes(prevNodes => 
+        prevNodes.map(node => 
+          node.id === nodeId 
+            ? { ...node, x: constrainedX, y: constrainedY }
+            : node
+        )
+      );
+
+      // Apply rope physics to connected nodes
+      applyRopePhysics(nodeId, { x: constrainedX, y: constrainedY });
+    };
+
+    const handleMouseUp = (upEvent) => {
+      dragState.current.isDragging = false;
+      dragState.current.draggedNodeId = null;
+      setIsDragging(false);
+
+      // Clear physics drag state
+      if (nodePhysics.current[nodeId]) {
+        nodePhysics.current[nodeId].isBeingDragged = false;
+        // Reset forces and velocities after drag
+        nodePhysics.current[nodeId].velocityX = 0;
+        nodePhysics.current[nodeId].velocityY = 0;
+        nodePhysics.current[nodeId].forceX = 0;
+        nodePhysics.current[nodeId].forceY = 0;
+      }
+
+      // Calculate final position from current DOM position
+      const rect = timelineRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const finalX = Math.max(50, Math.min(TIMELINE_WIDTH - 50, upEvent.clientX - rect.left));
+      const finalY = Math.max(50, Math.min(totalHeight - 50, upEvent.clientY - rect.top));
+
+      // Update state
+      setNodes(prevNodes => 
+        prevNodes.map(node => 
+          node.id === nodeId 
+            ? { ...node, x: finalX, y: finalY }
+            : node
+        )
+      );
+
+      // Update the initial position reference for future drags
+      initialPositions.current[nodeId].x = finalX;
+      initialPositions.current[nodeId].y = finalY;
+
+      // Trigger auto-save after position change
+      triggerAutoSave();
+
+      // Clean up event listeners
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+
+      // Small delay to allow drag state to clear before click events
+      setTimeout(() => {
+        dragState.current.isDragging = false;
+      }, 10);
+    };
+
+    // Add event listeners
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [totalHeight, applyRopePhysics, triggerAutoSave]);
+
+  // Handle node click - trigger edit mode for both cards
+  const handleNodeClick = useCallback((node) => {
+    // Only trigger if not currently dragging
+    if (dragState.current.isDragging) return;
+    
+    // Clear any hover state and set editing state for this node only
+    setHoveredNode(null);
+    setEditingCards({
+      [node.id]: { patient: true, clinical: true }
+    });
+    onNodeClick?.(node);
+  }, [onNodeClick]);
+
+  // Handle node hover
+  const handleNodeHover = useCallback((node, isHovering) => {
+    if (!dragState.current.isDragging) {
+      if (isHovering) {
+        // Clear any existing editing states when hovering over a different node
+        setEditingCards({});
+        setHoveredNode(node);
+      } else {
+        setHoveredNode(null);
+      }
+      onNodeHover?.(node, isHovering);
+    }
+  }, [onNodeHover]);
+
+  // Handle text change with auto-save
+  const handleTextChange = useCallback((nodeId, cardType, newText) => {
+    setCardTexts(prev => ({
+      ...prev,
+      [nodeId]: {
+        ...prev[nodeId],
+        [cardType]: newText
+      }
+    }));
+    
+    // Trigger auto-save after text change
+    triggerAutoSave();
+  }, [triggerAutoSave]);
+
+  // Handle click outside card (save and exit edit mode for both cards)
+  const handleClickOutside = useCallback((nodeId, cardType) => {
+    setEditingCards(prev => ({
+      ...prev,
+      [nodeId]: { patient: false, clinical: false }
+    }));
+  }, []);
+
+  // Determine if cards should be visible
+  const shouldShowCards = useCallback((nodeId) => {
+    const isHovered = hoveredNode?.id === nodeId;
+    const isEditing = editingCards[nodeId]?.patient || editingCards[nodeId]?.clinical;
+    console.log(`Cards visibility check for ${nodeId}:`, { isHovered, isEditing, editingState: editingCards[nodeId] });
+    return isHovered || isEditing;
+  }, [hoveredNode, editingCards]);
+
+  // Handle adding new node to the timeline
+  const handleAddNode = useCallback(() => {
+    if (isAnimatingNewNode) return; // Prevent multiple additions during animation
+    
+    setIsAnimatingNewNode(true);
+    
+    // Generate new node data
+    const newNodeId = `node-${Date.now()}`;
+    const newIndex = nodes.length;
+    const baseY = 100 + (newIndex * NODE_SPACING);
+    
+    const newNodeData = {
+      id: newNodeId,
+      date: new Date().toISOString(),
+      patientData: {
+        chiefComplaint: '',
+        notes: ''
+      },
+      clinicalData: {
+        chiefComplaint: '',
+        notes: ''
+      },
+      x: CENTER_X,
+      y: baseY,
+      originalY: baseY
+    };
+
+    // Store initial position and physics data
+    initialPositions.current[newNodeId] = {
+      x: CENTER_X,
+      y: baseY,
+      index: newIndex
+    };
+
+    nodePhysics.current[newNodeId] = {
+      velocityX: 0,
+      velocityY: 0,
+      forceX: 0,
+      forceY: 0,
+      mass: 1.0,
+      isBeingDragged: false
+    };
+
+    // Initialize card texts
+    setCardTexts(prev => ({
+      ...prev,
+      [newNodeId]: {
+        patient: '',
+        clinical: ''
+      }
+    }));
+
+    // Add new node to the timeline
+    setNodes(prevNodes => {
+      const updatedNodes = [...prevNodes, newNodeData];
+      
+      // Update all node indices in initialPositions
+      updatedNodes.forEach((node, index) => {
+        if (initialPositions.current[node.id]) {
+          initialPositions.current[node.id].index = index;
+        }
+      });
+      
+      return updatedNodes;
+    });
+
+    // Scroll to the new node after a brief delay for animation
+    setTimeout(() => {
+      const newNodeElement = document.querySelector(`[data-node-id="${newNodeId}"]`);
+      if (newNodeElement && scrollContainerRef.current) {
+        newNodeElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest' 
+        });
+      }
+      setIsAnimatingNewNode(false);
+      
+      // Trigger auto-save after adding new node
+      triggerAutoSave();
+    }, 800);
+
+  }, [nodes.length, isAnimatingNewNode, triggerAutoSave]);
+
+  // Handle resetting layout to original straight line
+  const handleResetLayout = useCallback(() => {
+    // Reset all nodes to their original positions
+    setNodes(prevNodes => 
+      prevNodes.map((node, index) => {
+        const baseY = 100 + (index * NODE_SPACING);
+        const resetNode = {
+          ...node,
+          x: CENTER_X,
+          y: baseY,
+          originalY: baseY
+        };
+
+        // Update initial positions reference
+        if (initialPositions.current[node.id]) {
+          initialPositions.current[node.id].x = CENTER_X;
+          initialPositions.current[node.id].y = baseY;
+          initialPositions.current[node.id].index = index;
+        }
+
+        // Reset physics state
+        if (nodePhysics.current[node.id]) {
+          nodePhysics.current[node.id].velocityX = 0;
+          nodePhysics.current[node.id].velocityY = 0;
+          nodePhysics.current[node.id].forceX = 0;
+          nodePhysics.current[node.id].forceY = 0;
+          nodePhysics.current[node.id].isBeingDragged = false;
+        }
+
+        // Update DOM positions immediately
+        const nodeElement = document.querySelector(`[data-node-id="${node.id}"]`);
+        if (nodeElement) {
+          nodeElement.style.left = `${CENTER_X - 30}px`;
+          nodeElement.style.top = `${baseY - 30}px`;
+          nodeElement.style.transform = '';
+        }
+
+        // Update card positions
+        const patientCard = document.querySelector(`[data-patient-card="${node.id}"]`);
+        const clinicalCard = document.querySelector(`[data-clinical-card="${node.id}"]`);
+        if (patientCard) {
+          patientCard.style.left = `${CENTER_X - CARD_OFFSET - CARD_WIDTH}px`;
+          patientCard.style.top = `${baseY - 60}px`;
+          patientCard.style.transform = '';
+        }
+        if (clinicalCard) {
+          clinicalCard.style.left = `${CENTER_X + CARD_OFFSET}px`;
+          clinicalCard.style.top = `${baseY - 60}px`;
+          clinicalCard.style.transform = '';
+        }
+
+        return resetNode;
+      })
+    );
+    
+    // Trigger auto-save after reset
+    triggerAutoSave();
+  }, [triggerAutoSave]);
+
+  // Manual save function
+  const handleManualSave = useCallback(() => {
+    saveTimelineData(true); // Force save
+  }, [saveTimelineData]);
+
+  // Cleanup auto-save timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="relative w-full h-full">
+      {/* Inject custom scrollbar styles */}
+      <style>{scrollbarStyles}</style>
+      
+      {/* Control Buttons Container */}
+      <div className="absolute top-4 right-4 flex gap-2 z-40">
+        {/* Save Button */}
+        <motion.button
+          className={`${
+            isSaving 
+              ? 'bg-green-600 cursor-not-allowed' 
+              : 'bg-green-500 hover:bg-green-600'
+          } text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-colors`}
+          onClick={handleManualSave}
+          disabled={isSaving}
+          whileHover={!isSaving ? { scale: 1.05 } : {}}
+          whileTap={!isSaving ? { scale: 0.95 } : {}}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.4, duration: 0.5 }}
+        >
+          {isSaving ? (
+            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+          )}
+          {isSaving ? 'Saving...' : 'Save'}
+        </motion.button>
+
+        {/* Reset Layout Button */}
+        <motion.button
+          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+          onClick={handleResetLayout}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.2, duration: 0.5 }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reset Layout
+        </motion.button>
+
+        {/* Add Node Button */}
+        <motion.button
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+          onClick={handleAddNode}
+          disabled={isAnimatingNewNode}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1, duration: 0.5 }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          {isAnimatingNewNode ? 'Adding...' : 'Add Node'}
+        </motion.button>
+      </div>
+
+      {/* Scrollable Timeline Container */}
+      <div 
+        ref={scrollContainerRef}
+        className="timeline-scrollbar relative w-full h-full overflow-y-auto"
+        onClick={(e) => {
+          // Close all edit modes when clicking outside cards and nodes
+          const isClickOnCard = e.target.closest('.timeline-card');
+          const isClickOnNode = e.target.closest('.timeline-node');
+          const isClickOnButton = e.target.closest('button');
+          
+          if (!isClickOnCard && !isClickOnNode && !isClickOnButton) {
+            setEditingCards({});
+          }
+        }}
+      >
+        <div 
+          className="relative w-full" 
+          style={{ height: Math.max(totalHeight, window.innerHeight) }}
+        >
+      {/* Main timeline container */}
+      <div 
+        ref={timelineRef}
+        className="relative mx-auto"
+        style={{ width: TIMELINE_WIDTH, height: totalHeight }}
+      >
+        {/* Dynamic vertical line that responds to node movement */}
+        <svg 
+          className="absolute inset-0 pointer-events-none"
+          style={{ zIndex: 1 }}
+        >
+          <path
+            d={`M ${CENTER_X} 50 ${nodes.map(node => `L ${node.x} ${node.y}`).join(' ')}`}
+            stroke="#93C5FD"
+            strokeWidth="2"
+            fill="none"
+            strokeDasharray="5,5"
+          />
+          
+          {/* Connection lines between nodes */}
+          {nodes.map((node, index) => {
+            if (index === 0) return null;
+            const prevNode = nodes[index - 1];
+            return (
+              <motion.line
+                key={`connection-${node.id}`}
+                x1={prevNode.x}
+                y1={prevNode.y}
+                x2={node.x}
+                y2={node.y}
+                stroke="#60A5FA"
+                strokeWidth="1"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
+              />
+            );
+          })}
+        </svg>
+
+        {/* Timeline title */}
+        <motion.div
+          className="absolute text-center"
+          style={{
+            left: CENTER_X - 150,
+            top: 10,
+            width: 300
+          }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
+          <h2 className="text-xl font-bold text-gray-800">Native DOM Patient Timeline</h2>
+          <p className="text-sm text-gray-600">Instant 1:1 drag • Hover for cards • Click to edit</p>
+        </motion.div>
+
+        {/* Rope connections between adjacent nodes */}
+        {nodes.map((node, index) => {
+          if (index === nodes.length - 1) return null; // No rope from last node
+          
+          const nextNode = nodes[index + 1];
+          if (!nextNode) return null;
+          
+          // Calculate rope line between this node and next node
+          const x1 = node.x;
+          const y1 = node.y;
+          const x2 = nextNode.x;
+          const y2 = nextNode.y;
+          
+          const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+          const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+          
+          // Calculate tension based on distance vs rope length
+          const tension = Math.max(0, (length - ROPE_LENGTH) / ROPE_LENGTH);
+          const ropeColor = tension > 0.2 ? '#ef4444' : tension > 0.1 ? '#f59e0b' : '#10b981';
+          const ropeWidth = Math.max(1, Math.min(4, 1 + tension * 3));
+          
+          return (
+            <div
+              key={`rope-${node.id}-${nextNode.id}`}
+              className="absolute pointer-events-none"
+              style={{
+                left: x1,
+                top: y1,
+                width: length,
+                height: ropeWidth,
+                backgroundColor: ropeColor,
+                transformOrigin: '0 50%',
+                transform: `rotate(${angle}deg)`,
+                opacity: 0.7,
+                zIndex: 1,
+                transition: dragState.current.isDragging ? 'none' : 'all 0.2s ease-out'
+              }}
+            />
+          );
+        })}
+
+        {/* Timeline nodes */}
+        {nodes.map((node, index) => (
+          <div key={node.id}>
+            {/* Pure DOM Draggable Timeline Node */}
+            <motion.div
+              ref={el => nodeRefs.current[node.id] = el}
+              data-node-id={node.id}
+              className={`timeline-node absolute cursor-grab active:cursor-grabbing transform-gpu ${
+                hoveredNode?.id === node.id
+                  ? 'bg-blue-500 ring-4 ring-blue-200 shadow-xl scale-110' 
+                  : 'bg-blue-400 hover:bg-blue-500 shadow-md hover:shadow-lg hover:scale-105'
+              }`}
+              style={{
+                left: node.x - 30, // Updated for bigger nodes
+                top: node.y - 30, // Updated for bigger nodes
+                width: 60, // Increased from 40
+                height: 60, // Increased from 40
+                borderRadius: '50%',
+                zIndex: 10,
+                transition: dragState.current.isDragging 
+                  ? 'none' 
+                  : 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s ease-out',
+                willChange: dragState.current.isDragging ? 'transform' : 'auto'
+              }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 200, 
+                damping: 20,
+                delay: index * 0.1 
+              }}
+              onMouseDown={(event) => {
+                // Add active state animation
+                const nodeEl = event.currentTarget;
+                nodeEl.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  if (nodeEl.style.transform === 'scale(0.95)') {
+                    nodeEl.style.transform = '';
+                  }
+                }, 100);
+                
+                handleMouseDown(event, node.id);
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                // Small delay to ensure drag state is cleared
+                setTimeout(() => {
+                  if (!dragState.current.isDragging) {
+                    handleNodeClick(node);
+                  }
+                }, 20);
+              }}
+              onMouseEnter={(event) => {
+                // Only trigger hover if not dragging
+                if (!dragState.current.isDragging) {
+                  handleNodeHover(node, true);
+                }
+              }}
+              onMouseLeave={(event) => {
+                // Only trigger hover if not dragging
+                if (!dragState.current.isDragging) {
+                  handleNodeHover(node, false);
+                }
+              }}
+            >
+              {/* Node inner circle with pulse animation */}
+              <div className="w-full h-full rounded-full bg-white/30 flex items-center justify-center relative overflow-hidden">
+                <div className="w-4 h-4 bg-white rounded-full z-10"></div> {/* Increased from w-3 h-3 */}
+                {/* Pulse ring effect */}
+                <div 
+                  className="absolute inset-0 rounded-full bg-white/20 animate-pulse"
+                  style={{
+                    animation: hoveredNode?.id === node.id 
+                      ? 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' 
+                      : 'none'
+                  }}
+                ></div>
+              </div>
+              
+              {/* Date label with slide animation */}
+              <div 
+                className={`absolute text-xs font-medium text-gray-700 whitespace-nowrap bg-white/90 px-2 py-1 rounded shadow-sm transition-all duration-200 ease-out ${
+                  hoveredNode?.id === node.id ? 'translate-x-2 bg-white shadow-md' : ''
+                }`}
+                style={{
+                  left: 70, // Adjusted for bigger node
+                  top: '50%',
+                  transform: hoveredNode?.id === node.id 
+                    ? 'translateY(-50%) translateX(8px) scale(1.05)' 
+                    : 'translateY(-50%)'
+                }}
+              >
+                {new Date(node.date).toLocaleDateString()}
+              </div>
+            </motion.div>
+
+            {/* Hover/Edit Cards */}
+            <AnimatePresence>
+              {shouldShowCards(node.id) && (
+                <>
+                  {/* Patient Card */}
+                  <motion.div
+                    data-patient-card={node.id}
+                    className="timeline-card absolute bg-white rounded-lg shadow-xl border-l-4 border-green-400 p-4 z-20"
+                    style={{
+                      left: node.x - CARD_OFFSET - CARD_WIDTH,
+                      top: node.y - 60,
+                      width: CARD_WIDTH,
+                    }}
+                    initial={{ opacity: 0, scale: 0.8, x: 20 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, x: 20 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  >
+                    <div className="flex items-center mb-3">
+                      <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+                      <h4 className="font-semibold text-gray-800">Patient Narrative</h4>
+                      {editingCards[node.id]?.patient && (
+                        <div className="ml-auto text-xs text-green-600 font-medium">Editing...</div>
+                      )}
+                    </div>
+                    
+                    {editingCards[node.id]?.patient ? (
+                      <textarea
+                        className="w-full h-24 p-3 border-2 border-green-300 rounded-lg resize-none text-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400"
+                        value={cardTexts[node.id]?.patient || ''}
+                        onChange={(e) => handleTextChange(node.id, 'patient', e.target.value)}
+                        onBlur={(e) => {
+                          // Save and close when focus is lost
+                          handleClickOutside(node.id, 'patient');
+                        }}
+                        placeholder="Enter patient narrative..."
+                      />
+                    ) : (
+                      <div
+                        className="text-sm text-gray-600 min-h-[60px] p-3 border-2 border-transparent hover:border-gray-200 rounded-lg cursor-text hover:bg-gray-50 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Clear any hover state and set editing for this node only
+                          setHoveredNode(null);
+                          setEditingCards({
+                            [node.id]: { patient: true, clinical: true }
+                          });
+                        }}
+                      >
+                        {cardTexts[node.id]?.patient || 'Click to add patient narrative...'}
+                      </div>
+                    )}
+                    
+                    {/* Connection line to node */}
+                    <div 
+                      className="absolute bg-green-300"
+                      style={{
+                        width: CARD_OFFSET - 20,
+                        height: 2,
+                        right: -CARD_OFFSET + 20,
+                        top: 50,
+                        zIndex: 0
+                      }}
+                    />
+                  </motion.div>
+
+                  {/* Clinical Card */}
+                  <motion.div
+                    data-clinical-card={node.id}
+                    className="timeline-card absolute bg-white rounded-lg shadow-xl border-l-4 border-purple-400 p-4 z-20"
+                    style={{
+                      left: node.x + CARD_OFFSET,
+                      top: node.y - 60,
+                      width: CARD_WIDTH,
+                    }}
+                    initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, x: -20 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.1 }}
+                  >
+                    <div className="flex items-center mb-3">
+                      <div className="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
+                      <h4 className="font-semibold text-gray-800">Clinical Impression</h4>
+                      {editingCards[node.id]?.clinical && (
+                        <div className="ml-auto text-xs text-purple-600 font-medium">Editing...</div>
+                      )}
+                    </div>
+                    
+                    {editingCards[node.id]?.clinical ? (
+                      <textarea
+                        className="w-full h-24 p-3 border-2 border-purple-300 rounded-lg resize-none text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
+                        value={cardTexts[node.id]?.clinical || ''}
+                        onChange={(e) => handleTextChange(node.id, 'clinical', e.target.value)}
+                        onBlur={(e) => {
+                          // Save and close when focus is lost
+                          handleClickOutside(node.id, 'clinical');
+                        }}
+                        placeholder="Enter clinical impression..."
+                      />
+                    ) : (
+                      <div
+                        className="text-sm text-gray-600 min-h-[60px] p-3 border-2 border-transparent hover:border-gray-200 rounded-lg cursor-text hover:bg-gray-50 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Clear any hover state and set editing for this node only
+                          setHoveredNode(null);
+                          setEditingCards({
+                            [node.id]: { patient: true, clinical: true }
+                          });
+                        }}
+                      >
+                        {cardTexts[node.id]?.clinical || 'Click to add clinical impression...'}
+                      </div>
+                    )}
+                    
+                    {/* Connection line to node */}
+                    <div 
+                      className="absolute bg-purple-300"
+                      style={{
+                        width: CARD_OFFSET - 20,
+                        height: 2,
+                        left: -CARD_OFFSET + 20,
+                        top: 50,
+                        zIndex: 0
+                      }}
+                    />
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default VerticalTimeline;

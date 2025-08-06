@@ -3,6 +3,9 @@ import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Import timeline test component
+import TimelineTestPage from './components/timeline-test/TimelineTestPage';
 import {
   ReactFlow,
   addEdge,
@@ -2685,16 +2688,15 @@ useEffect(() => {
             snapToGrid={false}
             snapGrid={[15, 15]}
             elevateEdgesOnSelect={false}
-            connectionLineComponent={ConnectionLine}
-          connectionLineStyle={{
-            stroke: '#3b82f6', // Use a bright blue color for better visibility during connection
-            strokeWidth: 3.5, // Slightly thicker than regular edges
-            opacity: 0.9,
-            strokeLinecap: 'round',
-            strokeDasharray: '5,3', // Shorter dash pattern for more modern look
-            filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))', // Softer glow
-            animation: 'flowingDash 1s linear infinite' // Add flowing animation
-          }}
+            connectionLineStyle={{
+              stroke: '#3b82f6', // Use a bright blue color for better visibility during connection
+              strokeWidth: 3.5, // Slightly thicker than regular edges
+              opacity: 0.9,
+              strokeLinecap: 'round',
+              strokeDasharray: '5,3', // Shorter dash pattern for more modern look
+              filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))', // Softer glow
+              animation: 'flowingDash 1s linear infinite' // Add flowing animation
+            }}
           defaultEdgeOptions={{
             type: 'enhanced', // Use our enhanced edge with proper prop handling
             style: { 
@@ -2898,6 +2900,14 @@ const Dashboard = () => (
 );
 
 function App() {
+  // Check for timeline test parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const showTimelineTest = urlParams.get('timeline-test') === 'true';
+  
+  if (showTimelineTest) {
+    return <TimelineTestPage />;
+  }
+  
   return <Dashboard />;
 }
 

@@ -25,8 +25,8 @@ import {
   Activity
 } from 'lucide-react';
 
-// Import the Angular Timeline component
-import AngularTimeline from './timeline/ModularAngularTimeline';
+// Import the Vertical Timeline component
+import VerticalTimeline from './timeline-test/VerticalTimeline';
 
 // Utility function for debouncing
 const debounce = (func, delay) => {
@@ -593,15 +593,40 @@ const CaseModal = ({
   }, [editData, data?.id, setMindMapData, autoSaveMindMapData, addToast]);
 
   // Enhanced timeline management with debounced auto-save and better backend integration
-  const timelineEntries = useMemo(() => editData.timeline || [], [editData.timeline]);
+  const timelineEntries = useMemo(() => {
+    // Ensure timeline data is properly structured for the VerticalTimeline component
+    const timeline = editData.timeline || [];
+    console.log(`Timeline entries for case ${data?.id}:`, timeline);
+    return timeline;
+  }, [editData.timeline, data?.id]);
   
-  // Debounced timeline save function
+  // Debounced timeline save function with enhanced error handling
   const debouncedTimelineSave = useCallback(
     debounce(async (updatedTimeline, retryCount = 0) => {
       try {
+        // Validate timeline data structure
+        const validatedTimeline = updatedTimeline.map((entry, index) => ({
+          id: entry.id || `timeline-${data?.id}-${Date.now()}-${index}`,
+          title: entry.title || `Timeline Entry ${index + 1}`,
+          type: entry.type || 'timeline_entry',
+          timestamp: entry.timestamp || entry.date || new Date().toISOString(),
+          date: entry.date || entry.timestamp || new Date().toISOString(),
+          patient_narrative: entry.patient_narrative || entry.patientData?.notes || '',
+          clinical_notes: entry.clinical_notes || entry.clinicalData?.notes || '',
+          content: entry.content || entry.patient_narrative || entry.clinical_notes || '',
+          symptoms: entry.symptoms || [],
+          orderIndex: entry.orderIndex !== undefined ? entry.orderIndex : index,
+          x: entry.x || 400, // Default center position
+          y: entry.y || (100 + (index * 200)), // Default spacing
+          created_at: entry.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          // Keep original data for backward compatibility
+          ...entry
+        }));
+
         const updatedData = {
           ...editData,
-          timeline: updatedTimeline,
+          timeline: validatedTimeline,
           last_updated: new Date().toISOString()
         };
         
@@ -616,16 +641,19 @@ const CaseModal = ({
                 ...caseItem, 
                 ...updatedData,
                 // Ensure timeline data is properly structured for backend
-                timeline: updatedTimeline.map(entry => ({
-                  id: entry.id,
-                  title: entry.title || `Entry ${entry.orderIndex + 1}`,
-                  type: entry.type || 'note',
-                  content: entry.content || '',
-                  timestamp: entry.timestamp,
+                timeline: validatedTimeline.map(entry => ({
+                  id: String(entry.id || `${Date.now()}-${caseItem.id}-timeline-${entry.orderIndex || 0}`),
+                  title: entry.title || `Timeline Entry ${(entry.orderIndex || 0) + 1}`,
+                  type: entry.type || 'timeline_entry',
+                  timestamp: entry.timestamp || entry.date || new Date().toISOString(),
+                  date: entry.date || entry.timestamp || new Date().toISOString(),
                   patient_narrative: entry.patient_narrative || '',
                   clinical_notes: entry.clinical_notes || '',
+                  content: entry.content || entry.patient_narrative || entry.clinical_notes || '',
                   symptoms: entry.symptoms || [],
-                  orderIndex: entry.orderIndex || 0,
+                  orderIndex: entry.orderIndex !== undefined ? entry.orderIndex : 0,
+                  x: Number(entry.x) || 400,
+                  y: Number(entry.y) || 100,
                   created_at: entry.created_at || new Date().toISOString(),
                   updated_at: new Date().toISOString()
                 }))
@@ -657,18 +685,23 @@ const CaseModal = ({
   const updateTimeline = useCallback(async (updatedTimeline, options = {}) => {
     if (isLoading && !options.force) return;
     
-    // Skip saving if both patient_narrative and clinical_notes are empty for all entries
+    // Enhanced validation - check for meaningful content or position changes
     const hasContent = updatedTimeline.some(entry => 
       (entry.patient_narrative && entry.patient_narrative.trim()) ||
-      (entry.clinical_notes && entry.clinical_notes.trim())
+      (entry.clinical_notes && entry.clinical_notes.trim()) ||
+      (entry.content && entry.content.trim()) ||
+      entry.x !== 400 || entry.y !== 100 // Position has changed from default
     );
     
+    // Always save if forced or if there's meaningful content/changes
     if (!hasContent && !options.force) {
+      console.log('Skipping timeline save - no meaningful content or changes');
       return { success: true, skipped: true };
     }
     
+    console.log(`Updating timeline for case ${data?.id} with ${updatedTimeline.length} entries`);
     return debouncedTimelineSave(updatedTimeline);
-  }, [debouncedTimelineSave, isLoading]);
+  }, [debouncedTimelineSave, isLoading, data?.id]);
 
   // Get connected nodes for Related tab
   const connectedNodes = useMemo(() => {
@@ -1250,22 +1283,18 @@ const CaseModal = ({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3 }}
-                    className="h-full overflow-hidden"
+                    className="h-full"
                   >
-                    <AngularTimeline
+                    <VerticalTimeline
+                      data={timelineEntries}
                       caseId={data?.id}
-                      initialEntries={timelineEntries}
-                      onEntryUpdate={updateTimeline}
-                      onEntryAdd={(newEntry) => {
-                        const updatedTimeline = [...timelineEntries, newEntry];
-                        updateTimeline(updatedTimeline);
+                      setMindMapData={setMindMapData}
+                      autoSaveMindMapData={autoSaveMindMapData}
+                      onDataChange={(timelineData) => {
+                        // Handle timeline data changes - the VerticalTimeline handles the save internally
+                        console.log('Timeline data updated:', timelineData);
+                        addToast('Timeline updated successfully', 'success');
                       }}
-                      onEntryDelete={(entryId) => {
-                        const updatedTimeline = timelineEntries.filter(entry => entry.id !== entryId);
-                        updateTimeline(updatedTimeline);
-                      }}
-                      width={950} // Increased width to use expanded modal space
-                      height={500} // Increased height for better layout
                     />
                   </motion.div>
                 )}
