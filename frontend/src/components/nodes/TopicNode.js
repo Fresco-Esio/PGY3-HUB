@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Brain, Tag, Clock, X } from 'lucide-react';
+import { Brain, Tag, Clock, X, BookOpen, Lightbulb } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const TopicNode = ({ data, selected }) => {
   const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
@@ -18,222 +19,277 @@ const TopicNode = ({ data, selected }) => {
     : 0;
 
   return (
-    <div
-      className={`group px-4 py-3 rounded-xl border-2 transition-all duration-700 min-w-[220px] relative hover:scale-105 backdrop-blur-sm ${selected
-          ? 'border-teal-400 scale-105 ring-4 ring-teal-200 animate-pulse'
-          : 'border-transparent hover:border-teal-300 hover:ring-2 hover:ring-teal-100'
-        } ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-8'}`}
-      style={{
-        backgroundColor: data.color || '#3B82F6',
-        color: 'white',
-        boxShadow: selected
-          ? `0 0 20px ${data.color || '#3B82F6'}40, 0 8px 32px rgba(0,0,0,0.3)`
-          : `0 4px 20px ${data.color || '#3B82F6'}20, 0 4px 16px rgba(0,0,0,0.15)`,
-        transition: 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease',
-        filter: selected ? 'none' : `drop-shadow(0 4px 12px rgba(0,0,0,0.2))`
+    <motion.div
+      initial={data.skipAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, y: -20 }}
+      transition={{ 
+        duration: 0.6, 
+        ease: [0.25, 0.46, 0.45, 0.94],
+        delay: data.skipAnimation ? 0 : 0.1
       }}
+      whileHover={{ 
+        scale: 1.06, 
+        y: -3,
+        transition: { duration: 0.2 }
+      }}
+      className={`group relative min-w-[260px] max-w-[300px] cursor-pointer ${selected ? 'z-10' : 'z-0'}`}
     >
-      {/* Connection Hotspots - Stacked source and target handles for all four sides */}
-      {/* Top handles */}
-      <Handle
-        id="top"
-        type="source"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
+      {/* 🎨 ARTISTIC TOPIC CONTAINER with midnight blue → indigo gradient */}
+      <div
+        className={`
+          relative px-6 py-5 rounded-2xl backdrop-blur-sm
+          border-2 transition-all duration-400 overflow-hidden
+          shadow-lg hover:shadow-2xl
+          ${selected
+            ? 'border-indigo-300 shadow-indigo-500/30 ring-4 ring-indigo-200/60' 
+            : 'border-indigo-200/40 hover:border-indigo-300/70'
+          }
+        `}
         style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 20%, #312e81 60%, #4338ca 85%, #6366f1 100%)',
+          boxShadow: selected 
+            ? '0 12px 28px -8px rgba(67, 56, 202, 0.4), 0 8px 16px -8px rgba(67, 56, 202, 0.3)'
+            : '0 6px 20px -6px rgba(67, 56, 202, 0.25), 0 4px 8px -4px rgba(67, 56, 202, 0.1)'
         }}
-        isConnectable={true}
-      />
-      <Handle
-        id="top"
-        type="target"
-        position={Position.Top}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
+      >
+        {/* 🌟 KNOWLEDGE GLOW EFFECT */}
+        <div 
+          className={`
+            absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
+            transition-opacity duration-400 pointer-events-none
+          `}
+          style={{
+            background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%)',
+          }}
+        />
 
-      {/* Right handles */}
-      <Handle
-        id="right"
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="right"
-        type="target"
-        position={Position.Right}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
+        {/* 🔗 ENHANCED CONNECTION HANDLES with indigo theme */}
+        {/* Top handles */}
+        <Handle
+          id="top"
+          type="source"
+          position={Position.Top}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 2,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
+        <Handle
+          id="top"
+          type="target"
+          position={Position.Top}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
 
-      {/* Bottom handles */}
-      <Handle
-        id="bottom"
-        type="source"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="bottom"
-        type="target"
-        position={Position.Bottom}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
+        {/* Right handles */}
+        <Handle
+          id="right"
+          type="source"
+          position={Position.Right}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 2,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
+        <Handle
+          id="right"
+          type="target"
+          position={Position.Right}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
 
-      {/* Left handles */}
-      <Handle
-        id="left"
-        type="source"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 2
-        }}
-        isConnectable={true}
-      />
-      <Handle
-        id="left"
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 !bg-blue-500 transition-all duration-300 hover:scale-150 cursor-pointer opacity-0 group-hover:opacity-100"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-        isConnectable={true}
-      />
+        {/* Bottom handles */}
+        <Handle
+          id="bottom"
+          type="source"
+          position={Position.Bottom}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 2,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
+        <Handle
+          id="bottom"
+          type="target"
+          position={Position.Bottom}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
 
-      {/* Priority indicator */}
-      {data.priority && (
-        <div className="absolute -top-2 -right-2">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white ${data.priority === 'high' ? 'bg-red-500' :
-              data.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-            }`}>
-            {data.priority === 'high' ? '!' : data.priority === 'medium' ? '•' : '✓'}
+        {/* Left handles */}
+        <Handle
+          id="left"
+          type="source"
+          position={Position.Left}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 2,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
+        <Handle
+          id="left"
+          type="target"
+          position={Position.Left}
+          className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
+          style={{
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1,
+            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+          }}
+          isConnectable={true}
+        />
+
+        {/* 📚 TOPIC HEADER with knowledge icons */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center gap-2 bg-white/15 rounded-xl px-3 py-2 backdrop-blur-sm">
+              <motion.div
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Lightbulb size={20} className="text-yellow-300" />
+              </motion.div>
+              <BookOpen size={18} className="text-indigo-200" />
+            </div>
+            <div className="font-bold text-xl text-white leading-tight">
+              {data.label}
+            </div>
           </div>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 mb-2">
-        <div className="flex items-center gap-1">
-          <Brain size={16} className="drop-shadow-sm" />
-          {data.tags && data.tags.length > 0 && (
-            <Tag size={12} className="opacity-75" />
+          
+          {data.onDelete && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => {
+                e.preventDefault();
+                const deleteTimeout = setTimeout(() => {
+                  e.stopPropagation();
+                  data.onDelete();
+                }, 300);
+                e.currentTarget.deleteTimeout = deleteTimeout;
+              }}
+              onDoubleClick={(e) => {
+                if (e.currentTarget.deleteTimeout) {
+                  clearTimeout(e.currentTarget.deleteTimeout);
+                  e.currentTarget.deleteTimeout = null;
+                }
+              }}
+              className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200 backdrop-blur-sm"
+            >
+              <X size={16} className="text-indigo-100" />
+            </motion.button>
           )}
         </div>
-        <div className="font-semibold text-sm truncate flex-1">{data.label}</div>
-        {data.onDelete && (
-          <button
-            onClick={(e) => {
-              // Don't stop propagation immediately - delay the action to allow double-clicks
-              e.preventDefault(); // Prevent any default behavior but allow bubbling
-              
-              // Use a longer timeout to distinguish between single click and double-click
-              const deleteTimeout = setTimeout(() => {
-                // Only execute delete if this wasn't part of a double-click sequence
-                e.stopPropagation(); // Stop propagation only when actually deleting
-                data.onDelete();
-              }, 300); // Increased timeout
-              
-              // Store timeout ID on the button to cancel it if double-click occurs
-              e.currentTarget.deleteTimeout = deleteTimeout;
+
+        {/* 📝 TOPIC DESCRIPTION */}
+        {data.description && (
+          <div className="text-sm text-indigo-100 mb-4 p-3 bg-white/10 rounded-xl backdrop-blur-sm leading-relaxed">
+            {data.description}
+          </div>
+        )}
+
+        {/* 🏷️ CATEGORY TAG */}
+        {data.category && (
+          <div className="flex items-center gap-2 mb-4">
+            <Tag size={14} className="text-indigo-200" />
+            <span className="text-xs font-semibold text-indigo-200 bg-white/15 px-3 py-1 rounded-full backdrop-blur-sm">
+              {data.category.toUpperCase()}
+            </span>
+          </div>
+        )}
+
+        {/* 📊 PROGRESS VISUALIZATION */}
+        {data.flashcard_count > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm text-indigo-100">
+              <span className="font-medium">Learning Progress</span>
+              <span className="font-bold">{Math.round(completionPercentage)}%</span>
+            </div>
+            
+            {/* Enhanced progress bar */}
+            <div className="relative">
+              <div className="w-full bg-white/20 rounded-full h-3 backdrop-blur-sm border border-white/30">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 shadow-lg"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${completionPercentage}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+              <div className="text-xs text-indigo-200 mt-1 flex justify-between">
+                <span>{data.completed_flashcards || 0} completed</span>
+                <span>{data.flashcard_count} total</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🧠 BRAIN ACTIVITY INDICATOR */}
+        <div className="absolute bottom-3 right-3 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.1, 1],
+              opacity: [0.6, 1, 0.6]
             }}
-            onDoubleClick={(e) => {
-              // Cancel the pending delete action
-              if (e.currentTarget.deleteTimeout) {
-                clearTimeout(e.currentTarget.deleteTimeout);
-                e.currentTarget.deleteTimeout = null;
-              }
-              
-              // Don't prevent default - allow the double-click to bubble up for modal opening
-              // The parent node will handle the double-click to open the modal
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
             }}
-            className="ml-auto p-1 hover:bg-white hover:bg-opacity-20 rounded transition-all duration-200 hover:scale-110 opacity-70 hover:opacity-100"
+            className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm"
           >
-            <X size={12} />
-          </button>
+            <Brain size={16} className="text-indigo-200" />
+          </motion.div>
+        </div>
+
+        {/* 🕐 LAST UPDATED with enhanced styling */}
+        {data.updated_at && (
+          <div className="absolute bottom-2 left-3 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <Clock size={12} className="text-indigo-100" />
+            </div>
+          </div>
         )}
       </div>
-
-      <div className="text-xs opacity-90 mb-2">{data.category}</div>
-
-      {/* Enhanced progress display */}
-      {data.flashcard_count > 0 && (
-        <div className="text-xs mt-2 space-y-1">
-          <div className="flex justify-between items-center">
-            <span className="opacity-90">{data.completed_flashcards}/{data.flashcard_count} flashcards</span>
-            <span className="font-semibold">{Math.round(completionPercentage)}%</span>
-          </div>
-          <div className="w-full bg-white bg-opacity-20 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full transition-all duration-1000 ease-out"
-              style={{ width: `${completionPercentage}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Tags display */}
-      {data.tags && data.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {data.tags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs"
-            >
-              {tag}
-            </span>
-          ))}
-          {data.tags.length > 3 && (
-            <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
-              +{data.tags.length - 3}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Last updated indicator */}
-      {data.updated_at && (
-        <div className="absolute bottom-1 right-1 opacity-50">
-          <Clock size={10} />
-        </div>
-      )}
-    </div>
+    </motion.div>
   );
 };
 

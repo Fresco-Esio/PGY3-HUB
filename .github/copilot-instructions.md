@@ -65,12 +65,13 @@ PGY3-HUB is an immersive mind mapping application designed for psychiatry reside
 
 ### Timeline System
 
-- **Interactive Timeline**: Physics-based vertical timeline for tracking patient case progression over time
-- **Physics Simulation**: Rope-based physics with adjustable stiffness, damping, and force calculations for natural node movement
+- **Interactive Timeline**: SVG path-based vertical timeline for tracking patient case progression over time
+- **SVG Path Morphing**: GSAP-powered smooth path animations between timeline nodes with gradient styling
 - **Scroll Navigation**: Custom scrolling with animated gradient scrollbars and navigation buttons (Top, Bottom, Latest)
 - **Modal Integration**: Timeline embedded as a tab within CaseModal with proper height constraints for modal context
 - **Node Interactions**: Draggable timeline nodes with collision detection and smooth animations
-- **Performance Optimized**: Throttled physics updates, memoized calculations, and efficient scroll handling
+- **Visual Design**: Blue-purple gradient theme with dark slate backgrounds for cards (rgba(30, 41, 59, 0.85))
+- **Performance Optimized**: Memoized path calculations, optimized animations, and efficient scroll handling
 
 ### Performance Optimizations
 
@@ -392,5 +393,5 @@ const scrollToTop = useCallback(() => {
 - **Template System**: Predefined node templates for quick creation
 - **Literature Modal**: Dedicated interface for literature node interactions
 - **Timeline Integration**: Interactive vertical timeline within CaseModal with scroll navigation
-- **Physics-Based Timeline**: Rope simulation for natural timeline node movement and interactions
+- **SVG-Based Timeline**: Elegant path-based connections with gradient styling and smooth animations
 - **Auto-save Status**: Visual indicators for save state and last saved time

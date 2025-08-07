@@ -9,7 +9,6 @@ import TimelineTestPage from './components/timeline-test/TimelineTestPage';
 import {
   ReactFlow,
   addEdge,
-  Background,
   Controls,
   MiniMap,
   useNodesState,
@@ -23,6 +22,10 @@ import {
 
 // Lazy load heavy D3 dependencies
 const loadD3Force = () => import('d3-force');
+
+// 🎨 ARTISTIC COMPONENTS
+import ArtisticBackground from './components/ArtisticBackground';
+import './components/ArtisticStyles.css';
 const loadDagre = () => import('dagre');
 
 import {
@@ -843,11 +846,44 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
 
   if (!isOpen) return null;
 
+  // 🎨 ENHANCED NODE TYPES with artistic styling
   const nodeTypes = [
-    { type: 'topic', label: 'Psychiatric Topic', icon: Brain, color: 'bg-blue-600', description: 'Add a new psychiatric topic or disorder' },
-    { type: 'literature', label: 'Literature', icon: BookOpen, color: 'bg-purple-600', description: 'Add research papers, articles, or references' },
-    { type: 'case', label: 'Patient Case', icon: Users, color: 'bg-indigo-600', description: 'Add a new patient case study' },
-    { type: 'task', label: 'Task', icon: CheckSquare, color: 'bg-amber-600', description: 'Add a task or to-do item' }
+    { 
+      type: 'topic', 
+      label: 'Psychiatric Topic', 
+      icon: Brain, 
+      gradient: 'from-midnight-900 to-indigo-600', 
+      shadowColor: 'shadow-indigo-500/30',
+      description: 'Add a new psychiatric topic or disorder',
+      bgPattern: 'gradient-midnight'
+    },
+    { 
+      type: 'literature', 
+      label: 'Literature', 
+      icon: BookOpen, 
+      gradient: 'from-amber-600 to-orange-500', 
+      shadowColor: 'shadow-amber-500/30',
+      description: 'Add research papers, articles, or references',
+      bgPattern: 'gradient-parchment'
+    },
+    { 
+      type: 'case', 
+      label: 'Patient Case', 
+      icon: Users, 
+      gradient: 'from-violet-800 to-purple-600', 
+      shadowColor: 'shadow-violet-500/30',
+      description: 'Add a new patient case study',
+      bgPattern: 'gradient-plum'
+    },
+    { 
+      type: 'task', 
+      label: 'Task', 
+      icon: CheckSquare, 
+      gradient: 'from-red-500 to-pink-500', 
+      shadowColor: 'shadow-red-500/30',
+      description: 'Add a task or to-do item',
+      bgPattern: 'gradient-coral'
+    }
   ];
 
   const handleNodeTypeSelect = (nodeType) => {
@@ -860,49 +896,99 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm animate-in fade-in-25 duration-300">
-      <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 ease-out">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-md"
+    >
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 300, 
+          damping: 30
+        }}
+        className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-lg w-full mx-4 border border-white/20"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)'
+        }}
+      >
+        {/* 🎨 ARTISTIC HEADER */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
             {selectedNodeType && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1, x: -2 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setSelectedNodeType(null)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all"
               >
                 <ArrowLeft size={20} />
-              </button>
+              </motion.button>
             )}
-            <h3 className="text-xl font-semibold text-gray-800">
-              {selectedNodeType ? `Create ${selectedNodeType}` : 'Add New Node'}
-            </h3>
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <motion.div
+                animate={selectedNodeType ? { rotate: 45 } : { rotate: [0, 10, -10, 0] }}
+                transition={{ 
+                  duration: selectedNodeType ? 0.3 : 2, 
+                  repeat: selectedNodeType ? 0 : Infinity, 
+                  ease: "easeInOut" 
+                }}
+              >
+                <Plus size={24} className="text-white" />
+              </motion.div>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-1">
+                {selectedNodeType ? `Create ${selectedNodeType}` : 'Add New Node'}
+              </h2>
+              <p className="text-gray-600">
+                {selectedNodeType ? 'Configure your new node' : 'Choose the type of content to add'}
+              </p>
+            </div>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1"
+            className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all"
           >
-            <X size={20} />
-          </button>
+            <X size={24} />
+          </motion.button>
         </div>
 
         <div className="relative overflow-hidden" style={{ minHeight: '200px' }}>
           {/* View 1: Node Type Selection */}
           <div className={`transition-transform duration-300 ease-in-out ${selectedNodeType ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}>
-            <div className="space-y-3">
-              {nodeTypes.map(({ type, label, icon: Icon, color, description }) => (
-                <button
+            <div className="space-y-4">
+              {nodeTypes.map(({ type, label, icon: Icon, gradient, shadowColor, description }) => (
+                <motion.button
                   key={type}
                   onClick={() => handleNodeTypeSelect(type)}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`
+                    w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-transparent 
+                    hover:border-white/30 transition-all text-left overflow-hidden relative
+                    bg-gradient-to-r ${gradient} text-white shadow-lg hover:shadow-xl ${shadowColor}
+                    group
+                  `}
                 >
-                  <div className={`${color} p-2 rounded-lg text-white`}>
-                    <Icon size={20} />
+                  {/* Glow effect overlay */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-r from-white/10 to-transparent" />
+                  
+                  <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm border border-white/30 relative z-10">
+                    <Icon size={24} className="text-white" />
                   </div>
-                  <div>
-                    <div className="font-medium text-gray-800">{label}</div>
-                    <div className="text-sm text-gray-500">{description}</div>
+                  <div className="relative z-10">
+                    <div className="font-bold text-lg text-white mb-1">{label}</div>
+                    <div className="text-sm text-white/80 leading-relaxed">{description}</div>
                   </div>
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
@@ -928,8 +1014,8 @@ const NodeSelector = ({ isOpen, onClose, onSelect }) => {
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -2710,7 +2796,13 @@ useEffect(() => {
           }}
           className="bg-gradient-to-br from-blue-50 to-indigo-100"
         >
-          <Background color="#aaa" gap={16} />
+          {/* 🎨 ARTISTIC RADIAL BACKGROUND */}
+          <ArtisticBackground 
+            variant="radial"
+            color="#e2e8f0"
+            showRadialLines={true}
+            showConcentricCircles={true}
+          />
           <Controls />
           <MiniMap />
         </ReactFlow>
