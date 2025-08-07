@@ -30,12 +30,12 @@ const LiteratureNode = ({ data, selected }) => {
         rotate: 0.5,
         transition: { duration: 0.2 }
       }}
-      className={`group relative min-w-[260px] max-w-[300px] cursor-pointer ${selected ? 'z-10' : 'z-0'}`}
+      className={`group relative min-w-[180px] max-w-[220px] cursor-pointer ${selected ? 'z-10' : 'z-0'}`}
     >
       {/* 🎨 ARTISTIC PAPER CONTAINER with academic styling */}
       <div
         className={`
-          relative px-6 py-5 rounded-lg backdrop-blur-sm
+          relative px-3 py-3 rounded-lg backdrop-blur-sm
           border-2 transition-all duration-400 overflow-hidden
           shadow-lg hover:shadow-xl text-slate-800
           ${selected
@@ -179,14 +179,14 @@ const LiteratureNode = ({ data, selected }) => {
           isConnectable={true}
         />
 
-        {/* 📚 ACADEMIC HEADER with paper icons */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="flex items-center gap-2 bg-amber-100/80 rounded-lg px-3 py-2 border border-amber-200/60">
-              <FileText size={18} className="text-amber-800" />
-              <BookOpen size={16} className="text-amber-700" />
+        {/* 📚 COMPACT ACADEMIC HEADER */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center gap-1 bg-amber-100/80 rounded px-2 py-1 border border-amber-200/60">
+              <FileText size={14} className="text-amber-800" />
+              <BookOpen size={12} className="text-amber-700" />
             </div>
-            <div className="font-bold text-lg text-slate-800 leading-tight" style={{ fontFamily: '"Crimson Text", serif' }}>
+            <div className="font-bold text-sm text-slate-800 leading-tight line-clamp-2" style={{ fontFamily: '"Crimson Text", serif' }}>
               {data.title || data.label}
             </div>
           </div>
@@ -209,115 +209,74 @@ const LiteratureNode = ({ data, selected }) => {
                   e.currentTarget.deleteTimeout = null;
                 }
               }}
-              className="p-2 hover:bg-amber-100 rounded-lg transition-all duration-200"
+              className="p-1 hover:bg-amber-100 rounded-lg transition-all duration-200"
             >
-              <X size={16} className="text-slate-600" />
+              <X size={14} className="text-slate-600" />
             </motion.button>
           )}
         </div>
 
-        {/* 👨‍💼 AUTHORS with academic styling */}
+        {/* 👨‍💼 COMPACT AUTHORS & YEAR */}
         {data.authors && (
-          <div className="flex items-center gap-2 mb-3 text-sm text-slate-700">
-            <Users size={14} className="text-amber-700" />
-            <span className="italic font-medium">
-              {Array.isArray(data.authors) ? data.authors.join(', ') : data.authors}
+          <div className="flex items-center gap-2 mb-2 text-xs text-slate-700">
+            <Users size={12} className="text-amber-700" />
+            <span className="italic font-medium truncate">
+              {(() => {
+                const authors = Array.isArray(data.authors) ? data.authors.join(', ') : data.authors;
+                return authors.length > 30 ? `${authors.substring(0, 30)}...` : authors;
+              })()}
             </span>
+            {data.year && <span className="text-slate-600 font-semibold">({data.year})</span>}
           </div>
         )}
 
-        {/* 📅 PUBLICATION INFO */}
-        <div className="grid grid-cols-1 gap-3 mb-4">
-          {data.journal && (
-            <div className="text-sm text-slate-700 bg-amber-50/80 rounded-lg p-3 border border-amber-200/40">
-              <span className="font-semibold italic">{data.journal}</span>
-              {data.year && <span className="ml-2 text-slate-600">({data.year})</span>}
-              {data.volume && <span className="ml-2 text-slate-600">Vol. {data.volume}</span>}
-            </div>
-          )}
-
-          {data.publication_date && (
-            <div className="flex items-center gap-2 text-sm text-slate-700">
-              <Calendar size={14} className="text-amber-700" />
-              <span className="font-medium">{data.publication_date}</span>
-            </div>
-          )}
-        </div>
-
-        {/* 📄 ABSTRACT PREVIEW */}
-        {data.abstract && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Quote size={14} className="text-amber-700" />
-              <span className="text-sm font-semibold text-slate-700">Abstract</span>
-            </div>
-            <div className="text-sm text-slate-600 leading-relaxed bg-slate-50/80 rounded-lg p-3 border border-slate-200/40 line-clamp-3">
-              {data.abstract.length > 150 ? `${data.abstract.substring(0, 150)}...` : data.abstract}
-            </div>
+        {/* � COMPACT JOURNAL INFO */}
+        {data.journal && (
+          <div className="text-xs text-slate-700 bg-amber-50/60 rounded px-2 py-1 mb-2 truncate">
+            <span className="font-medium italic">{data.journal}</span>
+            {data.volume && <span className="ml-1 text-slate-600">Vol.{data.volume}</span>}
           </div>
         )}
 
-        {/* 🔗 DOI & LINKS */}
-        {(data.doi || data.url) && (
-          <div className="space-y-2 mb-4">
-            {data.doi && (
-              <div className="text-xs text-amber-800 bg-amber-100/60 rounded px-2 py-1 font-mono">
-                DOI: {data.doi}
-              </div>
-            )}
-            {data.url && (
-              <div className="text-xs text-blue-700 bg-blue-50/60 rounded px-2 py-1 truncate">
-                🔗 {data.url}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 🏷️ KEYWORDS/TAGS */}
+        {/* 🏷️ COMPACT KEYWORDS */}
         {(() => {
-          // Handle both 'keywords' and 'tags' fields, ensure they're arrays
           const keywordsOrTags = data.keywords || data.tags || [];
           const keywords = Array.isArray(keywordsOrTags) ? keywordsOrTags : [];
           
           return keywords.length > 0 && (
-            <div className="space-y-2">
-              <span className="text-xs font-semibold text-slate-600">Keywords:</span>
-              <div className="flex flex-wrap gap-1">
-                {keywords.slice(0, 4).map((keyword, index) => (
-                  <span
-                    key={index}
-                    className="text-xs bg-slate-200/60 text-slate-700 px-2 py-1 rounded-full border border-slate-300/40"
-                  >
-                    {keyword}
-                  </span>
-                ))}
-                {keywords.length > 4 && (
-                  <span className="text-xs bg-slate-200/60 text-slate-700 px-2 py-1 rounded-full border border-slate-300/40">
-                    +{keywords.length - 4}
-                  </span>
-                )}
-              </div>
+            <div className="flex flex-wrap gap-1 mb-2">
+              {keywords.slice(0, 2).map((keyword, index) => (
+                <span
+                  key={index}
+                  className="text-xs bg-slate-200/60 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300/40"
+                >
+                  {keyword.length > 12 ? `${keyword.substring(0, 12)}...` : keyword}
+                </span>
+              ))}
+              {keywords.length > 2 && (
+                <span className="text-xs bg-slate-200/60 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300/40">
+                  +{keywords.length - 2}
+                </span>
+              )}
             </div>
           );
         })()}
 
-        {/* 📊 CITATION TOOLTIP (appears on hover) */}
+        {/* 📊 COMPACT CITATION TOOLTIP */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ 
             opacity: 1, 
             y: 0,
             transition: { delay: 0.3 }
           }}
-          className="opacity-0 group-hover:opacity-100 transition-all duration-300 mt-4"
+          className="opacity-0 group-hover:opacity-100 transition-all duration-300 mt-2"
         >
-          <div className="text-xs bg-slate-700 text-white rounded-lg py-2 px-3 border border-slate-600">
-            <div className="font-semibold mb-1">Citation Preview</div>
-            <div className="italic">
+          <div className="text-xs bg-slate-700 text-white rounded py-1 px-2 border border-slate-600">
+            <div className="italic line-clamp-1">
               {data.authors && Array.isArray(data.authors) ? data.authors[0] : 'Author'} et al. 
-              {data.title && ` "${data.title.substring(0, 40)}..."`} 
-              {data.journal && ` ${data.journal}.`} 
-              {data.year && ` ${data.year}.`}
+              {data.year && ` (${data.year})`}
+              {data.journal && `, ${data.journal.substring(0, 20)}...`}
             </div>
           </div>
         </motion.div>
