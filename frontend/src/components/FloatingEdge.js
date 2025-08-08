@@ -58,6 +58,15 @@ const FloatingEdge = memo(
       const targetType = targetNode?.type || "default";
       const edgeKey = `${sourceType}-${targetType}`;
 
+      // Debug logging to check node type detection
+      console.log("FloatingEdge styling:", {
+        sourceType,
+        targetType,
+        edgeKey,
+        sourceNodeId: source,
+        targetNodeId: target,
+      });
+
       // Enhanced styling based on connection types
       switch (edgeKey) {
         case "topic-case":
@@ -75,7 +84,10 @@ const FloatingEdge = memo(
           return {
             stroke: "url(#taskCaseGradient)",
             strokeWidth: 4,
-            filter: "drop-shadow(0 2px 4px rgba(248, 113, 113, 0.3))",
+            strokeDasharray: "6,3", // Add dashed pattern
+            animation: "dash-flow 3s linear infinite", // Add flowing animation
+            filter: "drop-shadow(0 2px 4px rgba(248, 113, 113, 0.4))", // Slightly stronger shadow
+            strokeLinecap: "round", // Rounded dash ends for smoother look
           };
 
         case "literature-case":
@@ -97,13 +109,14 @@ const FloatingEdge = memo(
           };
 
         default:
+          console.log("Using default edge styling for:", edgeKey);
           return {
             stroke: "url(#defaultGradient)",
             strokeWidth: 2,
             filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))",
           };
       }
-    }, [sourceNode?.type, targetNode?.type]);
+    }, [sourceNode?.type, targetNode?.type, source, target]);
 
     // Memoize the edge path calculation for better performance
     const { edgePath, labelX, labelY } = useMemo(() => {
@@ -249,67 +262,6 @@ const FloatingEdge = memo(
 
     return (
       <>
-        {/* 🎨 GRADIENT DEFINITIONS for artistic edge styling */}
-        <defs>
-          <linearGradient
-            id="topicCaseGradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
-            <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#a855f7" stopOpacity="0.8" />
-          </linearGradient>
-
-          <linearGradient
-            id="taskCaseGradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop offset="0%" stopColor="#f97316" stopOpacity="0.9" />
-            <stop offset="50%" stopColor="#ef4444" stopOpacity="1.0" />
-            <stop offset="100%" stopColor="#ec4899" stopOpacity="0.9" />
-          </linearGradient>
-
-          <linearGradient
-            id="literatureCaseGradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop offset="0%" stopColor="#d97706" stopOpacity="0.7" />
-            <stop offset="50%" stopColor="#ca8a04" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#a16207" stopOpacity="0.7" />
-          </linearGradient>
-
-          <linearGradient
-            id="topicTaskGradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.8" />
-          </linearGradient>
-
-          <linearGradient
-            id="defaultGradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop offset="0%" stopColor="#64748b" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#475569" stopOpacity="0.8" />
-          </linearGradient>
-        </defs>
-
         <BaseEdge
           id={id}
           path={edgePath}

@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
   useRef,
+  useLayoutEffect,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -181,6 +182,15 @@ const CaseModal = ({
   // Tab-specific scroll positions
   const [scrollPositions, setScrollPositions] = useState({});
   const contentRefs = useRef({});
+  // Height animation state for smooth vertical resize
+  const [contentHeight, setContentHeight] = useState("auto");
+  const contentWrapperRef = useRef(null);
+  // Refs to measure chrome (header + tabs) to compute available height
+  const headerRef = useRef(null);
+  const tabsRef = useRef(null);
+  const viewportHRef = useRef(
+    typeof window !== "undefined" ? window.innerHeight : 1080
+  );
 
   // Form states for different tabs
   const [newMedication, setNewMedication] = useState({
@@ -330,6 +340,15 @@ const CaseModal = ({
 
       // Save current tab's scroll position
       saveScrollPosition(activeTab);
+      // Capture current panel height before switching to animate from
+      const currentEl = contentRefs.current[activeTab];
+      if (contentWrapperRef.current) {
+        // Prefer actual rendered wrapper height as the starting point
+        setContentHeight(contentWrapperRef.current.offsetHeight);
+      } else if (currentEl) {
+        // Fallback to panel height if wrapper not yet available
+        setContentHeight(currentEl.scrollHeight);
+      }
 
       setIsTabTransitioning(true);
       setActiveTab(newTabId);
@@ -342,6 +361,94 @@ const CaseModal = ({
     },
     [activeTab, isTabTransitioning, saveScrollPosition, restoreScrollPosition]
   );
+
+  // Helper: compute max modal and target wrapper height (clamped to viewport)
+  const computeTargetHeight = useCallback((panelEl) => {
+    const headerH = headerRef.current?.offsetHeight || 0;
+    const tabsH = tabsRef.current?.offsetHeight || 0;
+    const chrome = headerH + tabsH;
+    const maxModalH = Math.round(
+      (viewportHRef.current || window.innerHeight || 1080) * 0.9
+    ); // matches max-h-[90vh]
+    const maxWrapperH = Math.max(160, maxModalH - chrome);
+    // Prefer the largest among layout and visual box to avoid under-measure during transforms
+    const rectH = panelEl?.getBoundingClientRect
+      ? Math.ceil(panelEl.getBoundingClientRect().height)
+      : 0;
+    const offsetH = panelEl?.offsetHeight || 0;
+    const scrollH = panelEl?.scrollHeight || 0;
+    const panelH = Math.max(rectH, offsetH, scrollH);
+    return Math.min(panelH || 0, maxWrapperH);
+  }, []);
+
+  // Measure helper to update height immediately when a panel mounts
+  const measureNow = useCallback(
+    (panelEl) => {
+      if (!panelEl) return;
+      viewportHRef.current =
+        typeof window !== "undefined"
+          ? window.innerHeight
+          : viewportHRef.current;
+      setContentHeight(computeTargetHeight(panelEl));
+    },
+    [computeTargetHeight]
+  );
+
+  // On first open, measure after layout and once more on next frame to avoid transform-induced undershoot
+  useLayoutEffect(() => {
+    if (!hasInitialized) return;
+    const el = contentRefs.current[activeTab];
+    if (!el) return;
+    let f1 = requestAnimationFrame(() => {
+      setContentHeight(computeTargetHeight(el));
+      // measure one more time next frame
+      f1 = requestAnimationFrame(() =>
+        setContentHeight(computeTargetHeight(el))
+      );
+    });
+    return () => cancelAnimationFrame(f1);
+  }, [hasInitialized, activeTab, computeTargetHeight]);
+
+  // Ensure we measure once the modal has initialized and the first panel is in the DOM
+  useEffect(() => {
+    if (!hasInitialized) return;
+    const raf = requestAnimationFrame(() => {
+      const el = contentRefs.current[activeTab];
+      if (el) measureNow(el);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [hasInitialized, activeTab, measureNow]);
+
+  // Update contentHeight when active tab content renders/changes and on resize
+  useEffect(() => {
+    const nextEl = contentRefs.current[activeTab];
+    if (!nextEl) return;
+
+    const update = () => {
+      // Keep viewport height up to date
+      viewportHRef.current =
+        typeof window !== "undefined"
+          ? window.innerHeight
+          : viewportHRef.current;
+      setContentHeight(computeTargetHeight(nextEl));
+    };
+
+    // Initial measure after paint
+    const raf = requestAnimationFrame(update);
+    // Observe size changes while mounted
+    const ro = new ResizeObserver(update);
+    ro.observe(nextEl);
+    // Listen to viewport resizes
+    const onResize = () => update();
+    window.addEventListener("resize", onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      try {
+        ro.disconnect();
+      } catch {}
+      window.removeEventListener("resize", onResize);
+    };
+  }, [activeTab, computeTargetHeight]);
 
   // Section editing functionality
   const toggleEditSection = useCallback(
@@ -876,6 +983,10 @@ const CaseModal = ({
             animate="visible"
             exit="exit"
             variants={modalVariants}
+            layout
+            transition={{
+              layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+            }}
             className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-hidden transition-all duration-500 ease-in-out ${
               activeTab === "timeline" ? "max-w-7xl" : "max-w-4xl"
             }`}
@@ -894,6 +1005,8 @@ const CaseModal = ({
             }}
           >
             <motion.div
+              ref={headerRef}
+              layout
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -913,7 +1026,10 @@ const CaseModal = ({
             </motion.div>
 
             {/* Tab Navigation */}
-            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-600">
+            <div
+              ref={tabsRef}
+              className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-600"
+            >
               <nav className="flex flex-wrap gap-2 px-6 py-4">
                 {tabs.map(({ id, label, icon: Icon }) => (
                   <motion.button
@@ -949,21 +1065,28 @@ const CaseModal = ({
 
             {/* Dark Content Area */}
             <motion.div
-              className="flex-1 bg-gradient-to-br from-slate-900 to-slate-800 overflow-hidden"
-              animate={{ opacity: isTabTransitioning ? 0.7 : 1 }}
-              transition={{ duration: 0.2 }}
+              ref={contentWrapperRef}
+              className="bg-gradient-to-br from-slate-900 to-slate-800 overflow-y-auto overflow-x-hidden"
+              initial={false}
+              animate={{ height: contentHeight }}
+              style={{ willChange: "height" }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
               <AnimatePresence mode="wait">
                 {/* Overview Tab */}
                 {activeTab === "overview" && (
                   <motion.div
+                    layout
                     key="overview"
-                    ref={(el) => (contentRefs.current.overview = el)}
+                    ref={(el) => {
+                      contentRefs.current.overview = el;
+                      if (el && activeTab === "overview") measureNow(el);
+                    }}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3 }}
-                    className="h-full overflow-y-auto p-6 space-y-6"
+                    className="p-6 space-y-6"
                   >
                     {/* Case Title and Basic Info */}
                     <motion.div
@@ -1195,13 +1318,17 @@ const CaseModal = ({
                 {/* Medications Tab */}
                 {activeTab === "medications" && (
                   <motion.div
+                    layout
                     key="medications"
-                    ref={(el) => (contentRefs.current.medications = el)}
+                    ref={(el) => {
+                      contentRefs.current.medications = el;
+                      if (el && activeTab === "medications") measureNow(el);
+                    }}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3 }}
-                    className="h-full overflow-y-auto p-6 space-y-6"
+                    className="p-6 space-y-6"
                   >
                     {/* Medications List */}
                     <motion.div
@@ -1430,13 +1557,17 @@ const CaseModal = ({
                 {/* Therapy & Insights Tab */}
                 {activeTab === "therapy" && (
                   <motion.div
+                    layout
                     key="therapy"
-                    ref={(el) => (contentRefs.current.therapy = el)}
+                    ref={(el) => {
+                      contentRefs.current.therapy = el;
+                      if (el && activeTab === "therapy") measureNow(el);
+                    }}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3 }}
-                    className="h-full overflow-y-auto p-6 space-y-6"
+                    className="p-6 space-y-6"
                   >
                     {/* Therapeutic Highlights Section */}
                     <motion.div
@@ -1552,13 +1683,17 @@ const CaseModal = ({
                 {/* Timeline Tab */}
                 {activeTab === "timeline" && (
                   <motion.div
+                    layout
                     key="timeline"
-                    ref={(el) => (contentRefs.current.timeline = el)}
+                    ref={(el) => {
+                      contentRefs.current.timeline = el;
+                      if (el && activeTab === "timeline") measureNow(el);
+                    }}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3 }}
-                    className="h-full"
+                    className=""
                   >
                     <VerticalTimeline
                       data={timelineEntries}
@@ -1577,13 +1712,17 @@ const CaseModal = ({
                 {/* Related Tab */}
                 {activeTab === "related" && (
                   <motion.div
+                    layout
                     key="related"
-                    ref={(el) => (contentRefs.current.related = el)}
+                    ref={(el) => {
+                      contentRefs.current.related = el;
+                      if (el && activeTab === "related") measureNow(el);
+                    }}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3 }}
-                    className="h-full overflow-y-auto p-6 space-y-6"
+                    className="p-6 space-y-6"
                   >
                     {/* Connected Nodes */}
                     <motion.div

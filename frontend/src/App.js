@@ -3287,7 +3287,7 @@ const DashboardComponent = () => {
               animation: "flowingDash 1s linear infinite", // Add flowing animation
             }}
             defaultEdgeOptions={{
-              type: "enhanced", // Use our enhanced edge with proper prop handling
+              type: "floating", // Use our floating edge with proper type-based styling
               style: {
                 strokeWidth: 2.5,
                 stroke: "#64748b",
@@ -3306,6 +3306,70 @@ const DashboardComponent = () => {
               showRadialLines={true}
               showConcentricCircles={true}
             />
+
+            {/* 🎨 SVG GRADIENT DEFINITIONS for FloatingEdge styling */}
+            <svg style={{ position: "absolute", width: 0, height: 0 }}>
+              <defs>
+                <linearGradient
+                  id="topicCaseGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#a855f7" stopOpacity="0.8" />
+                </linearGradient>
+
+                <linearGradient
+                  id="taskCaseGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="#f97316" stopOpacity="0.9" />
+                  <stop offset="50%" stopColor="#ef4444" stopOpacity="1.0" />
+                  <stop offset="100%" stopColor="#ec4899" stopOpacity="0.9" />
+                </linearGradient>
+
+                <linearGradient
+                  id="literatureCaseGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="#d97706" stopOpacity="0.7" />
+                  <stop offset="50%" stopColor="#ca8a04" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#a16207" stopOpacity="0.7" />
+                </linearGradient>
+
+                <linearGradient
+                  id="topicTaskGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.7" />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.8" />
+                </linearGradient>
+
+                <linearGradient
+                  id="defaultGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="#64748b" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#475569" stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
+            </svg>
+
             <Controls />
             <MiniMap />
           </ReactFlow>
