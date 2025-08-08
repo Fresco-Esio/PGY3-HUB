@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Handle, Position } from '@xyflow/react';
-import { Brain, Tag, Clock, X, BookOpen, Lightbulb } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { Handle, Position } from "@xyflow/react";
+import { Brain, Tag, Clock, X, BookOpen, Lightbulb } from "lucide-react";
+import { motion } from "framer-motion";
 
 const TopicNode = ({ data, selected }) => {
   const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
-  
+
   // Entry animation - only if not skipping animations
   useEffect(() => {
     if (!data.skipAnimation) {
@@ -14,26 +14,33 @@ const TopicNode = ({ data, selected }) => {
     }
   }, [data.skipAnimation]);
 
-  const completionPercentage = data.flashcard_count > 0
-    ? ((data.completed_flashcards || 0) / data.flashcard_count) * 100
-    : 0;
+  const completionPercentage =
+    data.flashcard_count > 0
+      ? ((data.completed_flashcards || 0) / data.flashcard_count) * 100
+      : 0;
 
   return (
     <motion.div
-      initial={data.skipAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8, y: 20 }}
+      initial={
+        data.skipAnimation
+          ? { opacity: 1, scale: 1 }
+          : { opacity: 0, scale: 0.8, y: 20 }
+      }
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: -20 }}
-      transition={{ 
-        duration: 0.6, 
+      transition={{
+        duration: 0.6,
         ease: [0.25, 0.46, 0.45, 0.94],
-        delay: data.skipAnimation ? 0 : 0.1
+        delay: data.skipAnimation ? 0 : 0.1,
       }}
-      whileHover={{ 
-        scale: 1.06, 
+      whileHover={{
+        scale: 1.06,
         y: -3,
-        transition: { duration: 0.2 }
+        transition: { duration: 0.2 },
       }}
-      className={`group relative min-w-[260px] max-w-[300px] cursor-pointer ${selected ? 'z-10' : 'z-0'}`}
+      className={`group relative min-w-[260px] max-w-[300px] cursor-pointer ${
+        selected ? "z-10" : "z-0"
+      }`}
     >
       {/* 🎨 ARTISTIC TOPIC CONTAINER with midnight blue → indigo gradient */}
       <div
@@ -41,26 +48,29 @@ const TopicNode = ({ data, selected }) => {
           relative px-6 py-5 rounded-2xl backdrop-blur-sm
           border-2 transition-all duration-400 overflow-hidden
           shadow-lg hover:shadow-2xl
-          ${selected
-            ? 'border-indigo-300 shadow-indigo-500/30 ring-4 ring-indigo-200/60' 
-            : 'border-indigo-200/40 hover:border-indigo-300/70'
+          ${
+            selected
+              ? "border-indigo-300 shadow-indigo-500/30 ring-4 ring-indigo-200/60"
+              : "border-indigo-200/40 hover:border-indigo-300/70"
           }
         `}
         style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 20%, #312e81 60%, #4338ca 85%, #6366f1 100%)',
-          boxShadow: selected 
-            ? '0 12px 28px -8px rgba(67, 56, 202, 0.4), 0 8px 16px -8px rgba(67, 56, 202, 0.3)'
-            : '0 6px 20px -6px rgba(67, 56, 202, 0.25), 0 4px 8px -4px rgba(67, 56, 202, 0.1)'
+          background:
+            "linear-gradient(135deg, #0f172a 0%, #1e293b 20%, #312e81 60%, #4338ca 85%, #6366f1 100%)",
+          boxShadow: selected
+            ? "0 12px 28px -8px rgba(67, 56, 202, 0.4), 0 8px 16px -8px rgba(67, 56, 202, 0.3)"
+            : "0 6px 20px -6px rgba(67, 56, 202, 0.25), 0 4px 8px -4px rgba(67, 56, 202, 0.1)",
         }}
       >
         {/* 🌟 KNOWLEDGE GLOW EFFECT */}
-        <div 
+        <div
           className={`
             absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
             transition-opacity duration-400 pointer-events-none
           `}
           style={{
-            background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%)',
+            background:
+              "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%)",
           }}
         />
 
@@ -72,10 +82,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Top}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -85,10 +95,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Top}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -100,10 +110,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Right}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -113,10 +123,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Right}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -128,10 +138,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Bottom}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -141,10 +151,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Bottom}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -156,10 +166,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Left}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -169,10 +179,10 @@ const TopicNode = ({ data, selected }) => {
           position={Position.Left}
           className="w-4 h-4 !bg-indigo-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-indigo-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+            boxShadow: "0 2px 8px rgba(67, 56, 202, 0.4)",
           }}
           isConnectable={true}
         />
@@ -183,7 +193,11 @@ const TopicNode = ({ data, selected }) => {
             <div className="flex items-center gap-2 bg-white/15 rounded-xl px-3 py-2 backdrop-blur-sm">
               <motion.div
                 animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
                 <Lightbulb size={20} className="text-yellow-300" />
               </motion.div>
@@ -193,7 +207,7 @@ const TopicNode = ({ data, selected }) => {
               {data.label}
             </div>
           </div>
-          
+
           {data.onDelete && (
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -241,9 +255,11 @@ const TopicNode = ({ data, selected }) => {
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-indigo-100">
               <span className="font-medium">Learning Progress</span>
-              <span className="font-bold">{Math.round(completionPercentage)}%</span>
+              <span className="font-bold">
+                {Math.round(completionPercentage)}%
+              </span>
             </div>
-            
+
             {/* Enhanced progress bar */}
             <div className="relative">
               <div className="w-full bg-white/20 rounded-full h-3 backdrop-blur-sm border border-white/30">
@@ -265,14 +281,14 @@ const TopicNode = ({ data, selected }) => {
         {/* 🧠 BRAIN ACTIVITY INDICATOR */}
         <div className="absolute bottom-3 right-3 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
           <motion.div
-            animate={{ 
+            animate={{
               scale: [1, 1.1, 1],
-              opacity: [0.6, 1, 0.6]
+              opacity: [0.6, 1, 0.6],
             }}
-            transition={{ 
-              duration: 3, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
             }}
             className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm"
           >

@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Handle, Position } from '@xyflow/react';
-import { Users, Calendar, CheckSquare, Clock, X, AlertCircle, Eye } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { Handle, Position } from "@xyflow/react";
+import {
+  Users,
+  Calendar,
+  CheckSquare,
+  Clock,
+  X,
+  AlertCircle,
+  Eye,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 const CaseNode = ({ data, selected }) => {
   const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
-  
+
   // Entry animation with slight delay for staggered effect - only if not skipping animations
   useEffect(() => {
     if (!data.skipAnimation) {
@@ -16,43 +24,57 @@ const CaseNode = ({ data, selected }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200';
-      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'follow_up': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-blue-100 text-blue-800 border-blue-200';
+      case "active":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "archived":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "follow_up":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-blue-100 text-blue-800 border-blue-200";
     }
   };
 
   const getUrgencyLevel = (data) => {
     // Simple urgency calculation based on keywords
-    const urgentKeywords = ['emergency', 'urgent', 'crisis', 'acute', 'severe'];
-    const complaint = data.chief_complaint?.toLowerCase() || '';
-    const diagnosis = data.diagnosis?.toLowerCase() || '';
+    const urgentKeywords = ["emergency", "urgent", "crisis", "acute", "severe"];
+    const complaint = data.chief_complaint?.toLowerCase() || "";
+    const diagnosis = data.diagnosis?.toLowerCase() || "";
 
-    if (urgentKeywords.some(keyword => complaint.includes(keyword) || diagnosis.includes(keyword))) {
-      return 'high';
+    if (
+      urgentKeywords.some(
+        (keyword) => complaint.includes(keyword) || diagnosis.includes(keyword)
+      )
+    ) {
+      return "high";
     }
-    return 'normal';
+    return "normal";
   };
 
   const urgency = getUrgencyLevel(data);
 
   return (
     <motion.div
-      initial={data.skipAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8, y: 20 }}
+      initial={
+        data.skipAnimation
+          ? { opacity: 1, scale: 1 }
+          : { opacity: 0, scale: 0.8, y: 20 }
+      }
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: -20 }}
-      transition={{ 
-        duration: 0.5, 
+      transition={{
+        duration: 0.5,
         ease: [0.25, 0.46, 0.45, 0.94],
-        delay: data.skipAnimation ? 0 : 0.15
+        delay: data.skipAnimation ? 0 : 0.15,
       }}
-      whileHover={{ 
-        scale: 1.05, 
+      whileHover={{
+        scale: 1.05,
         y: -2,
-        transition: { duration: 0.2 }
+        transition: { duration: 0.2 },
       }}
-      className={`group relative min-w-[280px] max-w-[320px] cursor-pointer ${selected ? 'z-10' : 'z-0'}`}
+      className={`group relative min-w-[280px] max-w-[320px] cursor-pointer ${
+        selected ? "z-10" : "z-0"
+      }`}
     >
       {/* 🎨 ARTISTIC CARD CONTAINER with deep violet → plum gradient */}
       <div
@@ -60,27 +82,30 @@ const CaseNode = ({ data, selected }) => {
           relative px-6 py-4 rounded-2xl backdrop-blur-sm
           border transition-all duration-300 overflow-hidden
           shadow-lg hover:shadow-2xl
-          ${selected
-            ? 'border-violet-300 shadow-violet-500/25 ring-4 ring-violet-200/50' 
-            : 'border-violet-200/30 hover:border-violet-300/60'
+          ${
+            selected
+              ? "border-violet-300 shadow-violet-500/25 ring-4 ring-violet-200/50"
+              : "border-violet-200/30 hover:border-violet-300/60"
           }
-          ${urgency === 'high' ? 'ring-2 ring-red-400/60' : ''}
+          ${urgency === "high" ? "ring-2 ring-red-400/60" : ""}
         `}
         style={{
-          background: 'linear-gradient(135deg, #581c87 0%, #7c3aed 25%, #a855f7 75%, #c084fc 100%)',
-          boxShadow: selected 
-            ? '0 10px 25px -5px rgba(139, 92, 246, 0.4), 0 8px 10px -6px rgba(139, 92, 246, 0.3)'
-            : '0 4px 15px -3px rgba(139, 92, 246, 0.25), 0 4px 6px -4px rgba(139, 92, 246, 0.1)'
+          background:
+            "linear-gradient(135deg, #581c87 0%, #7c3aed 25%, #a855f7 75%, #c084fc 100%)",
+          boxShadow: selected
+            ? "0 10px 25px -5px rgba(139, 92, 246, 0.4), 0 8px 10px -6px rgba(139, 92, 246, 0.3)"
+            : "0 4px 15px -3px rgba(139, 92, 246, 0.25), 0 4px 6px -4px rgba(139, 92, 246, 0.1)",
         }}
       >
         {/* 🌟 GLOW EFFECT OVERLAY */}
-        <div 
+        <div
           className={`
             absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
             transition-opacity duration-300 pointer-events-none
           `}
           style={{
-            background: 'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.1) 0%, transparent 70%)',
+            background:
+              "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.1) 0%, transparent 70%)",
           }}
         />
 
@@ -92,10 +117,10 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Top}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
@@ -105,10 +130,10 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Top}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
@@ -120,10 +145,10 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Right}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
@@ -133,10 +158,10 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Right}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
@@ -148,10 +173,10 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Bottom}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
@@ -161,10 +186,10 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Bottom}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
@@ -176,10 +201,10 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Left}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
@@ -189,17 +214,17 @@ const CaseNode = ({ data, selected }) => {
           position={Position.Left}
           className="w-4 h-4 !bg-violet-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-violet-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+            boxShadow: "0 2px 8px rgba(139, 92, 246, 0.4)",
           }}
           isConnectable={true}
         />
 
         {/* 🚨 ENHANCED URGENCY INDICATOR */}
-        {urgency === 'high' && (
-          <motion.div 
+        {urgency === "high" && (
+          <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             className="absolute -top-3 -right-3"
@@ -230,7 +255,7 @@ const CaseNode = ({ data, selected }) => {
               {data.label}
             </div>
           </div>
-          
+
           {data.onDelete && (
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -273,8 +298,12 @@ const CaseNode = ({ data, selected }) => {
           )}
 
           {data.status && (
-            <div className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 backdrop-blur-sm ${getStatusColor(data.status)}`}>
-              {data.status.replace('_', ' ').toUpperCase()}
+            <div
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 backdrop-blur-sm ${getStatusColor(
+                data.status
+              )}`}
+            >
+              {data.status.replace("_", " ").toUpperCase()}
             </div>
           )}
         </div>
@@ -295,16 +324,18 @@ const CaseNode = ({ data, selected }) => {
         {/* 👁️ VIEW TIMELINE BADGE (appears on hover) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
-          animate={{ 
-            opacity: 1, 
+          animate={{
+            opacity: 1,
             y: 0,
-            transition: { delay: 0.2 }
+            transition: { delay: 0.2 },
           }}
           className="opacity-0 group-hover:opacity-100 transition-all duration-300 mt-3"
         >
           <div className="flex items-center justify-center gap-2 bg-white/20 rounded-lg py-2 backdrop-blur-sm border border-white/30">
             <Eye size={16} className="text-white" />
-            <span className="text-sm font-medium text-white">View Timeline</span>
+            <span className="text-sm font-medium text-white">
+              View Timeline
+            </span>
           </div>
         </motion.div>
 

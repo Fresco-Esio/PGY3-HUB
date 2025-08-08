@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Handle, Position } from '@xyflow/react';
-import { CheckSquare, X, Clock, Flag, Target, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { Handle, Position } from "@xyflow/react";
+import { CheckSquare, X, Clock, Flag, Target, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 
 const TaskNode = ({ data, selected }) => {
   const [isVisible, setIsVisible] = useState(data.skipAnimation || false);
-  
+
   // Entry animation with different timing for variety - only if not skipping animations
   useEffect(() => {
     if (!data.skipAnimation) {
@@ -17,30 +17,34 @@ const TaskNode = ({ data, selected }) => {
   // 🎨 Enhanced status styling with better visual hierarchy
   const getStatusStyles = (status) => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return {
-          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #ea580c 100%)',
-          ring: 'ring-orange-300/50',
-          shadow: 'shadow-orange-500/30'
+          background:
+            "linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #ea580c 100%)",
+          ring: "ring-orange-300/50",
+          shadow: "shadow-orange-500/30",
         };
-      case 'in_progress':
+      case "in_progress":
         return {
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)',
-          ring: 'ring-blue-300/50',
-          shadow: 'shadow-blue-500/30'
+          background:
+            "linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)",
+          ring: "ring-blue-300/50",
+          shadow: "shadow-blue-500/30",
         };
-      case 'completed':
+      case "completed":
         return {
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)',
-          ring: 'ring-emerald-300/50',
-          shadow: 'shadow-emerald-500/30',
-          opacity: 'opacity-75'
+          background:
+            "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)",
+          ring: "ring-emerald-300/50",
+          shadow: "shadow-emerald-500/30",
+          opacity: "opacity-75",
         };
       default:
         return {
-          background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #e74c3c 100%)',
-          ring: 'ring-red-300/50',
-          shadow: 'shadow-red-500/30'
+          background:
+            "linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #e74c3c 100%)",
+          ring: "ring-red-300/50",
+          shadow: "shadow-red-500/30",
         };
     }
   };
@@ -48,10 +52,14 @@ const TaskNode = ({ data, selected }) => {
   // 🎯 Priority ring colors
   const getPriorityRing = (priority) => {
     switch (priority) {
-      case 'high': return 'ring-4 ring-red-400 ring-opacity-70';
-      case 'medium': return 'ring-4 ring-yellow-400 ring-opacity-70';
-      case 'low': return 'ring-4 ring-green-400 ring-opacity-70';
-      default: return '';
+      case "high":
+        return "ring-4 ring-red-400 ring-opacity-70";
+      case "medium":
+        return "ring-4 ring-yellow-400 ring-opacity-70";
+      case "low":
+        return "ring-4 ring-green-400 ring-opacity-70";
+      default:
+        return "";
     }
   };
 
@@ -60,20 +68,26 @@ const TaskNode = ({ data, selected }) => {
 
   return (
     <motion.div
-      initial={data.skipAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8, x: -20 }}
+      initial={
+        data.skipAnimation
+          ? { opacity: 1, scale: 1 }
+          : { opacity: 0, scale: 0.8, x: -20 }
+      }
       animate={{ opacity: 1, scale: 1, x: 0 }}
       exit={{ opacity: 0, scale: 0.8, x: 20 }}
-      transition={{ 
-        duration: 0.4, 
+      transition={{
+        duration: 0.4,
         ease: [0.68, -0.55, 0.265, 1.55],
-        delay: data.skipAnimation ? 0 : 0.2
+        delay: data.skipAnimation ? 0 : 0.2,
       }}
-      whileHover={{ 
-        scale: 1.05, 
+      whileHover={{
+        scale: 1.05,
         x: 2,
-        transition: { duration: 0.2 }
+        transition: { duration: 0.2 },
       }}
-      className={`group relative min-w-[240px] max-w-[280px] cursor-pointer ${selected ? 'z-10' : 'z-0'}`}
+      className={`group relative min-w-[240px] max-w-[280px] cursor-pointer ${
+        selected ? "z-10" : "z-0"
+      }`}
     >
       {/* 🎨 ARTISTIC TASK CONTAINER with bright coral theme */}
       <div
@@ -81,28 +95,30 @@ const TaskNode = ({ data, selected }) => {
           relative px-5 py-4 rounded-2xl backdrop-blur-sm
           border-2 transition-all duration-300 overflow-hidden
           shadow-lg hover:shadow-2xl text-white font-medium
-          ${selected
-            ? `border-white shadow-2xl ring-4 ring-white/30 ${statusStyles.shadow}` 
-            : 'border-white/30 hover:border-white/60'
+          ${
+            selected
+              ? `border-white shadow-2xl ring-4 ring-white/30 ${statusStyles.shadow}`
+              : "border-white/30 hover:border-white/60"
           }
           ${priorityRing}
-          ${statusStyles.opacity || ''}
+          ${statusStyles.opacity || ""}
         `}
         style={{
           background: statusStyles.background,
-          boxShadow: selected 
-            ? '0 12px 32px -8px rgba(255, 107, 107, 0.4), 0 8px 16px -8px rgba(255, 107, 107, 0.3)'
-            : '0 6px 20px -6px rgba(255, 107, 107, 0.25), 0 4px 8px -4px rgba(255, 107, 107, 0.1)'
+          boxShadow: selected
+            ? "0 12px 32px -8px rgba(255, 107, 107, 0.4), 0 8px 16px -8px rgba(255, 107, 107, 0.3)"
+            : "0 6px 20px -6px rgba(255, 107, 107, 0.25), 0 4px 8px -4px rgba(255, 107, 107, 0.1)",
         }}
       >
         {/* 🌟 ENERGY GLOW EFFECT */}
-        <div 
+        <div
           className={`
             absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
             transition-opacity duration-300 pointer-events-none
           `}
           style={{
-            background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+            background:
+              "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 50%)",
           }}
         />
 
@@ -114,10 +130,10 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Top}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
@@ -127,10 +143,10 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Top}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
@@ -142,10 +158,10 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Right}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
@@ -155,10 +171,10 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Right}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
@@ -170,10 +186,10 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Bottom}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
@@ -183,10 +199,10 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Bottom}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
@@ -198,10 +214,10 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Left}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
@@ -211,25 +227,31 @@ const TaskNode = ({ data, selected }) => {
           position={Position.Left}
           className="w-4 h-4 !bg-red-400 !border-2 !border-white transition-all duration-300 hover:scale-125 cursor-pointer opacity-0 group-hover:opacity-100 hover:!bg-red-300"
           style={{
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: "50%",
+            transform: "translateY(-50%)",
             zIndex: 1,
-            boxShadow: '0 2px 8px rgba(248, 113, 113, 0.4)'
+            boxShadow: "0 2px 8px rgba(248, 113, 113, 0.4)",
           }}
           isConnectable={true}
         />
 
         {/* 🎯 PRIORITY INDICATOR with enhanced styling */}
         {data.priority && (
-          <motion.div 
+          <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             className="absolute -top-3 -right-3"
           >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-3 border-white shadow-lg
-              ${data.priority === 'high' ? 'bg-red-500' : 
-                data.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-              }`}>
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center border-3 border-white shadow-lg
+              ${
+                data.priority === "high"
+                  ? "bg-red-500"
+                  : data.priority === "medium"
+                  ? "bg-yellow-500"
+                  : "bg-green-500"
+              }`}
+            >
               <Flag size={16} className="text-white" />
             </div>
           </motion.div>
@@ -239,7 +261,7 @@ const TaskNode = ({ data, selected }) => {
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex items-center gap-2 bg-white/20 rounded-xl px-3 py-2 backdrop-blur-sm">
-              {data.status === 'completed' ? (
+              {data.status === "completed" ? (
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -247,7 +269,7 @@ const TaskNode = ({ data, selected }) => {
                 >
                   <CheckSquare size={20} className="text-green-300" />
                 </motion.div>
-              ) : data.status === 'in_progress' ? (
+              ) : data.status === "in_progress" ? (
                 <motion.div
                   animate={{ rotate: [0, 360] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -262,7 +284,7 @@ const TaskNode = ({ data, selected }) => {
               {data.label}
             </div>
           </div>
-          
+
           {data.onDelete && (
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -321,7 +343,10 @@ const TaskNode = ({ data, selected }) => {
                 {data.completed_subtasks || 0}/{data.total_subtasks}
               </span>
               <div className="relative w-6 h-6">
-                <svg className="w-6 h-6 transform -rotate-90" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6 transform -rotate-90"
+                  viewBox="0 0 24 24"
+                >
                   <circle
                     cx="12"
                     cy="12"
@@ -338,10 +363,20 @@ const TaskNode = ({ data, selected }) => {
                     strokeWidth="2"
                     fill="none"
                     strokeDasharray={`${2 * Math.PI * 8}`}
-                    strokeDashoffset={`${2 * Math.PI * 8 * (1 - ((data.completed_subtasks || 0) / data.total_subtasks))}`}
+                    strokeDashoffset={`${
+                      2 *
+                      Math.PI *
+                      8 *
+                      (1 - (data.completed_subtasks || 0) / data.total_subtasks)
+                    }`}
                     initial={{ strokeDashoffset: 2 * Math.PI * 8 }}
-                    animate={{ 
-                      strokeDashoffset: 2 * Math.PI * 8 * (1 - ((data.completed_subtasks || 0) / data.total_subtasks))
+                    animate={{
+                      strokeDashoffset:
+                        2 *
+                        Math.PI *
+                        8 *
+                        (1 -
+                          (data.completed_subtasks || 0) / data.total_subtasks),
                     }}
                     transition={{ duration: 1, ease: "easeOut" }}
                   />
