@@ -2448,6 +2448,17 @@ useEffect(() => {
           <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
         </div>
 
+        {/* Home Button */}
+        <motion.button
+          onClick={() => navigate('/')}
+          className="w-full p-3 mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-lg transition-all duration-300 flex items-center space-x-3 group"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-medium">Return to Home</span>
+        </motion.button>
+
         {/* --- Category Filters --- */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-slate-300 mb-3">Filter by Category</h3>
