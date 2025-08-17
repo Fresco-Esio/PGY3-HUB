@@ -209,21 +209,35 @@ const TopicNode = ({ data, selected }) => {
       )}
 
       {/* Tags display */}
-      {data.tags && data.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {data.tags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs"
-            >
-              {tag}
-            </span>
-          ))}
-          {data.tags.length > 3 && (
-            <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
-              +{data.tags.length - 3}
-            </span>
-          )}
+      {(() => {
+        // Handle tags as either string (comma-separated) or array
+        let tagsArray = [];
+        if (data.tags) {
+          if (typeof data.tags === 'string') {
+            tagsArray = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+          } else if (Array.isArray(data.tags)) {
+            tagsArray = data.tags;
+          }
+        }
+        
+        return tagsArray.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {tagsArray.slice(0, 3).map((tag, index) => (
+              <span
+                key={index}
+                className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs"
+              >
+                {tag}
+              </span>
+            ))}
+            {tagsArray.length > 3 && (
+              <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
+                +{tagsArray.length - 3}
+              </span>
+            )}
+          </div>
+        );
+      })()
         </div>
       )}
 
