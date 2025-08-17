@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Import new components
+import HomeScreen from './components/HomeScreen';
+import MapOptionsModal, { mapStorageUtils } from './components/MapManager';
 import {
   ReactFlow,
   addEdge,
