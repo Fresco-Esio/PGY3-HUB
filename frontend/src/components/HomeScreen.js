@@ -241,18 +241,12 @@ const MenuButton = ({
 
 // Main HomeScreen Component
 const HomeScreen = ({ onCreateNew, onOpenExisting, hasExistingData }) => {
-  const [showOptions, setShowOptions] = useState(true); // Set to true for testing
+  const [showOptions, setShowOptions] = useState(false);
   
   useEffect(() => {
-    console.log('HomeScreen mounted, setting showOptions to true');
-    const timer = setTimeout(() => {
-      console.log('Showing options now');
-      setShowOptions(true);
-    }, 500);
+    const timer = setTimeout(() => setShowOptions(true), 1000); // Slightly longer delay for better UX
     return () => clearTimeout(timer);
   }, []);
-  
-  console.log('HomeScreen render - showOptions:', showOptions, 'hasExistingData:', hasExistingData);
 
   return (
     <div className="min-h-screen bg-gray-900 relative overflow-hidden">
