@@ -241,7 +241,7 @@ const MenuButton = ({
 
 // Main HomeScreen Component
 const HomeScreen = ({ onCreateNew, onOpenExisting, hasExistingData }) => {
-  const [showOptions, setShowOptions] = useState(false);
+  const [showOptions, setShowOptions] = useState(true); // Set to true for testing
   
   useEffect(() => {
     console.log('HomeScreen mounted, setting showOptions to true');
