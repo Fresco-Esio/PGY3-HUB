@@ -1016,7 +1016,7 @@ const DashboardComponent = () => {
   const navigate = useNavigate(); // Add navigation hook
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesState] = useEdgesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   // State for forcing node updates
   const [nodeUpdateTrigger, setNodeUpdateTrigger] = useState(0);
