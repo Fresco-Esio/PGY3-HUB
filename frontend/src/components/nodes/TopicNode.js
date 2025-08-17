@@ -237,7 +237,7 @@ const TopicNode = ({ data, selected }) => {
             )}
           </div>
         );
-      })()
+      })()}
 
       {/* Last updated indicator */}
       {data.updated_at && (
