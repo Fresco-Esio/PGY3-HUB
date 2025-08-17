@@ -2902,8 +2902,81 @@ const Dashboard = () => (
   </ReactFlowProvider>
 );
 
+// Main App Component with Routing
 function App() {
-  return <Dashboard />;
+  return (
+    <Router>
+      <AppRouter />
+    </Router>
+  );
 }
+
+// App Router Component 
+const AppRouter = () => {
+  const navigate = useNavigate();
+  const [showMapOptions, setShowMapOptions] = useState(false);
+  
+  // Check if there's existing data
+  const hasExistingData = mapStorageUtils.hasExistingData();
+  const mapStats = mapStorageUtils.getMapStats();
+  
+  // Handle creating new map
+  const handleCreateNew = useCallback(() => {
+    if (hasExistingData) {
+      // Show options modal if there's existing data
+      setShowMapOptions(true);
+    } else {
+      // Navigate directly to dashboard if no existing data
+      navigate('/dashboard');
+    }
+  }, [hasExistingData, navigate]);
+  
+  // Handle opening existing map
+  const handleOpenExisting = useCallback(() => {
+    navigate('/dashboard');
+  }, [navigate]);
+  
+  // Handle clearing data and starting fresh
+  const handleClearData = useCallback(() => {
+    mapStorageUtils.clearMapData();
+    navigate('/dashboard');
+  }, [navigate]);
+  
+  // Handle exporting data
+  const handleExportData = useCallback(() => {
+    mapStorageUtils.exportMapData();
+  }, []);
+
+  return (
+    <>
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            <HomeScreen 
+              onCreateNew={handleCreateNew}
+              onOpenExisting={handleOpenExisting}
+              hasExistingData={hasExistingData}
+            />
+          } 
+        />
+        <Route 
+          path="/dashboard" 
+          element={<Dashboard />} 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      
+      {/* Map Options Modal */}
+      <MapOptionsModal
+        isOpen={showMapOptions}
+        onClose={() => setShowMapOptions(false)}
+        onClearData={handleClearData}
+        onExportData={handleExportData}
+        mapStats={mapStats}
+      />
+    </>
+  );
+};
 
 export default App;
