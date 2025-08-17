@@ -238,8 +238,6 @@ const TopicNode = ({ data, selected }) => {
           </div>
         );
       })()
-        </div>
-      )}
 
       {/* Last updated indicator */}
       {data.updated_at && (
