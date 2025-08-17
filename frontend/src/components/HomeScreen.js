@@ -244,9 +244,15 @@ const HomeScreen = ({ onCreateNew, onOpenExisting, hasExistingData }) => {
   const [showOptions, setShowOptions] = useState(false);
   
   useEffect(() => {
-    const timer = setTimeout(() => setShowOptions(true), 500);
+    console.log('HomeScreen mounted, setting showOptions to true');
+    const timer = setTimeout(() => {
+      console.log('Showing options now');
+      setShowOptions(true);
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
+  
+  console.log('HomeScreen render - showOptions:', showOptions, 'hasExistingData:', hasExistingData);
 
   return (
     <div className="min-h-screen bg-gray-900 relative overflow-hidden">
