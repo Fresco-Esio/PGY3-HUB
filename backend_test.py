@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List
 
 class PGY3HubAPITester:
-    def __init__(self, base_url="https://a6f96840-83cc-480e-b322-714fc222a655.preview.emergentagent.com"):
+    def __init__(self, base_url="https://mindmap-hub-2.preview.emergentagent.com"):
         self.base_url = base_url.rstrip('/')
         self.api_url = f"{self.base_url}/api"
         self.tests_run = 0
