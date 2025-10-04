@@ -1369,35 +1369,7 @@ useEffect(() => {
     }
   }, []);
 
-  const onConnect = useCallback((params) => {
-    const edgeId = `conn-${Date.now()}`;
-    const newEdge = { 
-      ...params, 
-      id: edgeId,
-      type: 'default', // Use default edge type
-      style: { 
-        strokeWidth: 2, 
-        stroke: '#64748b',
-        opacity: 0.85,
-        transition: 'none' // Critical: disable transitions for immediate updates
-      },
-      // Add a unique timestamp to force React to re-render this edge when source or target nodes move
-      data: { __forceUpdate: Date.now() },
-      interactionWidth: 20 // Wider area for interaction
-    };
-    setEdges((eds) => addEdge(newEdge, eds));
-    setMindMapData(prev => {
-      const newConnections = [...prev.connections, { 
-        id: newEdge.id, 
-        source: params.source, 
-        target: params.target, 
-        label: '' 
-      }];
-      const newData = { ...prev, connections: newConnections };
-      autoSaveMindMapData(newData);
-      return newData;
-    });
-  }, [setEdges, setMindMapData, autoSaveMindMapData]);
+  // Cytoscape handles edge creation via right-click (see CytoscapeGraph component)
 
   const onNodeClick = useCallback((cytoscapeNode) => {
     // Cytoscape node object
