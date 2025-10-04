@@ -74,7 +74,7 @@ const CaseNode = ({ data, selected }) => {
       }}
       className={`group relative min-w-[280px] max-w-[320px] cursor-pointer ${
         selected ? "z-10" : "z-0"
-      }`}
+      } ${data.className || ''}`}
     >
       {/* 🎨 ARTISTIC CARD CONTAINER with deep violet → plum gradient */}
       <div
@@ -88,6 +88,7 @@ const CaseNode = ({ data, selected }) => {
               : "border-violet-200/30 hover:border-violet-300/60"
           }
           ${urgency === "high" ? "ring-2 ring-red-400/60" : ""}
+          ${data._hasIncompleteData ? "ring-2 ring-amber-400/80" : ""}
         `}
         style={{
           background:
