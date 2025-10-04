@@ -267,6 +267,11 @@ const CytoscapeGraph = ({
       containerHeight: containerRef.current?.offsetHeight,
       cyReady: !!cy
     });
+    
+    // Wait for Cytoscape to be fully ready before allowing operations
+    cy.ready(() => {
+      console.log('🔍 Cytoscape is ready for operations');
+    });
 
     // Add click handlers
     cy.on('tap', 'node', (evt) => {
