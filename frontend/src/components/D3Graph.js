@@ -25,16 +25,34 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       const nodeType = category === 'literature' ? 'literature' : category.slice(0, -1);
       const items = data[category] || [];
       
-      items.forEach((item) => {
+      items.forEach((item, index) => {
         const config = nodeConfig[nodeType];
+        
+        // Use existing position or create grid position
+        let x, y;
+        if (item.position?.x !== undefined && item.position?.y !== undefined) {
+          x = item.position.x;
+          y = item.position.y;
+        } else {
+          // Grid layout for new nodes
+          const gridSize = 5;
+          const spacing = 150;
+          const row = Math.floor(index / gridSize);
+          const col = index % gridSize;
+          x = 300 + col * spacing;
+          y = 300 + row * spacing;
+        }
+        
         nodes.push({
           id: `${nodeType}-${item.id}`,
           label: item.label || item.title || 'Untitled',
           type: nodeType,
           color: config.color,
           radius: config.radius,
-          x: item.position?.x || Math.random() * 800 + 200,
-          y: item.position?.y || Math.random() * 600 + 200,
+          x: x,
+          y: y,
+          fx: x, // Fix position initially
+          fy: y,
           originalData: item,
         });
       });
