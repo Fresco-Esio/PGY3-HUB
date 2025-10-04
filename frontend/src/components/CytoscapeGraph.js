@@ -323,6 +323,7 @@ const CytoscapeGraph = ({
 
     // Update positions in data
     const updatePositionsInData = () => {
+      isUpdatingRef.current = true;
       const positions = {};
       cy.nodes().forEach((node) => {
         positions[node.id()] = node.position();
@@ -330,6 +331,9 @@ const CytoscapeGraph = ({
       if (onDataChange) {
         onDataChange({ type: 'positions', positions });
       }
+      setTimeout(() => {
+        isUpdatingRef.current = false;
+      }, 100);
     };
 
     // Update connections in data
