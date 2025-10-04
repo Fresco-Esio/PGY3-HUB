@@ -1687,6 +1687,20 @@ useEffect(() => {
       ...n,
       selected: n.id === node.id
     })));
+    
+    // Toggle node expansion
+    setNodes(currentNodes => currentNodes.map(n => {
+      if (n.id === node.id) {
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            isExpanded: !n.data.isExpanded
+          }
+        };
+      }
+      return n;
+    }));
   }, [setNodes]);
 
   const onNodeDoubleClick = useCallback((event, node) => {
