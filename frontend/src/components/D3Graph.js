@@ -232,11 +232,14 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
     // Drag functions
     function dragstarted(event, d) {
+      // Change cursor to grabbing
+      d3.select(this).style('cursor', 'grabbing');
       // Don't restart simulation on drag - causes instability
       d.fx = d.x;
       d.fy = d.y;
       // Highlight dragged node
       d3.select(this).select('circle').attr('stroke-width', 6);
+      console.log('🔷 Drag started on node:', d.id);
     }
 
     function dragged(event, d) {
@@ -258,12 +261,16 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     }
 
     function dragended(event, d) {
+      // Restore cursor
+      d3.select(this).style('cursor', 'grab');
       // Keep node fixed at dropped position
       d.fx = d.x;
       d.fy = d.y;
       
       // Remove highlight
       d3.select(this).select('circle').attr('stroke-width', 4);
+      
+      console.log('🔷 Drag ended on node:', d.id, 'at position:', { x: d.x, y: d.y });
       
       // Save position to backend
       if (onDataChange) {
