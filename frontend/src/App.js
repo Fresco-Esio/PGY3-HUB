@@ -1929,6 +1929,12 @@ useEffect(() => {
       }
       
       if (event.key === 'Escape') {
+        // Exit connection mode first if active
+        if (connectionMode) {
+          setConnectionMode(false);
+          return;
+        }
+        
         setSelectedNode(null);
         // Close all modals
         setCaseModal({ isOpen: false, data: null });
