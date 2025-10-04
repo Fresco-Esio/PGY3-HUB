@@ -1189,7 +1189,7 @@ const CaseModal = ({
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Case Title/Label
+                                Name or ID
                               </label>
                               <div
                                 className={`bg-slate-700/50 rounded-lg p-3 ${
@@ -1200,7 +1200,7 @@ const CaseModal = ({
                               >
                                 {editData.label ||
                                   editData.title ||
-                                  "Untitled case"}
+                                  "Unnamed patient"}
                               </div>
                             </div>
                             <div>
