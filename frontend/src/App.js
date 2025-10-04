@@ -997,11 +997,10 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
 
 // Enhanced Main Dashboard Component with improved visual effects
 const DashboardComponent = () => {
-  const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
   const navigate = useNavigate(); // Add navigation hook
-
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  
+  // Cytoscape will handle node/edge management internally
+  const cytoscapeRef = useRef(null);
 
   // State for forcing node updates
   const [nodeUpdateTrigger, setNodeUpdateTrigger] = useState(0);
