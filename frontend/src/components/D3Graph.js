@@ -428,13 +428,29 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
   // Separate effect for physics toggle
   useEffect(() => {
-    if (isInitializedRef.current && simulationRef.current) {
+    if (isInitializedRef.current && nodesRef.current) {
       if (physicsEnabled) {
-        simulationRef.current.alpha(0.3).restart();
-        console.log('🔷 Physics enabled - restarted simulation');
+        // Release all nodes
+        nodesRef.current.forEach(n => {
+          n.fx = null;
+          n.fy = null;
+        });
+        
+        if (simulationRef.current) {
+          simulationRef.current.alpha(1).restart();
+          console.log('🔷 Physics enabled - nodes released, simulation restarted');
+        }
       } else {
-        simulationRef.current.stop();
-        console.log('🔷 Physics disabled - stopped simulation');
+        // Fix all nodes in place
+        nodesRef.current.forEach(n => {
+          n.fx = n.x;
+          n.fy = n.y;
+        });
+        
+        if (simulationRef.current) {
+          simulationRef.current.stop();
+          console.log('🔷 Physics disabled - nodes fixed, simulation stopped');
+        }
       }
     }
   }, [physicsEnabled]);
