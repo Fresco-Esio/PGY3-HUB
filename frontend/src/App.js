@@ -1205,15 +1205,7 @@ useEffect(() => {
   // Cytoscape handles data conversion internally
 }, [mindMapData]);
 
-// Force node update when trigger changes
-useEffect(() => {
-  if (nodeUpdateTrigger > 0) {
-    console.log('Force update triggered by nodeUpdateTrigger:', nodeUpdateTrigger);
-    setTimeout(() => {
-      syncNodeData();
-    }, 100);
-  }
-}, [nodeUpdateTrigger, syncNodeData]);
+// Cytoscape handles node updates automatically
 
   // Cytoscape handles node/edge rendering internally - no conversion needed
 
