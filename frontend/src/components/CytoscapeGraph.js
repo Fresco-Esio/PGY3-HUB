@@ -525,11 +525,17 @@ const CytoscapeGraph = ({
           totalEdges: cy.edges().length
         });
         
-        // Fit view to show all nodes after adding
+        // Fit view to show all nodes after adding - use ready() to ensure Cytoscape is fully initialized
         setTimeout(() => {
           if (cy && cy.nodes().length > 0) {
-            cy.fit(50);
-            console.log('🔍 Called fit()');
+            cy.ready(() => {
+              try {
+                cy.fit(50);
+                console.log('🔍 Called fit() successfully');
+              } catch (error) {
+                console.error('🔍 Error calling fit():', error);
+              }
+            });
           }
         }, 100);
       }
