@@ -1430,28 +1430,20 @@ useEffect(() => {
 
   // Cytoscape handles edge interactions internally
   
-  // Handle edge label saving
+  // Handle edge label saving (simplified for D3)
   const handleSaveEdgeLabel = useCallback((edgeId, label) => {
-    const cy = getCytoscape();
-    if (!cy) return;
+    // Update the connections in mindMapData
+    setMindMapData(prevData => {
+      const updatedConnections = (prevData.connections || []).map(conn => 
+        conn.id === edgeId ? { ...conn, label } : conn
+      );
+      const newData = { ...prevData, connections: updatedConnections };
+      autoSaveMindMapData(newData);
+      return newData;
+    });
     
-    const edge = cy.$id(edgeId);
-    if (edge) {
-      edge.data('label', label);
-      
-      // Update the connections in mindMapData
-      setMindMapData(prevData => {
-        const updatedConnections = (prevData.connections || []).map(conn => 
-          conn.id === edgeId ? { ...conn, label } : conn
-        );
-        const newData = { ...prevData, connections: updatedConnections };
-        autoSaveMindMapData(newData);
-        return newData;
-      });
-      
-      addToast('Edge label updated successfully', 'success');
-    }
-  }, [getCytoscape, setMindMapData, autoSaveMindMapData, addToast]);
+    addToast('Edge label updated successfully', 'success');
+  }, [setMindMapData, autoSaveMindMapData, addToast]);
 
   // Restart D3 force simulation for realignment
   const forceLayout = useCallback(() => {
