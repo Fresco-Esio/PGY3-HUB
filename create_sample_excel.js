@@ -1,4 +1,4 @@
-const XLSX = require('xlsx');
+const XLSX = require('./frontend/node_modules/xlsx');
 const path = require('path');
 
 // Sample patient data
