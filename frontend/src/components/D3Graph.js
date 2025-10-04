@@ -124,17 +124,25 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       .data(nodes)
       .join('g')
       .attr('class', 'node')
+      .style('cursor', 'grab')
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
         .on('end', dragended))
       .on('click', function(event, d) {
         event.stopPropagation();
-        if (onNodeClick) onNodeClick(d);
+        if (onNodeClick) {
+          console.log('Node clicked:', d.id);
+          onNodeClick(d);
+        }
       })
       .on('dblclick', function(event, d) {
         event.stopPropagation();
-        if (onNodeDoubleClick) onNodeDoubleClick(d);
+        event.preventDefault(); // Prevent default double-click behavior
+        if (onNodeDoubleClick) {
+          console.log('Node double-clicked:', d.id);
+          onNodeDoubleClick(d);
+        }
       });
 
     // Add circles to nodes
