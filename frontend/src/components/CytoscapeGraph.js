@@ -611,20 +611,14 @@ const CytoscapeGraph = ({
       prevNodeCountRef.current = currentNodeCount;
     }
     
-    // DEBUG: Log current state
-    if (cy.nodes().length > 0) {
-      const firstNode = cy.nodes()[0];
-      const extent = cy.extent();
-      console.log('🔍 Cytoscape state:', {
-        nodeCount: cy.nodes().length,
-        edgeCount: cy.edges().length,
-        firstNodePos: firstNode.position(),
-        extent: extent,
-        zoom: cy.zoom(),
-        pan: cy.pan()
-      });
-    }
-  }, [mindMapData, convertToElements, physicsEnabled, expandedNodes, runLayout]);
+    // DEBUG: Log final state
+    console.log('🔍 Final Cytoscape state:', {
+      nodeCount: cy.nodes().length,
+      edgeCount: cy.edges().length,
+      zoom: cy.zoom(),
+      pan: cy.pan()
+    });
+  }, [mindMapData]);
 
   // Expose layout function and Cytoscape instance for debugging
   useEffect(() => {
