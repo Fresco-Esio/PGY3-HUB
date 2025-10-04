@@ -127,6 +127,8 @@ const CytoscapeGraph = ({
           selector: 'node.topic',
           style: {
             'background-color': '#3b82f6',
+            'background-gradient-stop-colors': '#3b82f6 #1d4ed8',
+            'background-gradient-direction': 'to-bottom-right',
             'width': 120,
             'height': 120,
           },
@@ -135,6 +137,8 @@ const CytoscapeGraph = ({
           selector: 'node.case',
           style: {
             'background-color': '#6366f1',
+            'background-gradient-stop-colors': '#6366f1 #4338ca',
+            'background-gradient-direction': 'to-bottom-right',
             'width': 130,
             'height': 130,
           },
@@ -143,6 +147,8 @@ const CytoscapeGraph = ({
           selector: 'node.task',
           style: {
             'background-color': '#f59e0b',
+            'background-gradient-stop-colors': '#f59e0b #d97706',
+            'background-gradient-direction': 'to-bottom-right',
             'width': 110,
             'height': 110,
           },
@@ -151,8 +157,22 @@ const CytoscapeGraph = ({
           selector: 'node.literature',
           style: {
             'background-color': '#a855f7',
+            'background-gradient-stop-colors': '#a855f7 #7c3aed',
+            'background-gradient-direction': 'to-bottom-right',
             'width': 115,
             'height': 115,
+          },
+        },
+        
+        // Expanded nodes
+        {
+          selector: 'node.expanded',
+          style: {
+            'width': 280,
+            'height': 280,
+            'text-wrap': 'wrap',
+            'text-max-width': '250px',
+            'font-size': '10px',
           },
         },
         
