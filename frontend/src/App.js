@@ -1174,15 +1174,8 @@ const handleDeleteNode = useCallback((fullNodeId) => {
     return newData;
   });
   
-  // Remove the node from Cytoscape
-  const cy = getCytoscape();
-  if (cy) {
-    const node = cy.$id(fullNodeId);
-    if (node) {
-      node.remove();
-    }
-  }
-}, [setMindMapData, autoSaveMindMapData, addToast, getCytoscape]);
+  // D3 will automatically update when mindMapData changes
+}, [setMindMapData, autoSaveMindMapData, addToast]);
 
 // Handle literature node click to open modal
 const handleLiteratureClick = useCallback((literatureData) => {
