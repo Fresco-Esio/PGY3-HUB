@@ -408,11 +408,69 @@ const CytoscapeGraph = ({
     cy.elements().remove();
     cy.add(elements);
 
-    // Apply layout if physics is enabled
-    if (physicsEnabled && elements.length > 0) {
-      runLayout();
+    // Re-apply HTML labels after adding elements
+    if (cy.nodeHtmlLabel) {
+      cy.nodeHtmlLabel([
+        {
+          query: 'node',
+          halign: 'center',
+          valign: 'center',
+          halignBox: 'center',
+          valignBox: 'center',
+          tpl: function(data) {
+            const icon = data.icon || '●';
+            const label = data.label || '';
+            const isExpanded = expandedNodes.has(data.id);
+            
+            if (isExpanded) {
+              const originalData = data.originalData || {};
+              return `
+                <div style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  text-align: center;
+                  padding: 10px;
+                  width: 260px;
+                  height: 260px;
+                  overflow-y: auto;
+                  pointer-events: none;
+                ">
+                  <div style="font-size: 24px; margin-bottom: 8px;">${icon}</div>
+                  <div style="font-weight: bold; font-size: 14px; margin-bottom: 8px;">${label}</div>
+                  ${originalData.description ? `<div style="font-size: 10px; margin-top: 4px;">${originalData.description.substring(0, 100)}...</div>` : ''}
+                  <div style="font-size: 9px; margin-top: 8px; opacity: 0.8;">Click to collapse</div>
+                </div>
+              `;
+            } else {
+              return `
+                <div style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  text-align: center;
+                  padding: 8px;
+                  pointer-events: none;
+                ">
+                  <div style="font-size: 32px; margin-bottom: 4px;">${icon}</div>
+                  <div style="font-weight: bold; font-size: 12px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${label}</div>
+                </div>
+              `;
+            }
+          }
+        }
+      ]);
     }
-  }, [mindMapData, convertToElements, physicsEnabled]);
+
+    // Apply layout if physics is enabled and there are elements
+    if (physicsEnabled && elements.length > 0) {
+      setTimeout(() => runLayout(), 100);
+    }
+  }, [mindMapData, convertToElements, physicsEnabled, expandedNodes, runLayout]);
 
   // Run force-directed layout
   const runLayout = useCallback(() => {
