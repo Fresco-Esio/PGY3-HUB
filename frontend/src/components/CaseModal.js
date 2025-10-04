@@ -791,11 +791,13 @@ const CaseModal = ({
 
   // Enhanced timeline management with debounced auto-save and better backend integration
   const timelineEntries = useMemo(() => {
+    // Only process timeline when timeline tab is active to improve initial render performance
+    if (activeTab !== 'timeline') return [];
     // Ensure timeline data is properly structured for the VerticalTimeline component
     const timeline = editData.timeline || [];
     console.log(`Timeline entries for case ${data?.id}:`, timeline);
     return timeline;
-  }, [editData.timeline, data?.id]);
+  }, [editData.timeline, data?.id, activeTab]);
 
   // Debounced timeline save function with enhanced error handling
   const debouncedTimelineSave = useCallback(
