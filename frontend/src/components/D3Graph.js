@@ -215,11 +215,11 @@ const D3Graph = ({
       console.log('🔷 Creating new simulation');
       
       simulationRef.current = d3.forceSimulation(nodes)
-        .force('charge', d3.forceManyBody().strength(-250))
-        .force('collision', d3.forceCollide().radius(d => (d.radius || 28) + 15).strength(0.99))
+        .force('charge', d3.forceManyBody().strength(-350))
+        .force('collision', d3.forceCollide().radius(d => (d.radius || 28) + 18).strength(0.99))
         .alpha(0.12)
         .alphaDecay(0.08)
-        .velocityDecay(0.55);
+        .velocityDecay(0.6);
 
       if (links.length > 0) {
         simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(150).strength(1.5).iterations(2));
@@ -227,8 +227,8 @@ const D3Graph = ({
 
       const cx = width / 2;
       const cy = height / 2;
-      simulationRef.current.force('viewX', d3.forceX(cx).strength(0.04));
-      simulationRef.current.force('viewY', d3.forceY(cy).strength(0.04));
+      simulationRef.current.force('viewX', d3.forceX(cx).strength(0.008));
+      simulationRef.current.force('viewY', d3.forceY(cy).strength(0.008));
 
       simulationRef.current.alphaTarget(Math.max(0.03, BASELINE_ALPHA));
       if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
