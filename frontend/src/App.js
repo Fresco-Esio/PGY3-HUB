@@ -1476,90 +1476,11 @@ useEffect(() => {
       layout.run();
       
       addToast('Nodes realigned successfully', 'success');
-
-      // Create Dagre graph
-      const dagreGraph = new dagre.graphlib.Graph();
-      dagreGraph.setDefaultEdgeLabel(() => ({}));
-      dagreGraph.setGraph({ 
-        rankdir: 'TB', // Top to Bottom
-        nodesep: 150,
-        ranksep: 200,
-        marginy: 50,
-        marginx: 50,
-      });
-
-      // Add nodes to Dagre graph with appropriate sizes
-      nodes.forEach(node => {
-        const nodeType = node.type;
-        let width = 120;
-        let height = 120;
-        
-        // Adjust size based on node type
-        if (nodeType === 'case') {
-          width = 130;
-          height = 130;
-        } else if (nodeType === 'topic') {
-          width = 120;
-          height = 120;
-        } else if (nodeType === 'literature') {
-          width = 115;
-          height = 115;
-        } else if (nodeType === 'task') {
-          width = 110;
-          height = 110;
-        }
-        
-        dagreGraph.setNode(node.id, { width, height });
-      });
-
-      // Add edges to Dagre graph
-      edges.forEach(edge => {
-        dagreGraph.setEdge(edge.source, edge.target);
-      });
-
-      // Calculate layout
-      dagre.layout(dagreGraph);
-
-      // Update nodes with new positions
-      const updatedNodes = nodes.map(node => {
-        const nodeWithPosition = dagreGraph.node(node.id);
-        return {
-          ...node,
-          position: {
-            x: nodeWithPosition.x,
-            y: nodeWithPosition.y,
-          },
-        };
-      });
-
-      // Update both nodes and edges
-      setNodes(updatedNodes);
-
-      // Update mindMapData with new positions
-      setMindMapData(currentData => {
-        const updatedData = { ...currentData };
-        
-        updatedNodes.forEach(node => {
-          const [type, id] = node.id.split('-');
-          const key = type === 'literature' ? 'literature' : `${type}s`;
-          const item = updatedData[key]?.find(i => String(i.id) === id);
-          if (item) {
-            item.position = node.position;
-          }
-        });
-        
-        return updatedData;
-      });
-
-      // Smooth camera transition to fit the new layout
-      setTimeout(() => {
-        fitView({ duration: 800, padding: 0.2 });
-      }, 200);
     } catch (error) {
       console.error('Force layout failed:', error);
       addToast('Layout calculation failed', 'error');
     }
-  }, [nodes, edges, setNodes, setEdges, setMindMapData, fitView, addToast]);
+  }, [getCytoscape, addToast]);
 
   // applyForceLayout wrapper function (defined after forceLayout)
   const applyForceLayout = useCallback(() => {
