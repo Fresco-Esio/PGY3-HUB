@@ -102,9 +102,11 @@ const CytoscapeGraph = ({
     return elements;
   }, []);
 
-  // Initialize Cytoscape
+  // Initialize Cytoscape - ONLY ONCE
   useEffect(() => {
-    if (!containerRef.current || cyRef.current) return;
+    if (!containerRef.current || cyRef.current || isInitializedRef.current) return;
+    
+    isInitializedRef.current = true;
 
     const cy = cytoscape({
       container: containerRef.current,
