@@ -7,8 +7,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 201.0,
-        "y": 514.0
+        "x": 619.6030243040043,
+        "y": 256.66315581393735
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -23,7 +23,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T16:49:05.263000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759596660735",
@@ -32,8 +32,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 796.0,
-        "y": 284.0
+        "x": 935.8677978515625,
+        "y": 563.7357177734375
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -48,7 +48,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597082282",
@@ -57,8 +57,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 400.0,
-        "y": 710.0
+        "x": 432.37328843733064,
+        "y": 202.19248245539188
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -73,7 +73,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T16:58:04.386000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597334107",
@@ -82,8 +82,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 960.0,
-        "y": 710.0
+        "x": 313.5349624394646,
+        "y": 527.8760578582295
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -98,7 +98,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T17:02:16.199000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759599021253",
@@ -123,7 +123,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T17:30:21.283000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759599506832",
@@ -148,10 +148,10 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T17:38:26.911000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
-      "id": "1759599865416",
+      "id": "1759599990551",
       "title": "Untitled Topic",
       "description": "",
       "category": "Uncategorized",
@@ -172,8 +172,8 @@
       "medications": [],
       "psychotherapy_modalities": [],
       "last_updated": null,
-      "created_at": "2025-10-04T17:44:25.443000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     }
   ],
   "cases": [
@@ -201,12 +201,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 134.5914535522461,
-        "y": 500.2082862854004
+        "x": 766.5914535522461,
+        "y": 400.2082862854004
       },
       "timeline": [],
       "created_at": "2025-10-04T16:49:05.263000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759596662301",
@@ -232,12 +232,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 613.838134765625,
-        "y": 802.5956726074219
+        "x": 426.1119569076525,
+        "y": 355.5379847641665
       },
       "timeline": [],
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597084361",
@@ -268,7 +268,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T16:58:04.386000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597336174",
@@ -294,12 +294,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 216.02001953125,
-        "y": 212.708251953125
+        "x": 738.5451965332031,
+        "y": 225.90333557128906
       },
       "timeline": [],
       "created_at": "2025-10-04T17:02:16.199000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597398089",
@@ -330,7 +330,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597398115",
@@ -361,7 +361,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597399687",
@@ -392,7 +392,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597399713",
@@ -423,7 +423,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597768399",
@@ -454,7 +454,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597768428",
@@ -485,7 +485,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597769470",
@@ -516,7 +516,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     },
     {
       "id": "1759597769498",
@@ -547,7 +547,224 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
+    },
+    {
+      "id": "1759599992743",
+      "case_id": "CASE-1759599994072-12",
+      "encounter_date": "2025-10-04T17:46:34.072000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 680.0,
+        "y": 1270.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
+    },
+    {
+      "id": "1759599993204",
+      "case_id": "CASE-1759599994072-13",
+      "encounter_date": "2025-10-04T17:46:34.072000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 960.0,
+        "y": 1270.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
+    },
+    {
+      "id": "1759599993376",
+      "case_id": "CASE-1759599994072-14",
+      "encounter_date": "2025-10-04T17:46:34.072000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1240.0,
+        "y": 1270.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
+    },
+    {
+      "id": "1759599993542",
+      "case_id": "CASE-1759599994072-15",
+      "encounter_date": "2025-10-04T17:46:34.072000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1520.0,
+        "y": 1270.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
+    },
+    {
+      "id": "1759599993712",
+      "case_id": "CASE-1759599994072-16",
+      "encounter_date": "2025-10-04T17:46:34.072000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 680.0,
+        "y": 1270.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
+    },
+    {
+      "id": "1759599993881",
+      "case_id": "CASE-1759599994072-17",
+      "encounter_date": "2025-10-04T17:46:34.072000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 960.0,
+        "y": 1270.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
+    },
+    {
+      "id": "1759599994053",
+      "case_id": "CASE-1759599994072-18",
+      "encounter_date": "2025-10-04T17:46:34.072000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1240.0,
+        "y": 1270.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T17:46:34.072000+00:00",
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     }
   ],
   "tasks": [
@@ -566,7 +783,7 @@
         "y": 784.0
       },
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     }
   ],
   "literature": [
@@ -582,11 +799,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": 755.973876953125,
-        "y": 189.07452392578125
+        "x": -57.68803787231445,
+        "y": 401.01617431640625
       },
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T17:44:25.443000+00:00"
+      "updated_at": "2025-10-04T17:52:07.747000+00:00"
     }
   ],
   "connections": []
