@@ -1368,11 +1368,9 @@ useEffect(() => {
 
   // Cytoscape handles edge creation via right-click (see CytoscapeGraph component)
 
-  const onNodeClick = useCallback((cytoscapeNode) => {
-    // Cytoscape node object
-    const nodeId = cytoscapeNode.id();
-    const nodeData = cytoscapeNode.data('originalData');
-    setSelectedNode({ id: nodeId, data: nodeData });
+  const onNodeClick = useCallback((d3Node) => {
+    // D3 node object
+    setSelectedNode({ id: d3Node.id, data: d3Node.originalData });
   }, []);
 
   const onNodeDoubleClick = useCallback((cytoscapeNode) => {
