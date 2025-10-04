@@ -2458,6 +2458,20 @@ useEffect(() => {
         onSave={handleSaveEdgeLabel} 
       />
 
+      <ConnectionManager
+        isOpen={connectionManagerOpen}
+        onClose={() => setConnectionManagerOpen(false)}
+        nodes={[
+          ...mindMapData.topics.map(t => ({ id: `topic-${t.id}`, label: t.label, type: 'topic' })),
+          ...mindMapData.cases.map(c => ({ id: `case-${c.id}`, label: c.primary_diagnosis || c.case_id || 'Untitled Case', type: 'case' })),
+          ...mindMapData.tasks.map(t => ({ id: `task-${t.id}`, label: t.title, type: 'task' })),
+          ...mindMapData.literature.map(l => ({ id: `literature-${l.id}`, label: l.title, type: 'literature' }))
+        ]}
+        connections={mindMapData.connections}
+        onCreateConnection={handleCreateConnection}
+        onDeleteConnection={handleDeleteConnection}
+      />
+
       {loading && (
         <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
           <Loader2 size={48} className="animate-spin text-blue-600" />
