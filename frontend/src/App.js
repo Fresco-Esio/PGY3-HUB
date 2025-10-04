@@ -1054,6 +1054,7 @@ const DashboardComponent = () => {
   const [edgeModal, setEdgeModal] = useState({ isOpen: false, edge: null });
   const [toasts, setToasts] = useState([]);
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
+  const [importModal, setImportModal] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
   const [modalAnimationStates, setModalAnimationStates] = useState({
     case: false,
