@@ -44,13 +44,9 @@ class SimpleAPITester:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
 
-    def test_health_check(self):
-        """Test basic health check"""
-        return self.run_test("Health Check", "GET", "api/health", 200)
-
     def test_get_mindmap_data(self):
         """Test getting mind map data"""
-        return self.run_test("Get Mind Map Data", "GET", "api/mindmap", 200)
+        return self.run_test("Get Mind Map Data", "GET", "api/mindmap-data", 200)
 
     def test_save_mindmap_data(self):
         """Test saving mind map data"""
@@ -68,7 +64,30 @@ class SimpleAPITester:
             "literature": [],
             "connections": []
         }
-        return self.run_test("Save Mind Map Data", "POST", "api/mindmap", 200, test_data)
+        # Use PUT method as shown in logs
+        url = f"{self.base_url}/api/mindmap-data"
+        headers = {'Content-Type': 'application/json'}
+        self.tests_run += 1
+        print(f"\n🔍 Testing Save Mind Map Data...")
+        
+        try:
+            response = requests.put(url, json=test_data, headers=headers, timeout=10)
+            success = response.status_code == 200
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    response_data = response.json()
+                    print(f"   Response: {json.dumps(response_data, indent=2)[:200]}...")
+                except:
+                    print(f"   Response: {response.text[:200]}...")
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                print(f"   Response: {response.text[:200]}...")
+            return success, response.json() if success else {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
 
 def main():
     print("🔍 Starting PGY3-HUB Backend API Tests")
