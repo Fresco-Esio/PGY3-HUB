@@ -2718,8 +2718,19 @@ useEffect(() => {
 
         {/* --- Controls --- */}
         <div className="space-y-3 mb-6">
+          <LoadingButton 
+            onClick={() => setPhysicsEnabled(!physicsEnabled)} 
+            icon={Zap} 
+            className={`w-full px-4 py-2 rounded-md text-sm ${
+              physicsEnabled 
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'bg-gray-600 hover:bg-gray-700 text-white'
+            }`}
+          >
+            {physicsEnabled ? 'Physics: ON' : 'Physics: OFF'}
+          </LoadingButton>
           <LoadingButton onClick={applyForceLayout} icon={Shuffle} className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm">
-            Realign Nodes
+            Realign Nodes (Dagre)
           </LoadingButton>
           <LoadingButton 
             onClick={() => populateSampleLiteratureData(setMindMapData, autoSaveMindMapData, addToast)} 
