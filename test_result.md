@@ -228,9 +228,9 @@ metadata:
 test_plan:
   current_focus:
     - "Node Interaction (Double-click)"
-    - "Node Dragging"
   stuck_tasks:
     - "CORS Configuration"
+    - "Node Interaction (Double-click)"
   test_all: false
   test_priority: "high_first"
 
@@ -241,3 +241,5 @@ agent_communication:
     message: "Frontend D3.js testing completed. CRITICAL ISSUE FOUND: D3.js nodes are created in simulation but not rendering visually in SVG. Dashboard, controls, and interactions work correctly. Physics toggle, zoom/pan, and import modal all functional. Node rendering issue needs immediate attention as it prevents users from seeing the mind map visualization."
   - agent: "testing"
     message: "COMPREHENSIVE FRONTEND TESTING COMPLETED AFTER D3 RENDERING FIX: ✅ CRITICAL SUCCESS - D3 SVG clearing issue FIXED! Nodes now rendering correctly as circles with proper colors and shapes. Verified 11-17 nodes rendering with distinct colors per type. All major functionality working: node creation (Topic/Case/Task/Literature), physics toggle, realign, spreadsheet import, category filtering, simulation stability (100% node stability, proper alpha decay). Minor issues remain: node double-click modals not opening, node dragging not working properly. Overall frontend success rate: 90% (9/10 major features working). The critical rendering fix has restored full mind map visualization capability."
+  - agent: "testing"
+    message: "FINAL VERIFICATION TESTING COMPLETED: ✅ EXCELLENT PROGRESS - Visual rendering confirmed working perfectly (18 nodes with proper colors/sizes). ✅ DRAG FUNCTIONALITY WORKING - Console logs confirm proper drag events, position changes, and backend persistence. ❌ DOUBLE-CLICK ISSUE IDENTIFIED - Double-click events are NOT firing due to conflict with drag handlers. Playwright double-clicks are being interpreted as drag events instead of double-click events. This is a timing/threshold issue in the D3 event handling, not a missing handler issue. All 18 node groups have D3 event handlers attached. RECOMMENDATION: Adjust double-click timing threshold or implement alternative modal trigger (e.g., right-click, long-press, or dedicated button)."
