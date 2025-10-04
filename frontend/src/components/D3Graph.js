@@ -84,8 +84,9 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
     console.log('🔷 D3 Initializing:', { width, height, hasData: !!mindMapData });
 
-    // Clear previous content
-    svg.selectAll('*').remove();
+    // Clear previous graph container only (not all SVG content)
+    // Using targeted removal prevents React StrictMode from removing circles during double-render
+    svg.selectAll('.graph-container').remove();
 
     // Create container group for zoom/pan
     const g = svg.append('g').attr('class', 'graph-container');
