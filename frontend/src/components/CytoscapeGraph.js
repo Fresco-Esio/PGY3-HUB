@@ -516,74 +516,8 @@ const CytoscapeGraph = ({
     }
   }, [runLayout]);
 
-  // Handle continuous physics
-  useEffect(() => {
-    if (!cyRef.current || !physicsEnabled) return;
-
-    let animationId;
-    const cy = cyRef.current;
-
-    const applyPhysics = () => {
-      cy.nodes().forEach((node) => {
-        const pos = node.position();
-        const neighbors = node.neighborhood('node');
-        
-        let fx = 0;
-        let fy = 0;
-
-        // Repulsion from all nodes
-        cy.nodes().forEach((other) => {
-          if (node.id() === other.id()) return;
-          
-          const otherPos = other.position();
-          const dx = pos.x - otherPos.x;
-          const dy = pos.y - otherPos.y;
-          const distSq = dx * dx + dy * dy;
-          const dist = Math.sqrt(distSq);
-          
-          if (dist < 200) {
-            const force = 1000 / (distSq || 1);
-            fx += (dx / dist) * force;
-            fy += (dy / dist) * force;
-          }
-        });
-
-        // Attraction to connected nodes
-        neighbors.forEach((neighbor) => {
-          const neighborPos = neighbor.position();
-          const dx = neighborPos.x - pos.x;
-          const dy = neighborPos.y - pos.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          if (dist > 100) {
-            const force = 0.01 * (dist - 150);
-            fx += (dx / dist) * force;
-            fy += (dy / dist) * force;
-          }
-        });
-
-        // Apply force with damping
-        const damping = 0.8;
-        const newX = pos.x + fx * damping;
-        const newY = pos.y + fy * damping;
-        
-        node.position({ x: newX, y: newY });
-      });
-
-      animationId = requestAnimationFrame(applyPhysics);
-    };
-
-    // Start physics only if there are nodes
-    if (cy.nodes().length > 0) {
-      animationId = requestAnimationFrame(applyPhysics);
-    }
-
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-    };
-  }, [physicsEnabled]);
+  // Continuous physics is handled by fcose layout when physicsEnabled is true
+  // The layout continuously adjusts node positions
 
   return (
     <div
