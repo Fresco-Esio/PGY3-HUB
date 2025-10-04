@@ -2692,67 +2692,37 @@ useEffect(() => {
 
       {/* --- Main Mind Map Workspace --- */}
       <div className="flex-1 relative">
-        <ReactFlowErrorBoundary>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onNodeDoubleClick={onNodeDoubleClick}
-            onNodeDragStop={handleNodeDragStop}
-            onEdgeDoubleClick={onEdgeDoubleClick}
-            onEdgeContextMenu={onEdgeContextMenu}
-            onEdgeMouseEnter={onEdgeMouseEnter}
-            onEdgeMouseLeave={onEdgeMouseLeave}
-            nodeTypes={nodeTypes}
-            nodesDraggable={true}
-            nodesConnectable={true}
-            elementsSelectable={true}
-            onInit={(reactFlowInstance) => {
-              setIsReactFlowReady(true);
-              // Store reference for error recovery
-              window.reactFlowInstance = reactFlowInstance;
-            }}
-            onError={(id, message) => {
-              console.warn('React Flow Error:', id, message);
-              // Ignore dimension-related errors during animations
-              if (isAnimating && message.includes('dimensions')) {
-                return;
-              }
-            }}
-            fitView
-            snapToGrid={false}
-            snapGrid={[15, 15]}
-            elevateEdgesOnSelect={false}
-          connectionLineStyle={{
-            stroke: '#3b82f6', // Use a bright blue color for better visibility during connection
-            strokeWidth: 3.5, // Slightly thicker than regular edges
-            opacity: 0.9,
-            strokeLinecap: 'round',
-            strokeDasharray: '5,3', // Shorter dash pattern for more modern look
-            filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))', // Softer glow
-            animation: 'flowingDash 1s linear infinite' // Add flowing animation
-          }}
-          defaultEdgeOptions={{
-            type: 'enhanced', // Use our enhanced edge with proper prop handling
-            style: { 
-              strokeWidth: 2.5, 
-              stroke: '#64748b',
-              opacity: 0.9,
-              strokeLinecap: 'round',
-              transition: 'none'
+        <CytoscapeGraph
+          mindMapData={mindMapData}
+          onNodeClick={onNodeClick}
+          onNodeDoubleClick={onNodeDoubleClick}
+          onDataChange={(change) => {
+            if (change.type === 'positions') {
+              // Update positions in mindMapData
+              setMindMapData(currentData => {
+                const updatedData = { ...currentData };
+                Object.entries(change.positions).forEach(([nodeId, position]) => {
+                  const [type, id] = nodeId.split('-');
+                  const key = type === 'literature' ? 'literature' : `${type}s`;
+                  const item = updatedData[key]?.find(i => String(i.id) === id);
+                  if (item) {
+                    item.position = position;
+                  }
+                });
+                autoSaveMindMapData(updatedData);
+                return updatedData;
+              });
+            } else if (change.type === 'connections') {
+              // Update connections in mindMapData
+              setMindMapData(currentData => {
+                const updatedData = { ...currentData, connections: change.connections };
+                autoSaveMindMapData(updatedData);
+                return updatedData;
+              });
             }
-            // Remove pathOptions - this is not a standard React Flow prop
           }}
-          className="bg-gradient-to-br from-blue-50 to-indigo-100"
-        >
-          <Background color="#aaa" gap={16} />
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
-        </ReactFlowErrorBoundary>
+          physicsEnabled={physicsEnabled}
+        />
       </div>
       
       {/* --- Modals --- */}
