@@ -1662,7 +1662,7 @@ useEffect(() => {
         setLoadingProgress(60);
         setLoadingMessage('Applying layout...');
         
-        await convertDataToReactFlow(local, true); // Apply layout immediately
+        // Cytoscape.js handles data conversion automatically
         
         setLoadingProgress(90);
         setLoadingMessage('Finalizing...');
