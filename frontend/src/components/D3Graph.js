@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 
 const D3Graph = ({ 
   mindMapData, 
+  activeFilter = 'all',
   onNodeClick, 
   onNodeDoubleClick, 
   onDataChange, 
