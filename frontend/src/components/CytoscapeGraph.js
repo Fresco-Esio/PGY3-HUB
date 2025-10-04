@@ -519,10 +519,12 @@ const CytoscapeGraph = ({
     }
   }, [mindMapData, convertToElements, physicsEnabled, expandedNodes, runLayout]);
 
-  // Expose layout function
+  // Expose layout function and Cytoscape instance for debugging
   useEffect(() => {
     if (cyRef.current && window) {
       window.cytoscapeRunLayout = runLayout;
+      window.cy = cyRef.current;
+      console.log('Cytoscape instance exposed to window.cy');
     }
   }, [runLayout]);
 
