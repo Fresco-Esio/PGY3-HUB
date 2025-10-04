@@ -1021,7 +1021,7 @@ const DashboardComponent = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [focusedCategory, setFocusedCategory] = useState(null);
+  const [focusedCategory, setFocusedCategory] = useState(null); // Kept for backward compatibility
   const [showNodeSelector, setShowNodeSelector] = useState(false);
   // Specialized modal state for each node type with stable data references
   const [caseModal, setCaseModal] = useState({ isOpen: false, data: null });
