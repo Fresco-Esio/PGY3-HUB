@@ -1048,6 +1048,7 @@ const DashboardComponent = () => {
   });
   const [connectionManagerOpen, setConnectionManagerOpen] = useState(false);
   const [connectionMode, setConnectionMode] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
