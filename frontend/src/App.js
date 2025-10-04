@@ -1045,6 +1045,7 @@ const DashboardComponent = () => {
     task: false,
     literature: false
   });
+  const [connectionManagerOpen, setConnectionManagerOpen] = useState(false);
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
