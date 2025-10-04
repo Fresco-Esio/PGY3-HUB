@@ -1447,9 +1447,28 @@ useEffect(() => {
 
   // Restart D3 force simulation for realignment
   const forceLayout = useCallback(() => {
-    if (window.d3Simulation) {
+    if (window.d3Simulation && window.d3Nodes) {
+      // Unfix all nodes so they can be repositioned
+      window.d3Nodes.forEach(node => {
+        node.fx = null;
+        node.fy = null;
+      });
+      
+      // Restart simulation with high alpha
       window.d3Simulation.alpha(1).restart();
       addToast('Nodes realigning...', 'success');
+      
+      // Stop after layout completes
+      setTimeout(() => {
+        if (window.d3Simulation) {
+          window.d3Simulation.stop();
+          // Re-fix nodes at their new positions
+          window.d3Nodes.forEach(node => {
+            node.fx = node.x;
+            node.fy = node.y;
+          });
+        }
+      }, 3000);
     } else {
       addToast('Simulation not ready', 'warning');
     }
