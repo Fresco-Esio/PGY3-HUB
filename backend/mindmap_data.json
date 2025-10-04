@@ -23,7 +23,32 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T16:49:05.263000+00:00",
-      "updated_at": "2025-10-04T16:49:05.263000+00:00"
+      "updated_at": "2025-10-04T16:51:05.460000+00:00"
+    },
+    {
+      "id": "1759596660735",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 400.0,
+        "y": 430.0
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": null,
+      "diagnostic_criteria": [],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-10-04T16:51:05.460000+00:00",
+      "updated_at": "2025-10-04T16:51:05.460000+00:00"
     }
   ],
   "cases": [
@@ -33,7 +58,7 @@
       "encounter_date": "2025-10-04T16:49:05.263000+00:00",
       "primary_diagnosis": "Unspecified",
       "secondary_diagnoses": [],
-      "age": null,
+      "age": 0,
       "gender": null,
       "chief_complaint": "",
       "initial_presentation": "",
@@ -56,10 +81,78 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T16:49:05.263000+00:00",
-      "updated_at": "2025-10-04T16:49:05.263000+00:00"
+      "updated_at": "2025-10-04T16:51:05.460000+00:00"
+    },
+    {
+      "id": "1759596662301",
+      "case_id": "CASE-1759596665460-1",
+      "encounter_date": "2025-10-04T16:51:05.460000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 680.0,
+        "y": 430.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T16:51:05.460000+00:00",
+      "updated_at": "2025-10-04T16:51:05.460000+00:00"
     }
   ],
-  "tasks": [],
-  "literature": [],
+  "tasks": [
+    {
+      "id": "1759596663868",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": 680.0,
+        "y": 430.0
+      },
+      "created_at": "2025-10-04T16:51:05.460000+00:00",
+      "updated_at": "2025-10-04T16:51:05.460000+00:00"
+    }
+  ],
+  "literature": [
+    {
+      "id": "1759596665434",
+      "title": "Untitled Literature",
+      "authors": null,
+      "publication": null,
+      "year": null,
+      "doi": null,
+      "abstract": null,
+      "notes": null,
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 960.0,
+        "y": 430.0
+      },
+      "created_at": "2025-10-04T16:51:05.460000+00:00",
+      "updated_at": "2025-10-04T16:51:05.460000+00:00"
+    }
+  ],
   "connections": []
 }
