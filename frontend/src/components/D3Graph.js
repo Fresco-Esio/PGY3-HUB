@@ -321,7 +321,8 @@ const D3Graph = ({
             .attr('r', d => d.radius)
             .attr('fill', d => d.color)
             .attr('stroke', '#fff')
-            .attr('stroke-width', 4);
+            .attr('stroke-width', 4)
+            .style('opacity', 1);
 
           // Add connection mode indicator ring
           g.append('circle')
