@@ -1039,8 +1039,6 @@ const DashboardComponent = () => {
   const [importModal, setImportModal] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
   const [physicsEnabled, setPhysicsEnabled] = useState(true); // Control physics simulation
-  const simulationRef = useRef(null); // Store D3 force simulation
-  const animationFrameRef = useRef(null); // Store animation frame ID
   const [modalAnimationStates, setModalAnimationStates] = useState({
     case: false,
     topic: false,
