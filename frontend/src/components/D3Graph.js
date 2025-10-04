@@ -1,7 +1,15 @@
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 
-const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, physicsEnabled }) => {
+const D3Graph = ({ 
+  mindMapData, 
+  onNodeClick, 
+  onNodeDoubleClick, 
+  onDataChange, 
+  physicsEnabled,
+  connectionMode = false,
+  onConnectionCreate
+}) => {
   const svgRef = useRef(null);
   const simulationRef = useRef(null);
   const nodesRef = useRef([]);
@@ -16,7 +24,11 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
   const postDragWarmRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   
-  const BASELINE_ALPHA = 0.015; // Keep sim gently ticking for continuous settling
+  // Connection mode state
+  const [connectionStart, setConnectionStart] = useState(null);
+  const [tempConnection, setTempConnection] = useState(null);
+  
+  const BASELINE_ALPHA = 0.015;
   
   // Node configuration
   const nodeConfig = {
@@ -26,7 +38,7 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     literature: { color: '#a855f7', radius: 58 },
   };
 
-  // Structural key - only changes when nodes/links added/removed (not position changes)
+  // Structural key
   const structuralKey = useMemo(() => {
     const nodeIds = [];
     if (mindMapData?.topics) nodeIds.push(...mindMapData.topics.map(t => `topic-${t.id}`));
@@ -38,13 +50,12 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     return JSON.stringify({ nodes: nodeIds, links: linkIds });
   }, [mindMapData]);
 
-  // Convert mindMapData to D3 format with position caching
+  // Convert mindMapData to D3 format
   const convertToD3Format = useCallback((data) => {
     const nodes = [];
     const links = [];
     const nodeById = new Map();
 
-    // Add nodes from all categories
     ['topics', 'cases', 'tasks', 'literature'].forEach((category) => {
       const nodeType = category === 'literature' ? 'literature' : category.slice(0, -1);
       const items = data[category] || [];
@@ -53,7 +64,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         const config = nodeConfig[nodeType];
         const nodeId = `${nodeType}-${item.id}`;
         
-        // Position priority: 1) runtime cache, 2) saved position, 3) random
         let x, y;
         if (prevPositionsRef.current.has(nodeId)) {
           const prev = prevPositionsRef.current.get(nodeId);
@@ -83,15 +93,14 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       });
     });
 
-    // Add edges
     const connections = data.connections || [];
-    
     connections.forEach((conn) => {
       if (nodeById.has(conn.source) && nodeById.has(conn.target)) {
         links.push({
           source: conn.source,
           target: conn.target,
           id: conn.id || `edge-${conn.source}-${conn.target}`,
+          type: conn.type || 'related'
         });
       }
     });
@@ -99,7 +108,81 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     return { nodes, links };
   }, []);
 
-  // Main effect - only reinitialize on structural changes
+  // Handle connection mode clicks
+  const handleConnectionClick = useCallback((event, d) => {
+    if (!connectionMode) return;
+    
+    event.stopPropagation();
+    
+    if (!connectionStart) {
+      // Start connection
+      setConnectionStart(d);
+      console.log('🔷 Connection started from:', d.id);
+    } else if (connectionStart.id !== d.id) {
+      // Complete connection
+      console.log('🔷 Connection completed to:', d.id);
+      if (onConnectionCreate) {
+        onConnectionCreate(connectionStart.id, d.id);
+      }
+      setConnectionStart(null);
+      setTempConnection(null);
+    } else {
+      // Clicked same node - cancel
+      setConnectionStart(null);
+      setTempConnection(null);
+    }
+  }, [connectionMode, connectionStart, onConnectionCreate]);
+
+  // Update temp connection line during mouse move
+  useEffect(() => {
+    if (!connectionMode || !connectionStart || !svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    
+    const handleMouseMove = (event) => {
+      const [x, y] = d3.pointer(event);
+      const transform = gRef.current ? gRef.current.node().getAttribute('transform') : null;
+      
+      // Parse transform to get current scale and translation
+      let tx = 0, ty = 0, scale = 1;
+      if (transform) {
+        const match = transform.match(/translate\(([^,]+),([^)]+)\)\s*scale\(([^)]+)\)/);
+        if (match) {
+          tx = parseFloat(match[1]);
+          ty = parseFloat(match[2]);
+          scale = parseFloat(match[3]);
+        } else {
+          const translateMatch = transform.match(/translate\(([^,]+),([^)]+)\)/);
+          if (translateMatch) {
+            tx = parseFloat(translateMatch[1]);
+            ty = parseFloat(translateMatch[2]);
+          }
+        }
+      }
+      
+      // Convert mouse coordinates to graph coordinates
+      const graphX = (x - tx) / scale;
+      const graphY = (y - ty) / scale;
+      
+      setTempConnection({ x: graphX, y: graphY });
+    };
+
+    svg.on('mousemove.connection', handleMouseMove);
+    
+    return () => {
+      svg.on('mousemove.connection', null);
+    };
+  }, [connectionMode, connectionStart]);
+
+  // Reset connection mode when disabled
+  useEffect(() => {
+    if (!connectionMode) {
+      setConnectionStart(null);
+      setTempConnection(null);
+    }
+  }, [connectionMode]);
+
+  // Main effect
   useEffect(() => {
     if (!svgRef.current || !mindMapData) return;
 
@@ -107,7 +190,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     const width = svgRef.current.clientWidth || 800;
     const height = svgRef.current.clientHeight || 600;
 
-    // Reuse or create container
     let g = gRef.current;
     if (!g) {
       const existing = svg.select('g.zoom-layer');
@@ -115,7 +197,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       gRef.current = g;
     }
 
-    // Setup zoom behavior (once)
     if (!zoomBehaviorRef.current) {
       zoomBehaviorRef.current = d3.zoom()
         .scaleExtent([0.2, 2])
@@ -127,18 +208,15 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       svg.call(zoomBehaviorRef.current);
     }
 
-    // Convert data
     const { nodes, links } = convertToD3Format(mindMapData);
     nodesRef.current = nodes;
     linksRef.current = links;
 
     console.log('🔷 D3 Update:', { nodeCount: nodes.length, linkCount: links.length });
 
-    // Create or update simulation
     if (!simulationRef.current) {
       console.log('🔷 Creating new simulation');
       
-      // Initial simulation with gentle forces
       simulationRef.current = d3.forceSimulation(nodes)
         .force('charge', d3.forceManyBody().strength(-90))
         .force('collision', d3.forceCollide().radius(d => (d.radius || 28) + 4).strength(0.95))
@@ -146,18 +224,15 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         .alphaDecay(0.08)
         .velocityDecay(0.55);
 
-      // Add link force if we have links
       if (links.length > 0) {
         simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(70).strength(0.9).iterations(2));
       }
 
-      // Add weak viewport centering forces
       const cx = width / 2;
       const cy = height / 2;
       simulationRef.current.force('viewX', d3.forceX(cx).strength(0.01));
       simulationRef.current.force('viewY', d3.forceY(cy).strength(0.01));
 
-      // Brief warm-up then return to baseline
       simulationRef.current.alphaTarget(Math.max(0.03, BASELINE_ALPHA));
       if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
       warmupTimeoutRef.current = setTimeout(() => {
@@ -172,10 +247,8 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     } else {
       console.log('🔷 Updating existing simulation');
       
-      // Update nodes in simulation
       simulationRef.current.nodes(nodes);
 
-      // Update or add link force
       if (links.length > 0) {
         const existingLinkForce = simulationRef.current.force('link');
         if (existingLinkForce) {
@@ -187,7 +260,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         simulationRef.current.force('link', null);
       }
 
-      // Gently reheat to integrate changes
       simulationRef.current.alpha(0.08).restart();
       simulationRef.current.alphaTarget(Math.max(0.02, BASELINE_ALPHA));
       if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
@@ -200,7 +272,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       }, 800);
     }
 
-    // Ensure layer groups exist
     if (!linkElementsRef.current) {
       linkElementsRef.current = g.append('g').attr('class', 'links-layer');
     }
@@ -208,7 +279,7 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       nodeElementsRef.current = g.append('g').attr('class', 'nodes-layer');
     }
 
-    // Data join for links
+    // Data join for links with hover effects
     const link = linkElementsRef.current
       .selectAll('line.link')
       .data(links, d => d.id)
@@ -217,7 +288,31 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
           .attr('class', 'link')
           .attr('stroke', '#94a3b8')
           .attr('stroke-width', 3)
-          .attr('stroke-opacity', 0.6),
+          .attr('stroke-opacity', 0.6)
+          .style('cursor', 'pointer')
+          .on('mouseenter', function() {
+            d3.select(this)
+              .attr('stroke', '#ef4444')
+              .attr('stroke-width', 5)
+              .attr('stroke-opacity', 1);
+          })
+          .on('mouseleave', function() {
+            d3.select(this)
+              .attr('stroke', '#94a3b8')
+              .attr('stroke-width', 3)
+              .attr('stroke-opacity', 0.6);
+          })
+          .on('click', function(event, d) {
+            event.stopPropagation();
+            if (confirm('Delete this connection?')) {
+              if (onDataChange) {
+                onDataChange({
+                  type: 'deleteConnection',
+                  connectionId: d.id
+                });
+              }
+            }
+          }),
         update => update,
         exit => exit.remove()
       );
@@ -233,10 +328,22 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
             .style('cursor', 'pointer');
 
           g.append('circle')
+            .attr('class', 'node-circle')
             .attr('r', d => d.radius)
             .attr('fill', d => d.color)
             .attr('stroke', '#fff')
             .attr('stroke-width', 4);
+
+          // Add connection mode indicator ring
+          g.append('circle')
+            .attr('class', 'connection-indicator')
+            .attr('r', d => d.radius + 8)
+            .attr('fill', 'none')
+            .attr('stroke', '#10b981')
+            .attr('stroke-width', 3)
+            .attr('stroke-dasharray', '5,5')
+            .style('opacity', 0)
+            .style('pointer-events', 'none');
 
           g.append('text')
             .text(d => {
@@ -257,7 +364,31 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         exit => exit.remove()
       );
 
-    // Drag behavior with warm-up/cool-down
+    // Update connection mode indicators
+    node.select('.connection-indicator')
+      .style('opacity', d => {
+        if (!connectionMode) return 0;
+        if (connectionStart && connectionStart.id === d.id) return 1;
+        if (connectionStart) return 0.5;
+        return 0;
+      })
+      .attr('stroke', d => {
+        if (connectionStart && connectionStart.id === d.id) return '#10b981';
+        return '#3b82f6';
+      });
+
+    // Update node appearance for connection mode
+    node.select('.node-circle')
+      .attr('stroke-width', d => {
+        if (connectionMode && connectionStart && connectionStart.id === d.id) return 6;
+        return 4;
+      })
+      .attr('stroke', d => {
+        if (connectionMode && connectionStart && connectionStart.id === d.id) return '#10b981';
+        return '#fff';
+      });
+
+    // Drag behavior
     let dragStartX = 0;
     let dragStartY = 0;
     let hasMoved = false;
@@ -265,24 +396,25 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
     const dragBehavior = d3.drag()
       .on('start', function(event, d) {
+        if (connectionMode) return; // Disable drag in connection mode
+        
         isDraggingRef.current = false;
         hasMoved = false;
         dragStartX = event.x;
         dragStartY = event.y;
         
-        // Disable zoom
         svg.on('.zoom', null);
         
-        // Warm up simulation
-        if (simulationRef.current) {
+        if (simulationRef.current && physicsEnabled) {
           simulationRef.current.alphaTarget(0.12).restart();
         }
         
-        // Fix node
         d.fx = d.x;
         d.fy = d.y;
       })
       .on('drag', function(event, d) {
+        if (connectionMode) return;
+        
         const dx = event.x - dragStartX;
         const dy = event.y - dragStartY;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -299,10 +431,11 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         }
       })
       .on('end', function(event, d) {
+        if (connectionMode) return;
+        
         if (hasMoved) {
           d3.select(this).select('circle').attr('stroke-width', 4);
           
-          // Release node if physics enabled
           if (physicsEnabled) {
             d.fx = null;
             d.fy = null;
@@ -311,8 +444,7 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
             d.fy = d.y;
           }
           
-          // Cool down with brief warm-up
-          if (simulationRef.current) {
+          if (simulationRef.current && physicsEnabled) {
             simulationRef.current.alphaTarget(Math.max(0.02, BASELINE_ALPHA));
             if (postDragWarmRef.current) clearTimeout(postDragWarmRef.current);
             postDragWarmRef.current = setTimeout(() => {
@@ -324,7 +456,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
             }, 600);
           }
           
-          // Save position
           if (onDataChange) {
             const [type, ...idParts] = d.id.split('-');
             const entityId = idParts.join('-');
@@ -337,7 +468,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
           }
         }
         
-        // Re-enable zoom
         setTimeout(() => {
           if (zoomBehaviorRef.current) {
             svg.call(zoomBehaviorRef.current);
@@ -350,9 +480,11 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
     node.call(dragBehavior);
 
-    // Click and double-click handlers
+    // Click handlers
     node.on('click', function(event, d) {
-      if (!hasMoved && !isDraggingRef.current) {
+      if (connectionMode) {
+        handleConnectionClick(event, d);
+      } else if (!hasMoved && !isDraggingRef.current) {
         event.stopPropagation();
         if (onNodeClick) {
           onNodeClick(d);
@@ -361,6 +493,8 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     });
 
     node.on('dblclick', function(event, d) {
+      if (connectionMode) return; // Ignore double-click in connection mode
+      
       if (!hasMoved && !isDraggingRef.current) {
         event.stopPropagation();
         event.preventDefault();
@@ -371,9 +505,8 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       }
     });
 
-    // Tick handler - update positions and cache them
+    // Tick handler
     simulationRef.current.on('tick', () => {
-      // Update links using the layer ref
       if (linkElementsRef.current) {
         linkElementsRef.current.selectAll('line.link')
           .attr('x1', d => d.source?.x ?? 0)
@@ -382,13 +515,11 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
           .attr('y2', d => d.target?.y ?? 0);
       }
 
-      // Update nodes using the layer ref
       if (nodeElementsRef.current) {
         nodeElementsRef.current.selectAll('g.node')
           .attr('transform', d => `translate(${d.x ?? 0},${d.y ?? 0})`);
       }
 
-      // Cache positions to prevent reset
       if (nodesRef.current) {
         nodesRef.current.forEach(n => {
           if (Number.isFinite(n.x) && Number.isFinite(n.y)) {
@@ -398,11 +529,9 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       }
     });
 
-    // Expose for debugging
     window.d3Simulation = simulationRef.current;
     window.d3Nodes = nodes;
 
-    // Cleanup
     return () => {
       if (warmupTimeoutRef.current) {
         clearTimeout(warmupTimeoutRef.current);
@@ -413,13 +542,12 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         postDragWarmRef.current = null;
       }
     };
-  }, [structuralKey, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format]);
+  }, [structuralKey, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format, connectionMode, handleConnectionClick]);
 
   // Physics toggle effect
   useEffect(() => {
     if (isInitializedRef.current && simulationRef.current && nodesRef.current) {
       if (physicsEnabled) {
-        // Release all nodes
         nodesRef.current.forEach(n => {
           n.fx = null;
           n.fy = null;
@@ -427,7 +555,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         simulationRef.current.alpha(1).alphaTarget(BASELINE_ALPHA).restart();
         console.log('🔷 Physics ON - nodes released');
       } else {
-        // Fix all nodes
         nodesRef.current.forEach(n => {
           n.fx = n.x;
           n.fy = n.y;
@@ -438,7 +565,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     }
   }, [physicsEnabled]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (simulationRef.current) {
@@ -447,12 +573,50 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     };
   }, []);
 
+  // Render temp connection line
+  const renderTempConnection = () => {
+    if (!connectionStart || !tempConnection || !gRef.current) return null;
+    
+    return (
+      <line
+        x1={connectionStart.x}
+        y1={connectionStart.y}
+        x2={tempConnection.x}
+        y2={tempConnection.y}
+        stroke="#10b981"
+        strokeWidth="3"
+        strokeDasharray="5,5"
+        strokeOpacity="0.8"
+        pointerEvents="none"
+        style={{ 
+          position: 'absolute',
+          zIndex: 1000
+        }}
+      />
+    );
+  };
+
   return (
     <svg
       ref={svgRef}
       className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100"
       style={{ width: '100%', height: '100%', minHeight: '600px' }}
-    />
+    >
+      {connectionStart && tempConnection && (
+        <g className="temp-connection-layer" style={{ pointerEvents: 'none' }}>
+          <line
+            x1={connectionStart.x}
+            y1={connectionStart.y}
+            x2={tempConnection.x}
+            y2={tempConnection.y}
+            stroke="#10b981"
+            strokeWidth="3"
+            strokeDasharray="5,5"
+            strokeOpacity="0.8"
+          />
+        </g>
+      )}
+    </svg>
   );
 };
 
