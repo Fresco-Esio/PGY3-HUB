@@ -78,9 +78,17 @@ const D3Graph = ({
           y = 200 + Math.random() * 200;
         }
         
+        // Determine label based on node type
+        let label = 'Untitled';
+        if (nodeType === 'case') {
+          label = item.label || item.title || item.case_id || 'Unnamed Patient';
+        } else {
+          label = item.label || item.title || `Untitled ${nodeType}`;
+        }
+        
         const node = {
           id: nodeId,
-          label: item.label || item.title || item.primary_diagnosis || item.case_id || 'Untitled',
+          label: label,
           type: nodeType,
           color: config.color,
           radius: config.radius,
