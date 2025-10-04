@@ -2563,7 +2563,6 @@ useEffect(() => {
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
-            syncNodeData={syncNodeData}
             forceNodeUpdate={() => setNodeUpdateTrigger(prev => prev + 1)}
           />
         )}
