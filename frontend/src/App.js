@@ -999,11 +999,8 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
 const DashboardComponent = () => {
   const navigate = useNavigate(); // Add navigation hook
   
-  // Cytoscape will handle node/edge management internally
-  const cytoscapeRef = useRef(null);
-  
-  // Helper to get current Cytoscape instance
-  const getCytoscape = useCallback(() => cytoscapeRef.current, []);
+  // D3 will handle node/edge management internally
+  const d3SimulationRef = useRef(null);
 
   // State for forcing node updates
   const [nodeUpdateTrigger, setNodeUpdateTrigger] = useState(0);
