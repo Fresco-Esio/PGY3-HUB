@@ -1801,19 +1801,13 @@ useEffect(() => {
     );
   }, [setEdges]);
 
-  // Lazy-loaded force-directed layout for better performance
+  // Lazy-loaded Dagre layout for realignment
   const forceLayout = useCallback(async () => {
     if (nodes.length === 0) return;
 
     try {
-      // Lazy load D3 force simulation
-      const { 
-        forceSimulation, 
-        forceManyBody, 
-        forceLink, 
-        forceCenter, 
-        forceCollide 
-      } = await loadD3Force();
+      // Lazy load Dagre for hierarchical layout
+      const dagre = await loadDagre();
 
       // Preserve the current edges before layout
       const currentEdges = [...edges];
