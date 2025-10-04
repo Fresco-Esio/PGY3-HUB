@@ -54,7 +54,8 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Link2
 } from 'lucide-react';
 
 // Lazy load components for better initial load time
