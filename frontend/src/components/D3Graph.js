@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 
 const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, physicsEnabled }) => {
@@ -11,6 +11,12 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
   const gRef = useRef(null);
   const isDraggingRef = useRef(false);
   const isInitializedRef = useRef(false);
+  const prevPositionsRef = useRef(new Map());
+  const warmupTimeoutRef = useRef(null);
+  const postDragWarmRef = useRef(null);
+  const zoomBehaviorRef = useRef(null);
+  
+  const BASELINE_ALPHA = 0.015; // Keep sim gently ticking for continuous settling
   
   // Node configuration
   const nodeConfig = {
@@ -20,10 +26,23 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     literature: { color: '#a855f7', radius: 58 },
   };
 
-  // Convert mindMapData to D3 format
+  // Structural key - only changes when nodes/links added/removed (not position changes)
+  const structuralKey = useMemo(() => {
+    const nodeIds = [];
+    if (mindMapData?.topics) nodeIds.push(...mindMapData.topics.map(t => `topic-${t.id}`));
+    if (mindMapData?.cases) nodeIds.push(...mindMapData.cases.map(c => `case-${c.id}`));
+    if (mindMapData?.tasks) nodeIds.push(...mindMapData.tasks.map(t => `task-${t.id}`));
+    if (mindMapData?.literature) nodeIds.push(...mindMapData.literature.map(l => `literature-${l.id}`));
+    nodeIds.sort();
+    const linkIds = (mindMapData?.connections || []).map(c => String(c.id || `${c.source}->${c.target}`)).sort();
+    return JSON.stringify({ nodes: nodeIds, links: linkIds });
+  }, [mindMapData]);
+
+  // Convert mindMapData to D3 format with position caching
   const convertToD3Format = useCallback((data) => {
     const nodes = [];
     const links = [];
+    const nodeById = new Map();
 
     // Add nodes from all categories
     ['topics', 'cases', 'tasks', 'literature'].forEach((category) => {
@@ -32,13 +51,24 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       
       items.forEach((item) => {
         const config = nodeConfig[nodeType];
+        const nodeId = `${nodeType}-${item.id}`;
         
-        // Use existing position or create random position
-        const x = item.position?.x ?? (400 + Math.random() * 200);
-        const y = item.position?.y ?? (200 + Math.random() * 200);
+        // Position priority: 1) runtime cache, 2) saved position, 3) random
+        let x, y;
+        if (prevPositionsRef.current.has(nodeId)) {
+          const prev = prevPositionsRef.current.get(nodeId);
+          x = prev.x;
+          y = prev.y;
+        } else if (item.position?.x !== undefined && item.position?.y !== undefined) {
+          x = item.position.x;
+          y = item.position.y;
+        } else {
+          x = 400 + Math.random() * 200;
+          y = 200 + Math.random() * 200;
+        }
         
-        nodes.push({
-          id: `${nodeType}-${item.id}`,
+        const node = {
+          id: nodeId,
           label: item.label || item.title || item.primary_diagnosis || item.case_id || 'Untitled',
           type: nodeType,
           color: config.color,
@@ -46,16 +76,18 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
           x: x,
           y: y,
           originalData: item,
-        });
+        };
+        
+        nodes.push(node);
+        nodeById.set(nodeId, node);
       });
     });
 
     // Add edges
     const connections = data.connections || [];
-    const nodeIds = new Set(nodes.map(n => n.id));
     
     connections.forEach((conn) => {
-      if (nodeIds.has(conn.source) && nodeIds.has(conn.target)) {
+      if (nodeById.has(conn.source) && nodeById.has(conn.target)) {
         links.push({
           source: conn.source,
           target: conn.target,
@@ -67,171 +99,169 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     return { nodes, links };
   }, []);
 
-  // Update positions of existing nodes without recreating the graph
-  const updateNodePositions = useCallback((data) => {
-    if (!nodeElementsRef.current || !nodesRef.current) return;
-
-    const positionMap = new Map();
-    
-    // Build position map from data
-    ['topics', 'cases', 'tasks', 'literature'].forEach((category) => {
-      const nodeType = category === 'literature' ? 'literature' : category.slice(0, -1);
-      const items = data[category] || [];
-      
-      items.forEach((item) => {
-        const nodeId = `${nodeType}-${item.id}`;
-        if (item.position?.x !== undefined && item.position?.y !== undefined) {
-          positionMap.set(nodeId, item.position);
-        }
-      });
-    });
-
-    // Update node positions
-    nodesRef.current.forEach(node => {
-      const pos = positionMap.get(node.id);
-      if (pos) {
-        node.x = pos.x;
-        node.y = pos.y;
-      }
-    });
-
-    // Update visual positions
-    if (nodeElementsRef.current) {
-      nodeElementsRef.current.attr('transform', d => `translate(${d.x},${d.y})`);
-    }
-
-    // Update link positions
-    if (linkElementsRef.current && linksRef.current) {
-      linkElementsRef.current.each(function(l) {
-        const sourceNode = nodesRef.current.find(n => n.id === l.source);
-        const targetNode = nodesRef.current.find(n => n.id === l.target);
-        if (sourceNode && targetNode) {
-          d3.select(this)
-            .attr('x1', sourceNode.x)
-            .attr('y1', sourceNode.y)
-            .attr('x2', targetNode.x)
-            .attr('y2', targetNode.y);
-        }
-      });
-    }
-  }, []);
-
-  // Check if node structure has changed (not just positions)
-  const hasStructureChanged = useCallback((oldNodes, newData) => {
-    const { nodes: newNodes } = convertToD3Format(newData);
-    
-    if (oldNodes.length !== newNodes.length) return true;
-    
-    const oldIds = new Set(oldNodes.map(n => n.id));
-    const newIds = new Set(newNodes.map(n => n.id));
-    
-    for (const id of newIds) {
-      if (!oldIds.has(id)) return true;
-    }
-    
-    return false;
-  }, [convertToD3Format]);
-
-  // Initialize or reinitialize the graph
-  const initializeGraph = useCallback(() => {
+  // Main effect - only reinitialize on structural changes
+  useEffect(() => {
     if (!svgRef.current || !mindMapData) return;
 
     const svg = d3.select(svgRef.current);
     const width = svgRef.current.clientWidth || 800;
     const height = svgRef.current.clientHeight || 600;
 
-    console.log('🔷 D3 Initializing graph');
+    // Reuse or create container
+    let g = gRef.current;
+    if (!g) {
+      const existing = svg.select('g.zoom-layer');
+      g = existing.empty() ? svg.append('g').attr('class', 'zoom-layer') : existing;
+      gRef.current = g;
+    }
 
-    // Clear previous graph container
-    svg.selectAll('.graph-container').remove();
-
-    // Create container group for zoom/pan
-    const g = svg.append('g').attr('class', 'graph-container');
-    gRef.current = g;
-
-    // Setup zoom behavior
-    const zoom = d3.zoom()
-      .scaleExtent([0.1, 4])
-      .on('zoom', (event) => {
-        // Only apply zoom if not dragging a node
-        if (!isDraggingRef.current) {
-          g.attr('transform', event.transform);
-        }
-      });
-
-    svg.call(zoom);
+    // Setup zoom behavior (once)
+    if (!zoomBehaviorRef.current) {
+      zoomBehaviorRef.current = d3.zoom()
+        .scaleExtent([0.2, 2])
+        .on('zoom', (event) => {
+          if (!isDraggingRef.current) {
+            g.attr('transform', event.transform);
+          }
+        });
+      svg.call(zoomBehaviorRef.current);
+    }
 
     // Convert data
     const { nodes, links } = convertToD3Format(mindMapData);
     nodesRef.current = nodes;
     linksRef.current = links;
 
-    console.log('🔷 D3 Data:', { nodeCount: nodes.length, linkCount: links.length });
+    console.log('🔷 D3 Update:', { nodeCount: nodes.length, linkCount: links.length });
 
-    // Create links
-    const linkGroup = g.append('g').attr('class', 'links');
-    const link = linkGroup.selectAll('line')
-      .data(links)
-      .join('line')
-      .attr('stroke', '#94a3b8')
-      .attr('stroke-width', 3)
-      .attr('stroke-opacity', 0.6)
-      .attr('x1', d => {
-        const sourceNode = nodes.find(n => n.id === d.source);
-        return sourceNode ? sourceNode.x : 0;
-      })
-      .attr('y1', d => {
-        const sourceNode = nodes.find(n => n.id === d.source);
-        return sourceNode ? sourceNode.y : 0;
-      })
-      .attr('x2', d => {
-        const targetNode = nodes.find(n => n.id === d.target);
-        return targetNode ? targetNode.x : 0;
-      })
-      .attr('y2', d => {
-        const targetNode = nodes.find(n => n.id === d.target);
-        return targetNode ? targetNode.y : 0;
-      });
+    // Create or update simulation
+    if (!simulationRef.current) {
+      console.log('🔷 Creating new simulation');
+      
+      // Initial simulation with gentle forces
+      simulationRef.current = d3.forceSimulation(nodes)
+        .force('charge', d3.forceManyBody().strength(-90))
+        .force('collision', d3.forceCollide().radius(d => (d.radius || 28) + 4).strength(0.95))
+        .alpha(0.12)
+        .alphaDecay(0.08)
+        .velocityDecay(0.55);
 
-    linkElementsRef.current = link;
+      // Add link force if we have links
+      if (links.length > 0) {
+        simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(70).strength(0.9).iterations(2));
+      }
 
-    // Create node groups
-    const nodeGroup = g.append('g').attr('class', 'nodes');
-    const node = nodeGroup.selectAll('g')
-      .data(nodes)
-      .join('g')
-      .attr('class', 'node')
-      .attr('transform', d => `translate(${d.x},${d.y})`)
-      .style('cursor', 'pointer');
+      // Add weak viewport centering forces
+      const cx = width / 2;
+      const cy = height / 2;
+      simulationRef.current.force('viewX', d3.forceX(cx).strength(0.01));
+      simulationRef.current.force('viewY', d3.forceY(cy).strength(0.01));
 
-    nodeElementsRef.current = node;
+      // Brief warm-up then return to baseline
+      simulationRef.current.alphaTarget(Math.max(0.03, BASELINE_ALPHA));
+      if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
+      warmupTimeoutRef.current = setTimeout(() => {
+        try {
+          if (simulationRef.current) {
+            simulationRef.current.alphaTarget(BASELINE_ALPHA);
+          }
+        } catch (e) {}
+      }, 800);
 
-    // Add circles to nodes
-    node.append('circle')
-      .attr('r', d => d.radius)
-      .attr('fill', d => d.color)
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 4);
+      isInitializedRef.current = true;
+    } else {
+      console.log('🔷 Updating existing simulation');
+      
+      // Update nodes in simulation
+      simulationRef.current.nodes(nodes);
 
-    // Add labels to nodes
-    node.append('text')
-      .text(d => {
-        const maxLen = 20;
-        return d.label.length > maxLen ? d.label.substring(0, maxLen) + '...' : d.label;
-      })
-      .attr('text-anchor', 'middle')
-      .attr('dy', '.35em')
-      .attr('fill', '#fff')
-      .attr('font-size', '14px')
-      .attr('font-weight', 'bold')
-      .attr('pointer-events', 'none')
-      .style('text-shadow', '0 0 3px #000, 0 0 3px #000');
+      // Update or add link force
+      if (links.length > 0) {
+        const existingLinkForce = simulationRef.current.force('link');
+        if (existingLinkForce) {
+          existingLinkForce.links(links).distance(70).strength(0.9).iterations(2);
+        } else {
+          simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(70).strength(0.9).iterations(2));
+        }
+      } else {
+        simulationRef.current.force('link', null);
+      }
 
-    // Drag behavior with movement threshold
+      // Gently reheat to integrate changes
+      simulationRef.current.alpha(0.08).restart();
+      simulationRef.current.alphaTarget(Math.max(0.02, BASELINE_ALPHA));
+      if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
+      warmupTimeoutRef.current = setTimeout(() => {
+        try {
+          if (simulationRef.current) {
+            simulationRef.current.alphaTarget(BASELINE_ALPHA);
+          }
+        } catch (e) {}
+      }, 800);
+    }
+
+    // Ensure layer groups exist
+    if (!linkElementsRef.current) {
+      linkElementsRef.current = g.append('g').attr('class', 'links-layer');
+    }
+    if (!nodeElementsRef.current) {
+      nodeElementsRef.current = g.append('g').attr('class', 'nodes-layer');
+    }
+
+    // Data join for links
+    const link = linkElementsRef.current
+      .selectAll('line.link')
+      .data(links, d => d.id)
+      .join(
+        enter => enter.append('line')
+          .attr('class', 'link')
+          .attr('stroke', '#94a3b8')
+          .attr('stroke-width', 3)
+          .attr('stroke-opacity', 0.6),
+        update => update,
+        exit => exit.remove()
+      );
+
+    // Data join for nodes
+    const node = nodeElementsRef.current
+      .selectAll('g.node')
+      .data(nodes, d => d.id)
+      .join(
+        enter => {
+          const g = enter.append('g')
+            .attr('class', 'node')
+            .style('cursor', 'pointer');
+
+          g.append('circle')
+            .attr('r', d => d.radius)
+            .attr('fill', d => d.color)
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 4);
+
+          g.append('text')
+            .text(d => {
+              const maxLen = 20;
+              return d.label.length > maxLen ? d.label.substring(0, maxLen) + '...' : d.label;
+            })
+            .attr('text-anchor', 'middle')
+            .attr('dy', '.35em')
+            .attr('fill', '#fff')
+            .attr('font-size', '14px')
+            .attr('font-weight', 'bold')
+            .attr('pointer-events', 'none')
+            .style('text-shadow', '0 0 3px #000, 0 0 3px #000');
+
+          return g;
+        },
+        update => update,
+        exit => exit.remove()
+      );
+
+    // Drag behavior with warm-up/cool-down
     let dragStartX = 0;
     let dragStartY = 0;
     let hasMoved = false;
-    const dragThreshold = 5; // pixels
+    const dragThreshold = 5;
 
     const dragBehavior = d3.drag()
       .on('start', function(event, d) {
@@ -240,15 +270,15 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         dragStartX = event.x;
         dragStartY = event.y;
         
-        // Disable zoom during potential drag
+        // Disable zoom
         svg.on('.zoom', null);
         
-        // Reheat simulation on drag start if physics enabled
-        if (simulationRef.current && physicsEnabled) {
-          simulationRef.current.alphaTarget(0.3).restart();
+        // Warm up simulation
+        if (simulationRef.current) {
+          simulationRef.current.alphaTarget(0.12).restart();
         }
         
-        // Fix this node during drag
+        // Fix node
         d.fx = d.x;
         d.fy = d.y;
       })
@@ -264,35 +294,37 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         }
 
         if (hasMoved) {
-          // Update fixed position during drag
           d.fx = event.x;
           d.fy = event.y;
-          d.x = event.x;
-          d.y = event.y;
-          
-          // Physics simulation will handle the visual update via tick
         }
       })
       .on('end', function(event, d) {
         if (hasMoved) {
           d3.select(this).select('circle').attr('stroke-width', 4);
           
-          // Release the node after drag if physics is enabled
+          // Release node if physics enabled
           if (physicsEnabled) {
             d.fx = null;
             d.fy = null;
           } else {
-            // Keep it fixed if physics is disabled
             d.fx = d.x;
             d.fy = d.y;
           }
           
-          // Cool down simulation
-          if (simulationRef.current && physicsEnabled) {
-            simulationRef.current.alphaTarget(0);
+          // Cool down with brief warm-up
+          if (simulationRef.current) {
+            simulationRef.current.alphaTarget(Math.max(0.02, BASELINE_ALPHA));
+            if (postDragWarmRef.current) clearTimeout(postDragWarmRef.current);
+            postDragWarmRef.current = setTimeout(() => {
+              try {
+                if (simulationRef.current) {
+                  simulationRef.current.alphaTarget(BASELINE_ALPHA);
+                }
+              } catch (e) {}
+            }, 600);
           }
           
-          // Save position to backend
+          // Save position
           if (onDataChange) {
             const [type, ...idParts] = d.id.split('-');
             const entityId = idParts.join('-');
@@ -305,9 +337,11 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
           }
         }
         
-        // Re-enable zoom after drag
+        // Re-enable zoom
         setTimeout(() => {
-          svg.call(zoom);
+          if (zoomBehaviorRef.current) {
+            svg.call(zoomBehaviorRef.current);
+          }
           isDraggingRef.current = false;
         }, 100);
         
@@ -331,129 +365,78 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         event.stopPropagation();
         event.preventDefault();
         if (onNodeDoubleClick) {
-          console.log('🔷 Double-click on:', d.id);
+          console.log('🔷 Double-click:', d.id);
           onNodeDoubleClick(d);
         }
       }
     });
 
-    // Create force simulation only if physics enabled
-    if (physicsEnabled && nodes.length > 0) {
-      // Remove fixed positions to allow physics to work
+    // Tick handler - update positions and cache them
+    simulationRef.current.on('tick', () => {
+      link
+        .attr('x1', d => d.source?.x ?? 0)
+        .attr('y1', d => d.source?.y ?? 0)
+        .attr('x2', d => d.target?.x ?? 0)
+        .attr('y2', d => d.target?.y ?? 0);
+
+      node.attr('transform', d => `translate(${d.x ?? 0},${d.y ?? 0})`);
+
+      // Cache positions to prevent reset
       nodes.forEach(n => {
-        n.fx = null;
-        n.fy = null;
-      });
-
-      const simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.id).distance(200).strength(1))
-        .force('charge', d3.forceManyBody().strength(-800))
-        .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(d => d.radius + 20).strength(0.9))
-        .alphaDecay(0.02) // Slower decay = longer simulation
-        .velocityDecay(0.4); // Damping to prevent jitter
-
-      simulationRef.current = simulation;
-
-      simulation.on('tick', () => {
-        // Update node positions
-        node.attr('transform', d => `translate(${d.x},${d.y})`);
-
-        // Update link positions
-        link.each(function(l) {
-          const sourceNode = nodes.find(n => n.id === l.source);
-          const targetNode = nodes.find(n => n.id === l.target);
-          if (sourceNode && targetNode) {
-            d3.select(this)
-              .attr('x1', sourceNode.x)
-              .attr('y1', sourceNode.y)
-              .attr('x2', targetNode.x)
-              .attr('y2', targetNode.y);
-          }
-        });
-
-        // Save positions periodically (every 60 ticks when alpha is low)
-        if (simulation.alpha() < 0.05 && Math.random() < 0.1) {
-          nodes.forEach(n => {
-            const [type, ...idParts] = n.id.split('-');
-            const entityId = idParts.join('-');
-            if (onDataChange && !isDraggingRef.current) {
-              onDataChange({ 
-                type: 'position', 
-                nodeType: type,
-                nodeId: entityId,
-                position: { x: n.x, y: n.y },
-                silent: true // Don't trigger re-render
-              });
-            }
-          });
+        if (Number.isFinite(n.x) && Number.isFinite(n.y)) {
+          prevPositionsRef.current.set(n.id, { x: n.x, y: n.y });
         }
       });
+    });
 
-      window.d3Simulation = simulation;
-      window.d3Nodes = nodes;
-      console.log('🔷 Physics simulation started with continuous force-directed layout');
-    } else if (!physicsEnabled && nodes.length > 0) {
-      // Fix all nodes in place when physics is disabled
-      nodes.forEach(n => {
-        n.fx = n.x;
-        n.fy = n.y;
-      });
-      console.log('🔷 Physics disabled - nodes fixed in place');
-    }
-
-    isInitializedRef.current = true;
-  }, [mindMapData, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format]);
-
-  // Main effect - only reinitialize when structure changes
-  useEffect(() => {
-    if (!svgRef.current || !mindMapData) return;
-
-    // Check if we need to reinitialize or just update positions
-    if (!isInitializedRef.current || hasStructureChanged(nodesRef.current, mindMapData)) {
-      console.log('🔷 Structure changed - reinitializing');
-      initializeGraph();
-    } else {
-      console.log('🔷 Only positions changed - updating');
-      updateNodePositions(mindMapData);
-    }
+    // Expose for debugging
+    window.d3Simulation = simulationRef.current;
+    window.d3Nodes = nodes;
 
     // Cleanup
     return () => {
-      if (simulationRef.current) {
-        simulationRef.current.stop();
+      if (warmupTimeoutRef.current) {
+        clearTimeout(warmupTimeoutRef.current);
+        warmupTimeoutRef.current = null;
+      }
+      if (postDragWarmRef.current) {
+        clearTimeout(postDragWarmRef.current);
+        postDragWarmRef.current = null;
       }
     };
-  }, [mindMapData, physicsEnabled]);
+  }, [structuralKey, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format]);
 
-  // Separate effect for physics toggle
+  // Physics toggle effect
   useEffect(() => {
-    if (isInitializedRef.current && nodesRef.current) {
+    if (isInitializedRef.current && simulationRef.current && nodesRef.current) {
       if (physicsEnabled) {
         // Release all nodes
         nodesRef.current.forEach(n => {
           n.fx = null;
           n.fy = null;
         });
-        
-        if (simulationRef.current) {
-          simulationRef.current.alpha(1).restart();
-          console.log('🔷 Physics enabled - nodes released, simulation restarted');
-        }
+        simulationRef.current.alpha(1).alphaTarget(BASELINE_ALPHA).restart();
+        console.log('🔷 Physics ON - nodes released');
       } else {
-        // Fix all nodes in place
+        // Fix all nodes
         nodesRef.current.forEach(n => {
           n.fx = n.x;
           n.fy = n.y;
         });
-        
-        if (simulationRef.current) {
-          simulationRef.current.stop();
-          console.log('🔷 Physics disabled - nodes fixed, simulation stopped');
-        }
+        simulationRef.current.stop();
+        console.log('🔷 Physics OFF - nodes fixed');
       }
     }
   }, [physicsEnabled]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
+    };
+  }, []);
 
   return (
     <svg
