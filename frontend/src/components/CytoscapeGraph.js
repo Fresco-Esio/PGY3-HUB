@@ -604,6 +604,7 @@ const CytoscapeGraph = ({
         }
       ]);
     }
+    */
 
     // Run layout only when node count increases (new nodes added)
     const currentNodeCount = cy.nodes().length;
