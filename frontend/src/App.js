@@ -2370,6 +2370,22 @@ useEffect(() => {
           connectionMode={connectionMode}
           onConnectionCreate={handleCreateConnection}
         />
+        
+        {/* Connection Mode Indicator */}
+        {connectionMode && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 z-10"
+          >
+            <Link2 className="w-5 h-5 animate-pulse" />
+            <div>
+              <div className="font-semibold">Connection Mode Active</div>
+              <div className="text-xs text-emerald-100">Click two nodes to connect them • Click connections to delete • Press Esc to exit</div>
+            </div>
+          </motion.div>
+        )}
       </div>
       
       {/* --- Modals --- */}
