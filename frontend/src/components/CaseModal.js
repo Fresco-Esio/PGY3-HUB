@@ -1005,7 +1005,6 @@ const CaseModal = ({
           >
             <motion.div
               ref={headerRef}
-              layout
               initial="hidden"
               animate="visible"
               exit="exit"
