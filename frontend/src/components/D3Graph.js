@@ -242,6 +242,15 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         
         // Disable zoom during potential drag
         svg.on('.zoom', null);
+        
+        // Reheat simulation on drag start if physics enabled
+        if (simulationRef.current && physicsEnabled) {
+          simulationRef.current.alphaTarget(0.3).restart();
+        }
+        
+        // Fix this node during drag
+        d.fx = d.x;
+        d.fy = d.y;
       })
       .on('drag', function(event, d) {
         const dx = event.x - dragStartX;
@@ -255,31 +264,33 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         }
 
         if (hasMoved) {
+          // Update fixed position during drag
+          d.fx = event.x;
+          d.fy = event.y;
           d.x = event.x;
           d.y = event.y;
           
-          // Update node position
-          d3.select(this).attr('transform', `translate(${d.x},${d.y})`);
-          
-          // Update connected links
-          link.each(function(l) {
-            const sourceNode = nodes.find(n => n.id === l.source);
-            const targetNode = nodes.find(n => n.id === l.target);
-            if (sourceNode && targetNode) {
-              if (l.source === d.id || l.target === d.id) {
-                d3.select(this)
-                  .attr('x1', sourceNode.x)
-                  .attr('y1', sourceNode.y)
-                  .attr('x2', targetNode.x)
-                  .attr('y2', targetNode.y);
-              }
-            }
-          });
+          // Physics simulation will handle the visual update via tick
         }
       })
       .on('end', function(event, d) {
         if (hasMoved) {
           d3.select(this).select('circle').attr('stroke-width', 4);
+          
+          // Release the node after drag if physics is enabled
+          if (physicsEnabled) {
+            d.fx = null;
+            d.fy = null;
+          } else {
+            // Keep it fixed if physics is disabled
+            d.fx = d.x;
+            d.fy = d.y;
+          }
+          
+          // Cool down simulation
+          if (simulationRef.current && physicsEnabled) {
+            simulationRef.current.alphaTarget(0);
+          }
           
           // Save position to backend
           if (onDataChange) {
