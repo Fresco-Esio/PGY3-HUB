@@ -1302,25 +1302,8 @@ useEffect(() => {
   const hasData = mindMapData && (mindMapData.cases?.length > 0 || mindMapData.topics?.length > 0 || 
                                  mindMapData.tasks?.length > 0 || mindMapData.literature?.length > 0);
   
-  if (hasData) {
-    // Add small delay to ensure state has settled
-    const timeoutId = setTimeout(() => {
-      console.log('useEffect triggered syncNodeData due to mindMapData change');
-      syncNodeData();
-    }, 50);
-    
-    // If we don't have nodes but we have data, convert data to React Flow
-    if (nodes.length === 0) {
-      console.log('Converting data to React Flow nodes due to data change');
-      // Use a timeout to avoid dependency issues and ensure state is stable
-      setTimeout(() => {
-        convertDataToReactFlow(mindMapData, false); // CHANGED: Don't apply force layout automatically
-      }, 100);
-    }
-    
-    return () => clearTimeout(timeoutId);
-  }
-}, [mindMapData, syncNodeData, nodes.length]); // Updated to use syncNodeData
+  // Cytoscape handles data conversion internally
+}, [mindMapData]);
 
 // Force node update when trigger changes
 useEffect(() => {
