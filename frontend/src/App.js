@@ -1176,11 +1176,16 @@ const handleDeleteNode = useCallback((fullNodeId) => {
     addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} deleted.`, 'success');
     return newData;
   });
-  // Remove the node from the visual state
-  setNodes((nds) => nds.filter((node) => node.id !== fullNodeId));
-  // Remove edges referencing this node
-  setEdges((eds) => eds.filter((edge) => edge.source !== fullNodeId && edge.target !== fullNodeId));
-}, [setMindMapData, autoSaveMindMapData, addToast, setNodes, setEdges]);
+  
+  // Remove the node from Cytoscape
+  const cy = getCytoscape();
+  if (cy) {
+    const node = cy.$id(fullNodeId);
+    if (node) {
+      node.remove();
+    }
+  }
+}, [setMindMapData, autoSaveMindMapData, addToast, getCytoscape]);
 
 // Handle literature node click to open modal
 const handleLiteratureClick = useCallback((literatureData) => {
