@@ -463,62 +463,86 @@ const CytoscapeGraph = ({
 
   // Update elements when data changes - ONLY update structure, not positions
   useEffect(() => {
-    if (!cyRef.current || !mindMapData || isUpdatingRef.current) return;
+    if (!cyRef.current || !mindMapData || isUpdatingRef.current) {
+      console.log('🔍 Skipping update:', { hasCy: !!cyRef.current, hasData: !!mindMapData, isUpdating: isUpdatingRef.current });
+      return;
+    }
 
     const cy = cyRef.current;
-    const newElements = convertToElements(mindMapData);
     
-    // Get current node and edge IDs
-    const currentNodeIds = new Set(cy.nodes().map(n => n.id()));
-    const currentEdgeIds = new Set(cy.edges().map(e => e.id()));
+    console.log('🔍 Starting element update');
     
-    // Get new node and edge IDs
-    const newNodeIds = new Set(newElements.filter(e => e.group === 'nodes').map(e => e.data.id));
-    const newEdgeIds = new Set(newElements.filter(e => e.group === 'edges').map(e => e.data.id));
-    
-    // Find nodes to add and remove
-    const nodesToAdd = newElements.filter(e => e.group === 'nodes' && !currentNodeIds.has(e.data.id));
-    const nodesToRemove = Array.from(currentNodeIds).filter(id => !newNodeIds.has(id));
-    
-    // Find edges to add and remove
-    const edgesToAdd = newElements.filter(e => e.group === 'edges' && !currentEdgeIds.has(e.data.id));
-    const edgesToRemove = Array.from(currentEdgeIds).filter(id => !newEdgeIds.has(id));
-    
-    // Remove nodes and edges that no longer exist
-    nodesToRemove.forEach(id => {
-      const node = cy.$id(id);
-      if (node.length > 0) node.remove();
-    });
-    edgesToRemove.forEach(id => {
-      const edge = cy.$id(id);
-      if (edge.length > 0) edge.remove();
-    });
-    
-    // Add new nodes and edges
-    if (nodesToAdd.length > 0 || edgesToAdd.length > 0) {
-      cy.add([...nodesToAdd, ...edgesToAdd]);
-      console.log('🔍 Added elements:', {
+    try {
+      const newElements = convertToElements(mindMapData);
+      
+      // Get current node and edge IDs
+      const currentNodeIds = new Set(cy.nodes().map(n => n.id()));
+      const currentEdgeIds = new Set(cy.edges().map(e => e.id()));
+      
+      // Get new node and edge IDs
+      const newNodeIds = new Set(newElements.filter(e => e.group === 'nodes').map(e => e.data.id));
+      const newEdgeIds = new Set(newElements.filter(e => e.group === 'edges').map(e => e.data.id));
+      
+      // Find nodes to add and remove
+      const nodesToAdd = newElements.filter(e => e.group === 'nodes' && !currentNodeIds.has(e.data.id));
+      const nodesToRemove = Array.from(currentNodeIds).filter(id => !newNodeIds.has(id));
+      
+      // Find edges to add and remove
+      const edgesToAdd = newElements.filter(e => e.group === 'edges' && !currentEdgeIds.has(e.data.id));
+      const edgesToRemove = Array.from(currentEdgeIds).filter(id => !newEdgeIds.has(id));
+      
+      console.log('🔍 Changes detected:', {
         nodesToAdd: nodesToAdd.length,
+        nodesToRemove: nodesToRemove.length,
         edgesToAdd: edgesToAdd.length,
-        totalNodes: cy.nodes().length,
-        totalEdges: cy.edges().length
+        edgesToRemove: edgesToRemove.length
       });
       
-      // Fit view to show all nodes after adding
-      setTimeout(() => {
-        cy.fit(50); // 50px padding
-        console.log('🔍 Called fit() after adding nodes');
-      }, 100);
-    }
-    
-    // Update node data (labels, etc.) without removing/re-adding
-    cy.nodes().forEach(node => {
-      const nodeData = newElements.find(e => e.group === 'nodes' && e.data.id === node.id());
-      if (nodeData) {
-        node.data('label', nodeData.data.label);
-        node.data('originalData', nodeData.data.originalData);
+      // Remove nodes and edges that no longer exist
+      if (nodesToRemove.length > 0) {
+        nodesToRemove.forEach(id => {
+          const node = cy.$id(id);
+          if (node.length > 0) node.remove();
+        });
+        console.log('🔍 Removed nodes:', nodesToRemove);
       }
-    });
+      
+      if (edgesToRemove.length > 0) {
+        edgesToRemove.forEach(id => {
+          const edge = cy.$id(id);
+          if (edge.length > 0) edge.remove();
+        });
+        console.log('🔍 Removed edges:', edgesToRemove);
+      }
+      
+      // Add new nodes and edges
+      if (nodesToAdd.length > 0 || edgesToAdd.length > 0) {
+        cy.add([...nodesToAdd, ...edgesToAdd]);
+        console.log('🔍 Added elements - Total now:', {
+          totalNodes: cy.nodes().length,
+          totalEdges: cy.edges().length
+        });
+        
+        // Fit view to show all nodes after adding
+        setTimeout(() => {
+          if (cy && cy.nodes().length > 0) {
+            cy.fit(50);
+            console.log('🔍 Called fit()');
+          }
+        }, 100);
+      }
+      
+      // Update node data (labels, etc.) without removing/re-adding
+      cy.nodes().forEach(node => {
+        const nodeData = newElements.find(e => e.group === 'nodes' && e.data.id === node.id());
+        if (nodeData) {
+          node.data('label', nodeData.data.label);
+          node.data('originalData', nodeData.data.originalData);
+        }
+      });
+    } catch (error) {
+      console.error('🔍 Error updating elements:', error);
+    }
 
     // Re-apply HTML labels after adding elements
     if (cy.nodeHtmlLabel) {
