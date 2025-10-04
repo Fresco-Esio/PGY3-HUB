@@ -1440,56 +1440,7 @@ useEffect(() => {
     }
   }, [mindMapData, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
 
-  const onEdgeDoubleClick = useCallback((event, edge) => {
-    // Double-click to delete edge immediately
-    setEdges(eds => eds.filter(e => e.id !== edge.id));
-    setMindMapData(prev => {
-      const newConnections = prev.connections.filter(conn => conn.id !== edge.id);
-      const newData = { ...prev, connections: newConnections };
-      autoSaveMindMapData(newData);
-      addToast('Connection deleted', 'success');
-      return newData;
-    });
-  }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
-
-  const onEdgeContextMenu = useCallback((event, edge) => {
-    // Right-click to edit edge label
-    event.preventDefault();
-    setEdgeModal({ isOpen: true, edge: edge });
-  }, []);
-
-  const handleSaveEdgeLabel = useCallback((edgeId, label) => {
-    setEdges(eds =>
-      eds.map(edge =>
-        edge.id === edgeId ? { ...edge, label: label } : edge
-      )
-    );
-    setMindMapData(prev => {
-      const newConnections = prev.connections.map(conn =>
-        conn.id === edgeId ? { ...conn, label: label } : conn
-      );
-      const newData = { ...prev, connections: newConnections };
-      autoSaveMindMapData(newData);
-      return newData;
-    });
-  }, [setEdges, setMindMapData, autoSaveMindMapData]);
-
-  // Edge hover handlers for highlighting
-  const onEdgeMouseEnter = useCallback((event, edge) => {
-    setEdges(eds =>
-      eds.map(e =>
-        e.id === edge.id ? { ...e, className: 'highlighted' } : e
-      )
-    );
-  }, [setEdges]);
-
-  const onEdgeMouseLeave = useCallback((event, edge) => {
-    setEdges(eds =>
-      eds.map(e =>
-        e.id === edge.id ? { ...e, className: '' } : e
-      )
-    );
-  }, [setEdges]);
+  // Cytoscape handles edge interactions internally
 
   // Lazy-loaded Dagre layout for realignment
   const forceLayout = useCallback(async () => {
