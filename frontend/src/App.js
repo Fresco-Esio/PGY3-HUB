@@ -2091,9 +2091,9 @@ useEffect(() => {
           <h3 className="text-sm font-semibold text-slate-300 mb-3">Filter by Category</h3>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => setFocusedCategory(null)}
+              onClick={() => setActiveFilter('all')}
               className={`px-3 py-2 rounded-lg text-xs transition-all ${
-                focusedCategory === null
+                activeFilter === 'all'
                   ? 'bg-teal-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2101,9 +2101,9 @@ useEffect(() => {
               All
             </button>
             <button
-              onClick={() => setFocusedCategory('topic')}
+              onClick={() => setActiveFilter('topic')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'topic'
+                activeFilter === 'topic'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2112,9 +2112,9 @@ useEffect(() => {
               Topics
             </button>
             <button
-              onClick={() => setFocusedCategory('case')}
+              onClick={() => setActiveFilter('case')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'case'
+                activeFilter === 'case'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2123,9 +2123,9 @@ useEffect(() => {
               Cases
             </button>
             <button
-              onClick={() => setFocusedCategory('task')}
+              onClick={() => setActiveFilter('task')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'task'
+                activeFilter === 'task'
                   ? 'bg-amber-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2134,9 +2134,9 @@ useEffect(() => {
               Tasks
             </button>
             <button
-              onClick={() => setFocusedCategory('literature')}
+              onClick={() => setActiveFilter('literature')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'literature'
+                activeFilter === 'literature'
                   ? 'bg-purple-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
