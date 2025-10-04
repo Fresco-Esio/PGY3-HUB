@@ -1441,6 +1441,29 @@ useEffect(() => {
   }, [mindMapData, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
 
   // Cytoscape handles edge interactions internally
+  
+  // Handle edge label saving
+  const handleSaveEdgeLabel = useCallback((edgeId, label) => {
+    const cy = getCytoscape();
+    if (!cy) return;
+    
+    const edge = cy.$id(edgeId);
+    if (edge) {
+      edge.data('label', label);
+      
+      // Update the connections in mindMapData
+      setMindMapData(prevData => {
+        const updatedConnections = (prevData.connections || []).map(conn => 
+          conn.id === edgeId ? { ...conn, label } : conn
+        );
+        const newData = { ...prevData, connections: updatedConnections };
+        autoSaveMindMapData(newData);
+        return newData;
+      });
+      
+      addToast('Edge label updated successfully', 'success');
+    }
+  }, [getCytoscape, setMindMapData, autoSaveMindMapData, addToast]);
 
   // Lazy-loaded Dagre layout for realignment using Cytoscape
   const forceLayout = useCallback(async () => {
