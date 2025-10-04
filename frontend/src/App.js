@@ -1629,55 +1629,8 @@ useEffect(() => {
     }
   }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, addToast]);
 
-  const handleNodesChange = useCallback((changes) => {
-    // Apply the node changes to React Flow state immediately - this is critical!
-    onNodesChange(changes);
-    
-    // Skip heavy operations during animations to prevent interference
-    if (isAnimating) {
-      console.log('Skipping position updates during animation');
-      return;
-    }
-
-
-    
-    // Process position changes for data persistence - SIMPLIFIED
-    const positionChanges = changes.filter(change => 
-      change.type === 'position' && change.position
-    );
-    
-    if (positionChanges.length > 0) {
-      console.log('Processing position changes:', positionChanges);
-      
-      // Update mindMapData immediately without complex debouncing
-      setMindMapData(currentData => {
-        const updatedData = { ...currentData };
-        
-        positionChanges.forEach(change => {
-          if (change.position) {
-            const [type, id] = change.id.split('-');
-            const key = type === 'literature' ? 'literature' : `${type}s`;
-            const item = updatedData[key]?.find(i => String(i.id) === id);
-            
-            if (item) {
-              item.position = { ...change.position };
-              console.log(`Updated ${type} ${id} position to:`, change.position);
-            }
-          }
-        });
-        
-        // Save to localStorage immediately
-        localStorageUtils.save(updatedData, null, null, false);
-        
-        return updatedData;
-      });
-      
-      // Simple auto-save without complex timeouts
-      setTimeout(() => {
-        autoSaveMindMapData(mindMapData);
-      }, 500);
-    }
-  }, [onNodesChange, setMindMapData, isAnimating, autoSaveMindMapData, mindMapData]);
+  // Note: handleNodesChange is no longer needed with Cytoscape.js
+  // Position changes are handled directly in CytoscapeGraph component via onDataChange callback
 
   const handleNodeDragStop = useCallback((event, node) => {
     // Debounce the auto-save to prevent excessive backend calls
