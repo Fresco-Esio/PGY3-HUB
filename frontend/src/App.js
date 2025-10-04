@@ -2315,7 +2315,6 @@ useEffect(() => {
           onDataChange={(change) => {
             if (change.type === 'position') {
               // Single node position update (during drag)
-              // Use requestAnimationFrame to batch updates and prevent camera reset
               requestAnimationFrame(() => {
                 setMindMapData(currentData => {
                   const updatedData = { ...currentData };
@@ -2324,7 +2323,6 @@ useEffect(() => {
                   if (item) {
                     item.position = change.position;
                   }
-                  // Save to localStorage immediately but defer backend save
                   localStorageUtils.save(updatedData);
                   return updatedData;
                 });
@@ -2352,9 +2350,14 @@ useEffect(() => {
                 autoSaveMindMapData(updatedData);
                 return updatedData;
               });
+            } else if (change.type === 'deleteConnection') {
+              // Delete connection
+              handleDeleteConnection(change.connectionId);
             }
           }}
           physicsEnabled={physicsEnabled}
+          connectionMode={connectionMode}
+          onConnectionCreate={handleCreateConnection}
         />
       </div>
       
