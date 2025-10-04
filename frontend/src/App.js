@@ -1515,7 +1515,7 @@ useEffect(() => {
     setFocusedCategory(null);
     autoSaveMindMapData(empty);
     addToast('Mind map cleared successfully', 'success');
-  }, [getCytoscape, autoSaveMindMapData, addToast]);
+  }, [autoSaveMindMapData, addToast]);
 
   const addNewNode = useCallback((nodeType) => {
     const dataId = Date.now();
