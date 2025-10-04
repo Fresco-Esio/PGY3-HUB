@@ -1679,7 +1679,7 @@ useEffect(() => {
               // Only update if data has changed
               if (!response.data.connections) response.data.connections = [];
               setMindMapData(response.data);
-              await convertDataToReactFlow(response.data);
+              // Cytoscape.js handles data conversion automatically
               autoSaveMindMapData(response.data);
               addToast('Data synchronized with server', 'info');
             }
