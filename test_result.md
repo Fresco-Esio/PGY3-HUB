@@ -178,7 +178,7 @@ frontend:
     implemented: true
     working: false
     file: "frontend/src/App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "medium"
     needs_retesting: false
     status_history:
@@ -188,10 +188,13 @@ frontend:
       - working: false
         agent: "testing"
         comment: "Issue persists: Node double-click events not opening modals as expected. Tested on 3 different nodes with various colors but modals did not open. This appears to be an event handling issue rather than rendering, as nodes are now visible and clickable."
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL ISSUE IDENTIFIED: Double-click events are NOT firing at all. Console logs show drag events fire correctly ('🔷 Drag started/ended') but NO double-click console logs ('Node double-clicked:') are generated. The D3Graph.js has proper double-click handlers (.on('dblclick', function(event, d) {...})) but Playwright double-click actions are being interpreted as drag events instead. This suggests the double-click event threshold/timing may be too sensitive or conflicting with drag handlers. All 18 node groups have D3 event handlers attached (hasD3Events=true) but double-click specifically is not working."
 
   - task: "Node Dragging"
     implemented: true
-    working: false
+    working: true
     file: "frontend/src/components/D3Graph.js"
     stuck_count: 0
     priority: "medium"
@@ -200,6 +203,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "Node dragging not working properly - could not get initial node transform for drag testing. Drag event handlers may not be properly attached to rendered nodes."
+      - working: true
+        agent: "testing"
+        comment: "DRAG FUNCTIONALITY CONFIRMED WORKING: Console logs show proper drag events ('🔷 Drag started on node: [nodeId]' and '🔷 Drag ended on node: [nodeId] at position: {x: X, y: Y}'). Node positions change correctly during drag operations. Cursor changes work (grab → grabbing). Visual feedback with stroke-width changes works. Position persistence to backend confirmed. Drag handlers are properly attached to all 18 node groups."
 
   - task: "Category Filtering"
     implemented: true
