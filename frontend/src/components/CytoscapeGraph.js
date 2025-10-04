@@ -21,6 +21,7 @@ const CytoscapeGraph = ({
   const cyRef = useRef(null);
   const layoutRef = useRef(null);
   const [expandedNodes, setExpandedNodes] = useState(new Set());
+  const isUpdatingRef = useRef(false); // Prevent re-render loops
 
   // Node type configurations
   const nodeConfig = {
