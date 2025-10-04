@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React from "react";
 import { Handle, Position } from "@xyflow/react";
 import { BookOpen, X, Users, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
