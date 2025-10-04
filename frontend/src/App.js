@@ -1367,65 +1367,96 @@ useEffect(() => {
   }, []);
 
   const onNodeDoubleClick = useCallback((d3Node) => {
+    console.log('🔷 App.js onNodeDoubleClick called:', d3Node);
+    
     // Handle D3 node - get ID and type
     const nodeId = d3Node.id;
     const parts = nodeId.split('-');
     const type = parts[0];
     const id = parts.slice(1).join('-'); // Join all parts after the first one
     
+    console.log('🔷 Parsed:', { nodeId, type, id });
+    
     // Prevent multiple rapid clicks by checking if modal is already open
-    if (type === 'case' && caseModal.isOpen) return;
-    if (type === 'topic' && topicModal.isOpen) return;
-    if (type === 'task' && taskModal.isOpen) return;
-    if (type === 'literature' && literatureModal.isOpen) return;
+    if (type === 'case' && caseModal.isOpen) {
+      console.log('🔷 Case modal already open, returning');
+      return;
+    }
+    if (type === 'topic' && topicModal.isOpen) {
+      console.log('🔷 Topic modal already open, returning');
+      return;
+    }
+    if (type === 'task' && taskModal.isOpen) {
+      console.log('🔷 Task modal already open, returning');
+      return;
+    }
+    if (type === 'literature' && literatureModal.isOpen) {
+      console.log('🔷 Literature modal already open, returning');
+      return;
+    }
     
     // Route to appropriate specialized modal based on node type
     if (type === 'literature') {
+      console.log('🔷 Looking for literature with id:', id, 'in', mindMapData.literature);
       const dataItem = mindMapData.literature.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening literature modal with data:', dataItem);
         setLiteratureModal({ isOpen: true, data: dataItem });
+      } else {
+        console.error('🔷 Literature item not found!');
       }
       return;
     }
     
     if (type === 'case') {
+      console.log('🔷 Looking for case with id:', id, 'in', mindMapData.cases);
       const dataItem = mindMapData.cases.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening case modal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, case: true }));
         setCaseModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, case: false }));
         }, 800);
+      } else {
+        console.error('🔷 Case item not found!');
       }
       return;
     }
     
     if (type === 'topic') {
+      console.log('🔷 Looking for topic with id:', id, 'in', mindMapData.topics);
       const dataItem = mindMapData.topics.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening topic modal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, topic: true }));
         setTopicModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, topic: false }));
         }, 800);
+      } else {
+        console.error('🔷 Topic item not found!');
       }
       return;
     }
     
     if (type === 'task') {
+      console.log('🔷 Looking for task with id:', id, 'in', mindMapData.tasks);
       const dataItem = mindMapData.tasks.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening task modal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, task: true }));
         setTaskModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, task: false }));
         }, 800);
+      } else {
+        console.error('🔷 Task item not found!');
       }
       return;
     }
+    
+    console.error('🔷 Unknown node type:', type);
   }, [mindMapData, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
 
   // Cytoscape handles edge interactions internally
