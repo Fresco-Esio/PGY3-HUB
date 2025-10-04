@@ -240,10 +240,30 @@ const CytoscapeGraph = ({
     });
 
     cyRef.current = cy;
+    
+    // Expose Cytoscape instance to parent
+    if (cytoscapeRef) {
+      cytoscapeRef.current = cy;
+    }
 
     // Add click handlers
     cy.on('tap', 'node', (evt) => {
       const node = evt.target;
+      const nodeId = node.id();
+      
+      // Toggle expansion
+      setExpandedNodes(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(nodeId)) {
+          newSet.delete(nodeId);
+          node.removeClass('expanded');
+        } else {
+          newSet.add(nodeId);
+          node.addClass('expanded');
+        }
+        return newSet;
+      });
+      
       if (onNodeClick) {
         onNodeClick(node);
       }
