@@ -530,19 +530,9 @@ const CytoscapeGraph = ({
           totalEdges: cy.edges().length
         });
         
-        // Fit view to show all nodes after adding - use ready() to ensure Cytoscape is fully initialized
-        setTimeout(() => {
-          if (cy && cy.nodes().length > 0) {
-            cy.ready(() => {
-              try {
-                cy.fit(50);
-                console.log('🔍 Called fit() successfully');
-              } catch (error) {
-                console.error('🔍 Error calling fit():', error);
-              }
-            });
-          }
-        }, 100);
+        // Don't call fit() automatically - it causes isHeadless error
+        // User can manually pan/zoom or we can add a manual fit button
+        console.log('🔍 Elements added, skipping auto-fit to avoid isHeadless error');
       }
       
       // Update node data (labels, etc.) without removing/re-adding
