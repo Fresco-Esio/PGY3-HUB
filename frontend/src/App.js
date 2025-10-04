@@ -2277,16 +2277,8 @@ useEffect(() => {
   }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal]);
 
   useEffect(() => {
-    // DISABLED automatic force layout to prevent overriding individual node positions
-    // Force layout should only be applied manually via "Realign Nodes" button
-    if (isReactFlowReady && !hasAppliedInitialLayout && nodes.length > 0) {
-      // Just mark as applied without applying force layout 
-      setHasAppliedInitialLayout(true);
-    } else if (isInitialLoad && nodes.length > 0) {
-      // For initial load, just mark as applied since layout was already done in convertDataToReactFlow
-      setHasAppliedInitialLayout(true);
-    }
-  }, [isReactFlowReady, hasAppliedInitialLayout, nodes, isInitialLoad]); // Removed forceLayout from dependencies
+    // Layout handled by Cytoscape internally
+  }, []);
 
   // Simplified search and category filtering - no style interference
   useEffect(() => {
