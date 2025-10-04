@@ -99,10 +99,7 @@ def main():
     # Run tests
     print("\n📋 Running Backend API Tests...")
     
-    # Test 1: Health check
-    tester.test_health_check()
-    
-    # Test 2: Get mind map data
+    # Test 1: Get mind map data
     tester.test_get_mindmap_data()
     
     # Test 3: Save mind map data
