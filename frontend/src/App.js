@@ -10,8 +10,7 @@ import HomeScreen from './components/HomeScreen';
 import MapOptionsModal, { mapStorageUtils } from './components/MapManager';
 import CytoscapeGraph from './components/CytoscapeGraph';
 
-// Lazy load heavy D3 dependencies
-const loadD3Force = () => import('d3-force');
+// Lazy load heavy D3 dependencies (kept for Dagre layout)
 const loadDagre = () => import('dagre');
 
 import {
@@ -45,7 +44,7 @@ import {
   CheckCircle2,
   Loader2,
   Sparkles,
-  Search, // Added for global search functionality
+  Search,
   Heart,
   Bookmark,
   User,
@@ -63,9 +62,6 @@ import { RichTextEditor, LiteratureModal } from './components/LazyComponents';
 import CaseModal from './components/CaseModal';
 import TopicModal from './components/TopicModal';
 import TaskModal from './components/TaskModal';
-import FloatingEdge from './components/FloatingEdge'; // Import the custom FloatingEdge component
-import EnhancedEdge from './components/EnhancedEdge'; // Import the enhanced edge component
-import ConnectionLine from './components/ConnectionLine'; // Import the custom connection line for previews
 import OptimizedLoadingScreen from './components/OptimizedLoadingScreen';
 import ImportSpreadsheetModal from './components/ImportSpreadsheetModal';
 
