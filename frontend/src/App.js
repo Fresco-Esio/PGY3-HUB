@@ -1616,25 +1616,7 @@ useEffect(() => {
       return updatedData;
     });
 
-    // Create React Flow nodes
-    const reactFlowNodes = newCases.map((caseData) => {
-      const id = `case-${caseData.id}`;
-      return {
-        id,
-        type: 'case',
-        position: caseData.position,
-        data: { 
-          ...caseData, 
-          onDelete: () => handleDeleteNode(id),
-          // Add visual indicator for incomplete data
-          ...(caseData._hasIncompleteData && {
-            className: 'incomplete-node-highlight'
-          })
-        }
-      };
-    });
-
-    setNodes(n => [...n, ...reactFlowNodes]);
+    // Cytoscape will automatically render the new nodes when mindMapData updates
 
     // Show appropriate toast based on import stats
     if (importStats.invalidRows > 0) {
