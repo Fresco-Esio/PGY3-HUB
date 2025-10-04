@@ -555,9 +555,13 @@ const CytoscapeGraph = ({
       ]);
     }
 
-    // Don't auto-run layout on every change - only when nodes are added
-    if (nodesToAdd.length > 0 && physicsEnabled) {
+    // Run layout only when node count increases (new nodes added)
+    const currentNodeCount = cy.nodes().length;
+    if (currentNodeCount > prevNodeCountRef.current && physicsEnabled) {
+      prevNodeCountRef.current = currentNodeCount;
       setTimeout(() => runLayout(), 100);
+    } else {
+      prevNodeCountRef.current = currentNodeCount;
     }
   }, [mindMapData, convertToElements, physicsEnabled, expandedNodes, runLayout]);
 
