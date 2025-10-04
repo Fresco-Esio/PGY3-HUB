@@ -164,7 +164,10 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     simulationRef.current = simulation;
 
     // Update positions on each tick
+    let tickCount = 0;
     simulation.on('tick', () => {
+      tickCount++;
+      
       link
         .attr('x1', d => d.source.x)
         .attr('y1', d => d.source.y)
@@ -172,11 +175,21 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         .attr('y2', d => d.target.y);
 
       node.attr('transform', d => `translate(${d.x},${d.y})`);
+      
+      // Stop simulation after initial layout (300 ticks) to prevent continuous shifting
+      if (tickCount > 300) {
+        simulation.stop();
+        console.log('🔷 Simulation stopped after initial layout');
+      }
     });
 
     // Control simulation based on physics toggle
     if (!physicsEnabled) {
       simulation.stop();
+      tickCount = 999; // Prevent restart
+    } else {
+      // Let it run for initial layout only
+      simulation.alpha(1).restart();
     }
 
     // Drag functions

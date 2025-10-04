@@ -23,7 +23,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T15:20:26.240880",
-      "updated_at": "2025-10-04T15:59:59.024000+00:00"
+      "updated_at": "2025-10-04T16:03:45.743000+00:00"
     },
     {
       "id": "1759592598813",
@@ -32,8 +32,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 400.0,
-        "y": 430.0
+        "x": 496.75731600711083,
+        "y": 303.9845311538042
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -48,7 +48,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T15:43:18.833000+00:00",
-      "updated_at": "2025-10-04T15:59:59.024000+00:00"
+      "updated_at": "2025-10-04T16:03:45.743000+00:00"
     },
     {
       "id": "1759593590358",
@@ -57,8 +57,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 680.0,
-        "y": 430.0
+        "x": 1209.1787936735818,
+        "y": 513.6102425185929
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -73,7 +73,32 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T15:59:59.024000+00:00",
-      "updated_at": "2025-10-04T15:59:59.024000+00:00"
+      "updated_at": "2025-10-04T16:03:45.743000+00:00"
+    },
+    {
+      "id": "1759593823308",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 302.9554753660572,
+        "y": 735.8937268533173
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": null,
+      "diagnostic_criteria": [],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-10-04T16:03:45.743000+00:00",
+      "updated_at": "2025-10-04T16:03:45.743000+00:00"
     }
   ],
   "cases": [
@@ -101,12 +126,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 680.0,
-        "y": 150.0
+        "x": 185.6839031719116,
+        "y": -90.20743957403766
       },
       "timeline": [],
       "created_at": "2025-10-04T15:31:51.253000+00:00",
-      "updated_at": "2025-10-04T15:59:59.024000+00:00"
+      "updated_at": "2025-10-04T16:03:45.743000+00:00"
     },
     {
       "id": "1759593597923",
@@ -114,7 +139,7 @@
       "encounter_date": "2025-10-04T15:59:59.024000+00:00",
       "primary_diagnosis": "Unspecified",
       "secondary_diagnoses": [],
-      "age": null,
+      "age": 0,
       "gender": null,
       "chief_complaint": "",
       "initial_presentation": "",
@@ -132,12 +157,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 680.0,
-        "y": 430.0
+        "x": 851.2457410871464,
+        "y": 1268.7940156802115
       },
       "timeline": [],
       "created_at": "2025-10-04T15:59:59.024000+00:00",
-      "updated_at": "2025-10-04T15:59:59.024000+00:00"
+      "updated_at": "2025-10-04T16:03:45.743000+00:00"
     }
   ],
   "tasks": [
@@ -152,11 +177,11 @@
       "linked_topic_id": null,
       "notes": null,
       "position": {
-        "x": 960.0,
-        "y": 430.0
+        "x": 2601.8236398308804,
+        "y": 754.7437551390445
       },
       "created_at": "2025-10-04T15:59:59.024000+00:00",
-      "updated_at": "2025-10-04T15:59:59.024000+00:00"
+      "updated_at": "2025-10-04T16:03:45.743000+00:00"
     }
   ],
   "literature": [],
