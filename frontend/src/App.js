@@ -8,23 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Import new components
 import HomeScreen from './components/HomeScreen';
 import MapOptionsModal, { mapStorageUtils } from './components/MapManager';
-import {
-  ReactFlow,
-  addEdge,
-  Background,
-  Controls,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
-  ReactFlowProvider,
-  Panel,
-  Handle,
-  Position,
-  useReactFlow,
-} from '@xyflow/react';
+import D3Graph from './components/D3Graph';
 
-// Lazy load heavy D3 dependencies
-const loadD3Force = () => import('d3-force');
+// Lazy load heavy D3 dependencies (kept for Dagre layout)
 const loadDagre = () => import('dagre');
 
 import {
@@ -58,7 +44,7 @@ import {
   CheckCircle2,
   Loader2,
   Sparkles,
-  Search, // Added for global search functionality
+  Search,
   Heart,
   Bookmark,
   User,
@@ -67,18 +53,19 @@ import {
   Paperclip,
   ChevronDown,
   ChevronUp,
-  ArrowDown
+  ArrowDown,
+  FileSpreadsheet,
+  Link2
 } from 'lucide-react';
 
 // Lazy load components for better initial load time
 import { RichTextEditor, LiteratureModal } from './components/LazyComponents';
 import CaseModal from './components/CaseModal';
+import ConnectionManager from './components/ConnectionManager';
 import TopicModal from './components/TopicModal';
 import TaskModal from './components/TaskModal';
-import FloatingEdge from './components/FloatingEdge'; // Import the custom FloatingEdge component
-import EnhancedEdge from './components/EnhancedEdge'; // Import the enhanced edge component
-import ConnectionLine from './components/ConnectionLine'; // Import the custom connection line for previews
 import OptimizedLoadingScreen from './components/OptimizedLoadingScreen';
+import ImportSpreadsheetModal from './components/ImportSpreadsheetModal';
 
 // Import node components
 import { nodeTypes } from './components/nodes';
@@ -1012,11 +999,10 @@ const EdgeLabelModal = ({ edge, isOpen, onClose, onSave }) => {
 
 // Enhanced Main Dashboard Component with improved visual effects
 const DashboardComponent = () => {
-  const { fitView, setCenter, zoomTo, getViewport } = useReactFlow();
   const navigate = useNavigate(); // Add navigation hook
-
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  
+  // D3 will handle node/edge management internally
+  const d3SimulationRef = useRef(null);
 
   // State for forcing node updates
   const [nodeUpdateTrigger, setNodeUpdateTrigger] = useState(0);
@@ -1035,7 +1021,7 @@ const DashboardComponent = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [focusedCategory, setFocusedCategory] = useState(null);
+  const [focusedCategory, setFocusedCategory] = useState(null); // Kept for backward compatibility
   const [showNodeSelector, setShowNodeSelector] = useState(false);
   // Specialized modal state for each node type with stable data references
   const [caseModal, setCaseModal] = useState({ isOpen: false, data: null });
@@ -1044,7 +1030,6 @@ const DashboardComponent = () => {
   const caseModalStableData = useRef(null);
   const topicModalStableData = useRef(null);
   const taskModalStableData = useRef(null);
-  const [isReactFlowReady, setIsReactFlowReady] = useState(false);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
   const [isExportingCSV, setIsExportingCSV] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
@@ -1052,13 +1037,18 @@ const DashboardComponent = () => {
   const [edgeModal, setEdgeModal] = useState({ isOpen: false, edge: null });
   const [toasts, setToasts] = useState([]);
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
+  const [importModal, setImportModal] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
+  const [physicsEnabled, setPhysicsEnabled] = useState(true); // Control physics simulation
   const [modalAnimationStates, setModalAnimationStates] = useState({
     case: false,
     topic: false,
     task: false,
     literature: false
   });
+  const [connectionManagerOpen, setConnectionManagerOpen] = useState(false);
+  const [connectionMode, setConnectionMode] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
@@ -1188,11 +1178,9 @@ const handleDeleteNode = useCallback((fullNodeId) => {
     addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} deleted.`, 'success');
     return newData;
   });
-  // Remove the node from the visual state
-  setNodes((nds) => nds.filter((node) => node.id !== fullNodeId));
-  // Remove edges referencing this node
-  setEdges((eds) => eds.filter((edge) => edge.source !== fullNodeId && edge.target !== fullNodeId));
-}, [setMindMapData, autoSaveMindMapData, addToast, setNodes, setEdges]);
+  
+  // D3 will automatically update when mindMapData changes
+}, [setMindMapData, autoSaveMindMapData, addToast]);
 
 // Handle literature node click to open modal
 const handleLiteratureClick = useCallback((literatureData) => {
@@ -1202,287 +1190,19 @@ const handleLiteratureClick = useCallback((literatureData) => {
   setTimeout(() => setIsAnimating(false), 700); // 600ms modal animation + 100ms buffer
 }, []);
 
-// Enhanced node sync function that forces React Flow re-renders
-const syncNodeData = useCallback(() => {
-  console.log('syncNodeData called - syncing node colors and labels');
-  
-  setNodes(currentNodes => {
-    let hasChanges = false;
-    const updatedNodes = currentNodes.map(node => {
-      const nodeType = node.id.split('-')[0];
-      const nodeId = node.id.split('-')[1];
-      
-      let newLabel = node.data.label;
-      let newColor = node.data.color;
-      let needsUpdate = false;
-      
-      // Find the corresponding data item and sync properties
-      if (nodeType === 'case') {
-        const caseData = mindMapData.cases?.find(c => String(c.id) === nodeId);
-        if (caseData) {
-          const expectedLabel = caseData.primaryDiagnosis || caseData.primary_diagnosis || caseData.title || 'Untitled Case';
-          if (expectedLabel !== node.data.label) {
-            newLabel = expectedLabel;
-            needsUpdate = true;
-          }
-        }
-      } else if (nodeType === 'topic') {
-        const topicData = mindMapData.topics?.find(t => String(t.id) === nodeId);
-        if (topicData) {
-          const expectedLabel = topicData.title || 'Untitled Topic';
-          const expectedColor = topicData.color || '#3B82F6';
-          
-          if (expectedLabel !== node.data.label) {
-            newLabel = expectedLabel;
-            needsUpdate = true;
-          }
-          
-          if (expectedColor !== node.data.color) {
-            newColor = expectedColor;
-            needsUpdate = true;
-            console.log(`Topic ${nodeId}: Color changing from ${node.data.color} to ${expectedColor}`);
-          }
-        }
-      } else if (nodeType === 'task') {
-        const taskData = mindMapData.tasks?.find(t => String(t.id) === nodeId);
-        if (taskData) {
-          const expectedLabel = taskData.title || 'Untitled Task';
-          if (expectedLabel !== node.data.label) {
-            newLabel = expectedLabel;
-            needsUpdate = true;
-          }
-        }
-      } else if (nodeType === 'literature') {
-        const literatureData = mindMapData.literature?.find(l => String(l.id) === nodeId);
-        if (literatureData) {
-          const expectedLabel = literatureData.title || 'Untitled Literature';
-          if (expectedLabel !== node.data.label) {
-            newLabel = expectedLabel;
-            needsUpdate = true;
-          }
-        }
-      }
-      
-      // Create entirely new node object if something changed (forces React Flow re-render)
-      if (needsUpdate) {
-        hasChanges = true;
-        // Force React to treat this as a completely new object
-        const timestamp = Date.now();
-        const newNode = {
-          id: node.id,
-          type: node.type,
-          position: { ...node.position },
-          data: {
-            ...node.data,
-            label: newLabel,
-            color: newColor,
-            // Add timestamp to force re-render
-            lastUpdated: timestamp
-          },
-          // Force new style object for topic nodes
-          style: nodeType === 'topic' ? {
-            backgroundColor: newColor,
-            color: 'white',
-            boxShadow: `0 4px 20px ${newColor}20`,
-            transition: 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease',
-            // Force React to detect change
-            zIndex: timestamp % 1000
-          } : node.style,
-          // Add a rendering key to force React Flow update
-          key: `${node.id}-${timestamp}`
-        };
-        
-        return newNode;
-      }
-      
-      return node;
-    });
-    
-    if (hasChanges) {
-      console.log('syncNodeData: Changes detected, updating nodes with forced re-render');
-      // Return completely new array to force React Flow update
-      return [...updatedNodes];
-    } else {
-      console.log('syncNodeData: No changes needed');
-      return currentNodes;
-    }
-  });
-}, [mindMapData, setNodes]);
+// Cytoscape handles node updates automatically
 
 // Trigger auto-sync when mindMapData changes with enhanced detection
 useEffect(() => {
   const hasData = mindMapData && (mindMapData.cases?.length > 0 || mindMapData.topics?.length > 0 || 
                                  mindMapData.tasks?.length > 0 || mindMapData.literature?.length > 0);
   
-  if (hasData) {
-    // Add small delay to ensure state has settled
-    const timeoutId = setTimeout(() => {
-      console.log('useEffect triggered syncNodeData due to mindMapData change');
-      syncNodeData();
-    }, 50);
-    
-    // If we don't have nodes but we have data, convert data to React Flow
-    if (nodes.length === 0) {
-      console.log('Converting data to React Flow nodes due to data change');
-      // Use a timeout to avoid dependency issues and ensure state is stable
-      setTimeout(() => {
-        convertDataToReactFlow(mindMapData, false); // CHANGED: Don't apply force layout automatically
-      }, 100);
-    }
-    
-    return () => clearTimeout(timeoutId);
-  }
-}, [mindMapData, syncNodeData, nodes.length]); // Updated to use syncNodeData
+  // Cytoscape handles data conversion internally
+}, [mindMapData]);
 
-// Force node update when trigger changes
-useEffect(() => {
-  if (nodeUpdateTrigger > 0) {
-    console.log('Force update triggered by nodeUpdateTrigger:', nodeUpdateTrigger);
-    setTimeout(() => {
-      syncNodeData();
-    }, 100);
-  }
-}, [nodeUpdateTrigger, syncNodeData]);
+// Cytoscape handles node updates automatically
 
-  const convertDataToReactFlow = useCallback(async (data, applyLayoutImmediately = false) => {
-    // Use optimized quick layout for initial load
-    const allItems = [
-      ...data.topics.map(item => ({ ...item, type: 'topic' })),
-      ...data.cases.map(item => ({ ...item, type: 'case' })),
-      ...data.tasks.map(item => ({ ...item, type: 'task' })),
-      ...data.literature.map(item => ({ ...item, type: 'literature' }))
-    ];
-
-    // If we have data and need immediate layout, apply force layout to positions
-    let layoutNodes;
-    
-    // Check if nodes already have positions - if they do, don't override with force layout
-    const hasExistingPositions = allItems.some(item => 
-      item.position && typeof item.position.x === 'number' && typeof item.position.y === 'number'
-    );
-    
-    if (allItems.length > 0 && applyLayoutImmediately && !hasExistingPositions) {
-      try {
-        // Lazy load D3 force simulation for initial positioning
-        const { 
-          forceSimulation, 
-          forceManyBody, 
-          forceLink, 
-          forceCenter, 
-          forceCollide 
-        } = await loadD3Force();
-
-        // Create nodes for simulation
-        const simulationNodes = allItems.map((item, index) => ({
-          id: `${item.type}-${item.id}`,
-          x: item.position?.x || (Math.random() - 0.5) * 200,
-          y: item.position?.y || (Math.random() - 0.5) * 200,
-          type: item.type
-        }));
-
-        // Create D3-compatible edge objects
-        const d3Edges = (data.connections || []).map(edge => ({
-          source: edge.source,
-          target: edge.target,
-          id: edge.id
-        })).filter(edge => {
-          const nodeIds = new Set(simulationNodes.map(n => n.id));
-          return nodeIds.has(edge.source) && nodeIds.has(edge.target);
-        });
-
-        // Run simulation synchronously for initial layout
-        const simulation = forceSimulation(simulationNodes)
-          .force('link', forceLink(d3Edges).id(d => d.id).distance(200).strength(0.5))
-          .force('charge', forceManyBody().strength(-800).distanceMax(400))
-          .force('center', forceCenter(window.innerWidth / 3, window.innerHeight / 2))
-          .force('collision', forceCollide().radius(80))
-          .stop();
-
-        // Run enough ticks to get a good layout
-        for (let i = 0; i < 300; i++) {
-          simulation.tick();
-        }
-
-        // Create a map of positioned nodes
-        const positionMap = new Map();
-        simulationNodes.forEach(node => {
-          positionMap.set(node.id, { x: node.x, y: node.y });
-        });
-
-        layoutNodes = allItems.map(item => {
-          const nodeId = `${item.type}-${item.id}`;
-          const position = positionMap.get(nodeId) || { x: 0, y: 0 };
-          return { ...item, position };
-        });
-      } catch (error) {
-        console.warn('Failed to apply initial layout, using fallback positioning:', error);
-        layoutNodes = allItems;
-      }
-    } else {
-      layoutNodes = allItems;
-    }
-
-    // Quick layout without expensive calculations - ensure all nodes get proper positions
-    const quickNodes = (layoutNodes || allItems).map((item, index) => {
-      const nodeId = `${item.type}-${item.id}`;
-      
-      // Convert case fields efficiently
-      const nodeData = item.type === 'case' ? {
-        ...item,
-        chiefComplaint: item.chiefComplaint || item.chief_complaint || '',
-        initialPresentation: item.initialPresentation || item.initial_presentation || '',
-        currentPresentation: item.currentPresentation || item.current_presentation || '',
-        medicationHistory: item.medicationHistory || item.medication_history || '',
-        therapyProgress: item.therapyProgress || item.therapy_progress || '',
-        defensePatterns: item.defensePatterns || item.defense_patterns || '',
-        clinicalReflection: item.clinicalReflection || item.clinical_reflection || ''
-      } : item;
-
-      // Ensure proper positioning: use existing position, or create grid-based position
-      let position;
-      if (item.position && typeof item.position.x === 'number' && typeof item.position.y === 'number') {
-        position = item.position;
-      } else {
-        // Create grid-based layout for nodes without positions
-        const gridSize = Math.ceil(Math.sqrt(allItems.length));
-        const nodeSpacing = 250;
-        const offsetX = 300; // Offset from left sidebar
-        const offsetY = 150; // Offset from top
-        
-        position = {
-          x: (index % gridSize) * nodeSpacing + offsetX,
-          y: Math.floor(index / gridSize) * nodeSpacing + offsetY
-        };
-      }
-
-      return {
-        id: nodeId,
-        type: item.type,
-        position: position,
-        data: { 
-          ...nodeData, 
-          label: item.title || item.label || `Untitled ${item.type}`, // Ensure label matches title
-          color: item.color || '#3B82F6', // Include color in data
-          onDelete: () => handleDeleteNode(nodeId),
-          onLiteratureClick: item.type === 'literature' ? handleLiteratureClick : undefined,
-          skipAnimation: isInitialLoad // Use the isInitialLoad state
-        },
-        style: item.type === 'topic' ? {
-          backgroundColor: item.color || '#3B82F6' // Set style for topic nodes
-        } : undefined
-      };
-    });
-
-    // Create optimized edges
-    const optimizedEdges = createOptimizedEdges(
-      data.connections || [], 
-      quickNodes.map(n => n.id)
-    );
-
-    // Set nodes and edges immediately for fast UI response
-    setNodes(quickNodes);
-    setEdges(optimizedEdges);
-  }, [setNodes, setEdges, handleDeleteNode, handleLiteratureClick, isInitialLoad]);
+  // Cytoscape handles node/edge rendering internally - no conversion needed
 
   const saveToBackend = useCallback(async (data) => {
     // Deep clone the data to avoid modifying the original
@@ -1644,283 +1364,173 @@ useEffect(() => {
     }
   }, []);
 
-  const onConnect = useCallback((params) => {
-    const edgeId = `conn-${Date.now()}`;
-    const newEdge = { 
-      ...params, 
-      id: edgeId,
-      type: 'floating', // Use our high-performance floating edge type
-      style: { 
-        strokeWidth: 2, 
-        stroke: '#64748b',
-        opacity: 0.85,
-        transition: 'none' // Critical: disable transitions for immediate updates
-      },
-      // Add a unique timestamp to force React to re-render this edge when source or target nodes move
-      data: { __forceUpdate: Date.now() },
-      interactionWidth: 20 // Wider area for interaction
-    };
-    setEdges((eds) => addEdge(newEdge, eds));
-    setMindMapData(prev => {
-      const newConnections = [...prev.connections, { 
-        id: newEdge.id, 
-        source: params.source, 
-        target: params.target, 
-        label: '' 
-      }];
-      const newData = { ...prev, connections: newConnections };
-      autoSaveMindMapData(newData);
-      return newData;
-    });
-  }, [setEdges, setMindMapData, autoSaveMindMapData]);
+  // Cytoscape handles edge creation via right-click (see CytoscapeGraph component)
 
-  const onNodeClick = useCallback((event, node) => {
-    setSelectedNode(node);
-    // Visual feedback - highlight selected node
-    setNodes(currentNodes => currentNodes.map(n => ({
-      ...n,
-      selected: n.id === node.id
-    })));
-  }, [setNodes]);
+  const onNodeClick = useCallback((d3Node) => {
+    // D3 node object
+    setSelectedNode({ id: d3Node.id, data: d3Node.originalData });
+  }, []);
 
-  const onNodeDoubleClick = useCallback((event, node) => {
-    // Handle multi-part IDs correctly by joining all parts after the type
-    const parts = node.id.split('-');
+  const onNodeDoubleClick = useCallback((d3Node) => {
+    console.log('🔷 App.js onNodeDoubleClick called:', d3Node);
+    
+    // Handle D3 node - get ID and type
+    const nodeId = d3Node.id;
+    const parts = nodeId.split('-');
     const type = parts[0];
     const id = parts.slice(1).join('-'); // Join all parts after the first one
     
+    console.log('🔷 Parsed:', { nodeId, type, id });
+    
     // Prevent multiple rapid clicks by checking if modal is already open
-    if (type === 'case' && caseModal.isOpen) return;
-    if (type === 'topic' && topicModal.isOpen) return;
-    if (type === 'task' && taskModal.isOpen) return;
-    if (type === 'literature' && literatureModal.isOpen) return;
+    if (type === 'case' && caseModal.isOpen) {
+      console.log('🔷 Case modal already open, returning');
+      return;
+    }
+    if (type === 'topic' && topicModal.isOpen) {
+      console.log('🔷 Topic modal already open, returning');
+      return;
+    }
+    if (type === 'task' && taskModal.isOpen) {
+      console.log('🔷 Task modal already open, returning');
+      return;
+    }
+    if (type === 'literature' && literatureModal.isOpen) {
+      console.log('🔷 Literature modal already open, returning');
+      return;
+    }
     
     // Route to appropriate specialized modal based on node type
     if (type === 'literature') {
+      console.log('🔷 Looking for literature with id:', id, 'in', mindMapData.literature);
       const dataItem = mindMapData.literature.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening literature modal with data:', dataItem);
         setLiteratureModal({ isOpen: true, data: dataItem });
+      } else {
+        console.error('🔷 Literature item not found!');
       }
       return;
     }
     
     if (type === 'case') {
+      console.log('🔷 Looking for case with id:', id, 'in', mindMapData.cases);
       const dataItem = mindMapData.cases.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening case modal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, case: true }));
         setCaseModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, case: false }));
         }, 800);
+      } else {
+        console.error('🔷 Case item not found!');
       }
       return;
     }
     
     if (type === 'topic') {
+      console.log('🔷 Looking for topic with id:', id, 'in', mindMapData.topics);
       const dataItem = mindMapData.topics.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening topic modal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, topic: true }));
         setTopicModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, topic: false }));
         }, 800);
+      } else {
+        console.error('🔷 Topic item not found!');
       }
       return;
     }
     
     if (type === 'task') {
+      console.log('🔷 Looking for task with id:', id, 'in', mindMapData.tasks);
       const dataItem = mindMapData.tasks.find(item => String(item.id) === id);
       if (dataItem) {
+        console.log('🔷 Opening task modal with data:', dataItem);
         setModalAnimationStates(prev => ({ ...prev, task: true }));
         setTaskModal({ isOpen: true, data: dataItem });
-        // Clear animation state after modal animation completes
         setTimeout(() => {
           setModalAnimationStates(prev => ({ ...prev, task: false }));
         }, 800);
+      } else {
+        console.error('🔷 Task item not found!');
       }
       return;
     }
+    
+    console.error('🔷 Unknown node type:', type);
   }, [mindMapData, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
 
-  const onEdgeDoubleClick = useCallback((event, edge) => {
-    // Double-click to delete edge immediately
-    setEdges(eds => eds.filter(e => e.id !== edge.id));
-    setMindMapData(prev => {
-      const newConnections = prev.connections.filter(conn => conn.id !== edge.id);
-      const newData = { ...prev, connections: newConnections };
-      autoSaveMindMapData(newData);
-      addToast('Connection deleted', 'success');
-      return newData;
-    });
-  }, [setEdges, setMindMapData, autoSaveMindMapData, addToast]);
-
-  const onEdgeContextMenu = useCallback((event, edge) => {
-    // Right-click to edit edge label
-    event.preventDefault();
-    setEdgeModal({ isOpen: true, edge: edge });
-  }, []);
-
+  // Cytoscape handles edge interactions internally
+  
+  // Handle edge label saving (simplified for D3)
   const handleSaveEdgeLabel = useCallback((edgeId, label) => {
-    setEdges(eds =>
-      eds.map(edge =>
-        edge.id === edgeId ? { ...edge, label: label } : edge
-      )
-    );
-    setMindMapData(prev => {
-      const newConnections = prev.connections.map(conn =>
-        conn.id === edgeId ? { ...conn, label: label } : conn
+    // Update the connections in mindMapData
+    setMindMapData(prevData => {
+      const updatedConnections = (prevData.connections || []).map(conn => 
+        conn.id === edgeId ? { ...conn, label } : conn
       );
-      const newData = { ...prev, connections: newConnections };
+      const newData = { ...prevData, connections: updatedConnections };
       autoSaveMindMapData(newData);
       return newData;
     });
-  }, [setEdges, setMindMapData, autoSaveMindMapData]);
+    
+    addToast('Edge label updated successfully', 'success');
+  }, [setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Edge hover handlers for highlighting
-  const onEdgeMouseEnter = useCallback((event, edge) => {
-    setEdges(eds =>
-      eds.map(e =>
-        e.id === edge.id ? { ...e, className: 'highlighted' } : e
-      )
-    );
-  }, [setEdges]);
-
-  const onEdgeMouseLeave = useCallback((event, edge) => {
-    setEdges(eds =>
-      eds.map(e =>
-        e.id === edge.id ? { ...e, className: '' } : e
-      )
-    );
-  }, [setEdges]);
-
-  // Lazy-loaded force-directed layout for better performance
-  const forceLayout = useCallback(async () => {
-    if (nodes.length === 0) return;
-
-    try {
-      // Lazy load D3 force simulation
-      const { 
-        forceSimulation, 
-        forceManyBody, 
-        forceLink, 
-        forceCenter, 
-        forceCollide 
-      } = await loadD3Force();
-
-      // Preserve the current edges before layout
-      const currentEdges = [...edges];
+  // Restart D3 force simulation for realignment
+  const forceLayout = useCallback(() => {
+    if (window.d3Simulation && window.d3Nodes) {
+      // Unfix all nodes so they can be repositioned
+      window.d3Nodes.forEach(node => {
+        node.fx = null;
+        node.fy = null;
+      });
       
-      // Create a set of valid node IDs for fast lookup
-      const nodeIdSet = new Set(nodes.map(node => node.id));
+      // Restart simulation with high alpha for dramatic realignment
+      window.d3Simulation.alpha(1).alphaTarget(0).restart();
+      addToast('Nodes realigning with force-directed layout...', 'success');
       
-      // Filter edges to only include those with both source and target nodes present
-      const validEdges = currentEdges.filter(edge => 
-        nodeIdSet.has(edge.source) && nodeIdSet.has(edge.target)
-      );
-
-      // Create D3-compatible edge objects for the force simulation
-      const d3Edges = validEdges.map(edge => ({
-        source: edge.source,
-        target: edge.target,
-        id: edge.id
-      }));
-
-      // Create a copy of nodes for simulation (D3 mutates the objects)
-      const simulationNodes = nodes.map(node => ({ 
-        id: node.id,
-        x: node.position.x, 
-        y: node.position.y,
-        fx: null, // Remove any fixed positions
-        fy: null
-      }));
-
-      // Create simulation with optimized forces for mind map layout
-      const simulation = forceSimulation(simulationNodes)
-        .force('link', forceLink(d3Edges).id(d => d.id).distance(200).strength(0.5))
-        .force('charge', forceManyBody().strength(-800).distanceMax(400))
-        .force('center', forceCenter(window.innerWidth / 3, window.innerHeight / 2))
-        .force('collision', forceCollide().radius(80))
-        .stop();
-
-      // Run simulation in chunks to prevent blocking
-      const ticksPerFrame = 50;
-      const totalTicks = 400;
-      let currentTick = 0;
-
-      const runSimulationChunk = () => {
-        const remainingTicks = Math.min(ticksPerFrame, totalTicks - currentTick);
-        for (let i = 0; i < remainingTicks; i++) {
-          simulation.tick();
-        }
-        currentTick += remainingTicks;
-
-        if (currentTick < totalTicks) {
-          requestAnimationFrame(runSimulationChunk);
-        } else {
-          // Simulation complete, update nodes
-          const updatedNodes = simulationNodes.map(simNode => {
-            const originalNode = nodes.find(n => n.id === simNode.id);
-            return {
-              ...originalNode,
-              position: { x: simNode.x, y: simNode.y },
-            };
-          });
-          
-          // Update both nodes and edges in a single batch
-          setNodes(updatedNodes);
-          setEdges(validEdges);
-
-          // Update mindMapData with new positions
-          setMindMapData(currentData => {
-            const updatedData = { ...currentData };
-            
-            updatedNodes.forEach(node => {
-              const [type, id] = node.id.split('-');
-              const key = type === 'literature' ? 'literature' : `${type}s`;
-              const item = updatedData[key]?.find(i => String(i.id) === id);
-              if (item) {
-                item.position = node.position;
+      // If physics is disabled, fix nodes after simulation settles
+      if (!physicsEnabled) {
+        setTimeout(() => {
+          if (window.d3Simulation && window.d3Nodes) {
+            // Let it run until alpha is low, then stop
+            const checkInterval = setInterval(() => {
+              if (window.d3Simulation.alpha() < 0.05) {
+                clearInterval(checkInterval);
+                window.d3Simulation.stop();
+                window.d3Nodes.forEach(node => {
+                  node.fx = node.x;
+                  node.fy = node.y;
+                });
+                addToast('Realignment complete', 'success');
               }
-            });
-            
-            return updatedData;
-          });
-
-          // Smooth camera transition to fit the new layout
-          setTimeout(() => {
-            fitView({ duration: 800, padding: 0.2 });
-          }, 200);
-        }
-      };
-
-      // Start simulation in next frame
-      requestAnimationFrame(runSimulationChunk);
-    } catch (error) {
-      console.error('Force layout failed:', error);
-      addToast('Layout calculation failed', 'error');
+            }, 100);
+          }
+        }, 100);
+      }
+    } else {
+      addToast('Simulation not ready', 'warning');
     }
-  }, [nodes, edges, setNodes, setEdges, setMindMapData, fitView, addToast]);
+  }, [addToast, physicsEnabled]);
 
   // applyForceLayout wrapper function (defined after forceLayout)
   const applyForceLayout = useCallback(() => {
-    try {
-      forceLayout();
-      addToast('Nodes realigned successfully', 'success');
-    } catch (error) {
-      console.error('Force layout error:', error);
-      addToast('Failed to realign nodes', 'error');
-    }
-  }, [forceLayout, addToast]);
+    forceLayout();
+  }, [forceLayout]);
 
   const handleClearMap = useCallback(() => {
     if (!window.confirm('Are you sure you want to clear the entire mind map?')) return;
 
     const empty = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
     setMindMapData(empty);
-    setNodes([]);
-    setEdges([]);
+    
+    // D3 will automatically clear when mindMapData updates
+    
     setSelectedNode(null);
     // Clear all modal states
     setCaseModal({ isOpen: false, data: null });
@@ -1930,7 +1540,7 @@ useEffect(() => {
     setFocusedCategory(null);
     autoSaveMindMapData(empty);
     addToast('Mind map cleared successfully', 'success');
-  }, [setNodes, setEdges, autoSaveMindMapData, addToast]);
+  }, [autoSaveMindMapData, addToast]);
 
   const addNewNode = useCallback((nodeType) => {
     const dataId = Date.now();
@@ -1989,59 +1599,70 @@ useEffect(() => {
       return updatedData;
     });
 
-    setNodes(n => n.concat(newNode));
+    // Cytoscape will automatically render the new node when mindMapData updates
     addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} added successfully`, 'success');
-  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, setNodes, addToast]);
+  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, addToast]);
 
-  const handleNodesChange = useCallback((changes) => {
-    // Apply the node changes to React Flow state immediately - this is critical!
-    onNodesChange(changes);
-    
-    // Skip heavy operations during animations to prevent interference
-    if (isAnimating) {
-      console.log('Skipping position updates during animation');
+  // Handle spreadsheet import
+  const handleSpreadsheetImport = useCallback((patientCases, importStats) => {
+    if (!patientCases || patientCases.length === 0) {
+      addToast('No patient records to import', 'error');
       return;
     }
 
+    // Calculate grid-based positions for imported nodes
+    const currentDataCount = (mindMapData.topics?.length || 0) + 
+                           (mindMapData.cases?.length || 0) + 
+                           (mindMapData.tasks?.length || 0) + 
+                           (mindMapData.literature?.length || 0);
+    
+    const gridSize = Math.ceil(Math.sqrt(currentDataCount + patientCases.length));
+    const nodeSpacing = 280;
+    const offsetX = 400;
+    const offsetY = 150;
 
-    
-    // Process position changes for data persistence - SIMPLIFIED
-    const positionChanges = changes.filter(change => 
-      change.type === 'position' && change.position
-    );
-    
-    if (positionChanges.length > 0) {
-      console.log('Processing position changes:', positionChanges);
+    // Create nodes with unique IDs and positions
+    const newCases = patientCases.map((caseData, index) => {
+      const dataId = Date.now() + index;
+      const gridIndex = currentDataCount + index;
       
-      // Update mindMapData immediately without complex debouncing
-      setMindMapData(currentData => {
-        const updatedData = { ...currentData };
-        
-        positionChanges.forEach(change => {
-          if (change.position) {
-            const [type, id] = change.id.split('-');
-            const key = type === 'literature' ? 'literature' : `${type}s`;
-            const item = updatedData[key]?.find(i => String(i.id) === id);
-            
-            if (item) {
-              item.position = { ...change.position };
-              console.log(`Updated ${type} ${id} position to:`, change.position);
-            }
-          }
-        });
-        
-        // Save to localStorage immediately
-        localStorageUtils.save(updatedData, null, null, false);
-        
-        return updatedData;
-      });
-      
-      // Simple auto-save without complex timeouts
-      setTimeout(() => {
-        autoSaveMindMapData(mindMapData);
-      }, 500);
+      const position = {
+        x: (gridIndex % gridSize) * nodeSpacing + offsetX,
+        y: Math.floor(gridIndex / gridSize) * nodeSpacing + offsetY
+      };
+
+      return {
+        ...caseData,
+        id: dataId,
+        position,
+      };
+    });
+
+    // Update mind map data
+    setMindMapData(d => {
+      const updatedData = {
+        ...d,
+        cases: [...(d.cases || []), ...newCases]
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+
+    // Cytoscape will automatically render the new nodes when mindMapData updates
+
+    // Show appropriate toast based on import stats
+    if (importStats.invalidRows > 0) {
+      addToast(
+        `Imported ${importStats.validRows} complete and ${importStats.invalidRows} incomplete records. Incomplete nodes are highlighted.`,
+        'info'
+      );
+    } else {
+      addToast(`Successfully imported ${importStats.validRows} patient records`, 'success');
     }
-  }, [onNodesChange, setMindMapData, isAnimating, autoSaveMindMapData, mindMapData]);
+  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, addToast]);
+
+  // Note: handleNodesChange is no longer needed with Cytoscape.js
+  // Position changes are handled directly in CytoscapeGraph component via onDataChange callback
 
   const handleNodeDragStop = useCallback((event, node) => {
     // Debounce the auto-save to prevent excessive backend calls
@@ -2073,7 +1694,7 @@ useEffect(() => {
         setLoadingProgress(60);
         setLoadingMessage('Applying layout...');
         
-        await convertDataToReactFlow(local, true); // Apply layout immediately
+        // Cytoscape.js handles data conversion automatically
         
         setLoadingProgress(90);
         setLoadingMessage('Finalizing...');
@@ -2090,7 +1711,7 @@ useEffect(() => {
               // Only update if data has changed
               if (!response.data.connections) response.data.connections = [];
               setMindMapData(response.data);
-              await convertDataToReactFlow(response.data);
+              // Cytoscape.js handles data conversion automatically
               autoSaveMindMapData(response.data);
               addToast('Data synchronized with server', 'info');
             }
@@ -2116,9 +1737,9 @@ useEffect(() => {
         setMindMapData(response.data);
         
         setLoadingProgress(80);
-        setLoadingMessage('Applying layout...');
+        setLoadingMessage('Rendering graph...');
         
-        await convertDataToReactFlow(response.data, true); // Apply layout immediately
+        // Cytoscape will handle rendering
         autoSaveMindMapData(response.data);
         
         setLoadingProgress(100);
@@ -2151,7 +1772,7 @@ useEffect(() => {
       setLoading(false);
       setIsInitialLoad(false);
     }
-  }, [addToast, autoSaveMindMapData, convertDataToReactFlow]);
+  }, [addToast, autoSaveMindMapData]);
 
   useEffect(() => {
     // Load initial mind map data
@@ -2223,6 +1844,53 @@ useEffect(() => {
     }
   }, []);
 
+  // Connection management handlers
+  const handleCreateConnection = useCallback((sourceId, targetId, type = 'related') => {
+    // Check if connection already exists
+    const exists = mindMapData.connections.some(conn => 
+      (conn.source === sourceId && conn.target === targetId) ||
+      (conn.source === targetId && conn.target === sourceId)
+    );
+    
+    if (exists) {
+      addToast('Connection already exists', 'warning');
+      return;
+    }
+    
+    const newConnection = {
+      id: `conn-${Date.now()}`,
+      source: sourceId,
+      target: targetId,
+      type: type
+    };
+    
+    setMindMapData(prevData => {
+      const updatedData = {
+        ...prevData,
+        connections: [...prevData.connections, newConnection]
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+    
+    addToast('Connection created successfully', 'success');
+  }, [mindMapData, autoSaveMindMapData, addToast]);
+
+  const handleDeleteConnection = useCallback((connectionId) => {
+    setMindMapData(prevData => {
+      const updatedData = {
+        ...prevData,
+        connections: prevData.connections.filter(conn => 
+          (conn.id || `${conn.source}-${conn.target}`) !== connectionId
+        )
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+    
+    addToast('Connection deleted', 'info');
+  }, [autoSaveMindMapData, addToast]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -2248,12 +1916,26 @@ useEffect(() => {
             // Focus the search box
             document.querySelector('input[type="text"][placeholder*="Search"]')?.focus();
             break;
+          case 'l':
+            event.preventDefault();
+            setConnectionManagerOpen(true);
+            break;
+          case 'c':
+            event.preventDefault();
+            setConnectionMode(!connectionMode);
+            break;
           default:
             break;
         }
       }
       
       if (event.key === 'Escape') {
+        // Exit connection mode first if active
+        if (connectionMode) {
+          setConnectionMode(false);
+          return;
+        }
+        
         setSelectedNode(null);
         // Close all modals
         setCaseModal({ isOpen: false, data: null });
@@ -2272,71 +1954,16 @@ useEffect(() => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal]);
+  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal, connectionMode]);
 
   useEffect(() => {
-    // DISABLED automatic force layout to prevent overriding individual node positions
-    // Force layout should only be applied manually via "Realign Nodes" button
-    if (isReactFlowReady && !hasAppliedInitialLayout && nodes.length > 0) {
-      // Just mark as applied without applying force layout 
-      setHasAppliedInitialLayout(true);
-    } else if (isInitialLoad && nodes.length > 0) {
-      // For initial load, just mark as applied since layout was already done in convertDataToReactFlow
-      setHasAppliedInitialLayout(true);
-    }
-  }, [isReactFlowReady, hasAppliedInitialLayout, nodes, isInitialLoad]); // Removed forceLayout from dependencies
+    // Layout handled by Cytoscape internally
+  }, []);
 
-  // Simplified search and category filtering - no style interference
-  useEffect(() => {
-    if (nodes.length === 0) return;
-    
-    // Skip during animations to prevent interference
-    const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
-    if (isAnimating || anyModalAnimating) return;
-    
-  }, [focusedCategory, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
+  // Search/filter functionality to be reimplemented with Cytoscape
+  // TODO: Add Cytoscape-based search and filtering
   
-  // CSS-based search filtering - no direct style manipulation
-  useEffect(() => {
-    if (!isReactFlowReady) return;
-    
-    // Apply CSS classes instead of direct style manipulation
-    const styleSheet = document.getElementById('search-filter-styles') || document.createElement('style');
-    styleSheet.id = 'search-filter-styles';
-    
-    if (!document.getElementById('search-filter-styles')) {
-      document.head.appendChild(styleSheet);
-    }
-    
-    // Generate CSS for search filtering
-    let css = `
-      /* Default node styling */
-      .react-flow__node {
-        transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease !important;
-      }
-      
-      /* Search dimmed nodes */
-      .react-flow__node.search-dimmed {
-        opacity: 0.15 !important;
-        filter: grayscale(0.7) !important;
-        transform: scale(0.9) !important;
-      }
-      
-      /* Selected node highlighting */
-      .react-flow__node.search-selected {
-        box-shadow: 0 0 0 2px #10b981, 0 0 20px rgba(16, 185, 129, 0.6) !important;
-        z-index: 1000 !important;
-      }
-      
-      /* Ensure dragging still works */
-      .react-flow__node.search-dimmed {
-        pointer-events: auto !important;
-      }
-    `;
-    
-    styleSheet.textContent = css;
-    
-  }, [isReactFlowReady]);
+  // Note: Search/filter styling now handled by Cytoscape.js directly
 
   // Optionally: handle layout setup on first render if needed
 
@@ -2464,9 +2091,9 @@ useEffect(() => {
           <h3 className="text-sm font-semibold text-slate-300 mb-3">Filter by Category</h3>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => setFocusedCategory(null)}
+              onClick={() => setActiveFilter('all')}
               className={`px-3 py-2 rounded-lg text-xs transition-all ${
-                focusedCategory === null
+                activeFilter === 'all'
                   ? 'bg-teal-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2474,9 +2101,9 @@ useEffect(() => {
               All
             </button>
             <button
-              onClick={() => setFocusedCategory('topic')}
+              onClick={() => setActiveFilter('topic')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'topic'
+                activeFilter === 'topic'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2485,9 +2112,9 @@ useEffect(() => {
               Topics
             </button>
             <button
-              onClick={() => setFocusedCategory('case')}
+              onClick={() => setActiveFilter('case')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'case'
+                activeFilter === 'case'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2496,9 +2123,9 @@ useEffect(() => {
               Cases
             </button>
             <button
-              onClick={() => setFocusedCategory('task')}
+              onClick={() => setActiveFilter('task')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'task'
+                activeFilter === 'task'
                   ? 'bg-amber-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2507,9 +2134,9 @@ useEffect(() => {
               Tasks
             </button>
             <button
-              onClick={() => setFocusedCategory('literature')}
+              onClick={() => setActiveFilter('literature')}
               className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                focusedCategory === 'literature'
+                activeFilter === 'literature'
                   ? 'bg-purple-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
@@ -2546,8 +2173,30 @@ useEffect(() => {
 
         {/* --- Controls --- */}
         <div className="space-y-3 mb-6">
+          <LoadingButton 
+            onClick={() => setPhysicsEnabled(!physicsEnabled)} 
+            icon={Zap} 
+            className={`w-full px-4 py-2 rounded-md text-sm ${
+              physicsEnabled 
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'bg-gray-600 hover:bg-gray-700 text-white'
+            }`}
+          >
+            {physicsEnabled ? 'Physics: ON' : 'Physics: OFF'}
+          </LoadingButton>
+          <LoadingButton 
+            onClick={() => setConnectionMode(!connectionMode)} 
+            icon={Link2} 
+            className={`w-full px-4 py-2 rounded-md text-sm ${
+              connectionMode 
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                : 'bg-slate-600 hover:bg-slate-700 text-white'
+            }`}
+          >
+            {connectionMode ? 'Connect: ON' : 'Connect: OFF'}
+          </LoadingButton>
           <LoadingButton onClick={applyForceLayout} icon={Shuffle} className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm">
-            Realign Nodes
+            Realign Nodes (Dagre)
           </LoadingButton>
           <LoadingButton 
             onClick={() => populateSampleLiteratureData(setMindMapData, autoSaveMindMapData, addToast)} 
@@ -2555,6 +2204,13 @@ useEffect(() => {
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm"
           >
             Add Sample Literature
+          </LoadingButton>
+          <LoadingButton 
+            onClick={() => setConnectionManagerOpen(true)} 
+            icon={Link2} 
+            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-md text-sm"
+          >
+            Manage Connections
           </LoadingButton>
           
           {/* Individual Node Creation Buttons */}
@@ -2591,6 +2247,14 @@ useEffect(() => {
             >
               <BookOpen size={16} />
               Add Literature
+            </LoadingButton>
+            <LoadingButton 
+              onClick={() => setImportModal(true)} 
+              icon={FileSpreadsheet} 
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <FileSpreadsheet size={16} />
+              Import Patients
             </LoadingButton>
           </div>
           
@@ -2666,70 +2330,74 @@ useEffect(() => {
 
       {/* --- Main Mind Map Workspace --- */}
       <div className="flex-1 relative">
-        <ReactFlowErrorBoundary>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onNodeDoubleClick={onNodeDoubleClick}
-            onNodeDragStop={handleNodeDragStop}
-            onEdgeDoubleClick={onEdgeDoubleClick}
-            onEdgeContextMenu={onEdgeContextMenu}
-            onEdgeMouseEnter={onEdgeMouseEnter}
-            onEdgeMouseLeave={onEdgeMouseLeave}
-            nodeTypes={nodeTypes}
-            edgeTypes={{ floating: FloatingEdge, enhanced: EnhancedEdge }}
-            connectionLineComponent={ConnectionLine}
-            nodesDraggable={true}
-            nodesConnectable={true}
-            elementsSelectable={true}
-            onInit={(reactFlowInstance) => {
-              setIsReactFlowReady(true);
-              // Store reference for error recovery
-              window.reactFlowInstance = reactFlowInstance;
-            }}
-            onError={(id, message) => {
-              console.warn('React Flow Error:', id, message);
-              // Ignore dimension-related errors during animations
-              if (isAnimating && message.includes('dimensions')) {
-                return;
-              }
-            }}
-            fitView
-            snapToGrid={false}
-            snapGrid={[15, 15]}
-            elevateEdgesOnSelect={false}
-            connectionLineComponent={ConnectionLine}
-          connectionLineStyle={{
-            stroke: '#3b82f6', // Use a bright blue color for better visibility during connection
-            strokeWidth: 3.5, // Slightly thicker than regular edges
-            opacity: 0.9,
-            strokeLinecap: 'round',
-            strokeDasharray: '5,3', // Shorter dash pattern for more modern look
-            filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.6))', // Softer glow
-            animation: 'flowingDash 1s linear infinite' // Add flowing animation
-          }}
-          defaultEdgeOptions={{
-            type: 'enhanced', // Use our enhanced edge with proper prop handling
-            style: { 
-              strokeWidth: 2.5, 
-              stroke: '#64748b',
-              opacity: 0.9,
-              strokeLinecap: 'round',
-              transition: 'none'
+        <D3Graph
+          mindMapData={mindMapData}
+          activeFilter={activeFilter}
+          onNodeClick={onNodeClick}
+          onNodeDoubleClick={onNodeDoubleClick}
+          onDataChange={(change) => {
+            if (change.type === 'position') {
+              // Single node position update (during drag)
+              requestAnimationFrame(() => {
+                setMindMapData(currentData => {
+                  const updatedData = { ...currentData };
+                  const key = change.nodeType === 'literature' ? 'literature' : `${change.nodeType}s`;
+                  const item = updatedData[key]?.find(i => String(i.id) === change.nodeId);
+                  if (item) {
+                    item.position = change.position;
+                  }
+                  localStorageUtils.save(updatedData);
+                  return updatedData;
+                });
+              });
+            } else if (change.type === 'positions') {
+              // Batch position update
+              setMindMapData(currentData => {
+                const updatedData = { ...currentData };
+                Object.entries(change.positions).forEach(([nodeId, position]) => {
+                  const [type, ...idParts] = nodeId.split('-');
+                  const id = idParts.join('-');
+                  const key = type === 'literature' ? 'literature' : `${type}s`;
+                  const item = updatedData[key]?.find(i => String(i.id) === id);
+                  if (item) {
+                    item.position = position;
+                  }
+                });
+                autoSaveMindMapData(updatedData);
+                return updatedData;
+              });
+            } else if (change.type === 'connections') {
+              // Update connections in mindMapData
+              setMindMapData(currentData => {
+                const updatedData = { ...currentData, connections: change.connections };
+                autoSaveMindMapData(updatedData);
+                return updatedData;
+              });
+            } else if (change.type === 'deleteConnection') {
+              // Delete connection
+              handleDeleteConnection(change.connectionId);
             }
-            // Remove pathOptions - this is not a standard React Flow prop
           }}
-          className="bg-gradient-to-br from-blue-50 to-indigo-100"
-        >
-          <Background color="#aaa" gap={16} />
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
-        </ReactFlowErrorBoundary>
+          physicsEnabled={physicsEnabled}
+          connectionMode={connectionMode}
+          onConnectionCreate={handleCreateConnection}
+        />
+        
+        {/* Connection Mode Indicator */}
+        {connectionMode && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 z-10"
+          >
+            <Link2 className="w-5 h-5 animate-pulse" />
+            <div>
+              <div className="font-semibold">Connection Mode Active</div>
+              <div className="text-xs text-emerald-100">Click two nodes to connect them • Click connections to delete • Press Esc to exit</div>
+            </div>
+          </motion.div>
+        )}
       </div>
       
       {/* --- Modals --- */}
@@ -2800,7 +2468,6 @@ useEffect(() => {
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
-            syncNodeData={syncNodeData}
             forceNodeUpdate={() => setNodeUpdateTrigger(prev => prev + 1)}
           />
         )}
@@ -2831,11 +2498,32 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
+      <ImportSpreadsheetModal
+        isOpen={importModal}
+        onClose={() => setImportModal(false)}
+        onImport={handleSpreadsheetImport}
+        addToast={addToast}
+      />
+
       <EdgeLabelModal 
         isOpen={edgeModal.isOpen} 
         edge={edgeModal.edge} 
         onClose={() => setEdgeModal({ isOpen: false, edge: null })} 
         onSave={handleSaveEdgeLabel} 
+      />
+
+      <ConnectionManager
+        isOpen={connectionManagerOpen}
+        onClose={() => setConnectionManagerOpen(false)}
+        nodes={[
+          ...mindMapData.topics.map(t => ({ id: `topic-${t.id}`, label: t.label, type: 'topic' })),
+          ...mindMapData.cases.map(c => ({ id: `case-${c.id}`, label: c.primary_diagnosis || c.case_id || 'Untitled Case', type: 'case' })),
+          ...mindMapData.tasks.map(t => ({ id: `task-${t.id}`, label: t.title, type: 'task' })),
+          ...mindMapData.literature.map(l => ({ id: `literature-${l.id}`, label: l.title, type: 'literature' }))
+        ]}
+        connections={mindMapData.connections}
+        onCreateConnection={handleCreateConnection}
+        onDeleteConnection={handleDeleteConnection}
       />
 
       {loading && (
@@ -2908,11 +2596,7 @@ class ReactFlowErrorBoundary extends React.Component {
   }
 }
 
-const Dashboard = () => (
-  <ReactFlowProvider>
-    <DashboardComponent />
-  </ReactFlowProvider>
-);
+const Dashboard = () => <DashboardComponent />;
 
 // Main App Component with Routing
 function App() {

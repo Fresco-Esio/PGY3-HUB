@@ -85,7 +85,7 @@ const backdropVariants = {
     opacity: 1,
     backdropFilter: "blur(8px)",
     transition: {
-      duration: 0.4,
+      duration: 0.2,
       ease: "easeOut",
     },
   },
@@ -93,8 +93,8 @@ const backdropVariants = {
     opacity: 0,
     backdropFilter: "blur(0px)",
     transition: {
-      duration: 0.3,
-      ease: "easeIn",
+      duration: 0.15,
+      ease: "easeInOut",
     },
   },
 };
@@ -110,18 +110,19 @@ const contentVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: "easeOut",
+      type: "spring",
+      damping: 25,
+      stiffness: 400,
       duration: 0.3,
-      delay: 0.1,
     },
   },
   exit: {
     opacity: 0,
     y: -10,
-    scale: 1.02,
+    scale: 0.98,
     transition: {
-      type: "easeIn",
       duration: 0.2,
+      ease: "easeInOut",
     },
   },
 };
@@ -790,11 +791,13 @@ const CaseModal = ({
 
   // Enhanced timeline management with debounced auto-save and better backend integration
   const timelineEntries = useMemo(() => {
+    // Only process timeline when timeline tab is active to improve initial render performance
+    if (activeTab !== 'timeline') return [];
     // Ensure timeline data is properly structured for the VerticalTimeline component
     const timeline = editData.timeline || [];
     console.log(`Timeline entries for case ${data?.id}:`, timeline);
     return timeline;
-  }, [editData.timeline, data?.id]);
+  }, [editData.timeline, data?.id, activeTab]);
 
   // Debounced timeline save function with enhanced error handling
   const debouncedTimelineSave = useCallback(
@@ -983,15 +986,11 @@ const CaseModal = ({
             animate="visible"
             exit="exit"
             variants={modalVariants}
-            layout
-            transition={{
-              layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
-            }}
-            className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-hidden transition-all duration-500 ease-in-out ${
+            className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-hidden ${
               activeTab === "timeline" ? "max-w-7xl" : "max-w-4xl"
             }`}
             style={{
-              willChange: "transform, opacity, scale",
+              willChange: "transform, opacity",
               backfaceVisibility: "hidden",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -1006,7 +1005,6 @@ const CaseModal = ({
           >
             <motion.div
               ref={headerRef}
-              layout
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -1115,7 +1113,7 @@ const CaseModal = ({
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Case Title/Label
+                                Name or ID
                               </label>
                               <input
                                 type="text"
@@ -1132,7 +1130,7 @@ const CaseModal = ({
                                   )
                                 }
                                 className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                                placeholder="Enter case title/label"
+                                placeholder="Enter patient name or case ID"
                               />
                             </div>
                             <div>
@@ -1188,7 +1186,7 @@ const CaseModal = ({
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Case Title/Label
+                                Name or ID
                               </label>
                               <div
                                 className={`bg-slate-700/50 rounded-lg p-3 ${
@@ -1199,7 +1197,7 @@ const CaseModal = ({
                               >
                                 {editData.label ||
                                   editData.title ||
-                                  "Untitled case"}
+                                  "Unnamed patient"}
                               </div>
                             </div>
                             <div>

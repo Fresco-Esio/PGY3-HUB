@@ -1,0 +1,8 @@
+First Name,Last Name,Chief Complaint,Initial Presentation,Narrative Summary,Status
+John,Doe,"Persistent sadness and loss of interest","Patient presents with 3-month history of depressed mood","35-year-old male with major depressive disorder",active
+Jane,Smith,"Anxiety and panic attacks","Patient reports increasing anxiety over 6 months","28-year-old female with generalized anxiety disorder",active
+Michael,Johnson,"Sleep disturbances and racing thoughts","Alternating periods of high and low mood","42-year-old male with bipolar disorder",follow_up
+Sarah,,"Intrusive thoughts and compulsive behaviors","Distressing intrusive thoughts and rituals","31-year-old female with OCD",active
+,Brown,"Social withdrawal and flat affect","Patient increasingly isolated","26-year-old male with schizophrenia",active
+Emily,Davis,,,"45-year-old female seeking therapy",active
+David,Wilson,"Substance use concerns","Patient reports daily alcohol use","38-year-old male with alcohol use disorder",active

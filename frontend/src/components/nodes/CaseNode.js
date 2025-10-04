@@ -74,7 +74,7 @@ const CaseNode = ({ data, selected }) => {
       }}
       className={`group relative min-w-[280px] max-w-[320px] cursor-pointer ${
         selected ? "z-10" : "z-0"
-      }`}
+      } ${data.className || ''}`}
     >
       {/* 🎨 ARTISTIC CARD CONTAINER with deep violet → plum gradient */}
       <div
@@ -88,6 +88,7 @@ const CaseNode = ({ data, selected }) => {
               : "border-violet-200/30 hover:border-violet-300/60"
           }
           ${urgency === "high" ? "ring-2 ring-red-400/60" : ""}
+          ${data._hasIncompleteData ? "ring-2 ring-amber-400/80" : ""}
         `}
         style={{
           background:
@@ -230,6 +231,25 @@ const CaseNode = ({ data, selected }) => {
             className="absolute -top-3 -right-3"
           >
             <div className="w-7 h-7 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <AlertCircle size={16} className="text-white" />
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ⚠️ INCOMPLETE DATA INDICATOR */}
+        {data._hasIncompleteData && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`absolute ${urgency === "high" ? "-top-3 -left-3" : "-top-3 -right-3"}`}
+            title={`Missing fields: ${(data._missingFields || []).join(', ')}`}
+          >
+            <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
