@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Import new components
 import HomeScreen from './components/HomeScreen';
 import MapOptionsModal, { mapStorageUtils } from './components/MapManager';
-import CytoscapeGraph from './components/CytoscapeGraph';
+import D3Graph from './components/D3Graph';
 
 // Lazy load heavy D3 dependencies (kept for Dagre layout)
 const loadDagre = () => import('dagre');
