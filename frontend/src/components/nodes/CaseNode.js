@@ -241,6 +241,25 @@ const CaseNode = ({ data, selected }) => {
           </motion.div>
         )}
 
+        {/* ⚠️ INCOMPLETE DATA INDICATOR */}
+        {data._hasIncompleteData && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`absolute ${urgency === "high" ? "-top-3 -left-3" : "-top-3 -right-3"}`}
+            title={`Missing fields: ${(data._missingFields || []).join(', ')}`}
+          >
+            <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <AlertCircle size={16} className="text-white" />
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
         {/* 📱 CARD HEADER with enhanced styling */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
