@@ -60,6 +60,7 @@ import {
 // Lazy load components for better initial load time
 import { RichTextEditor, LiteratureModal } from './components/LazyComponents';
 import CaseModal from './components/CaseModal';
+import ConnectionManager from './components/ConnectionManager';
 import TopicModal from './components/TopicModal';
 import TaskModal from './components/TaskModal';
 import OptimizedLoadingScreen from './components/OptimizedLoadingScreen';
