@@ -23,7 +23,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159494",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
@@ -48,7 +48,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159508",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "a9c0a2ec-bdb8-4043-adf7-b4d761c1dabe",
@@ -73,7 +73,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159519",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "bf0ca57b-4ce6-48f0-a77f-a10394dc7cc7",
@@ -98,7 +98,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159534",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "e3f00945-e7d6-48c9-9044-53ee940b7bce",
@@ -123,7 +123,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159552",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "fe743542-0af5-4889-b77a-744ed7a7eeda",
@@ -148,7 +148,32 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-07-24T02:24:34.159579",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "201",
+      "title": "Diagnostic Criteria",
+      "description": "",
+      "category": "Assessment",
+      "color": "#3B82F6",
+      "position": {
+        "x": 1182.5986152820044,
+        "y": -179.64927726470353
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": null,
+      "diagnostic_criteria": [],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     }
   ],
   "cases": [
@@ -178,12 +203,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 400.0,
-        "y": 710.0
+        "x": 1899.1587356816597,
+        "y": 259.3542538865877
       },
       "timeline": [],
       "created_at": "2025-07-24T22:56:01.406000+00:00",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "1753397837568",
@@ -209,12 +234,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 680.0,
-        "y": 710.0
+        "x": 1138.3551548078742,
+        "y": 1003.7232137615739
       },
       "timeline": [],
       "created_at": "2025-07-24T22:57:17.987000+00:00",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "1753398442218",
@@ -240,12 +265,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 960.0,
-        "y": 710.0
+        "x": 1966.2502626721307,
+        "y": 697.8306662450053
       },
       "timeline": [],
       "created_at": "2025-07-24T23:07:22.694000+00:00",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     },
     {
       "id": "1753398664975",
@@ -271,16 +296,283 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 680.0,
-        "y": 710.0
+        "x": 1171.8021906633787,
+        "y": 673.9809505622362
       },
       "timeline": [],
       "created_at": "2025-07-24T23:11:05.486000+00:00",
-      "updated_at": "2025-07-31T04:46:48.379000+00:00"
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "1759543893706",
+      "case_id": "CASE-1759544203024-4",
+      "encounter_date": "2025-10-04T02:16:43.024000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1581.8378908245497,
+        "y": 960.7177350387559
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "101",
+      "case_id": "CASE-1759544203024-5",
+      "encounter_date": "2025-10-04T02:16:43.024000+00:00",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Anxiety",
+        "Insomnia"
+      ],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "Persistent sadness and loss of interest",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 3722.875737831386,
+        "y": 2697.203313968441
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "102",
+      "case_id": "CASE-1759544203024-6",
+      "encounter_date": "2025-10-04T02:16:43.024000+00:00",
+      "primary_diagnosis": "Bipolar I Disorder",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "Mood swings and impulsivity",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1498.173096873805,
+        "y": 99.94363057126864
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "103",
+      "case_id": "CASE-1759544203024-7",
+      "encounter_date": "2025-10-04T02:16:43.024000+00:00",
+      "primary_diagnosis": "Generalized Anxiety Disorder",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "Excessive worry and restlessness",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1044.9463553373666,
+        "y": 294.6293711568554
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "104",
+      "case_id": "CASE-1759544203024-8",
+      "encounter_date": "2025-10-04T02:16:43.024000+00:00",
+      "primary_diagnosis": "Schizophrenia",
+      "secondary_diagnoses": [],
+      "age": 0,
+      "gender": null,
+      "chief_complaint": "Auditory hallucinations and delusions",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 1500.7171708883247,
+        "y": 569.0297768295063
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
     }
   ],
-  "tasks": [],
-  "literature": [],
+  "tasks": [
+    {
+      "id": "1759543899555",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": 1798.908299369634,
+        "y": -368.7187113806844
+      },
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    }
+  ],
+  "literature": [
+    {
+      "id": "1",
+      "title": "Efficacy of Cognitive Behavioral Therapy for Depression: A Meta-Analysis",
+      "authors": "Smith, J.A., Johnson, B.K., Williams, C.D.",
+      "publication": null,
+      "year": 2023,
+      "doi": "10.1002/jclp.23456",
+      "abstract": "This meta-analysis examines the efficacy of cognitive behavioral therapy (CBT) for treating major depressive disorder across 45 randomized controlled trials involving 3,242 participants. Results indicate that CBT shows significant effectiveness with a large effect size (d = 0.85) compared to control conditions. The analysis also reveals that individual CBT may be more effective than group CBT for severe depression cases.",
+      "notes": null,
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 3551.7158068265844,
+        "y": 2567.2705290195445
+      },
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "2",
+      "title": "DSM-5-TR Clinical Cases",
+      "authors": "American Psychiatric Association",
+      "publication": null,
+      "year": 2022,
+      "doi": null,
+      "abstract": "A comprehensive collection of clinical cases that illustrate the diagnostic criteria and clinical features of mental disorders as defined in the DSM-5-TR. Each case includes detailed patient presentations, differential diagnoses, and treatment considerations.",
+      "notes": "Essential reference for diagnostic clarity",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1377.576969229884,
+        "y": -270.9854110045546
+      },
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "3",
+      "title": "Pharmacological Treatment of Bipolar Disorder: Current Evidence",
+      "authors": "Rodriguez, M.L., Chen, K.H., Anderson, P.R.",
+      "publication": null,
+      "year": 2023,
+      "doi": "10.1111/bdi.13289",
+      "abstract": "This comprehensive review examines current evidence for pharmacological treatments of bipolar disorder, including mood stabilizers, antipsychotics, and adjunctive therapies. The review covers efficacy, safety profiles, and treatment-resistant cases.",
+      "notes": "Important for medication management decisions",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1687.8023816049476,
+        "y": 15.541019011751674
+      },
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "4",
+      "title": "Mindfulness-Based Interventions for Anxiety Disorders: A Systematic Review",
+      "authors": "Taylor, S.M., Brown, A.J., Davis, L.K.",
+      "publication": null,
+      "year": 2023,
+      "doi": null,
+      "abstract": "Systematic review of mindfulness-based interventions for treating various anxiety disorders. Analysis of 28 studies shows moderate to large effect sizes for reducing anxiety symptoms, with particular effectiveness for generalized anxiety disorder.",
+      "notes": "Good evidence for mindfulness approaches",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1253.35175947246,
+        "y": 282.38208191679365
+      },
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    },
+    {
+      "id": "5",
+      "title": "Case Study: Treatment-Resistant Schizophrenia with Clozapine",
+      "authors": "Wilson, K.R., Martinez, E.S.",
+      "publication": null,
+      "year": 2022,
+      "doi": null,
+      "abstract": "Detailed case study of a 28-year-old male with treatment-resistant schizophrenia who showed significant improvement after clozapine initiation. The case discusses monitoring protocols, side effect management, and long-term outcomes.",
+      "notes": "Useful for understanding clozapine protocols",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1081.8029859940043,
+        "y": 272.29430241296836
+      },
+      "created_at": "2025-10-04T02:16:43.024000+00:00",
+      "updated_at": "2025-10-04T02:18:55.186000+00:00"
+    }
+  ],
   "connections": [
     {
       "id": "ea9a2ab228f1c41998873a3bf5ba6fcb3",
@@ -305,6 +597,36 @@
       "source": "7f8ca947-0887-4794-8dd0-074f8b1be81c",
       "target": "c338db37-f9c6-4c1c-89a8-1cd869c4bcd6",
       "label": "Updated Old Format Connection"
+    },
+    {
+      "id": "conn-1",
+      "source": "literature-1",
+      "target": "case-101",
+      "label": "Treatment approach"
+    },
+    {
+      "id": "conn-2",
+      "source": "literature-2",
+      "target": "topic-201",
+      "label": "Reference guide"
+    },
+    {
+      "id": "conn-3",
+      "source": "literature-3",
+      "target": "case-102",
+      "label": "Medication guidance"
+    },
+    {
+      "id": "conn-4",
+      "source": "literature-4",
+      "target": "case-103",
+      "label": "Treatment option"
+    },
+    {
+      "id": "conn-5",
+      "source": "literature-5",
+      "target": "case-104",
+      "label": "Treatment protocol"
     }
   ]
 }
