@@ -110,18 +110,19 @@ const contentVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: "easeOut",
+      type: "spring",
+      damping: 25,
+      stiffness: 400,
       duration: 0.3,
-      delay: 0.1,
     },
   },
   exit: {
     opacity: 0,
     y: -10,
-    scale: 1.02,
+    scale: 0.98,
     transition: {
-      type: "easeIn",
       duration: 0.2,
+      ease: "easeInOut",
     },
   },
 };
