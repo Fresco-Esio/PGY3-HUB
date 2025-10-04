@@ -1484,14 +1484,8 @@ useEffect(() => {
 
   // applyForceLayout wrapper function (defined after forceLayout)
   const applyForceLayout = useCallback(() => {
-    try {
-      forceLayout();
-      addToast('Nodes realigned successfully', 'success');
-    } catch (error) {
-      console.error('Force layout error:', error);
-      addToast('Failed to realign nodes', 'error');
-    }
-  }, [forceLayout, addToast]);
+    forceLayout();
+  }, [forceLayout]);
 
   const handleClearMap = useCallback(() => {
     if (!window.confirm('Are you sure you want to clear the entire mind map?')) return;
