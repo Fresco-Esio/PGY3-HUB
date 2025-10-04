@@ -4,12 +4,7 @@ import { BookOpen, X, Users, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 const CircularLiteratureNode = ({ data, selected }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleToggleExpand = useCallback((e) => {
-    e.stopPropagation();
-    setIsExpanded(prev => !prev);
-  }, []);
+  const isExpanded = data.isExpanded || false;
 
   const baseSize = 115; // Medium size for literature
   const expandedSize = 290;
@@ -22,7 +17,6 @@ const CircularLiteratureNode = ({ data, selected }) => {
         height: isExpanded ? expandedSize : baseSize,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      onClick={handleToggleExpand}
     >
       {/* Connection Handles */}
       <Handle
