@@ -257,6 +257,14 @@ const CytoscapeGraph = ({
     if (cytoscapeRef) {
       cytoscapeRef.current = cy;
     }
+    
+    // DEBUG: Log Cytoscape initialization
+    console.log('🔍 Cytoscape initialized:', {
+      container: containerRef.current,
+      containerWidth: containerRef.current?.offsetWidth,
+      containerHeight: containerRef.current?.offsetHeight,
+      cyReady: !!cy
+    });
 
     // Add click handlers
     cy.on('tap', 'node', (evt) => {
