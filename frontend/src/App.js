@@ -1845,6 +1845,17 @@ useEffect(() => {
 
   // Connection management handlers
   const handleCreateConnection = useCallback((sourceId, targetId, type = 'related') => {
+    // Check if connection already exists
+    const exists = mindMapData.connections.some(conn => 
+      (conn.source === sourceId && conn.target === targetId) ||
+      (conn.source === targetId && conn.target === sourceId)
+    );
+    
+    if (exists) {
+      addToast('Connection already exists', 'warning');
+      return;
+    }
+    
     const newConnection = {
       id: `conn-${Date.now()}`,
       source: sourceId,
@@ -1862,7 +1873,7 @@ useEffect(() => {
     });
     
     addToast('Connection created successfully', 'success');
-  }, [autoSaveMindMapData, addToast]);
+  }, [mindMapData, autoSaveMindMapData, addToast]);
 
   const handleDeleteConnection = useCallback((connectionId) => {
     setMindMapData(prevData => {
