@@ -1900,9 +1900,9 @@ useEffect(() => {
         setMindMapData(response.data);
         
         setLoadingProgress(80);
-        setLoadingMessage('Applying layout...');
+        setLoadingMessage('Rendering graph...');
         
-        await convertDataToReactFlow(response.data, true); // Apply layout immediately
+        // Cytoscape will handle rendering
         autoSaveMindMapData(response.data);
         
         setLoadingProgress(100);
