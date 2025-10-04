@@ -1492,8 +1492,13 @@ useEffect(() => {
 
     const empty = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
     setMindMapData(empty);
-    setNodes([]);
-    setEdges([]);
+    
+    // Clear Cytoscape graph
+    const cy = getCytoscape();
+    if (cy) {
+      cy.elements().remove();
+    }
+    
     setSelectedNode(null);
     // Clear all modal states
     setCaseModal({ isOpen: false, data: null });
@@ -1503,7 +1508,7 @@ useEffect(() => {
     setFocusedCategory(null);
     autoSaveMindMapData(empty);
     addToast('Mind map cleared successfully', 'success');
-  }, [setNodes, setEdges, autoSaveMindMapData, addToast]);
+  }, [getCytoscape, autoSaveMindMapData, addToast]);
 
   const addNewNode = useCallback((nodeType) => {
     const dataId = Date.now();
