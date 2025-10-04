@@ -1596,7 +1596,7 @@ useEffect(() => {
     const newEdge = { 
       ...params, 
       id: edgeId,
-      type: 'floating', // Use our high-performance floating edge type
+      type: 'default', // Use default edge type
       style: { 
         strokeWidth: 2, 
         stroke: '#64748b',
