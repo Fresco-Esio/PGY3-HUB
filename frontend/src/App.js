@@ -1935,7 +1935,7 @@ useEffect(() => {
       setLoading(false);
       setIsInitialLoad(false);
     }
-  }, [addToast, autoSaveMindMapData, convertDataToReactFlow]);
+  }, [addToast, autoSaveMindMapData]);
 
   useEffect(() => {
     // Load initial mind map data
