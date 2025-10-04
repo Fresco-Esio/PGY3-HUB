@@ -13,10 +13,12 @@ const CytoscapeGraph = ({
   onNodeDoubleClick,
   onDataChange,
   physicsEnabled,
+  cytoscapeRef, // Expose ref to parent
 }) => {
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const layoutRef = useRef(null);
+  const [expandedNodes, setExpandedNodes] = useState(new Set());
 
   // Node type configurations
   const nodeConfig = {
