@@ -1627,7 +1627,7 @@ useEffect(() => {
     } else {
       addToast(`Successfully imported ${importStats.validRows} patient records`, 'success');
     }
-  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, setNodes, addToast]);
+  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, addToast]);
 
   const handleNodesChange = useCallback((changes) => {
     // Apply the node changes to React Flow state immediately - this is critical!
