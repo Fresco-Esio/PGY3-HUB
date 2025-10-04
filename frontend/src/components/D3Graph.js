@@ -6,7 +6,11 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
   const simulationRef = useRef(null);
   const nodesRef = useRef([]);
   const linksRef = useRef([]);
+  const nodeElementsRef = useRef(null);
+  const linkElementsRef = useRef(null);
+  const gRef = useRef(null);
   const isDraggingRef = useRef(false);
+  const isInitializedRef = useRef(false);
   
   // Node configuration
   const nodeConfig = {
@@ -63,18 +67,87 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     return { nodes, links };
   }, []);
 
-  useEffect(() => {
+  // Update positions of existing nodes without recreating the graph
+  const updateNodePositions = useCallback((data) => {
+    if (!nodeElementsRef.current || !nodesRef.current) return;
+
+    const positionMap = new Map();
+    
+    // Build position map from data
+    ['topics', 'cases', 'tasks', 'literature'].forEach((category) => {
+      const nodeType = category === 'literature' ? 'literature' : category.slice(0, -1);
+      const items = data[category] || [];
+      
+      items.forEach((item) => {
+        const nodeId = `${nodeType}-${item.id}`;
+        if (item.position?.x !== undefined && item.position?.y !== undefined) {
+          positionMap.set(nodeId, item.position);
+        }
+      });
+    });
+
+    // Update node positions
+    nodesRef.current.forEach(node => {
+      const pos = positionMap.get(node.id);
+      if (pos) {
+        node.x = pos.x;
+        node.y = pos.y;
+      }
+    });
+
+    // Update visual positions
+    if (nodeElementsRef.current) {
+      nodeElementsRef.current.attr('transform', d => `translate(${d.x},${d.y})`);
+    }
+
+    // Update link positions
+    if (linkElementsRef.current && linksRef.current) {
+      linkElementsRef.current.each(function(l) {
+        const sourceNode = nodesRef.current.find(n => n.id === l.source);
+        const targetNode = nodesRef.current.find(n => n.id === l.target);
+        if (sourceNode && targetNode) {
+          d3.select(this)
+            .attr('x1', sourceNode.x)
+            .attr('y1', sourceNode.y)
+            .attr('x2', targetNode.x)
+            .attr('y2', targetNode.y);
+        }
+      });
+    }
+  }, []);
+
+  // Check if node structure has changed (not just positions)
+  const hasStructureChanged = useCallback((oldNodes, newData) => {
+    const { nodes: newNodes } = convertToD3Format(newData);
+    
+    if (oldNodes.length !== newNodes.length) return true;
+    
+    const oldIds = new Set(oldNodes.map(n => n.id));
+    const newIds = new Set(newNodes.map(n => n.id));
+    
+    for (const id of newIds) {
+      if (!oldIds.has(id)) return true;
+    }
+    
+    return false;
+  }, [convertToD3Format]);
+
+  // Initialize or reinitialize the graph
+  const initializeGraph = useCallback(() => {
     if (!svgRef.current || !mindMapData) return;
 
     const svg = d3.select(svgRef.current);
     const width = svgRef.current.clientWidth || 800;
     const height = svgRef.current.clientHeight || 600;
 
-    // Clear previous graph container only (not all SVG content)
+    console.log('🔷 D3 Initializing graph');
+
+    // Clear previous graph container
     svg.selectAll('.graph-container').remove();
 
     // Create container group for zoom/pan
     const g = svg.append('g').attr('class', 'graph-container');
+    gRef.current = g;
 
     // Setup zoom behavior
     const zoom = d3.zoom()
@@ -103,10 +176,24 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       .attr('stroke', '#94a3b8')
       .attr('stroke-width', 3)
       .attr('stroke-opacity', 0.6)
-      .attr('x1', d => nodes.find(n => n.id === d.source)?.x || 0)
-      .attr('y1', d => nodes.find(n => n.id === d.source)?.y || 0)
-      .attr('x2', d => nodes.find(n => n.id === d.target)?.x || 0)
-      .attr('y2', d => nodes.find(n => n.id === d.target)?.y || 0);
+      .attr('x1', d => {
+        const sourceNode = nodes.find(n => n.id === d.source);
+        return sourceNode ? sourceNode.x : 0;
+      })
+      .attr('y1', d => {
+        const sourceNode = nodes.find(n => n.id === d.source);
+        return sourceNode ? sourceNode.y : 0;
+      })
+      .attr('x2', d => {
+        const targetNode = nodes.find(n => n.id === d.target);
+        return targetNode ? targetNode.x : 0;
+      })
+      .attr('y2', d => {
+        const targetNode = nodes.find(n => n.id === d.target);
+        return targetNode ? targetNode.y : 0;
+      });
+
+    linkElementsRef.current = link;
 
     // Create node groups
     const nodeGroup = g.append('g').attr('class', 'nodes');
@@ -116,6 +203,8 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       .attr('class', 'node')
       .attr('transform', d => `translate(${d.x},${d.y})`)
       .style('cursor', 'pointer');
+
+    nodeElementsRef.current = node;
 
     // Add circles to nodes
     node.append('circle')
@@ -163,7 +252,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
           hasMoved = true;
           isDraggingRef.current = true;
           d3.select(this).select('circle').attr('stroke-width', 6);
-          console.log('🔷 Drag started:', d.id);
         }
 
         if (hasMoved) {
@@ -192,7 +280,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       .on('end', function(event, d) {
         if (hasMoved) {
           d3.select(this).select('circle').attr('stroke-width', 4);
-          console.log('🔷 Drag ended:', d.id, 'at', { x: d.x, y: d.y });
           
           // Save position to backend
           if (onDataChange) {
@@ -223,7 +310,6 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       if (!hasMoved && !isDraggingRef.current) {
         event.stopPropagation();
         if (onNodeClick) {
-          console.log('🔷 Node clicked:', d.id);
           onNodeClick(d);
         }
       }
@@ -234,7 +320,7 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         event.stopPropagation();
         event.preventDefault();
         if (onNodeDoubleClick) {
-          console.log('🔷 Node double-clicked:', d.id, 'type:', d.type);
+          console.log('🔷 Double-click on:', d.id);
           onNodeDoubleClick(d);
         }
       }
@@ -279,13 +365,24 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         }
       });
 
-      // Expose simulation to window for debugging
       window.d3Simulation = simulation;
-      window.d3Nodes = nodes;
-      
       console.log('🔷 Physics simulation started');
+    }
+
+    isInitializedRef.current = true;
+  }, [mindMapData, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format]);
+
+  // Main effect - only reinitialize when structure changes
+  useEffect(() => {
+    if (!svgRef.current || !mindMapData) return;
+
+    // Check if we need to reinitialize or just update positions
+    if (!isInitializedRef.current || hasStructureChanged(nodesRef.current, mindMapData)) {
+      console.log('🔷 Structure changed - reinitializing');
+      initializeGraph();
     } else {
-      console.log('🔷 Physics disabled or no nodes');
+      console.log('🔷 Only positions changed - updating');
+      updateNodePositions(mindMapData);
     }
 
     // Cleanup
@@ -294,7 +391,20 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
         simulationRef.current.stop();
       }
     };
-  }, [mindMapData, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format]);
+  }, [mindMapData, physicsEnabled]);
+
+  // Separate effect for physics toggle
+  useEffect(() => {
+    if (isInitializedRef.current && simulationRef.current) {
+      if (physicsEnabled) {
+        simulationRef.current.alpha(0.3).restart();
+        console.log('🔷 Physics enabled - restarted simulation');
+      } else {
+        simulationRef.current.stop();
+        console.log('🔷 Physics disabled - stopped simulation');
+      }
+    }
+  }, [physicsEnabled]);
 
   return (
     <svg
