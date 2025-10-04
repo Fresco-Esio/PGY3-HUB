@@ -554,8 +554,8 @@ const CytoscapeGraph = ({
       ]);
     }
 
-    // Apply layout if physics is enabled and there are elements
-    if (physicsEnabled && elements.length > 0) {
+    // Don't auto-run layout on every change - only when nodes are added
+    if (nodesToAdd.length > 0 && physicsEnabled) {
       setTimeout(() => runLayout(), 100);
     }
   }, [mindMapData, convertToElements, physicsEnabled, expandedNodes, runLayout]);
