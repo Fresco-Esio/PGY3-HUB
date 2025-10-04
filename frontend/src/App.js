@@ -1485,25 +1485,33 @@ useEffect(() => {
         node.fy = null;
       });
       
-      // Restart simulation with high alpha
-      window.d3Simulation.alpha(1).restart();
-      addToast('Nodes realigning...', 'success');
+      // Restart simulation with high alpha for dramatic realignment
+      window.d3Simulation.alpha(1).alphaTarget(0).restart();
+      addToast('Nodes realigning with force-directed layout...', 'success');
       
-      // Stop after layout completes
-      setTimeout(() => {
-        if (window.d3Simulation) {
-          window.d3Simulation.stop();
-          // Re-fix nodes at their new positions
-          window.d3Nodes.forEach(node => {
-            node.fx = node.x;
-            node.fy = node.y;
-          });
-        }
-      }, 3000);
+      // If physics is disabled, fix nodes after simulation settles
+      if (!physicsEnabled) {
+        setTimeout(() => {
+          if (window.d3Simulation && window.d3Nodes) {
+            // Let it run until alpha is low, then stop
+            const checkInterval = setInterval(() => {
+              if (window.d3Simulation.alpha() < 0.05) {
+                clearInterval(checkInterval);
+                window.d3Simulation.stop();
+                window.d3Nodes.forEach(node => {
+                  node.fx = node.x;
+                  node.fy = node.y;
+                });
+                addToast('Realignment complete', 'success');
+              }
+            }, 100);
+          }
+        }, 100);
+      }
     } else {
       addToast('Simulation not ready', 'warning');
     }
-  }, [addToast]);
+  }, [addToast, physicsEnabled]);
 
   // applyForceLayout wrapper function (defined after forceLayout)
   const applyForceLayout = useCallback(() => {
