@@ -2332,6 +2332,7 @@ useEffect(() => {
       <div className="flex-1 relative">
         <D3Graph
           mindMapData={mindMapData}
+          activeFilter={activeFilter}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
           onDataChange={(change) => {
