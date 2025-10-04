@@ -101,16 +101,10 @@ const CircularTopicNode = ({ data, selected }) => {
         ) : (
           // Expanded State
           <div className="w-full h-full p-6 overflow-y-auto text-white relative">
-            {/* Close button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(false);
-              }}
-              className="absolute top-2 right-2 p-1 hover:bg-white/20 rounded-full transition-colors"
-            >
-              <X size={16} />
-            </button>
+            {/* Hint text */}
+            <div className="absolute top-2 right-2 text-xs text-blue-200">
+              Click to collapse
+            </div>
 
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
