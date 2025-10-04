@@ -22,33 +22,8 @@
       "medications": [],
       "psychotherapy_modalities": [],
       "last_updated": null,
-      "created_at": "2025-10-04T16:07:31.451730",
-      "updated_at": "2025-10-04T16:19:51.910000+00:00"
-    },
-    {
-      "id": "1759594433040",
-      "title": "Untitled Topic",
-      "description": "",
-      "category": "Uncategorized",
-      "color": "#3B82F6",
-      "position": {
-        "x": 680.0,
-        "y": 150.0
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "notes": null,
-      "tags": null,
-      "definition": null,
-      "diagnostic_criteria": [],
-      "comorbidities": [],
-      "differential_diagnoses": [],
-      "medications": [],
-      "psychotherapy_modalities": [],
-      "last_updated": null,
-      "created_at": "2025-10-04T16:13:53.064000+00:00",
-      "updated_at": "2025-10-04T16:19:51.910000+00:00"
+      "created_at": "2025-10-04T16:41:59.825035",
+      "updated_at": "2025-10-04T16:41:59.825037"
     }
   ],
   "cases": [],
