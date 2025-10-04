@@ -2742,7 +2742,6 @@ useEffect(() => {
             snapToGrid={false}
             snapGrid={[15, 15]}
             elevateEdgesOnSelect={false}
-            connectionLineComponent={ConnectionLine}
           connectionLineStyle={{
             stroke: '#3b82f6', // Use a bright blue color for better visibility during connection
             strokeWidth: 3.5, // Slightly thicker than regular edges
