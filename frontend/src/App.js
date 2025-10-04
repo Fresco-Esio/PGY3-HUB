@@ -1996,6 +1996,82 @@ useEffect(() => {
     addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} added successfully`, 'success');
   }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, setNodes, addToast]);
 
+  // Handle spreadsheet import
+  const handleSpreadsheetImport = useCallback((patientCases, importStats) => {
+    if (!patientCases || patientCases.length === 0) {
+      addToast('No patient records to import', 'error');
+      return;
+    }
+
+    // Calculate grid-based positions for imported nodes
+    const currentDataCount = (mindMapData.topics?.length || 0) + 
+                           (mindMapData.cases?.length || 0) + 
+                           (mindMapData.tasks?.length || 0) + 
+                           (mindMapData.literature?.length || 0);
+    
+    const gridSize = Math.ceil(Math.sqrt(currentDataCount + patientCases.length));
+    const nodeSpacing = 280;
+    const offsetX = 400;
+    const offsetY = 150;
+
+    // Create nodes with unique IDs and positions
+    const newCases = patientCases.map((caseData, index) => {
+      const dataId = Date.now() + index;
+      const gridIndex = currentDataCount + index;
+      
+      const position = {
+        x: (gridIndex % gridSize) * nodeSpacing + offsetX,
+        y: Math.floor(gridIndex / gridSize) * nodeSpacing + offsetY
+      };
+
+      return {
+        ...caseData,
+        id: dataId,
+        position,
+      };
+    });
+
+    // Update mind map data
+    setMindMapData(d => {
+      const updatedData = {
+        ...d,
+        cases: [...(d.cases || []), ...newCases]
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+
+    // Create React Flow nodes
+    const reactFlowNodes = newCases.map((caseData) => {
+      const id = `case-${caseData.id}`;
+      return {
+        id,
+        type: 'case',
+        position: caseData.position,
+        data: { 
+          ...caseData, 
+          onDelete: () => handleDeleteNode(id),
+          // Add visual indicator for incomplete data
+          ...(caseData._hasIncompleteData && {
+            className: 'incomplete-node-highlight'
+          })
+        }
+      };
+    });
+
+    setNodes(n => [...n, ...reactFlowNodes]);
+
+    // Show appropriate toast based on import stats
+    if (importStats.invalidRows > 0) {
+      addToast(
+        `Imported ${importStats.validRows} complete and ${importStats.invalidRows} incomplete records. Incomplete nodes are highlighted.`,
+        'info'
+      );
+    } else {
+      addToast(`Successfully imported ${importStats.validRows} patient records`, 'success');
+    }
+  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, setNodes, addToast]);
+
   const handleNodesChange = useCallback((changes) => {
     // Apply the node changes to React Flow state immediately - this is critical!
     onNodesChange(changes);
