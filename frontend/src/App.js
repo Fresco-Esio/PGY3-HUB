@@ -1567,9 +1567,9 @@ useEffect(() => {
       return updatedData;
     });
 
-    setNodes(n => n.concat(newNode));
+    // Cytoscape will automatically render the new node when mindMapData updates
     addToast(`${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} added successfully`, 'success');
-  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, setNodes, addToast]);
+  }, [mindMapData, handleDeleteNode, setMindMapData, autoSaveMindMapData, addToast]);
 
   // Handle spreadsheet import
   const handleSpreadsheetImport = useCallback((patientCases, importStats) => {
