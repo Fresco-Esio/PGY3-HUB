@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import popper from 'cytoscape-popper';
-import nodeHtmlLabel from 'cytoscape-node-html-label';
+// TEMPORARILY DISABLED: nodeHtmlLabel causing "isHeadless" error
+// import nodeHtmlLabel from 'cytoscape-node-html-label';
 
 // Register extensions
 cytoscape.use(fcose);
 cytoscape.use(popper);
-cytoscape.use(nodeHtmlLabel);
+// cytoscape.use(nodeHtmlLabel);
 
 const CytoscapeGraph = ({
   mindMapData,
