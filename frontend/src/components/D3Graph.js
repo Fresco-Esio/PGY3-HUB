@@ -373,20 +373,29 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
     // Tick handler - update positions and cache them
     simulationRef.current.on('tick', () => {
-      link
-        .attr('x1', d => d.source?.x ?? 0)
-        .attr('y1', d => d.source?.y ?? 0)
-        .attr('x2', d => d.target?.x ?? 0)
-        .attr('y2', d => d.target?.y ?? 0);
+      // Update links using the layer ref
+      if (linkElementsRef.current) {
+        linkElementsRef.current.selectAll('line.link')
+          .attr('x1', d => d.source?.x ?? 0)
+          .attr('y1', d => d.source?.y ?? 0)
+          .attr('x2', d => d.target?.x ?? 0)
+          .attr('y2', d => d.target?.y ?? 0);
+      }
 
-      node.attr('transform', d => `translate(${d.x ?? 0},${d.y ?? 0})`);
+      // Update nodes using the layer ref
+      if (nodeElementsRef.current) {
+        nodeElementsRef.current.selectAll('g.node')
+          .attr('transform', d => `translate(${d.x ?? 0},${d.y ?? 0})`);
+      }
 
       // Cache positions to prevent reset
-      nodes.forEach(n => {
-        if (Number.isFinite(n.x) && Number.isFinite(n.y)) {
-          prevPositionsRef.current.set(n.id, { x: n.x, y: n.y });
-        }
-      });
+      if (nodesRef.current) {
+        nodesRef.current.forEach(n => {
+          if (Number.isFinite(n.x) && Number.isFinite(n.y)) {
+            prevPositionsRef.current.set(n.id, { x: n.x, y: n.y });
+          }
+        });
+      }
     });
 
     // Expose for debugging
