@@ -328,20 +328,23 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
     // Create force simulation only if physics enabled
     if (physicsEnabled && nodes.length > 0) {
+      // Remove fixed positions to allow physics to work
+      nodes.forEach(n => {
+        n.fx = null;
+        n.fy = null;
+      });
+
       const simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.id).distance(200))
-        .force('charge', d3.forceManyBody().strength(-400))
+        .force('link', d3.forceLink(links).id(d => d.id).distance(200).strength(1))
+        .force('charge', d3.forceManyBody().strength(-800))
         .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(d => d.radius + 10));
+        .force('collision', d3.forceCollide().radius(d => d.radius + 20).strength(0.9))
+        .alphaDecay(0.02) // Slower decay = longer simulation
+        .velocityDecay(0.4); // Damping to prevent jitter
 
       simulationRef.current = simulation;
 
-      let tickCount = 0;
-      const maxTicks = 300;
-
       simulation.on('tick', () => {
-        tickCount++;
-
         // Update node positions
         node.attr('transform', d => `translate(${d.x},${d.y})`);
 
@@ -358,15 +361,34 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
           }
         });
 
-        // Auto-stop after initial layout
-        if (tickCount >= maxTicks) {
-          simulation.stop();
-          console.log('🔷 Simulation stopped after', maxTicks, 'ticks');
+        // Save positions periodically (every 60 ticks when alpha is low)
+        if (simulation.alpha() < 0.05 && Math.random() < 0.1) {
+          nodes.forEach(n => {
+            const [type, ...idParts] = n.id.split('-');
+            const entityId = idParts.join('-');
+            if (onDataChange && !isDraggingRef.current) {
+              onDataChange({ 
+                type: 'position', 
+                nodeType: type,
+                nodeId: entityId,
+                position: { x: n.x, y: n.y },
+                silent: true // Don't trigger re-render
+              });
+            }
+          });
         }
       });
 
       window.d3Simulation = simulation;
-      console.log('🔷 Physics simulation started');
+      window.d3Nodes = nodes;
+      console.log('🔷 Physics simulation started with continuous force-directed layout');
+    } else if (!physicsEnabled && nodes.length > 0) {
+      // Fix all nodes in place when physics is disabled
+      nodes.forEach(n => {
+        n.fx = n.x;
+        n.fy = n.y;
+      });
+      console.log('🔷 Physics disabled - nodes fixed in place');
     }
 
     isInitializedRef.current = true;
