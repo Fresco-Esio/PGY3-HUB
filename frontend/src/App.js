@@ -1001,6 +1001,9 @@ const DashboardComponent = () => {
   
   // Cytoscape will handle node/edge management internally
   const cytoscapeRef = useRef(null);
+  
+  // Helper to get current Cytoscape instance
+  const getCytoscape = useCallback(() => cytoscapeRef.current, []);
 
   // State for forcing node updates
   const [nodeUpdateTrigger, setNodeUpdateTrigger] = useState(0);
