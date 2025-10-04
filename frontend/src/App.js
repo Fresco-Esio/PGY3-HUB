@@ -1809,94 +1809,84 @@ useEffect(() => {
       // Lazy load Dagre for hierarchical layout
       const dagre = await loadDagre();
 
-      // Preserve the current edges before layout
-      const currentEdges = [...edges];
-      
-      // Create a set of valid node IDs for fast lookup
-      const nodeIdSet = new Set(nodes.map(node => node.id));
-      
-      // Filter edges to only include those with both source and target nodes present
-      const validEdges = currentEdges.filter(edge => 
-        nodeIdSet.has(edge.source) && nodeIdSet.has(edge.target)
-      );
+      // Create Dagre graph
+      const dagreGraph = new dagre.graphlib.Graph();
+      dagreGraph.setDefaultEdgeLabel(() => ({}));
+      dagreGraph.setGraph({ 
+        rankdir: 'TB', // Top to Bottom
+        nodesep: 150,
+        ranksep: 200,
+        marginy: 50,
+        marginx: 50,
+      });
 
-      // Create D3-compatible edge objects for the force simulation
-      const d3Edges = validEdges.map(edge => ({
-        source: edge.source,
-        target: edge.target,
-        id: edge.id
-      }));
-
-      // Create a copy of nodes for simulation (D3 mutates the objects)
-      const simulationNodes = nodes.map(node => ({ 
-        id: node.id,
-        x: node.position.x, 
-        y: node.position.y,
-        fx: null, // Remove any fixed positions
-        fy: null
-      }));
-
-      // Create simulation with optimized forces for mind map layout
-      const simulation = forceSimulation(simulationNodes)
-        .force('link', forceLink(d3Edges).id(d => d.id).distance(200).strength(0.5))
-        .force('charge', forceManyBody().strength(-800).distanceMax(400))
-        .force('center', forceCenter(window.innerWidth / 3, window.innerHeight / 2))
-        .force('collision', forceCollide().radius(80))
-        .stop();
-
-      // Run simulation in chunks to prevent blocking
-      const ticksPerFrame = 50;
-      const totalTicks = 400;
-      let currentTick = 0;
-
-      const runSimulationChunk = () => {
-        const remainingTicks = Math.min(ticksPerFrame, totalTicks - currentTick);
-        for (let i = 0; i < remainingTicks; i++) {
-          simulation.tick();
+      // Add nodes to Dagre graph with appropriate sizes
+      nodes.forEach(node => {
+        const nodeType = node.type;
+        let width = 120;
+        let height = 120;
+        
+        // Adjust size based on node type
+        if (nodeType === 'case') {
+          width = 130;
+          height = 130;
+        } else if (nodeType === 'topic') {
+          width = 120;
+          height = 120;
+        } else if (nodeType === 'literature') {
+          width = 115;
+          height = 115;
+        } else if (nodeType === 'task') {
+          width = 110;
+          height = 110;
         }
-        currentTick += remainingTicks;
+        
+        dagreGraph.setNode(node.id, { width, height });
+      });
 
-        if (currentTick < totalTicks) {
-          requestAnimationFrame(runSimulationChunk);
-        } else {
-          // Simulation complete, update nodes
-          const updatedNodes = simulationNodes.map(simNode => {
-            const originalNode = nodes.find(n => n.id === simNode.id);
-            return {
-              ...originalNode,
-              position: { x: simNode.x, y: simNode.y },
-            };
-          });
-          
-          // Update both nodes and edges in a single batch
-          setNodes(updatedNodes);
-          setEdges(validEdges);
+      // Add edges to Dagre graph
+      edges.forEach(edge => {
+        dagreGraph.setEdge(edge.source, edge.target);
+      });
 
-          // Update mindMapData with new positions
-          setMindMapData(currentData => {
-            const updatedData = { ...currentData };
-            
-            updatedNodes.forEach(node => {
-              const [type, id] = node.id.split('-');
-              const key = type === 'literature' ? 'literature' : `${type}s`;
-              const item = updatedData[key]?.find(i => String(i.id) === id);
-              if (item) {
-                item.position = node.position;
-              }
-            });
-            
-            return updatedData;
-          });
+      // Calculate layout
+      dagre.layout(dagreGraph);
 
-          // Smooth camera transition to fit the new layout
-          setTimeout(() => {
-            fitView({ duration: 800, padding: 0.2 });
-          }, 200);
-        }
-      };
+      // Update nodes with new positions
+      const updatedNodes = nodes.map(node => {
+        const nodeWithPosition = dagreGraph.node(node.id);
+        return {
+          ...node,
+          position: {
+            x: nodeWithPosition.x,
+            y: nodeWithPosition.y,
+          },
+        };
+      });
 
-      // Start simulation in next frame
-      requestAnimationFrame(runSimulationChunk);
+      // Update both nodes and edges
+      setNodes(updatedNodes);
+
+      // Update mindMapData with new positions
+      setMindMapData(currentData => {
+        const updatedData = { ...currentData };
+        
+        updatedNodes.forEach(node => {
+          const [type, id] = node.id.split('-');
+          const key = type === 'literature' ? 'literature' : `${type}s`;
+          const item = updatedData[key]?.find(i => String(i.id) === id);
+          if (item) {
+            item.position = node.position;
+          }
+        });
+        
+        return updatedData;
+      });
+
+      // Smooth camera transition to fit the new layout
+      setTimeout(() => {
+        fitView({ duration: 800, padding: 0.2 });
+      }, 200);
     } catch (error) {
       console.error('Force layout failed:', error);
       addToast('Layout calculation failed', 'error');
