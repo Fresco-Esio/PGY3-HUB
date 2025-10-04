@@ -1350,63 +1350,21 @@ useEffect(() => {
       item.position && typeof item.position.x === 'number' && typeof item.position.y === 'number'
     );
     
+    // Use simple grid layout for nodes without positions
     if (allItems.length > 0 && applyLayoutImmediately && !hasExistingPositions) {
-      try {
-        // Lazy load D3 force simulation for initial positioning
-        const { 
-          forceSimulation, 
-          forceManyBody, 
-          forceLink, 
-          forceCenter, 
-          forceCollide 
-        } = await loadD3Force();
-
-        // Create nodes for simulation
-        const simulationNodes = allItems.map((item, index) => ({
-          id: `${item.type}-${item.id}`,
-          x: item.position?.x || (Math.random() - 0.5) * 200,
-          y: item.position?.y || (Math.random() - 0.5) * 200,
-          type: item.type
-        }));
-
-        // Create D3-compatible edge objects
-        const d3Edges = (data.connections || []).map(edge => ({
-          source: edge.source,
-          target: edge.target,
-          id: edge.id
-        })).filter(edge => {
-          const nodeIds = new Set(simulationNodes.map(n => n.id));
-          return nodeIds.has(edge.source) && nodeIds.has(edge.target);
-        });
-
-        // Run simulation synchronously for initial layout
-        const simulation = forceSimulation(simulationNodes)
-          .force('link', forceLink(d3Edges).id(d => d.id).distance(200).strength(0.5))
-          .force('charge', forceManyBody().strength(-800).distanceMax(400))
-          .force('center', forceCenter(window.innerWidth / 3, window.innerHeight / 2))
-          .force('collision', forceCollide().radius(80))
-          .stop();
-
-        // Run enough ticks to get a good layout
-        for (let i = 0; i < 300; i++) {
-          simulation.tick();
-        }
-
-        // Create a map of positioned nodes
-        const positionMap = new Map();
-        simulationNodes.forEach(node => {
-          positionMap.set(node.id, { x: node.x, y: node.y });
-        });
-
-        layoutNodes = allItems.map(item => {
-          const nodeId = `${item.type}-${item.id}`;
-          const position = positionMap.get(nodeId) || { x: 0, y: 0 };
-          return { ...item, position };
-        });
-      } catch (error) {
-        console.warn('Failed to apply initial layout, using fallback positioning:', error);
-        layoutNodes = allItems;
-      }
+      layoutNodes = allItems.map((item, index) => {
+        const gridSize = Math.ceil(Math.sqrt(allItems.length));
+        const nodeSpacing = 250;
+        const offsetX = 300; // Offset from left sidebar
+        const offsetY = 150; // Offset from top
+        
+        const position = {
+          x: (index % gridSize) * nodeSpacing + offsetX,
+          y: Math.floor(index / gridSize) * nodeSpacing + offsetY
+        };
+        
+        return { ...item, position };
+      });
     } else {
       layoutNodes = allItems;
     }
