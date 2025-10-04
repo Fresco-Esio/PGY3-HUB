@@ -582,7 +582,7 @@ const D3Graph = ({
         postDragWarmRef.current = null;
       }
     };
-  }, [structuralKey, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format, connectionMode, handleConnectionClick]);
+  }, [structuralKey, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format, connectionMode, handleConnectionClick, connectionStart, tempConnection]);
 
   // Physics toggle effect
   useEffect(() => {
