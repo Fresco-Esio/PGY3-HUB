@@ -1914,19 +1914,9 @@ useEffect(() => {
     // Layout handled by Cytoscape internally
   }, []);
 
-  // Simplified search and category filtering - no style interference
-  useEffect(() => {
-    if (nodes.length === 0) return;
-    
-    // Skip during animations to prevent interference
-    const anyModalAnimating = Object.values(modalAnimationStates).some(state => state);
-    if (isAnimating || anyModalAnimating) return;
-    
-  }, [focusedCategory, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
-
-  // Physics simulation removed - using static layout only
+  // Search/filter functionality to be reimplemented with Cytoscape
+  // TODO: Add Cytoscape-based search and filtering
   
-  // CSS-based search filtering - no direct style manipulation
   useEffect(() => {
     
     // Apply CSS classes instead of direct style manipulation
