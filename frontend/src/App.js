@@ -1453,45 +1453,15 @@ useEffect(() => {
     }
   }, [getCytoscape, setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Lazy-loaded Dagre layout for realignment using Cytoscape
-  const forceLayout = useCallback(async () => {
-    const cy = getCytoscape();
-    if (!cy || cy.nodes().length === 0) return;
-
-    try {
-      // Use Cytoscape's built-in fcose layout instead of Dagre
-      const layout = cy.layout({
-        name: 'fcose',
-        quality: 'default',
-        randomize: false,
-        animate: true,
-        animationDuration: 1000,
-        animationEasing: 'ease-out',
-        fit: true,
-        padding: 50,
-        nodeSeparation: 150,
-        idealEdgeLength: 200,
-        edgeElasticity: 0.45,
-        nestingFactor: 0.1,
-        gravity: 0.25,
-        numIter: 2500,
-        tile: true,
-        tilingPaddingVertical: 10,
-        tilingPaddingHorizontal: 10,
-        gravityRange: 3.8,
-        gravityCompound: 1.0,
-        gravityRangeCompound: 1.5,
-        initialEnergyOnIncremental: 0.5,
-      });
-      
-      layout.run();
-      
-      addToast('Nodes realigned successfully', 'success');
-    } catch (error) {
-      console.error('Force layout failed:', error);
-      addToast('Layout calculation failed', 'error');
+  // Restart D3 force simulation for realignment
+  const forceLayout = useCallback(() => {
+    if (window.d3Simulation) {
+      window.d3Simulation.alpha(1).restart();
+      addToast('Nodes realigning...', 'success');
+    } else {
+      addToast('Simulation not ready', 'warning');
     }
-  }, [getCytoscape, addToast]);
+  }, [addToast]);
 
   // applyForceLayout wrapper function (defined after forceLayout)
   const applyForceLayout = useCallback(() => {
