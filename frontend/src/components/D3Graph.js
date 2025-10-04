@@ -140,29 +140,17 @@ const D3Graph = ({
     const svg = d3.select(svgRef.current);
     
     const handleMouseMove = (event) => {
-      const [x, y] = d3.pointer(event);
-      const transform = gRef.current ? gRef.current.node().getAttribute('transform') : null;
+      if (!gRef.current) return;
       
-      // Parse transform to get current scale and translation
-      let tx = 0, ty = 0, scale = 1;
-      if (transform) {
-        const match = transform.match(/translate\(([^,]+),([^)]+)\)\s*scale\(([^)]+)\)/);
-        if (match) {
-          tx = parseFloat(match[1]);
-          ty = parseFloat(match[2]);
-          scale = parseFloat(match[3]);
-        } else {
-          const translateMatch = transform.match(/translate\(([^,]+),([^)]+)\)/);
-          if (translateMatch) {
-            tx = parseFloat(translateMatch[1]);
-            ty = parseFloat(translateMatch[2]);
-          }
-        }
-      }
+      // Get the current zoom transform
+      const transform = d3.zoomTransform(svgRef.current);
       
-      // Convert mouse coordinates to graph coordinates
-      const graphX = (x - tx) / scale;
-      const graphY = (y - ty) / scale;
+      // Get mouse position relative to SVG
+      const [x, y] = d3.pointer(event, svgRef.current);
+      
+      // Apply inverse transform to get graph coordinates
+      const graphX = (x - transform.x) / transform.k;
+      const graphY = (y - transform.y) / transform.k;
       
       setTempConnection({ x: graphX, y: graphY });
     };
