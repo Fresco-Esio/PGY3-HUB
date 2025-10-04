@@ -1620,28 +1620,12 @@ useEffect(() => {
     });
   }, [setEdges, setMindMapData, autoSaveMindMapData]);
 
-  const onNodeClick = useCallback((event, node) => {
-    setSelectedNode(node);
-    // Visual feedback - highlight selected node
-    setNodes(currentNodes => currentNodes.map(n => ({
-      ...n,
-      selected: n.id === node.id
-    })));
-    
-    // Toggle node expansion
-    setNodes(currentNodes => currentNodes.map(n => {
-      if (n.id === node.id) {
-        return {
-          ...n,
-          data: {
-            ...n.data,
-            isExpanded: !n.data.isExpanded
-          }
-        };
-      }
-      return n;
-    }));
-  }, [setNodes]);
+  const onNodeClick = useCallback((cytoscapeNode) => {
+    // Cytoscape node object
+    const nodeId = cytoscapeNode.id();
+    const nodeData = cytoscapeNode.data('originalData');
+    setSelectedNode({ id: nodeId, data: nodeData });
+  }, []);
 
   const onNodeDoubleClick = useCallback((event, node) => {
     // Handle multi-part IDs correctly by joining all parts after the type
