@@ -176,7 +176,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "CORS Configuration"
+    - "D3.js Graph Visualization"
+    - "D3 Simulation Stability"
   stuck_tasks:
     - "CORS Configuration"
   test_all: false
