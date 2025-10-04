@@ -104,10 +104,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Spreadsheet Import Endpoint"
     - "CORS Configuration"
   stuck_tasks:
-    - "Spreadsheet Import Endpoint"
+    - "CORS Configuration"
   test_all: false
   test_priority: "high_first"
 
