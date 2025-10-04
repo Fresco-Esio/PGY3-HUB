@@ -240,34 +240,8 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
     // Expose simulation to window for debugging
     window.d3Simulation = simulation;
     window.d3Nodes = nodes;
-    console.log('🔷 D3 Simulation started');
-    
-    // Center the initial view on the nodes after a brief delay
-    setTimeout(() => {
-      if (nodes.length > 0) {
-        const bounds = {
-          minX: Math.min(...nodes.map(n => n.x)),
-          maxX: Math.max(...nodes.map(n => n.x)),
-          minY: Math.min(...nodes.map(n => n.y)),
-          maxY: Math.max(...nodes.map(n => n.y)),
-        };
-        
-        const centerX = (bounds.minX + bounds.maxX) / 2;
-        const centerY = (bounds.minY + bounds.maxY) / 2;
-        
-        // Calculate zoom to fit all nodes
-        const graphWidth = bounds.maxX - bounds.minX + 200;
-        const graphHeight = bounds.maxY - bounds.minY + 200;
-        const scale = Math.min(width / graphWidth, height / graphHeight, 1);
-        
-        const transform = d3.zoomIdentity
-          .translate(width / 2 - centerX * scale, height / 2 - centerY * scale)
-          .scale(scale);
-        
-        svg.transition().duration(750).call(zoom.transform, transform);
-        console.log('🔷 View centered on nodes');
-      }
-    }, 500);
+    window.d3Links = links;
+    console.log('🔷 D3 Simulation started', { nodes: nodes.length, links: links.length });
 
     // Cleanup
     return () => {
