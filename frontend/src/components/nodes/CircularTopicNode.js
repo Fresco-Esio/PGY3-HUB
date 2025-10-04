@@ -4,12 +4,7 @@ import { Brain, X, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CircularTopicNode = ({ data, selected }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleToggleExpand = useCallback((e) => {
-    e.stopPropagation();
-    setIsExpanded(prev => !prev);
-  }, []);
+  const isExpanded = data.isExpanded || false;
 
   const baseSize = 120; // Base diameter for collapsed state
   const expandedSize = 300; // Expanded diameter
@@ -22,7 +17,6 @@ const CircularTopicNode = ({ data, selected }) => {
         height: isExpanded ? expandedSize : baseSize,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      onClick={handleToggleExpand}
     >
       {/* Connection Handles - positioned at edges of circle */}
       <Handle
