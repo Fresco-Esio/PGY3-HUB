@@ -2294,7 +2294,6 @@ useEffect(() => {
   
   // CSS-based search filtering - no direct style manipulation
   useEffect(() => {
-    if (!isReactFlowReady) return;
     
     // Apply CSS classes instead of direct style manipulation
     const styleSheet = document.getElementById('search-filter-styles') || document.createElement('style');
