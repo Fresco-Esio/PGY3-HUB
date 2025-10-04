@@ -1,14 +1,14 @@
-// Central export for all node components
-export { default as TopicNode } from './TopicNode';
-export { default as CaseNode } from './CaseNode';
-export { default as TaskNode } from './TaskNode';
-export { default as LiteratureNode } from './LiteratureNode';
+// Central export for all node components - Using Circular Design
+export { default as TopicNode } from './CircularTopicNode';
+export { default as CaseNode } from './CircularCaseNode';
+export { default as TaskNode } from './CircularTaskNode';
+export { default as LiteratureNode } from './CircularLiteratureNode';
 
 // Node types configuration
-import TopicNode from './TopicNode';
-import CaseNode from './CaseNode';
-import TaskNode from './TaskNode';
-import LiteratureNode from './LiteratureNode';
+import TopicNode from './CircularTopicNode';
+import CaseNode from './CircularCaseNode';
+import TaskNode from './CircularTaskNode';
+import LiteratureNode from './CircularLiteratureNode';
 
 export const nodeTypes = {
   topic: TopicNode,
