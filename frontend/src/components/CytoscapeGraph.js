@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import popper from 'cytoscape-popper';
+import nodeHtmlLabel from 'cytoscape-node-html-label';
 
 // Register extensions
 cytoscape.use(fcose);
