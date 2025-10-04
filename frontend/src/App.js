@@ -1504,11 +1504,7 @@ useEffect(() => {
     const empty = { topics: [], cases: [], tasks: [], literature: [], connections: [] };
     setMindMapData(empty);
     
-    // Clear Cytoscape graph
-    const cy = getCytoscape();
-    if (cy) {
-      cy.elements().remove();
-    }
+    // D3 will automatically clear when mindMapData updates
     
     setSelectedNode(null);
     // Clear all modal states
