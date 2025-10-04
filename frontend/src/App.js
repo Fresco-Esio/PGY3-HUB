@@ -2212,12 +2212,29 @@ useEffect(() => {
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
           onDataChange={(change) => {
-            if (change.type === 'positions') {
-              // Update positions in mindMapData
+            if (change.type === 'position') {
+              // Single node position update (during drag)
+              // Use requestAnimationFrame to batch updates and prevent camera reset
+              requestAnimationFrame(() => {
+                setMindMapData(currentData => {
+                  const updatedData = { ...currentData };
+                  const key = change.nodeType === 'literature' ? 'literature' : `${change.nodeType}s`;
+                  const item = updatedData[key]?.find(i => String(i.id) === change.nodeId);
+                  if (item) {
+                    item.position = change.position;
+                  }
+                  // Save to localStorage immediately but defer backend save
+                  localStorageUtils.save(updatedData);
+                  return updatedData;
+                });
+              });
+            } else if (change.type === 'positions') {
+              // Batch position update
               setMindMapData(currentData => {
                 const updatedData = { ...currentData };
                 Object.entries(change.positions).forEach(([nodeId, position]) => {
-                  const [type, id] = nodeId.split('-');
+                  const [type, ...idParts] = nodeId.split('-');
+                  const id = idParts.join('-');
                   const key = type === 'literature' ? 'literature' : `${type}s`;
                   const item = updatedData[key]?.find(i => String(i.id) === id);
                   if (item) {
