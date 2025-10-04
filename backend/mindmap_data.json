@@ -1,31 +1,5 @@
 {
-  "topics": [
-    {
-      "id": "invalid-topic",
-      "title": "",
-      "description": null,
-      "category": "",
-      "color": "invalid-color",
-      "position": {
-        "x": 0,
-        "y": 0
-      },
-      "flashcard_count": 0,
-      "completed_flashcards": 0,
-      "resources": [],
-      "notes": null,
-      "tags": null,
-      "definition": null,
-      "diagnostic_criteria": [],
-      "comorbidities": [],
-      "differential_diagnoses": [],
-      "medications": [],
-      "psychotherapy_modalities": [],
-      "last_updated": null,
-      "created_at": "2025-10-04T16:43:24.810678",
-      "updated_at": "2025-10-04T16:43:24.810679"
-    }
-  ],
+  "topics": [],
   "cases": [],
   "tasks": [],
   "literature": [],
