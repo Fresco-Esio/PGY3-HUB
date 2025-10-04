@@ -2908,11 +2908,7 @@ class ReactFlowErrorBoundary extends React.Component {
   }
 }
 
-const Dashboard = () => (
-  <ReactFlowProvider>
-    <DashboardComponent />
-  </ReactFlowProvider>
-);
+const Dashboard = () => <DashboardComponent />;
 
 // Main App Component with Routing
 function App() {
