@@ -2315,6 +2315,7 @@ useEffect(() => {
       {/* --- Main Mind Map Workspace --- */}
       <div className="flex-1 relative">
         <CytoscapeGraph
+          cytoscapeRef={cytoscapeRef}
           mindMapData={mindMapData}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
