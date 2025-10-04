@@ -2918,6 +2918,13 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
+      <ImportSpreadsheetModal
+        isOpen={importModal}
+        onClose={() => setImportModal(false)}
+        onImport={handleSpreadsheetImport}
+        addToast={addToast}
+      />
+
       <EdgeLabelModal 
         isOpen={edgeModal.isOpen} 
         edge={edgeModal.edge} 
