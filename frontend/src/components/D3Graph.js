@@ -194,20 +194,38 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
 
     // Drag functions
     function dragstarted(event, d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
+      // Don't restart simulation on drag - causes instability
       d.fx = d.x;
       d.fy = d.y;
+      // Highlight dragged node
+      d3.select(this).select('circle').attr('stroke-width', 6);
     }
 
     function dragged(event, d) {
+      // Fix position during drag
       d.fx = event.x;
       d.fy = event.y;
+      d.x = event.x;
+      d.y = event.y;
+      
+      // Update visual position immediately
+      d3.select(this).attr('transform', `translate(${d.x},${d.y})`);
+      
+      // Update connected links
+      link.filter(l => l.source.id === d.id || l.target.id === d.id)
+        .attr('x1', l => l.source.x)
+        .attr('y1', l => l.source.y)
+        .attr('x2', l => l.target.x)
+        .attr('y2', l => l.target.y);
     }
 
     function dragended(event, d) {
-      if (!event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
+      // Keep node fixed at dropped position
+      d.fx = d.x;
+      d.fy = d.y;
+      
+      // Remove highlight
+      d3.select(this).select('circle').attr('stroke-width', 4);
       
       // Save position to backend
       if (onDataChange) {
