@@ -447,7 +447,7 @@ const CytoscapeGraph = ({
 
   // Update elements when data changes - ONLY update structure, not positions
   useEffect(() => {
-    if (!cyRef.current || !mindMapData) return;
+    if (!cyRef.current || !mindMapData || isUpdatingRef.current) return;
 
     const cy = cyRef.current;
     const newElements = convertToElements(mindMapData);
