@@ -4,12 +4,7 @@ import { CheckSquare, X, Clock, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 const CircularTaskNode = ({ data, selected }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleToggleExpand = useCallback((e) => {
-    e.stopPropagation();
-    setIsExpanded(prev => !prev);
-  }, []);
+  const isExpanded = data.isExpanded || false;
 
   const baseSize = 110; // Smaller for task nodes
   const expandedSize = 280;
@@ -22,7 +17,6 @@ const CircularTaskNode = ({ data, selected }) => {
         height: isExpanded ? expandedSize : baseSize,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      onClick={handleToggleExpand}
     >
       {/* Connection Handles */}
       <Handle
