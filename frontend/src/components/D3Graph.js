@@ -269,11 +269,42 @@ const D3Graph = ({
       }, 800);
     }
 
+    // Ensure layer groups exist
     if (!linkElementsRef.current) {
       linkElementsRef.current = g.append('g').attr('class', 'links-layer');
     }
     if (!nodeElementsRef.current) {
       nodeElementsRef.current = g.append('g').attr('class', 'nodes-layer');
+    }
+    
+    // Temp connection layer (for connection mode guideline)
+    let tempConnectionLayer = g.select('.temp-connection-layer');
+    if (tempConnectionLayer.empty()) {
+      tempConnectionLayer = g.append('g').attr('class', 'temp-connection-layer');
+    }
+    
+    // Update temp connection line
+    if (connectionStart && tempConnection) {
+      const tempLine = tempConnectionLayer.selectAll('line.temp-connection')
+        .data([{ start: connectionStart, end: tempConnection }]);
+      
+      tempLine.enter()
+        .append('line')
+        .attr('class', 'temp-connection')
+        .merge(tempLine)
+        .attr('x1', d => d.start.x)
+        .attr('y1', d => d.start.y)
+        .attr('x2', d => d.end.x)
+        .attr('y2', d => d.end.y)
+        .attr('stroke', '#10b981')
+        .attr('stroke-width', 3)
+        .attr('stroke-dasharray', '5,5')
+        .attr('stroke-opacity', 0.8)
+        .style('pointer-events', 'none');
+      
+      tempLine.exit().remove();
+    } else {
+      tempConnectionLayer.selectAll('line.temp-connection').remove();
     }
 
     // Data join for links with hover effects
