@@ -230,56 +230,83 @@ const D3Graph = ({ mindMapData, onNodeClick, onNodeDoubleClick, onDataChange, ph
       console.log('🔷 Simulation started for initial layout');
     }
 
+    // Track drag state to distinguish clicks from drags
+    let isDragging = false;
+    const dragThreshold = 5; // pixels - minimum movement to consider as drag
+    
     // Drag functions
     function dragstarted(event, d) {
-      // Change cursor to grabbing
-      d3.select(this).style('cursor', 'grabbing');
+      // Reset drag state
+      isDragging = false;
+      d._dragStartX = event.x;
+      d._dragStartY = event.y;
+      
       // Don't restart simulation on drag - causes instability
       d.fx = d.x;
       d.fy = d.y;
-      // Highlight dragged node
-      d3.select(this).select('circle').attr('stroke-width', 6);
-      console.log('🔷 Drag started on node:', d.id);
     }
 
     function dragged(event, d) {
-      // Fix position during drag
-      d.fx = event.x;
-      d.fy = event.y;
-      d.x = event.x;
-      d.y = event.y;
+      // Check if movement exceeds threshold
+      const dx = event.x - d._dragStartX;
+      const dy = event.y - d._dragStartY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
       
-      // Update visual position immediately
-      d3.select(this).attr('transform', `translate(${d.x},${d.y})`);
+      if (!isDragging && distance > dragThreshold) {
+        isDragging = true;
+        // Now show visual feedback
+        d3.select(this).style('cursor', 'grabbing');
+        d3.select(this).select('circle').attr('stroke-width', 6);
+        console.log('🔷 Drag started on node:', d.id);
+      }
       
-      // Update connected links
-      link.filter(l => l.source.id === d.id || l.target.id === d.id)
-        .attr('x1', l => l.source.x)
-        .attr('y1', l => l.source.y)
-        .attr('x2', l => l.target.x)
-        .attr('y2', l => l.target.y);
+      if (isDragging) {
+        // Fix position during drag
+        d.fx = event.x;
+        d.fy = event.y;
+        d.x = event.x;
+        d.y = event.y;
+        
+        // Update visual position immediately
+        d3.select(this).attr('transform', `translate(${d.x},${d.y})`);
+        
+        // Update connected links
+        link.filter(l => l.source.id === d.id || l.target.id === d.id)
+          .attr('x1', l => l.source.x)
+          .attr('y1', l => l.source.y)
+          .attr('x2', l => l.target.x)
+          .attr('y2', l => l.target.y);
+      }
     }
 
     function dragended(event, d) {
       // Restore cursor
       d3.select(this).style('cursor', 'grab');
-      // Keep node fixed at dropped position
-      d.fx = d.x;
-      d.fy = d.y;
       
-      // Remove highlight
-      d3.select(this).select('circle').attr('stroke-width', 4);
-      
-      console.log('🔷 Drag ended on node:', d.id, 'at position:', { x: d.x, y: d.y });
-      
-      // Save position to backend
-      if (onDataChange) {
-        const positions = {};
-        nodes.forEach(node => {
-          positions[node.id] = { x: node.x, y: node.y };
-        });
-        onDataChange({ type: 'positions', positions });
+      if (isDragging) {
+        // Keep node fixed at dropped position
+        d.fx = d.x;
+        d.fy = d.y;
+        
+        // Remove highlight
+        d3.select(this).select('circle').attr('stroke-width', 4);
+        
+        console.log('🔷 Drag ended on node:', d.id, 'at position:', { x: d.x, y: d.y });
+        
+        // Save position to backend
+        if (onDataChange) {
+          const positions = {};
+          nodes.forEach(node => {
+            positions[node.id] = { x: node.x, y: node.y };
+          });
+          onDataChange({ type: 'positions', positions });
+        }
       }
+      
+      // Clean up drag start position
+      delete d._dragStartX;
+      delete d._dragStartY;
+      isDragging = false;
     }
 
     // Expose simulation to window for debugging
