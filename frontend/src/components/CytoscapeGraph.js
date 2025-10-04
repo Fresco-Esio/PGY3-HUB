@@ -545,7 +545,9 @@ const CytoscapeGraph = ({
       console.error('🔍 Error updating elements:', error);
     }
 
-    // Re-apply HTML labels after adding elements
+    // HTML labels disabled temporarily due to isHeadless error
+    // Will use standard Cytoscape labels instead
+    /*
     if (cy.nodeHtmlLabel) {
       cy.nodeHtmlLabel([
         {
