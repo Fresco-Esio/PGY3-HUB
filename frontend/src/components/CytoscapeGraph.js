@@ -581,7 +581,12 @@ const CytoscapeGraph = ({
     <div
       ref={containerRef}
       className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100"
-      style={{ width: '100%', height: '100%' }}
+      style={{ 
+        width: '100%', 
+        height: '100%',
+        minHeight: '600px',
+        position: 'relative'
+      }}
     />
   );
 };
