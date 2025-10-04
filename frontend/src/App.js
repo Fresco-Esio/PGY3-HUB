@@ -1841,6 +1841,42 @@ useEffect(() => {
     }
   }, []);
 
+  // Connection management handlers
+  const handleCreateConnection = useCallback((sourceId, targetId, type = 'related') => {
+    const newConnection = {
+      id: `conn-${Date.now()}`,
+      source: sourceId,
+      target: targetId,
+      type: type
+    };
+    
+    setMindMapData(prevData => {
+      const updatedData = {
+        ...prevData,
+        connections: [...prevData.connections, newConnection]
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+    
+    addToast('Connection created successfully', 'success');
+  }, [autoSaveMindMapData, addToast]);
+
+  const handleDeleteConnection = useCallback((connectionId) => {
+    setMindMapData(prevData => {
+      const updatedData = {
+        ...prevData,
+        connections: prevData.connections.filter(conn => 
+          (conn.id || `${conn.source}-${conn.target}`) !== connectionId
+        )
+      };
+      autoSaveMindMapData(updatedData);
+      return updatedData;
+    });
+    
+    addToast('Connection deleted', 'info');
+  }, [autoSaveMindMapData, addToast]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -1865,6 +1901,10 @@ useEffect(() => {
             event.preventDefault();
             // Focus the search box
             document.querySelector('input[type="text"][placeholder*="Search"]')?.focus();
+            break;
+          case 'l':
+            event.preventDefault();
+            setConnectionManagerOpen(true);
             break;
           default:
             break;
