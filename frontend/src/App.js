@@ -1870,45 +1870,7 @@ useEffect(() => {
   // Search/filter functionality to be reimplemented with Cytoscape
   // TODO: Add Cytoscape-based search and filtering
   
-  useEffect(() => {
-    
-    // Apply CSS classes instead of direct style manipulation
-    const styleSheet = document.getElementById('search-filter-styles') || document.createElement('style');
-    styleSheet.id = 'search-filter-styles';
-    
-    if (!document.getElementById('search-filter-styles')) {
-      document.head.appendChild(styleSheet);
-    }
-    
-    // Generate CSS for search filtering
-    let css = `
-      /* Default node styling */
-      .react-flow__node {
-        transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease !important;
-      }
-      
-      /* Search dimmed nodes */
-      .react-flow__node.search-dimmed {
-        opacity: 0.15 !important;
-        filter: grayscale(0.7) !important;
-        transform: scale(0.9) !important;
-      }
-      
-      /* Selected node highlighting */
-      .react-flow__node.search-selected {
-        box-shadow: 0 0 0 2px #10b981, 0 0 20px rgba(16, 185, 129, 0.6) !important;
-        z-index: 1000 !important;
-      }
-      
-      /* Ensure dragging still works */
-      .react-flow__node.search-dimmed {
-        pointer-events: auto !important;
-      }
-    `;
-    
-    styleSheet.textContent = css;
-    
-  }, [isReactFlowReady]);
+  // Note: Search/filter styling now handled by Cytoscape.js directly
 
   // Optionally: handle layout setup on first render if needed
 
