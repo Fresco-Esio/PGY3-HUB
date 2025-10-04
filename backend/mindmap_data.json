@@ -23,7 +23,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T16:49:05.263000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759596660735",
@@ -48,7 +48,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597082282",
@@ -57,8 +57,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 432.37328843733064,
-        "y": 202.19248245539188
+        "x": -122.7231323946225,
+        "y": 564.3534804668474
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -73,7 +73,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T16:58:04.386000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597334107",
@@ -82,8 +82,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 313.5349624394646,
-        "y": 527.8760578582295
+        "x": 1187.3912806806427,
+        "y": -225.31464597677115
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -98,7 +98,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T17:02:16.199000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599021253",
@@ -123,7 +123,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T17:30:21.283000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599506832",
@@ -132,8 +132,8 @@
       "category": "Uncategorized",
       "color": "#3B82F6",
       "position": {
-        "x": 1520.0,
-        "y": 990.0
+        "x": 373.2153068238372,
+        "y": 440.53174987459096
       },
       "flashcard_count": 0,
       "completed_flashcards": 0,
@@ -148,7 +148,7 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T17:38:26.911000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599990551",
@@ -173,7 +173,32 @@
       "psychotherapy_modalities": [],
       "last_updated": null,
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "201",
+      "title": "Diagnostic Criteria",
+      "description": "",
+      "category": "Assessment",
+      "color": "#3B82F6",
+      "position": {
+        "x": -621.7306407201011,
+        "y": 663.612129479366
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": null,
+      "diagnostic_criteria": [],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     }
   ],
   "cases": [
@@ -206,7 +231,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T16:49:05.263000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759596662301",
@@ -232,12 +257,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 426.1119569076525,
-        "y": 355.5379847641665
+        "x": 152.9897199636522,
+        "y": 102.69885735313457
       },
       "timeline": [],
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597084361",
@@ -263,12 +288,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 323.9035339355469,
-        "y": 739.8661499023438
+        "x": 177.50383427035808,
+        "y": 177.8529388467905
       },
       "timeline": [],
       "created_at": "2025-10-04T16:58:04.386000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597336174",
@@ -294,12 +319,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 738.5451965332031,
-        "y": 225.90333557128906
+        "x": 183.3816494530497,
+        "y": 221.25083518120238
       },
       "timeline": [],
       "created_at": "2025-10-04T17:02:16.199000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597398089",
@@ -325,12 +350,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 1110.0,
-        "y": 810.0
+        "x": 539.3311935237214,
+        "y": 569.0094819503249
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597398115",
@@ -361,7 +386,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597399687",
@@ -387,12 +412,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 400.0,
-        "y": 990.0
+        "x": 408.7718022411712,
+        "y": -39.969698989290066
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597399713",
@@ -418,12 +443,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 680.0,
-        "y": 990.0
+        "x": 496.4474313484815,
+        "y": 315.29452024178704
       },
       "timeline": [],
       "created_at": "2025-10-04T17:03:19.752000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597768399",
@@ -454,7 +479,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597768428",
@@ -485,7 +510,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597769470",
@@ -511,12 +536,12 @@
       "status": "active",
       "linked_topics": [],
       "position": {
-        "x": 680.0,
-        "y": 990.0
+        "x": 293.10073947393073,
+        "y": 453.45452511700785
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759597769498",
@@ -547,7 +572,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:09:29.529000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599992743",
@@ -578,7 +603,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599993204",
@@ -609,7 +634,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599993376",
@@ -640,7 +665,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599993542",
@@ -671,7 +696,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599993712",
@@ -702,7 +727,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599993881",
@@ -733,7 +758,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759599994053",
@@ -764,7 +789,7 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T17:46:34.072000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759603584544",
@@ -795,7 +820,165 @@
       },
       "timeline": [],
       "created_at": "2025-10-04T18:46:24.569000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "101",
+      "case_id": "CASE-1759612630795-20",
+      "encounter_date": "2025-10-04T21:17:10.795000+00:00",
+      "primary_diagnosis": "Major Depressive Disorder",
+      "secondary_diagnoses": [
+        "Anxiety",
+        "Insomnia"
+      ],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Persistent sadness and loss of interest",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 100.0,
+        "y": 100.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "102",
+      "case_id": "CASE-1759612630795-21",
+      "encounter_date": "2025-10-04T21:17:10.795000+00:00",
+      "primary_diagnosis": "Bipolar I Disorder",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Mood swings and impulsivity",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 200.0,
+        "y": 200.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "103",
+      "case_id": "CASE-1759612630795-22",
+      "encounter_date": "2025-10-04T21:17:10.795000+00:00",
+      "primary_diagnosis": "Generalized Anxiety Disorder",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Excessive worry and restlessness",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": -82.59905956412103,
+        "y": 534.5275648001915
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "104",
+      "case_id": "CASE-1759612630795-23",
+      "encounter_date": "2025-10-04T21:17:10.795000+00:00",
+      "primary_diagnosis": "Schizophrenia",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "Auditory hallucinations and delusions",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": -94.81742009145856,
+        "y": 614.9807102402169
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "1759612624136",
+      "case_id": "CASE-1759612630795-24",
+      "encounter_date": "2025-10-04T21:17:10.795000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": -189.23839119440618,
+        "y": 474.73819746258573
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     }
   ],
   "tasks": [
@@ -814,7 +997,24 @@
         "y": 784.0
       },
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "1759612630772",
+      "title": "Untitled Task",
+      "description": null,
+      "status": "pending",
+      "priority": "medium",
+      "due_date": null,
+      "linked_case_id": null,
+      "linked_topic_id": null,
+      "notes": null,
+      "position": {
+        "x": 400.0,
+        "y": 1830.0
+      },
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     }
   ],
   "literature": [
@@ -830,11 +1030,11 @@
       "pdf_path": null,
       "linked_topics": [],
       "position": {
-        "x": -57.68803787231445,
-        "y": 401.01617431640625
+        "x": 42.450280666678964,
+        "y": 309.6088747714651
       },
       "created_at": "2025-10-04T16:51:05.460000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759603832546",
@@ -852,7 +1052,7 @@
         "y": 1270.0
       },
       "created_at": "2025-10-04T18:50:32.575000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     },
     {
       "id": "1759603944205",
@@ -870,7 +1070,97 @@
         "y": 1550.0
       },
       "created_at": "2025-10-04T18:52:24.241000+00:00",
-      "updated_at": "2025-10-04T19:12:48.072000+00:00"
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "1",
+      "title": "Efficacy of Cognitive Behavioral Therapy for Depression: A Meta-Analysis",
+      "authors": "Smith, J.A., Johnson, B.K., Williams, C.D.",
+      "publication": null,
+      "year": 2023,
+      "doi": "10.1002/jclp.23456",
+      "abstract": "This meta-analysis examines the efficacy of cognitive behavioral therapy (CBT) for treating major depressive disorder across 45 randomized controlled trials involving 3,242 participants. Results indicate that CBT shows significant effectiveness with a large effect size (d = 0.85) compared to control conditions. The analysis also reveals that individual CBT may be more effective than group CBT for severe depression cases.",
+      "notes": null,
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": -223.11812932537583,
+        "y": -205.3668050419216
+      },
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "2",
+      "title": "DSM-5-TR Clinical Cases",
+      "authors": "American Psychiatric Association",
+      "publication": null,
+      "year": 2022,
+      "doi": null,
+      "abstract": "A comprehensive collection of clinical cases that illustrate the diagnostic criteria and clinical features of mental disorders as defined in the DSM-5-TR. Each case includes detailed patient presentations, differential diagnoses, and treatment considerations.",
+      "notes": "Essential reference for diagnostic clarity",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1985.5133944218283,
+        "y": -604.5600296467619
+      },
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "3",
+      "title": "Pharmacological Treatment of Bipolar Disorder: Current Evidence",
+      "authors": "Rodriguez, M.L., Chen, K.H., Anderson, P.R.",
+      "publication": null,
+      "year": 2023,
+      "doi": "10.1111/bdi.13289",
+      "abstract": "This comprehensive review examines current evidence for pharmacological treatments of bipolar disorder, including mood stabilizers, antipsychotics, and adjunctive therapies. The review covers efficacy, safety profiles, and treatment-resistant cases.",
+      "notes": "Important for medication management decisions",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 700.0,
+        "y": 150.0
+      },
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "4",
+      "title": "Mindfulness-Based Interventions for Anxiety Disorders: A Systematic Review",
+      "authors": "Taylor, S.M., Brown, A.J., Davis, L.K.",
+      "publication": null,
+      "year": 2023,
+      "doi": null,
+      "abstract": "Systematic review of mindfulness-based interventions for treating various anxiety disorders. Analysis of 28 studies shows moderate to large effect sizes for reducing anxiety symptoms, with particular effectiveness for generalized anxiety disorder.",
+      "notes": "Good evidence for mindfulness approaches",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 1668.8646891307549,
+        "y": 1466.8148019099583
+      },
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
+    },
+    {
+      "id": "5",
+      "title": "Case Study: Treatment-Resistant Schizophrenia with Clozapine",
+      "authors": "Wilson, K.R., Martinez, E.S.",
+      "publication": null,
+      "year": 2022,
+      "doi": null,
+      "abstract": "Detailed case study of a 28-year-old male with treatment-resistant schizophrenia who showed significant improvement after clozapine initiation. The case discusses monitoring protocols, side effect management, and long-term outcomes.",
+      "notes": "Useful for understanding clozapine protocols",
+      "pdf_path": null,
+      "linked_topics": [],
+      "position": {
+        "x": 600.0,
+        "y": 400.0
+      },
+      "created_at": "2025-10-04T21:17:10.795000+00:00",
+      "updated_at": "2025-10-04T21:17:10.795000+00:00"
     }
   ],
   "connections": [
@@ -878,6 +1168,78 @@
       "id": "conn-1759605168038",
       "source": "topic-1759596543172",
       "target": "topic-1759596660735",
+      "label": ""
+    },
+    {
+      "id": "conn-1759605264502",
+      "source": "case-1759596662301",
+      "target": "topic-1759597334107",
+      "label": ""
+    },
+    {
+      "id": "conn-1759611932876",
+      "source": "topic-1759597082282",
+      "target": "case-1759597769470",
+      "label": ""
+    },
+    {
+      "id": "conn-1759611934844",
+      "source": "topic-1759597082282",
+      "target": "case-1759597399687",
+      "label": ""
+    },
+    {
+      "id": "conn-1759611937151",
+      "source": "topic-1759597082282",
+      "target": "case-1759597399713",
+      "label": ""
+    },
+    {
+      "id": "conn-1759611939910",
+      "source": "topic-1759597082282",
+      "target": "case-1759597084361",
+      "label": ""
+    },
+    {
+      "id": "conn-1759611942129",
+      "source": "topic-1759597082282",
+      "target": "case-1759597768399",
+      "label": ""
+    },
+    {
+      "id": "conn-1",
+      "source": "literature-1",
+      "target": "case-101",
+      "label": "Treatment approach"
+    },
+    {
+      "id": "conn-2",
+      "source": "literature-2",
+      "target": "topic-201",
+      "label": "Reference guide"
+    },
+    {
+      "id": "conn-3",
+      "source": "literature-3",
+      "target": "case-102",
+      "label": "Medication guidance"
+    },
+    {
+      "id": "conn-4",
+      "source": "literature-4",
+      "target": "case-103",
+      "label": "Treatment option"
+    },
+    {
+      "id": "conn-5",
+      "source": "literature-5",
+      "target": "case-104",
+      "label": "Treatment protocol"
+    },
+    {
+      "id": "conn-1759612586480",
+      "source": "literature-2",
+      "target": "literature-4",
       "label": ""
     }
   ]
