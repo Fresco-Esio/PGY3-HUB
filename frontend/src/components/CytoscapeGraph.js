@@ -23,6 +23,7 @@ const CytoscapeGraph = ({
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const isUpdatingRef = useRef(false); // Prevent re-render loops
   const prevNodeCountRef = useRef(0); // Track node count changes
+  const isInitializedRef = useRef(false); // Prevent re-initialization
 
   // Node type configurations
   const nodeConfig = {
