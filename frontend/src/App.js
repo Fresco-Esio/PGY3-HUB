@@ -1627,9 +1627,10 @@ useEffect(() => {
     setSelectedNode({ id: nodeId, data: nodeData });
   }, []);
 
-  const onNodeDoubleClick = useCallback((event, node) => {
-    // Handle multi-part IDs correctly by joining all parts after the type
-    const parts = node.id.split('-');
+  const onNodeDoubleClick = useCallback((cytoscapeNode) => {
+    // Handle Cytoscape node - get ID and type
+    const nodeId = cytoscapeNode.id();
+    const parts = nodeId.split('-');
     const type = parts[0];
     const id = parts.slice(1).join('-'); // Join all parts after the first one
     
