@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from "react";
+import React from "react";
 import { Handle, Position } from "@xyflow/react";
-import { Brain, X, ChevronDown, ChevronUp } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Brain, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 const CircularTopicNode = ({ data, selected }) => {
   const isExpanded = data.isExpanded || false;
