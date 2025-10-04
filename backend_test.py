@@ -102,7 +102,7 @@ def main():
     # Test 1: Get mind map data
     tester.test_get_mindmap_data()
     
-    # Test 3: Save mind map data
+    # Test 2: Save mind map data
     tester.test_save_mindmap_data()
 
     # Print results
