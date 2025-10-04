@@ -1373,9 +1373,9 @@ useEffect(() => {
     setSelectedNode({ id: d3Node.id, data: d3Node.originalData });
   }, []);
 
-  const onNodeDoubleClick = useCallback((cytoscapeNode) => {
-    // Handle Cytoscape node - get ID and type
-    const nodeId = cytoscapeNode.id();
+  const onNodeDoubleClick = useCallback((d3Node) => {
+    // Handle D3 node - get ID and type
+    const nodeId = d3Node.id;
     const parts = nodeId.split('-');
     const type = parts[0];
     const id = parts.slice(1).join('-'); // Join all parts after the first one
