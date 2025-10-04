@@ -367,7 +367,7 @@ const D3Graph = ({
         return '#3b82f6';
       });
 
-    // Update node appearance for connection mode
+    // Update node appearance for connection mode and filter
     node.select('.node-circle')
       .attr('stroke-width', d => {
         if (connectionMode && connectionStart && connectionStart.id === d.id) return 6;
@@ -376,6 +376,17 @@ const D3Graph = ({
       .attr('stroke', d => {
         if (connectionMode && connectionStart && connectionStart.id === d.id) return '#10b981';
         return '#fff';
+      })
+      .style('opacity', d => {
+        if (activeFilter === 'all') return 1;
+        return activeFilter === d.type ? 1 : 0.2;
+      });
+    
+    // Update text opacity based on filter
+    node.select('text')
+      .style('opacity', d => {
+        if (activeFilter === 'all') return 1;
+        return activeFilter === d.type ? 1 : 0.3;
       });
 
     // Drag behavior
