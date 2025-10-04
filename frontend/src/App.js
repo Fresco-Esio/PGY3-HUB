@@ -67,7 +67,8 @@ import {
   Paperclip,
   ChevronDown,
   ChevronUp,
-  ArrowDown
+  ArrowDown,
+  FileSpreadsheet
 } from 'lucide-react';
 
 // Lazy load components for better initial load time
@@ -79,6 +80,7 @@ import FloatingEdge from './components/FloatingEdge'; // Import the custom Float
 import EnhancedEdge from './components/EnhancedEdge'; // Import the enhanced edge component
 import ConnectionLine from './components/ConnectionLine'; // Import the custom connection line for previews
 import OptimizedLoadingScreen from './components/OptimizedLoadingScreen';
+import ImportSpreadsheetModal from './components/ImportSpreadsheetModal';
 
 // Import node components
 import { nodeTypes } from './components/nodes';
