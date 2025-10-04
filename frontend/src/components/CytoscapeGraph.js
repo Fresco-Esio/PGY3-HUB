@@ -494,6 +494,12 @@ const CytoscapeGraph = ({
     // Add new nodes and edges
     if (nodesToAdd.length > 0 || edgesToAdd.length > 0) {
       cy.add([...nodesToAdd, ...edgesToAdd]);
+      console.log('🔍 Added elements:', {
+        nodesToAdd: nodesToAdd.length,
+        edgesToAdd: edgesToAdd.length,
+        totalNodes: cy.nodes().length,
+        totalEdges: cy.edges().length
+      });
     }
     
     // Update node data (labels, etc.) without removing/re-adding
