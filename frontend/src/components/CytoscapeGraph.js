@@ -359,7 +359,9 @@ const CytoscapeGraph = ({
       }
     };
 
-    // Add HTML labels with icons
+    // HTML labels disabled temporarily due to isHeadless error
+    // Using standard Cytoscape labels instead
+    /*
     cy.nodeHtmlLabel([
       {
         query: 'node',
@@ -414,6 +416,7 @@ const CytoscapeGraph = ({
         }
       }
     ]);
+    */
 
     return () => {
       if (cyRef.current) {
