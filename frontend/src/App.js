@@ -2377,6 +2377,9 @@ useEffect(() => {
       return;
     }
 
+    let frameCount = 0;
+    let isActive = true;
+
     // Initialize simulation asynchronously
     const initSimulation = async () => {
       try {
@@ -2384,7 +2387,6 @@ useEffect(() => {
           forceSimulation, 
           forceManyBody, 
           forceLink, 
-          forceCenter, 
           forceCollide 
         } = await loadD3Force();
 
@@ -2405,49 +2407,60 @@ useEffect(() => {
 
         // Create simulation with gentle forces
         const simulation = forceSimulation(simulationNodes)
-          .force('link', forceLink(simulationLinks).id(d => d.id).distance(150).strength(0.3))
-          .force('charge', forceManyBody().strength(-300).distanceMax(300))
-          .force('collision', forceCollide().radius(70))
-          .alphaDecay(0.02) // Slow decay for continuous gentle motion
-          .velocityDecay(0.4); // Damping for stability
+          .force('link', forceLink(simulationLinks).id(d => d.id).distance(180).strength(0.2))
+          .force('charge', forceManyBody().strength(-400).distanceMax(350))
+          .force('collision', forceCollide().radius(75))
+          .alphaDecay(0.01) // Very slow decay for continuous gentle motion
+          .velocityDecay(0.5); // More damping for stability
 
         simulationRef.current = simulation;
 
-        // Update node positions on each tick
-        simulation.on('tick', () => {
-          if (!simulationRef.current) return;
+        // Throttled update function using requestAnimationFrame
+        const updatePositions = () => {
+          if (!isActive || !simulationRef.current) return;
 
-          const updatedNodes = nodes.map(node => {
-            const simNode = simulationNodes.find(n => n.id === node.id);
-            if (simNode) {
-              return {
-                ...node,
-                position: { x: simNode.x, y: simNode.y },
-              };
-            }
-            return node;
-          });
-
-          setNodes(updatedNodes);
-
-          // Periodically update mindMapData positions (throttled)
-          if (simulation.alpha() > 0.01 && Math.random() < 0.05) {
-            setMindMapData(currentData => {
-              const updatedData = { ...currentData };
-              
-              updatedNodes.forEach(node => {
-                const [type, id] = node.id.split('-');
-                const key = type === 'literature' ? 'literature' : `${type}s`;
-                const item = updatedData[key]?.find(i => String(i.id) === id);
-                if (item) {
-                  item.position = node.position;
+          frameCount++;
+          
+          // Update positions every 2 frames (30fps instead of 60fps)
+          if (frameCount % 2 === 0) {
+            setNodes(currentNodes => {
+              return currentNodes.map(node => {
+                const simNode = simulationNodes.find(n => n.id === node.id);
+                if (simNode) {
+                  return {
+                    ...node,
+                    position: { x: Math.round(simNode.x), y: Math.round(simNode.y) },
+                  };
                 }
+                return node;
               });
-              
-              return updatedData;
             });
+
+            // Occasionally update mindMapData (every 100 frames, ~3 seconds at 30fps)
+            if (frameCount % 100 === 0 && simulation.alpha() > 0.01) {
+              setMindMapData(currentData => {
+                const updatedData = { ...currentData };
+                
+                simulationNodes.forEach(simNode => {
+                  const [type, id] = simNode.id.split('-');
+                  const key = type === 'literature' ? 'literature' : `${type}s`;
+                  const item = updatedData[key]?.find(i => String(i.id) === id);
+                  if (item) {
+                    item.position = { x: Math.round(simNode.x), y: Math.round(simNode.y) };
+                  }
+                });
+                
+                return updatedData;
+              });
+            }
           }
-        });
+
+          animationFrameRef.current = requestAnimationFrame(updatePositions);
+        };
+
+        // Start the animation loop
+        animationFrameRef.current = requestAnimationFrame(updatePositions);
+
       } catch (error) {
         console.error('Physics simulation error:', error);
       }
@@ -2457,6 +2470,7 @@ useEffect(() => {
 
     // Cleanup
     return () => {
+      isActive = false;
       if (simulationRef.current) {
         simulationRef.current.stop();
         simulationRef.current = null;
