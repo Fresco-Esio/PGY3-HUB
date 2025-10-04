@@ -1116,7 +1116,7 @@ const CaseModal = ({
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Case Title/Label
+                                Name or ID
                               </label>
                               <input
                                 type="text"
@@ -1133,7 +1133,7 @@ const CaseModal = ({
                                   )
                                 }
                                 className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                                placeholder="Enter case title/label"
+                                placeholder="Enter patient name or case ID"
                               />
                             </div>
                             <div>
