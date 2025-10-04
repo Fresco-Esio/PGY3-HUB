@@ -1,6 +1,64 @@
 {
-  "topics": [],
-  "cases": [],
+  "topics": [
+    {
+      "id": "1759596543172",
+      "title": "Untitled Topic",
+      "description": "",
+      "category": "Uncategorized",
+      "color": "#3B82F6",
+      "position": {
+        "x": 400.0,
+        "y": 150.0
+      },
+      "flashcard_count": 0,
+      "completed_flashcards": 0,
+      "resources": [],
+      "notes": null,
+      "tags": null,
+      "definition": null,
+      "diagnostic_criteria": [],
+      "comorbidities": [],
+      "differential_diagnoses": [],
+      "medications": [],
+      "psychotherapy_modalities": [],
+      "last_updated": null,
+      "created_at": "2025-10-04T16:49:05.263000+00:00",
+      "updated_at": "2025-10-04T16:49:05.263000+00:00"
+    }
+  ],
+  "cases": [
+    {
+      "id": "1759596545239",
+      "case_id": "CASE-1759596545263-0",
+      "encounter_date": "2025-10-04T16:49:05.263000+00:00",
+      "primary_diagnosis": "Unspecified",
+      "secondary_diagnoses": [],
+      "age": null,
+      "gender": null,
+      "chief_complaint": "",
+      "initial_presentation": "",
+      "current_presentation": "",
+      "medication_history": "",
+      "therapy_progress": "",
+      "defense_patterns": "",
+      "clinical_reflection": "",
+      "history_present_illness": null,
+      "medical_history": null,
+      "medications": [],
+      "mental_status_exam": null,
+      "assessment_plan": null,
+      "notes": null,
+      "status": "active",
+      "linked_topics": [],
+      "position": {
+        "x": 680.0,
+        "y": 150.0
+      },
+      "timeline": [],
+      "created_at": "2025-10-04T16:49:05.263000+00:00",
+      "updated_at": "2025-10-04T16:49:05.263000+00:00"
+    }
+  ],
   "tasks": [],
   "literature": [],
   "connections": []
