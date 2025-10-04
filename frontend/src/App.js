@@ -2377,6 +2377,112 @@ useEffect(() => {
     if (isAnimating || anyModalAnimating) return;
     
   }, [focusedCategory, nodes, nodeMatchesSearch, isAnimating, modalAnimationStates]);
+
+  // Continuous Physics Simulation
+  useEffect(() => {
+    if (!physicsEnabled || nodes.length === 0) {
+      // Stop any running simulation
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+        simulationRef.current = null;
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
+    // Initialize simulation asynchronously
+    const initSimulation = async () => {
+      try {
+        const { 
+          forceSimulation, 
+          forceManyBody, 
+          forceLink, 
+          forceCenter, 
+          forceCollide 
+        } = await loadD3Force();
+
+        // Create simulation nodes from current nodes
+        const simulationNodes = nodes.map(node => ({
+          id: node.id,
+          x: node.position.x,
+          y: node.position.y,
+          vx: 0,
+          vy: 0,
+        }));
+
+        // Create links from edges
+        const simulationLinks = edges.map(edge => ({
+          source: edge.source,
+          target: edge.target,
+        }));
+
+        // Create simulation with gentle forces
+        const simulation = forceSimulation(simulationNodes)
+          .force('link', forceLink(simulationLinks).id(d => d.id).distance(150).strength(0.3))
+          .force('charge', forceManyBody().strength(-300).distanceMax(300))
+          .force('collision', forceCollide().radius(70))
+          .alphaDecay(0.02) // Slow decay for continuous gentle motion
+          .velocityDecay(0.4); // Damping for stability
+
+        simulationRef.current = simulation;
+
+        // Update node positions on each tick
+        simulation.on('tick', () => {
+          if (!simulationRef.current) return;
+
+          const updatedNodes = nodes.map(node => {
+            const simNode = simulationNodes.find(n => n.id === node.id);
+            if (simNode) {
+              return {
+                ...node,
+                position: { x: simNode.x, y: simNode.y },
+              };
+            }
+            return node;
+          });
+
+          setNodes(updatedNodes);
+
+          // Periodically update mindMapData positions (throttled)
+          if (simulation.alpha() > 0.01 && Math.random() < 0.05) {
+            setMindMapData(currentData => {
+              const updatedData = { ...currentData };
+              
+              updatedNodes.forEach(node => {
+                const [type, id] = node.id.split('-');
+                const key = type === 'literature' ? 'literature' : `${type}s`;
+                const item = updatedData[key]?.find(i => String(i.id) === id);
+                if (item) {
+                  item.position = node.position;
+                }
+              });
+              
+              return updatedData;
+            });
+          }
+        });
+      } catch (error) {
+        console.error('Physics simulation error:', error);
+      }
+    };
+
+    initSimulation();
+
+    // Cleanup
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+        simulationRef.current = null;
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [physicsEnabled, nodes.length, edges.length]); // Only reinitialize when nodes/edges count changes
   
   // CSS-based search filtering - no direct style manipulation
   useEffect(() => {
