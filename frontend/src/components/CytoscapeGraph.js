@@ -72,18 +72,28 @@ const CytoscapeGraph = ({
       });
     });
 
-    // Add edges
+    // Add edges - only add valid connections where both source and target exist
     const connections = data.connections || [];
+    const nodeIds = new Set(elements.map(el => el.data.id));
+    
     connections.forEach((conn, idx) => {
-      elements.push({
-        group: 'edges',
-        data: {
-          id: `edge-${idx}`,
-          source: conn.source,
-          target: conn.target,
-          label: conn.label || '',
-        },
-      });
+      const source = conn.source;
+      const target = conn.target;
+      
+      // Check if both source and target nodes exist
+      if (nodeIds.has(source) && nodeIds.has(target)) {
+        elements.push({
+          group: 'edges',
+          data: {
+            id: conn.id || `edge-${idx}`,
+            source: source,
+            target: target,
+            label: conn.label || '',
+          },
+        });
+      } else {
+        console.warn(`Skipping invalid connection: source=${source} (exists: ${nodeIds.has(source)}), target=${target} (exists: ${nodeIds.has(target)})`);
+      }
     });
 
     return elements;
