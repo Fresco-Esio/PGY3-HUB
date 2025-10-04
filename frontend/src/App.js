@@ -1953,7 +1953,7 @@ useEffect(() => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal]);
+  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal, connectionMode]);
 
   useEffect(() => {
     // Layout handled by Cytoscape internally
