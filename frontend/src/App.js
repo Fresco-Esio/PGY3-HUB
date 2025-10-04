@@ -1028,7 +1028,6 @@ const DashboardComponent = () => {
   const caseModalStableData = useRef(null);
   const topicModalStableData = useRef(null);
   const taskModalStableData = useRef(null);
-  const [isReactFlowReady, setIsReactFlowReady] = useState(false);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
   const [isExportingCSV, setIsExportingCSV] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
