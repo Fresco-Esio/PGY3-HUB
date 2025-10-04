@@ -509,43 +509,6 @@ const CytoscapeGraph = ({
     }
   }, [mindMapData, convertToElements, physicsEnabled, expandedNodes, runLayout]);
 
-  // Run force-directed layout
-  const runLayout = useCallback(() => {
-    if (!cyRef.current) return;
-
-    // Stop existing layout
-    if (layoutRef.current) {
-      layoutRef.current.stop();
-    }
-
-    const layout = cyRef.current.layout({
-      name: 'fcose',
-      quality: 'default',
-      randomize: false,
-      animate: true,
-      animationDuration: 1000,
-      animationEasing: 'ease-out',
-      fit: true,
-      padding: 50,
-      nodeSeparation: 150,
-      idealEdgeLength: 200,
-      edgeElasticity: 0.45,
-      nestingFactor: 0.1,
-      gravity: 0.25,
-      numIter: 2500,
-      tile: true,
-      tilingPaddingVertical: 10,
-      tilingPaddingHorizontal: 10,
-      gravityRange: 3.8,
-      gravityCompound: 1.0,
-      gravityRangeCompound: 1.5,
-      initialEnergyOnIncremental: 0.5,
-    });
-
-    layoutRef.current = layout;
-    layout.run();
-  }, []);
-
   // Expose layout function
   useEffect(() => {
     if (cyRef.current && window) {
