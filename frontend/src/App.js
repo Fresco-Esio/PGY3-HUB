@@ -2173,6 +2173,17 @@ useEffect(() => {
           >
             {physicsEnabled ? 'Physics: ON' : 'Physics: OFF'}
           </LoadingButton>
+          <LoadingButton 
+            onClick={() => setConnectionMode(!connectionMode)} 
+            icon={Link2} 
+            className={`w-full px-4 py-2 rounded-md text-sm ${
+              connectionMode 
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                : 'bg-slate-600 hover:bg-slate-700 text-white'
+            }`}
+          >
+            {connectionMode ? 'Connect: ON' : 'Connect: OFF'}
+          </LoadingButton>
           <LoadingButton onClick={applyForceLayout} icon={Shuffle} className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm">
             Realign Nodes (Dagre)
           </LoadingButton>
