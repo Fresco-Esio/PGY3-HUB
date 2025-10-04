@@ -2656,6 +2656,14 @@ useEffect(() => {
               Add Case
             </LoadingButton>
             <LoadingButton 
+              onClick={() => setImportModal(true)} 
+              icon={FileSpreadsheet} 
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+            >
+              <FileSpreadsheet size={16} />
+              Import Patients
+            </LoadingButton>
+            <LoadingButton 
               onClick={() => addNewNode('task')} 
               icon={CheckSquare} 
               className="w-full bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
