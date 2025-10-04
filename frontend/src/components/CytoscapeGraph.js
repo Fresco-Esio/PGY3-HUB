@@ -7,6 +7,7 @@ import nodeHtmlLabel from 'cytoscape-node-html-label';
 // Register extensions
 cytoscape.use(fcose);
 cytoscape.use(popper);
+cytoscape.use(nodeHtmlLabel);
 
 const CytoscapeGraph = ({
   mindMapData,
