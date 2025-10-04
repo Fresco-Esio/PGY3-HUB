@@ -500,6 +500,12 @@ const CytoscapeGraph = ({
         totalNodes: cy.nodes().length,
         totalEdges: cy.edges().length
       });
+      
+      // Fit view to show all nodes after adding
+      setTimeout(() => {
+        cy.fit(50); // 50px padding
+        console.log('🔍 Called fit() after adding nodes');
+      }, 100);
     }
     
     // Update node data (labels, etc.) without removing/re-adding
