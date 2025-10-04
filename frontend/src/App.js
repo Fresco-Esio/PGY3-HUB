@@ -8,20 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Import new components
 import HomeScreen from './components/HomeScreen';
 import MapOptionsModal, { mapStorageUtils } from './components/MapManager';
-import {
-  ReactFlow,
-  addEdge,
-  Background,
-  Controls,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
-  ReactFlowProvider,
-  Panel,
-  Handle,
-  Position,
-  useReactFlow,
-} from '@xyflow/react';
+import CytoscapeGraph from './components/CytoscapeGraph';
 
 // Lazy load heavy D3 dependencies
 const loadD3Force = () => import('d3-force');
