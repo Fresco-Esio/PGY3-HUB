@@ -3,18 +3,24 @@
 import requests
 import sys
 import json
+import io
+import csv
 from datetime import datetime
+from typing import Dict, Any, Tuple
 
-class SimpleAPITester:
+class ComprehensiveAPITester:
     def __init__(self, base_url="https://medhub-map.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
+        self.failed_tests = []
+        self.critical_issues = []
 
-    def run_test(self, name, method, endpoint, expected_status, data=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, files=None, headers=None):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
-        headers = {'Content-Type': 'application/json'}
+        if headers is None:
+            headers = {'Content-Type': 'application/json'}
 
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
@@ -23,7 +29,16 @@ class SimpleAPITester:
             if method == 'GET':
                 response = requests.get(url, headers=headers, timeout=10)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=headers, timeout=10)
+                if files:
+                    # Remove Content-Type header for file uploads
+                    headers_copy = headers.copy()
+                    if 'Content-Type' in headers_copy:
+                        del headers_copy['Content-Type']
+                    response = requests.post(url, data=data, files=files, headers=headers_copy, timeout=10)
+                else:
+                    response = requests.post(url, json=data, headers=headers, timeout=10)
+            elif method == 'PUT':
+                response = requests.put(url, json=data, headers=headers, timeout=10)
 
             success = response.status_code == expected_status
             if success:
@@ -37,11 +52,21 @@ class SimpleAPITester:
             else:
                 print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
                 print(f"   Response: {response.text[:200]}...")
+                self.failed_tests.append({
+                    'name': name,
+                    'expected': expected_status,
+                    'actual': response.status_code,
+                    'response': response.text[:200]
+                })
 
-            return success, response.json() if success else {}
+            return success, response.json() if success and response.text else {}
 
         except Exception as e:
             print(f"❌ Failed - Error: {str(e)}")
+            self.failed_tests.append({
+                'name': name,
+                'error': str(e)
+            })
             return False, {}
 
     def test_get_mindmap_data(self):
