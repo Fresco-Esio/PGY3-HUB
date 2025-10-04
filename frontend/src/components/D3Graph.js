@@ -613,28 +613,7 @@ const D3Graph = ({
     };
   }, []);
 
-  // Render temp connection line
-  const renderTempConnection = () => {
-    if (!connectionStart || !tempConnection || !gRef.current) return null;
-    
-    return (
-      <line
-        x1={connectionStart.x}
-        y1={connectionStart.y}
-        x2={tempConnection.x}
-        y2={tempConnection.y}
-        stroke="#10b981"
-        strokeWidth="3"
-        strokeDasharray="5,5"
-        strokeOpacity="0.8"
-        pointerEvents="none"
-        style={{ 
-          position: 'absolute',
-          zIndex: 1000
-        }}
-      />
-    );
-  };
+  // Temp connection rendering moved to D3 layer for proper transform handling
 
   return (
     <svg
