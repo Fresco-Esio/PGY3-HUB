@@ -1919,6 +1919,10 @@ useEffect(() => {
             event.preventDefault();
             setConnectionManagerOpen(true);
             break;
+          case 'c':
+            event.preventDefault();
+            setConnectionMode(!connectionMode);
+            break;
           default:
             break;
         }
