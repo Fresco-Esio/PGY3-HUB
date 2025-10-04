@@ -85,7 +85,7 @@ const backdropVariants = {
     opacity: 1,
     backdropFilter: "blur(8px)",
     transition: {
-      duration: 0.4,
+      duration: 0.2,
       ease: "easeOut",
     },
   },
@@ -93,8 +93,8 @@ const backdropVariants = {
     opacity: 0,
     backdropFilter: "blur(0px)",
     transition: {
-      duration: 0.3,
-      ease: "easeIn",
+      duration: 0.15,
+      ease: "easeInOut",
     },
   },
 };
