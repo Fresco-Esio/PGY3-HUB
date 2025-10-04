@@ -4,12 +4,7 @@ import { Users, X, AlertCircle, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 const CircularCaseNode = ({ data, selected }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleToggleExpand = useCallback((e) => {
-    e.stopPropagation();
-    setIsExpanded(prev => !prev);
-  }, []);
+  const isExpanded = data.isExpanded || false;
 
   const baseSize = 130; // Slightly larger for case nodes
   const expandedSize = 320;
@@ -22,7 +17,6 @@ const CircularCaseNode = ({ data, selected }) => {
         height: isExpanded ? expandedSize : baseSize,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      onClick={handleToggleExpand}
     >
       {/* Connection Handles */}
       <Handle
