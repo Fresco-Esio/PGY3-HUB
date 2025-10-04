@@ -444,16 +444,52 @@ const CytoscapeGraph = ({
     layout.run();
   }, []);
 
-  // Update elements when data changes
+  // Update elements when data changes - ONLY update structure, not positions
   useEffect(() => {
     if (!cyRef.current || !mindMapData) return;
 
     const cy = cyRef.current;
-    const elements = convertToElements(mindMapData);
-
-    // Clear and add new elements
-    cy.elements().remove();
-    cy.add(elements);
+    const newElements = convertToElements(mindMapData);
+    
+    // Get current node and edge IDs
+    const currentNodeIds = new Set(cy.nodes().map(n => n.id()));
+    const currentEdgeIds = new Set(cy.edges().map(e => e.id()));
+    
+    // Get new node and edge IDs
+    const newNodeIds = new Set(newElements.filter(e => e.group === 'nodes').map(e => e.data.id));
+    const newEdgeIds = new Set(newElements.filter(e => e.group === 'edges').map(e => e.data.id));
+    
+    // Find nodes to add and remove
+    const nodesToAdd = newElements.filter(e => e.group === 'nodes' && !currentNodeIds.has(e.data.id));
+    const nodesToRemove = Array.from(currentNodeIds).filter(id => !newNodeIds.has(id));
+    
+    // Find edges to add and remove
+    const edgesToAdd = newElements.filter(e => e.group === 'edges' && !currentEdgeIds.has(e.data.id));
+    const edgesToRemove = Array.from(currentEdgeIds).filter(id => !newEdgeIds.has(id));
+    
+    // Remove nodes and edges that no longer exist
+    nodesToRemove.forEach(id => {
+      const node = cy.$id(id);
+      if (node.length > 0) node.remove();
+    });
+    edgesToRemove.forEach(id => {
+      const edge = cy.$id(id);
+      if (edge.length > 0) edge.remove();
+    });
+    
+    // Add new nodes and edges
+    if (nodesToAdd.length > 0 || edgesToAdd.length > 0) {
+      cy.add([...nodesToAdd, ...edgesToAdd]);
+    }
+    
+    // Update node data (labels, etc.) without removing/re-adding
+    cy.nodes().forEach(node => {
+      const nodeData = newElements.find(e => e.group === 'nodes' && e.data.id === node.id());
+      if (nodeData) {
+        node.data('label', nodeData.data.label);
+        node.data('originalData', nodeData.data.originalData);
+      }
+    });
 
     // Re-apply HTML labels after adding elements
     if (cy.nodeHtmlLabel) {
