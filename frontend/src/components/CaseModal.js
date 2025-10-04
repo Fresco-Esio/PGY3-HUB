@@ -986,15 +986,11 @@ const CaseModal = ({
             animate="visible"
             exit="exit"
             variants={modalVariants}
-            layout
-            transition={{
-              layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
-            }}
-            className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-hidden transition-all duration-500 ease-in-out ${
+            className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-hidden ${
               activeTab === "timeline" ? "max-w-7xl" : "max-w-4xl"
             }`}
             style={{
-              willChange: "transform, opacity, scale",
+              willChange: "transform, opacity",
               backfaceVisibility: "hidden",
             }}
             onClick={(e) => e.stopPropagation()}
