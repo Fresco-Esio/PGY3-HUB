@@ -54,8 +54,10 @@ class SimpleAPITester:
             "topics": [
                 {
                     "id": "test-topic-1",
-                    "label": "Test Topic",
+                    "title": "Test Topic",
                     "description": "A test topic for API testing",
+                    "category": "Test",
+                    "color": "#3B82F6",
                     "position": {"x": 100, "y": 100}
                 }
             ],
