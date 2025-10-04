@@ -621,20 +621,7 @@ const D3Graph = ({
       className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100"
       style={{ width: '100%', height: '100%', minHeight: '600px' }}
     >
-      {connectionStart && tempConnection && (
-        <g className="temp-connection-layer" style={{ pointerEvents: 'none' }}>
-          <line
-            x1={connectionStart.x}
-            y1={connectionStart.y}
-            x2={tempConnection.x}
-            y2={tempConnection.y}
-            stroke="#10b981"
-            strokeWidth="3"
-            strokeDasharray="5,5"
-            strokeOpacity="0.8"
-          />
-        </g>
-      )}
+      {/* Temp connection rendering moved to D3 layer */}
     </svg>
   );
 };
