@@ -279,16 +279,16 @@ const LiteratureModal = ({
   const connectedNodes = useMemo(() => {
     if (!literatureData || !connections) return [];
 
+    // Create the full node ID for this literature item
+    const fullNodeId = `literature-${literatureData.id}`;
+
     const relatedConnections = connections.filter(
       (conn) =>
-        (conn.source.includes("literature") &&
-          conn.source.includes(literatureData.id)) ||
-        (conn.target.includes("literature") &&
-          conn.target.includes(literatureData.id))
+        conn.source === fullNodeId || conn.target === fullNodeId
     );
 
     const nodeIds = relatedConnections.map((conn) =>
-      conn.source.includes(literatureData.id) ? conn.target : conn.source
+      conn.source === fullNodeId ? conn.target : conn.source
     );
 
     return allNodes.filter((node) => nodeIds.includes(node.id));

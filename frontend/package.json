@@ -38,7 +38,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "start-backend": "cd ../backend && uvicorn server:app --reload --port 8001",
+    "start-backend": "cd ../backend && python -m uvicorn server:app --reload --port 8001",
     "dev": "concurrently \"npm run start-backend\" \"npm run start\"",
     "build": "craco build",
     "test": "craco test",

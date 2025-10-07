@@ -108,7 +108,7 @@ console.error = (...args) => {
   originalError(...args);
 };
 
-// Toast Notification System
+// Toast Notification System with Animations
 const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, duration);
@@ -116,12 +116,12 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
   }, [onClose, duration]);
 
   const getToastStyles = () => {
-    const baseStyles = "fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-500 transform";
+    const baseStyles = "px-6 py-3 rounded-lg shadow-2xl backdrop-blur-sm";
     const typeStyles = {
-      success: "bg-green-600 text-white border-l-4 border-green-400",
-      error: "bg-red-600 text-white border-l-4 border-red-400",
-      info: "bg-blue-600 text-white border-l-4 border-blue-400",
-      saving: "bg-purple-600 text-white border-l-4 border-purple-400"
+      success: "bg-green-600/90 text-white border-l-4 border-green-400",
+      error: "bg-red-600/90 text-white border-l-4 border-red-400",
+      info: "bg-blue-600/90 text-white border-l-4 border-blue-400",
+      saving: "bg-purple-600/90 text-white border-l-4 border-purple-400"
     };
     return `${baseStyles} ${typeStyles[type]}`;
   };
@@ -137,18 +137,29 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
   };
 
   return (
-    <div className={getToastStyles()}>
+    <motion.div
+      initial={{ opacity: 0, y: -20, x: 50, scale: 0.8 }}
+      animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, x: 50, scale: 0.8 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 500, 
+        damping: 30,
+        mass: 0.8
+      }}
+      className={getToastStyles()}
+    >
       <div className="flex items-center">
         {getIcon()}
         <span className="text-sm font-medium">{message}</span>
         <button
           onClick={onClose}
-          className="ml-4 text-white hover:text-gray-200 transition-colors"
+          className="ml-4 text-white hover:text-gray-200 transition-colors hover:scale-110 active:scale-95"
         >
           <X size={14} />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -1403,10 +1414,10 @@ useEffect(() => {
     // Route to appropriate specialized modal based on node type
     if (type === 'literature') {
       console.log('🔷 Looking for literature with id:', id, 'in', mindMapData.literature);
-      const dataItem = mindMapData.literature.find(item => String(item.id) === id);
+      const dataItem = mindMapData.literature?.find(item => String(item.id) === id);
       if (dataItem) {
         console.log('🔷 Opening literature modal with data:', dataItem);
-        setLiteratureModal({ isOpen: true, data: dataItem });
+        handleLiteratureClick(dataItem);
       } else {
         console.error('🔷 Literature item not found!');
       }
@@ -1462,7 +1473,7 @@ useEffect(() => {
     }
     
     console.error('🔷 Unknown node type:', type);
-  }, [mindMapData, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen]);
+  }, [mindMapData, caseModal.isOpen, topicModal.isOpen, taskModal.isOpen, literatureModal.isOpen, handleLiteratureClick]);
 
   // Cytoscape handles edge interactions internally
   
@@ -1967,6 +1978,57 @@ useEffect(() => {
 
   // Optionally: handle layout setup on first render if needed
 
+  // Create nodes array for modals from mindMapData (MUST be before conditional return)
+  const allNodesForModals = useMemo(() => {
+    const nodes = [];
+    
+    // Add topic nodes
+    if (mindMapData.topics) {
+      mindMapData.topics.forEach(topic => {
+        nodes.push({
+          id: `topic-${topic.id}`,
+          type: 'topic',
+          data: topic
+        });
+      });
+    }
+    
+    // Add case nodes
+    if (mindMapData.cases) {
+      mindMapData.cases.forEach(caseItem => {
+        nodes.push({
+          id: `case-${caseItem.id}`,
+          type: 'case',
+          data: caseItem
+        });
+      });
+    }
+    
+    // Add task nodes
+    if (mindMapData.tasks) {
+      mindMapData.tasks.forEach(task => {
+        nodes.push({
+          id: `task-${task.id}`,
+          type: 'task',
+          data: task
+        });
+      });
+    }
+    
+    // Add literature nodes
+    if (mindMapData.literature) {
+      mindMapData.literature.forEach(lit => {
+        nodes.push({
+          id: `literature-${lit.id}`,
+          type: 'literature',
+          data: lit
+        });
+      });
+    }
+    
+    return nodes;
+  }, [mindMapData]);
+
   // Show optimized loading screen during initial load
   if (loading) {
     return <OptimizedLoadingScreen message={loadingMessage} progress={loadingProgress} />;
@@ -2073,6 +2135,10 @@ useEffect(() => {
         <div className="mb-8">
           <div className="text-3xl font-bold tracking-wide text-white">PGY-3 HQ</div>
           <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
+          <div className="mt-3 px-3 py-2 bg-amber-500/20 border border-amber-400/30 rounded-lg">
+            <div className="text-xs font-semibold text-amber-300">⚠️ DEVELOPMENT MODE</div>
+            <div className="text-xs text-amber-200 mt-1">Training data only</div>
+          </div>
         </div>
 
         {/* Home Button */}
@@ -2414,7 +2480,7 @@ useEffect(() => {
           onAnimationStart={() => setIsAnimating(true)}
           onAnimationEnd={() => setIsAnimating(false)}
           literatureData={literatureModal.data}
-          allNodes={nodes}
+          allNodes={allNodesForModals}
           connections={mindMapData.connections || []}
           setMindMapData={setMindMapData}
           autoSaveMindMapData={autoSaveMindMapData}
@@ -2532,15 +2598,20 @@ useEffect(() => {
         </div>
       )}
       
-      {toasts.map(toast => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          duration={toast.duration}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
+      {/* Toast Notification Container with AnimatePresence */}
+      <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+        <AnimatePresence mode="sync">
+          {toasts.map(toast => (
+            <Toast
+              key={toast.id}
+              message={toast.message}
+              type={toast.type}
+              duration={toast.duration}
+              onClose={() => removeToast(toast.id)}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

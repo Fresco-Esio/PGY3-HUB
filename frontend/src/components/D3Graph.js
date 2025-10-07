@@ -215,20 +215,20 @@ const D3Graph = ({
       console.log('🔷 Creating new simulation');
       
       simulationRef.current = d3.forceSimulation(nodes)
-        .force('charge', d3.forceManyBody().strength(-350))
-        .force('collision', d3.forceCollide().radius(d => (d.radius || 28) + 18).strength(0.99))
+        .force('charge', d3.forceManyBody().strength(-500))
+        .force('collision', d3.forceCollide().radius(d => (d.radius || 28) + 30).strength(0.99))
         .alpha(0.12)
         .alphaDecay(0.08)
         .velocityDecay(0.6);
 
       if (links.length > 0) {
-        simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(150).strength(1.5).iterations(2));
+        simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(220).strength(1.2).iterations(2));
       }
 
       const cx = width / 2;
       const cy = height / 2;
-      simulationRef.current.force('viewX', d3.forceX(cx).strength(0.008));
-      simulationRef.current.force('viewY', d3.forceY(cy).strength(0.008));
+      simulationRef.current.force('viewX', d3.forceX(cx).strength(0.025));
+      simulationRef.current.force('viewY', d3.forceY(cy).strength(0.025));
 
       simulationRef.current.alphaTarget(Math.max(0.03, BASELINE_ALPHA));
       if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
@@ -249,9 +249,9 @@ const D3Graph = ({
       if (links.length > 0) {
         const existingLinkForce = simulationRef.current.force('link');
         if (existingLinkForce) {
-          existingLinkForce.links(links).distance(70).strength(0.9).iterations(2);
+          existingLinkForce.links(links).distance(220).strength(0.9).iterations(2);
         } else {
-          simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(70).strength(0.9).iterations(2));
+          simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(220).strength(0.9).iterations(2));
         }
       } else {
         simulationRef.current.force('link', null);
@@ -307,45 +307,57 @@ const D3Graph = ({
       tempConnectionLayer.selectAll('line.temp-connection').remove();
     }
 
-    // Data join for links with hover effects
+    // Data join for links with enhanced video-game-like effects
     const link = linkElementsRef.current
       .selectAll('line.link')
       .data(links, d => d.id)
       .join(
         enter => enter.append('line')
           .attr('class', 'link')
-          .attr('stroke', '#94a3b8')
-          .attr('stroke-width', 3)
-          .attr('stroke-opacity', 0.6)
+          .attr('stroke', '#64748b')
+          .attr('stroke-width', 4)
+          .attr('stroke-opacity', 0.7)
+          .attr('stroke-linecap', 'round')
           .style('cursor', 'pointer')
+          .style('filter', 'drop-shadow(0 0 2px rgba(100, 116, 139, 0.3))')
+          .style('transition', 'all 0.2s ease-out')
           .on('mouseenter', function() {
             d3.select(this)
               .attr('stroke', '#ef4444')
-              .attr('stroke-width', 5)
-              .attr('stroke-opacity', 1);
+              .attr('stroke-width', 8)
+              .attr('stroke-opacity', 1)
+              .style('filter', 'drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.5))');
           })
           .on('mouseleave', function() {
             d3.select(this)
-              .attr('stroke', '#94a3b8')
-              .attr('stroke-width', 3)
-              .attr('stroke-opacity', 0.6);
+              .attr('stroke', '#64748b')
+              .attr('stroke-width', 4)
+              .attr('stroke-opacity', 0.7)
+              .style('filter', 'drop-shadow(0 0 2px rgba(100, 116, 139, 0.3))');
           })
           .on('click', function(event, d) {
             event.stopPropagation();
-            if (confirm('Delete this connection?')) {
-              if (onDataChange) {
-                onDataChange({
-                  type: 'deleteConnection',
-                  connectionId: d.id
-                });
-              }
-            }
+            // Instant deletion with visual feedback - no confirmation needed
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .attr('stroke-width', 12)
+              .attr('stroke-opacity', 0)
+              .style('filter', 'drop-shadow(0 0 20px rgba(239, 68, 68, 1))')
+              .on('end', function() {
+                if (onDataChange) {
+                  onDataChange({
+                    type: 'deleteConnection',
+                    connectionId: d.id
+                  });
+                }
+              });
           }),
         update => update,
         exit => exit.remove()
       );
 
-    // Data join for nodes
+    // Data join for nodes with enhanced video-game aesthetics
     const node = nodeElementsRef.current
       .selectAll('g.node')
       .data(nodes, d => d.id)
@@ -353,39 +365,63 @@ const D3Graph = ({
         enter => {
           const g = enter.append('g')
             .attr('class', 'node')
-            .style('cursor', 'pointer');
+            .style('cursor', 'grab');
 
+          // Outer glow ring for depth
+          g.append('circle')
+            .attr('class', 'node-glow')
+            .attr('r', d => d.radius + 6)
+            .attr('fill', d => d.color)
+            .attr('opacity', 0.2)
+            .style('filter', 'blur(8px)')
+            .style('pointer-events', 'none');
+
+          // Main node circle with enhanced styling
           g.append('circle')
             .attr('class', 'node-circle')
             .attr('r', d => d.radius)
             .attr('fill', d => d.color)
             .attr('stroke', '#fff')
-            .attr('stroke-width', 4)
-            .style('opacity', 1);
+            .attr('stroke-width', 5)
+            .style('opacity', 0.95)
+            .style('filter', 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))')
+            .style('transition', 'all 0.2s ease-out');
 
-          // Add connection mode indicator ring
+          // Inner highlight for glossy effect
           g.append('circle')
-            .attr('class', 'connection-indicator')
-            .attr('r', d => d.radius + 8)
-            .attr('fill', 'none')
-            .attr('stroke', '#10b981')
-            .attr('stroke-width', 3)
-            .attr('stroke-dasharray', '5,5')
-            .style('opacity', 0)
+            .attr('class', 'node-highlight')
+            .attr('r', d => d.radius * 0.35)
+            .attr('cx', d => -d.radius * 0.15)
+            .attr('cy', d => -d.radius * 0.15)
+            .attr('fill', 'rgba(255, 255, 255, 0.25)')
             .style('pointer-events', 'none');
 
+          // Connection mode indicator ring
+          g.append('circle')
+            .attr('class', 'connection-indicator')
+            .attr('r', d => d.radius + 12)
+            .attr('fill', 'none')
+            .attr('stroke', '#10b981')
+            .attr('stroke-width', 4)
+            .attr('stroke-dasharray', '8,4')
+            .style('opacity', 0)
+            .style('pointer-events', 'none')
+            .style('filter', 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.8))');
+
+          // Node label with better readability
           g.append('text')
             .text(d => {
-              const maxLen = 20;
+              const maxLen = 18;
               return d.label.length > maxLen ? d.label.substring(0, maxLen) + '...' : d.label;
             })
             .attr('text-anchor', 'middle')
             .attr('dy', '.35em')
             .attr('fill', '#fff')
             .attr('font-size', '14px')
-            .attr('font-weight', 'bold')
+            .attr('font-weight', '700')
             .attr('pointer-events', 'none')
-            .style('text-shadow', '0 0 3px #000, 0 0 3px #000');
+            .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)')
+            .style('letter-spacing', '0.3px');
 
           return g;
         },
@@ -428,7 +464,7 @@ const D3Graph = ({
         return activeFilter === d.type ? 1 : 0.3;
       });
 
-    // Drag behavior
+    // Enhanced drag behavior with video-game tactile feedback
     let dragStartX = 0;
     let dragStartY = 0;
     let hasMoved = false;
@@ -444,6 +480,19 @@ const D3Graph = ({
         dragStartY = event.y;
         
         svg.on('.zoom', null);
+        
+        // Visual feedback on grab
+        d3.select(this).style('cursor', 'grabbing');
+        d3.select(this).select('.node-circle')
+          .transition()
+          .duration(100)
+          .attr('stroke-width', 6)
+          .style('filter', 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5))');
+        
+        d3.select(this).select('.node-glow')
+          .transition()
+          .duration(100)
+          .attr('opacity', 0.4);
         
         if (simulationRef.current && physicsEnabled) {
           simulationRef.current.alphaTarget(0.12).restart();
@@ -462,7 +511,6 @@ const D3Graph = ({
         if (!hasMoved && distance > dragThreshold) {
           hasMoved = true;
           isDraggingRef.current = true;
-          d3.select(this).select('circle').attr('stroke-width', 6);
         }
 
         if (hasMoved) {
@@ -473,8 +521,20 @@ const D3Graph = ({
       .on('end', function(event, d) {
         if (connectionMode) return;
         
+        // Visual feedback on release
+        d3.select(this).style('cursor', 'grab');
+        
         if (hasMoved) {
-          d3.select(this).select('circle').attr('stroke-width', 4);
+          d3.select(this).select('.node-circle')
+            .transition()
+            .duration(200)
+            .attr('stroke-width', 5)
+            .style('filter', 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))');
+          
+          d3.select(this).select('.node-glow')
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.2);
           
           if (physicsEnabled) {
             d.fx = null;
@@ -520,12 +580,66 @@ const D3Graph = ({
 
     node.call(dragBehavior);
 
-    // Click handlers
+    // Enhanced hover effects for video-game tactile feel
+    node.on('mouseenter', function(event, d) {
+      if (connectionMode) return;
+      
+      d3.select(this).select('.node-circle')
+        .transition()
+        .duration(150)
+        .attr('r', d.radius * 1.08)
+        .style('filter', 'drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))');
+      
+      d3.select(this).select('.node-glow')
+        .transition()
+        .duration(150)
+        .attr('r', (d.radius + 6) * 1.08)
+        .attr('opacity', 0.35);
+      
+      d3.select(this).select('.node-highlight')
+        .transition()
+        .duration(150)
+        .attr('r', d.radius * 0.4)
+        .attr('fill', 'rgba(255, 255, 255, 0.35)');
+    })
+    .on('mouseleave', function(event, d) {
+      if (connectionMode) return;
+      
+      d3.select(this).select('.node-circle')
+        .transition()
+        .duration(200)
+        .attr('r', d.radius)
+        .style('filter', 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))');
+      
+      d3.select(this).select('.node-glow')
+        .transition()
+        .duration(200)
+        .attr('r', d.radius + 6)
+        .attr('opacity', 0.2);
+      
+      d3.select(this).select('.node-highlight')
+        .transition()
+        .duration(200)
+        .attr('r', d.radius * 0.35)
+        .attr('fill', 'rgba(255, 255, 255, 0.25)');
+    });
+
+    // Click handlers with press animation
     node.on('click', function(event, d) {
       if (connectionMode) {
         handleConnectionClick(event, d);
       } else if (!hasMoved && !isDraggingRef.current) {
         event.stopPropagation();
+        
+        // Click feedback animation
+        d3.select(this).select('.node-circle')
+          .transition()
+          .duration(100)
+          .attr('r', d.radius * 0.95)
+          .transition()
+          .duration(100)
+          .attr('r', d.radius);
+        
         if (onNodeClick) {
           onNodeClick(d);
         }

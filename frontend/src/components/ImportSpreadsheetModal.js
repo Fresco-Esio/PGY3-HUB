@@ -27,24 +27,42 @@ const ImportSpreadsheetModal = ({
   const [step, setStep] = useState(1); // 1: Upload, 2: Preview
   const fileInputRef = useRef(null);
 
-  // Required fields for patient nodes
-  const REQUIRED_FIELDS = ['firstName', 'lastName', 'chiefComplaint'];
+  // Required fields for patient nodes - ONLY first and last name required
+  const REQUIRED_FIELDS = ['firstName', 'lastName'];
   
   // Expected column headers (case-insensitive matching)
   const EXPECTED_HEADERS = {
+    // First name variations
     'first name': 'firstName',
     'firstname': 'firstName',
+    'first_name': 'firstName',
+    'given name': 'firstName',
+    'givenname': 'firstName',
+    'patient first name': 'firstName',
+    'pt first name': 'firstName',
+    'fname': 'firstName',
+    // Last name variations
     'last name': 'lastName',
     'lastname': 'lastName',
+    'last_name': 'lastName',
+    'surname': 'lastName',
+    'family name': 'lastName',
+    'familyname': 'lastName',
+    'patient last name': 'lastName',
+    'pt last name': 'lastName',
+    'lname': 'lastName',
+    // Optional fields
     'chief complaint': 'chiefComplaint',
     'chiefcomplaint': 'chiefComplaint',
     'complaint': 'chiefComplaint',
-    // Optional fields
+    'chief_complaint': 'chiefComplaint',
     'initial presentation': 'initialPresentation',
     'initialpresentation': 'initialPresentation',
+    'initial_presentation': 'initialPresentation',
     'presentation': 'initialPresentation',
     'narrative': 'narrativeSummary',
     'narrative summary': 'narrativeSummary',
+    'narrative_summary': 'narrativeSummary',
     'status': 'status',
   };
 
@@ -240,9 +258,19 @@ const ImportSpreadsheetModal = ({
       const row = validation.row;
       const fullName = `${row.firstName} ${row.lastName}`.trim();
       
+      // Generate ID from initials + timestamp for uniqueness
+      // Example: "John Smith" → "JS-1728234567890"
+      const firstInitial = row.firstName.charAt(0).toUpperCase();
+      const lastInitial = row.lastName.charAt(0).toUpperCase();
+      const timestamp = Date.now();
+      const generatedId = `${firstInitial}${lastInitial}-${timestamp}`;
+      
+      // Create initials label for privacy (e.g., "J.S.")
+      const initialsLabel = `${firstInitial}.${lastInitial}.`;
+      
       return {
-        id: Date.now() + Math.random(), // Temporary unique ID
-        label: fullName,
+        id: generatedId, // Auto-generated ID from initials
+        label: initialsLabel, // Use initials only for privacy (e.g., "J.S.")
         firstName: row.firstName,
         lastName: row.lastName,
         chief_complaint: row.chiefComplaint,
@@ -263,9 +291,18 @@ const ImportSpreadsheetModal = ({
       const row = validation.row;
       const fullName = `${row.firstName || 'Unknown'} ${row.lastName || 'Patient'}`.trim();
       
+      // Generate ID from available initials (use ? for missing)
+      const firstInitial = row.firstName ? row.firstName.charAt(0).toUpperCase() : '?';
+      const lastInitial = row.lastName ? row.lastName.charAt(0).toUpperCase() : '?';
+      const timestamp = Date.now();
+      const generatedId = `${firstInitial}${lastInitial}-${timestamp}`;
+      
+      // Create initials label for privacy (e.g., "J.S." or "?.S." if first name missing)
+      const initialsLabel = `${firstInitial}.${lastInitial}.`;
+      
       return {
-        id: Date.now() + Math.random(),
-        label: fullName,
+        id: generatedId,
+        label: initialsLabel, // Use initials only for privacy
         firstName: row.firstName || '',
         lastName: row.lastName || '',
         chief_complaint: row.chiefComplaint || '',
@@ -460,10 +497,15 @@ const ImportSpreadsheetModal = ({
                   <ul className="text-sm text-amber-800 space-y-1">
                     <li>• <strong>First Name</strong> - Patient's first name</li>
                     <li>• <strong>Last Name</strong> - Patient's last name</li>
-                    <li>• <strong>Chief Complaint</strong> - Primary presenting concern</li>
                   </ul>
+                  <p className="text-xs text-amber-700 mt-3">
+                    <strong>Privacy Protection:</strong> Node labels will show initials only (e.g., "John Smith" → "J.S.")
+                  </p>
+                  <p className="text-xs text-amber-700 mt-1">
+                    <strong>Auto-Generated ID:</strong> Unique ID from initials + timestamp (e.g., "JS-1728234567890")
+                  </p>
                   <p className="text-xs text-amber-700 mt-2">
-                    Optional fields: Initial Presentation, Narrative Summary, Status
+                    <strong>Optional fields:</strong> Chief Complaint, Initial Presentation, Narrative Summary, Status
                   </p>
                 </div>
 
