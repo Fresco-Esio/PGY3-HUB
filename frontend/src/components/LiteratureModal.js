@@ -19,9 +19,15 @@ import {
   Save,
   Trash2,
   Plus,
+  Brain,
+  Users,
+  Target,
 } from "lucide-react";
 
 import useAnimatedModalHeight from "../hooks/useAnimatedModalHeight";
+// Import Notes and Tags components
+import NotesEditor from "./NotesEditor";
+import TagManager from "./TagManager";
 
 // Animation variants for Framer Motion
 const modalVariants = {
@@ -431,7 +437,7 @@ const LiteratureModal = ({
             animate="visible"
             exit="hidden"
             variants={modalVariants}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
+            className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
             onAnimationStart={() => {
               setIsAnimating(true);
@@ -576,44 +582,50 @@ const LiteratureModal = ({
               )}
             </div>
 
-            {/* Tab Navigation with Dark Theme */}
+            {/* Tab Navigation */}
             <div
-              className="border-b border-slate-200 bg-gradient-to-r from-slate-100 to-slate-50"
+              className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-600"
               ref={tabsRef}
             >
-              <nav className="flex space-x-8 px-6">
+              <nav className="flex flex-wrap gap-2 px-6 py-4">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
                     <motion.button
                       key={tab.id}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
                       onClick={() => {
                         saveScrollFor(activeTab);
                         handleTabSwitch(tab.id);
                         setTimeout(() => restoreScrollFor(tab.id), 320);
                       }}
                       disabled={isAnimating}
-                      className={`flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm transition-all duration-300 ${
+                      className={`relative flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
                         activeTab === tab.id
-                          ? "text-slate-900 border-slate-900 bg-white shadow-sm"
-                          : "text-slate-600 border-transparent hover:text-slate-900 hover:border-slate-300"
+                          ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25"
+                          : "text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-md"
                       }`}
+                      whileHover={{ scale: activeTab === tab.id ? 1 : 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      initial={false}
                     >
                       <Icon
                         size={16}
-                        className={
-                          activeTab === tab.id
-                            ? "text-slate-900"
-                            : "text-slate-500"
-                        }
+                        className={activeTab === tab.id ? "drop-shadow-sm" : ""}
                       />
                       {tab.label}
                       {tab.badge !== undefined && tab.badge > 0 && (
                         <span className="ml-1 bg-slate-700 text-white text-xs px-2 py-0.5 rounded-full">
                           {tab.badge}
                         </span>
+                      )}
+
+                      {activeTab === tab.id && (
+                        <motion.div
+                          layoutId="literatureActiveTab"
+                          className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-purple-500/20 rounded-xl blur-sm"
+                          initial={false}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                        />
                       )}
                     </motion.button>
                   );
@@ -643,7 +655,7 @@ const LiteratureModal = ({
                       <div className="space-y-6">
                         {/* Abstract Section */}
                         <div>
-                          <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                          <h3 className="text-lg font-semibold text-white mb-3">
                             Abstract
                           </h3>
                           {isEditing ? (
@@ -652,12 +664,12 @@ const LiteratureModal = ({
                               onChange={(e) =>
                                 handleFieldChange("abstract", e.target.value)
                               }
-                              className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none"
+                              className="w-full p-3 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
                               rows={6}
                               placeholder="Enter abstract..."
                             />
                           ) : (
-                            <p className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg">
+                            <p className="text-slate-200 leading-relaxed bg-slate-700/50 p-4 rounded-lg border border-slate-600">
                               {formData.abstract || "No abstract provided"}
                             </p>
                           )}
@@ -665,7 +677,7 @@ const LiteratureModal = ({
 
                         {/* Keywords Section */}
                         <div>
-                          <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                          <h3 className="text-lg font-semibold text-white mb-3">
                             Keywords
                           </h3>
                           {isEditing ? (
@@ -675,7 +687,7 @@ const LiteratureModal = ({
                               onChange={(e) =>
                                 handleFieldChange("keywords", e.target.value)
                               }
-                              className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                              className="w-full p-3 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                               placeholder="Enter keywords (comma separated)..."
                             />
                           ) : (
@@ -686,13 +698,13 @@ const LiteratureModal = ({
                                   .map((keyword, index) => (
                                     <span
                                       key={index}
-                                      className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm"
+                                      className="bg-purple-600/20 text-purple-300 border border-purple-600/30 px-3 py-1 rounded-full text-sm"
                                     >
                                       {keyword.trim()}
                                     </span>
                                   ))
                               ) : (
-                                <span className="text-slate-500 italic">
+                                <span className="text-slate-400 italic">
                                   No keywords provided
                                 </span>
                               )}
@@ -702,13 +714,13 @@ const LiteratureModal = ({
 
                         {/* Publication Details */}
                         <div>
-                          <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                          <h3 className="text-lg font-semibold text-white mb-3">
                             Publication Details
                           </h3>
                           {isEditing ? (
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-300 mb-1">
                                   DOI
                                 </label>
                                 <input
@@ -717,12 +729,12 @@ const LiteratureModal = ({
                                   onChange={(e) =>
                                     handleFieldChange("doi", e.target.value)
                                   }
-                                  className="w-full p-2 bg-slate-50 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                  className="w-full p-2 bg-slate-700/50 border border-slate-600 rounded text-sm text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                   placeholder="DOI..."
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-300 mb-1">
                                   Volume
                                 </label>
                                 <input
@@ -731,12 +743,12 @@ const LiteratureModal = ({
                                   onChange={(e) =>
                                     handleFieldChange("volume", e.target.value)
                                   }
-                                  className="w-full p-2 bg-slate-50 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                  className="w-full p-2 bg-slate-700/50 border border-slate-600 rounded text-sm text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                   placeholder="Volume..."
                                 />
                               </div>
                               <div className="col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-300 mb-1">
                                   Pages
                                 </label>
                                 <input
@@ -745,39 +757,39 @@ const LiteratureModal = ({
                                   onChange={(e) =>
                                     handleFieldChange("pages", e.target.value)
                                   }
-                                  className="w-full p-2 bg-slate-50 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                  className="w-full p-2 bg-slate-700/50 border border-slate-600 rounded text-sm text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                   placeholder="Pages..."
                                 />
                               </div>
                             </div>
                           ) : (
-                            <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg">
+                            <div className="grid grid-cols-2 gap-4 text-sm bg-slate-700/50 p-4 rounded-lg border border-slate-600">
                               {formData.doi && (
                                 <div>
-                                  <span className="font-medium text-slate-600">
+                                  <span className="font-medium text-slate-400">
                                     DOI:
                                   </span>
-                                  <span className="ml-2 text-slate-900">
+                                  <span className="ml-2 text-slate-200">
                                     {formData.doi}
                                   </span>
                                 </div>
                               )}
                               {formData.volume && (
                                 <div>
-                                  <span className="font-medium text-slate-600">
+                                  <span className="font-medium text-slate-400">
                                     Volume:
                                   </span>
-                                  <span className="ml-2 text-slate-900">
+                                  <span className="ml-2 text-slate-200">
                                     {formData.volume}
                                   </span>
                                 </div>
                               )}
                               {formData.pages && (
                                 <div className="col-span-2">
-                                  <span className="font-medium text-slate-600">
+                                  <span className="font-medium text-slate-400">
                                     Pages:
                                   </span>
-                                  <span className="ml-2 text-slate-900">
+                                  <span className="ml-2 text-slate-200">
                                     {formData.pages}
                                   </span>
                                 </div>
@@ -787,47 +799,78 @@ const LiteratureModal = ({
                         </div>
 
                         {/* Connected Nodes */}
-                        {connectedNodes.length > 0 && (
-                          <div>
-                            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                              Connected To
-                            </h3>
-                            <div className="grid grid-cols-2 gap-3">
-                              {connectedNodes.map((node) => (
-                                <div
-                                  key={node.id}
-                                  className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors"
-                                >
+                        <div className="mb-6">
+                          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                            <Link2 size={18} className="text-purple-400" />
+                            Connected Nodes
+                            {connectedNodes.length > 0 && (
+                              <span className="text-xs bg-purple-600/20 text-purple-300 px-2 py-1 rounded">
+                                {connectedNodes.length}
+                              </span>
+                            )}
+                          </h3>
+                          {connectedNodes.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {connectedNodes.map((node) => {
+                                const Icon = node.type === "case" ? Users : 
+                                            node.type === "topic" ? Brain : 
+                                            node.type === "task" ? Target : 
+                                            BookOpen;
+                                const colorClass = node.type === "case" 
+                                  ? "bg-green-600/10 border-green-600/30 text-green-700 hover:bg-green-600/20"
+                                  : node.type === "topic"
+                                  ? "bg-blue-600/10 border-blue-600/30 text-blue-700 hover:bg-blue-600/20"
+                                  : node.type === "task"
+                                  ? "bg-amber-600/10 border-amber-600/30 text-amber-700 hover:bg-amber-600/20"
+                                  : "bg-purple-600/10 border-purple-600/30 text-purple-700 hover:bg-purple-600/20";
+                                
+                                return (
                                   <div
-                                    className={`w-3 h-3 rounded-full ${
-                                      node.type === "case"
-                                        ? "bg-indigo-500"
-                                        : node.type === "topic"
-                                        ? "bg-blue-500"
-                                        : node.type === "task"
-                                        ? "bg-amber-500"
-                                        : "bg-purple-500"
-                                    }`}
-                                  />
-                                  <div>
-                                    <div className="font-medium text-sm text-slate-900">
-                                      {node.data.label || node.data.title}
-                                    </div>
-                                    <div className="text-xs text-slate-500 capitalize">
-                                      {node.type}
-                                    </div>
+                                    key={node.id}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-md transition-colors cursor-pointer text-sm ${colorClass}`}
+                                  >
+                                    <Icon size={14} className="flex-shrink-0" />
+                                    <span>
+                                      {node.data.label || node.data.title || 'Untitled'}
+                                    </span>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            <p className="text-slate-400 text-sm italic text-center py-4 bg-slate-700/20 rounded-lg border border-slate-600">
+                              No connected nodes. Use the connection manager to link related content.
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Tags Section */}
+                        <div className="mb-4">
+                          <TagManager
+                            tags={formData.tags || []}
+                            onChange={(tags) => handleFieldChange("tags", tags)}
+                            suggestions={[
+                              'meta-analysis',
+                              'randomized-controlled-trial',
+                              'systematic-review',
+                              'case-study',
+                              'clinical-guidelines',
+                              'neuroscience',
+                              'psychotherapy',
+                              'pharmacology',
+                              'diagnostic-criteria',
+                              'evidence-based',
+                              'treatment-efficacy',
+                              'epidemiology',
+                            ]}
+                          />
+                        </div>
                       </div>
                     )}
 
                     {activeTab === "notes" && (
                       <div>
-                        <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                        <h3 className="text-lg font-semibold text-white mb-3">
                           Personal Notes
                         </h3>
                         {isEditing ? (
@@ -836,18 +879,18 @@ const LiteratureModal = ({
                             onChange={(e) =>
                               handleFieldChange("notes", e.target.value)
                             }
-                            className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none"
+                            className="w-full p-3 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
                             rows={12}
                             placeholder="Add your personal notes about this literature..."
                           />
                         ) : (
-                          <div className="bg-slate-50 p-4 rounded-lg min-h-64">
+                          <div className="bg-slate-700/50 border border-slate-600 p-4 rounded-lg min-h-64">
                             {formData.notes ? (
-                              <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                              <p className="text-slate-200 leading-relaxed whitespace-pre-wrap">
                                 {formData.notes}
                               </p>
                             ) : (
-                              <p className="text-slate-500 italic">
+                              <p className="text-slate-400 italic">
                                 No notes yet. Click Edit to add your thoughts
                                 about this literature.
                               </p>

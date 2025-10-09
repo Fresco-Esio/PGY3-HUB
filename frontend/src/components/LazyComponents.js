@@ -14,7 +14,6 @@ const LoadingSpinner = ({ message = "Loading..." }) => (
 
 // Lazy load components that aren't needed immediately
 export const LazyRichTextEditor = lazy(() => import('./RichTextEditor'));
-export const LazyTemplateManager = lazy(() => import('./TemplateManager'));
 export const LazyLiteratureModal = lazy(() => import('./LiteratureModal'));
 
 // Lazy load modals for better initial load performance
@@ -31,7 +30,6 @@ export const withLazyLoading = (LazyComponent, fallbackMessage) => (props) => (
 
 // Pre-wrapped components ready to use
 export const RichTextEditor = withLazyLoading(LazyRichTextEditor, "Loading editor...");
-export const TemplateManager = withLazyLoading(LazyTemplateManager, "Loading templates...");
 export const LiteratureModal = withLazyLoading(LazyLiteratureModal, "Loading literature viewer...");
 
 // Pre-wrapped modal components

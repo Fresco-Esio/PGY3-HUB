@@ -39,6 +39,9 @@ import {
 } from "lucide-react";
 
 import useAnimatedModalHeight from "../hooks/useAnimatedModalHeight";
+// Import Notes and Tags components
+import NotesEditor from "./NotesEditor";
+import TagManager from "./TagManager";
 
 // Animation variants for Framer Motion
 const modalVariants = {
@@ -163,6 +166,8 @@ const TopicModal = ({
   addToast,
   syncNodeData,
   forceNodeUpdate,
+  allNodes = [],
+  connections = [],
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -434,15 +439,54 @@ const TopicModal = ({
 
   // Get connected nodes for Connections tab
   const connectedNodes = useMemo(() => {
-    if (!data?.id) return { cases: [], literature: [] };
+    if (!data?.id || !connections.length || !allNodes.length) {
+      return { cases: [], literature: [], tasks: [], topics: [] };
+    }
 
-    // This would typically come from your mind map data
-    // For now, return empty arrays - you can implement based on your data structure
-    return {
+    const currentNodeId = `topic-${data.id}`;
+    
+    // Find all connections where this topic is involved
+    const relatedConnections = connections.filter(
+      conn => conn.source === currentNodeId || conn.target === currentNodeId
+    );
+
+    // Get IDs of connected nodes
+    const connectedNodeIds = relatedConnections.map(conn => 
+      conn.source === currentNodeId ? conn.target : conn.source
+    );
+
+    // Group connected nodes by type
+    const grouped = {
       cases: [],
       literature: [],
+      tasks: [],
+      topics: []
     };
-  }, [data?.id]);
+
+    connectedNodeIds.forEach(nodeId => {
+      const nodeWrapper = allNodes.find(n => n.id === nodeId);
+      
+      if (!nodeWrapper || !nodeWrapper.data) {
+        return;
+      }
+
+      const nodeData = nodeWrapper.data;
+      const nodeType = nodeWrapper.type;
+
+      // Add to appropriate group based on type
+      if (nodeType === 'case' && (nodeData.case_id || nodeData.primary_diagnosis || nodeData.title)) {
+        grouped.cases.push(nodeData);
+      } else if (nodeType === 'literature' && (nodeData.title || nodeData.label)) {
+        grouped.literature.push(nodeData);
+      } else if (nodeType === 'task' && (nodeData.title || nodeData.label || nodeData.description)) {
+        grouped.tasks.push(nodeData);
+      } else if (nodeType === 'topic' && (nodeData.title || nodeData.label)) {
+        grouped.topics.push(nodeData);
+      }
+    });
+
+    return grouped;
+  }, [data?.id, connections, allNodes]);
 
   const handleDelete = useCallback(async () => {
     if (isLoading) return;
@@ -756,7 +800,7 @@ const TopicModal = ({
                     onClick={() => handleTabSwitch(id)}
                     className={`relative flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
                       activeTab === id
-                        ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/25"
+                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25"
                         : "text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-md"
                     }`}
                     whileHover={{ scale: activeTab === id ? 1 : 1.02 }}
@@ -772,7 +816,7 @@ const TopicModal = ({
                     {activeTab === id && (
                       <motion.div
                         layoutId="topicActiveTab"
-                        className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-500/20 rounded-xl blur-sm"
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-500/20 rounded-xl blur-sm"
                         initial={false}
                         transition={{ duration: 0.3, ease: "easeOut" }}
                       />
@@ -1668,11 +1712,118 @@ const TopicModal = ({
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                           <Link2 size={20} className="text-blue-400" />
                           Connected Nodes
+                          {(connectedNodes.cases.length + connectedNodes.literature.length + 
+                            connectedNodes.tasks.length + connectedNodes.topics.length) > 0 && (
+                            <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
+                              {connectedNodes.cases.length + connectedNodes.literature.length + 
+                               connectedNodes.tasks.length + connectedNodes.topics.length}
+                            </span>
+                          )}
                         </h3>
-                        <p className="text-slate-400 text-center py-8">
-                          This section will show nodes connected to this topic
-                          in the mind map.
-                        </p>
+
+                        {/* Inline Tag-Style Layout for All Connected Nodes */}
+                        {(connectedNodes.cases.length + connectedNodes.literature.length + 
+                          connectedNodes.tasks.length + connectedNodes.topics.length) > 0 ? (
+                          <div className="flex flex-wrap gap-2 mb-6">
+                            {/* Cases - Green */}
+                            {connectedNodes.cases.map((caseNode, index) => (
+                              <div
+                                key={`case-${index}`}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-600/10 border border-green-600/30 rounded-md hover:bg-green-600/20 transition-colors cursor-pointer text-sm"
+                              >
+                                <Users size={14} className="text-green-400 flex-shrink-0" />
+                                <span className="text-green-300">
+                                  {caseNode.case_id || caseNode.title || caseNode.primary_diagnosis || 'Untitled Case'}
+                                </span>
+                              </div>
+                            ))}
+
+                            {/* Literature - Purple */}
+                            {connectedNodes.literature.map((lit, index) => (
+                              <div
+                                key={`lit-${index}`}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple-600/10 border border-purple-600/30 rounded-md hover:bg-purple-600/20 transition-colors cursor-pointer text-sm"
+                              >
+                                <BookOpen size={14} className="text-purple-400 flex-shrink-0" />
+                                <span className="text-purple-300">
+                                  {lit.title || lit.label || 'Untitled Literature'}
+                                </span>
+                              </div>
+                            ))}
+
+                            {/* Tasks - Amber */}
+                            {connectedNodes.tasks.map((task, index) => (
+                              <div
+                                key={`task-${index}`}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-600/10 border border-amber-600/30 rounded-md hover:bg-amber-600/20 transition-colors cursor-pointer text-sm"
+                              >
+                                <Target size={14} className="text-amber-400 flex-shrink-0" />
+                                <span className="text-amber-300">
+                                  {task.title || task.label || task.description || 'Untitled Task'}
+                                </span>
+                              </div>
+                            ))}
+
+                            {/* Other Topics - Cyan */}
+                            {connectedNodes.topics.map((topic, index) => (
+                              <div
+                                key={`topic-${index}`}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-cyan-600/10 border border-cyan-600/30 rounded-md hover:bg-cyan-600/20 transition-colors cursor-pointer text-sm"
+                              >
+                                <Brain size={14} className="text-cyan-400 flex-shrink-0" />
+                                <span className="text-cyan-300">
+                                  {topic.title || topic.label || 'Untitled Topic'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="mb-6 p-4 bg-slate-700/20 rounded-lg border border-slate-600/50">
+                            <p className="text-slate-400 text-sm italic text-center">
+                              No connected nodes. Use the connection manager to link related cases, literature, tasks, or topics.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Notes Section */}
+                        <div className="mb-6">
+                          <NotesEditor
+                            value={editData.notes || ''}
+                            onChange={(notes) => setEditData(prev => ({ ...prev, notes }))}
+                            placeholder="Add notes, study observations, or personal insights about this topic..."
+                          />
+                        </div>
+
+                        {/* Tags Section */}
+                        <div className="mb-6">
+                          <TagManager
+                            tags={editData.tags || []}
+                            onChange={(tags) => setEditData(prev => ({ ...prev, tags }))}
+                            suggestions={[
+                              'diagnosis',
+                              'treatment',
+                              'assessment',
+                              'psychotherapy',
+                              'pharmacology',
+                              'neuroscience',
+                              'developmental',
+                              'clinical-skills',
+                              'ethics',
+                              'research',
+                              'differential-diagnosis',
+                              'emergency',
+                              'cultural-considerations',
+                            ]}
+                          />
+                        </div>
+
+                        <div className="mt-6 p-4 bg-slate-700/20 rounded-lg border border-slate-600">
+                          <p className="text-slate-400 text-sm italic">
+                            Connected nodes are automatically populated based on
+                            mind map relationships. Use the connection manager to
+                            link nodes together.
+                          </p>
+                        </div>
                       </motion.div>
                     </motion.div>
                   )}

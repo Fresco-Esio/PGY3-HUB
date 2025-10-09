@@ -1,8 +1,33 @@
 # PGY3-HUB - Mind Mapping Tool for Psychiatry Residents
 
+**Current Version:** v0.6.0 - "Visual Clarity"  
+**Last Updated:** October 8, 2025
+
+---
+
+## 🚨 IMPORTANT: Read These First
+
+1. **AI_GUIDELINES.md** - MANDATORY documentation practices and version system
+2. **VERSION.md** - Current version and what's being worked on
+3. **ROADMAP.md** - Current priorities and task lists
+
+**CRITICAL:** Any AI working on this codebase MUST update documentation files after making code changes. See `.github/AI_GUIDELINES.md` for complete instructions.
+
+---
+
 ## Project Overview
 
-PGY3-HUB is an immersive mind mapping application designed for psychiatry residents to organize and connect psychiatric knowledge, clinical cases, tasks, and literature. The application features a modern React frontend with dual backend support (FastAPI/Python and Express.js/Node.js), focusing on an intuitive, visually engaging experience for psychiatric training.
+**PGY3-HUB is a visual thinking tool** for psychiatrists/psychologists to organize knowledge through an interactive mind map.
+
+**Core Purpose:**
+- Visual organization of Cases ↔ Topics ↔ Literature (the "knowledge triangle")
+- Private clinical reflection space (notes outside medical charts)  
+- Board study tool using real case examples
+- "Calm, focused digital studio for the mind"
+
+**NOT a task management or productivity app.** No deadlines, no notifications, no urgency.
+
+The application features a modern React frontend with dual backend support (FastAPI/Python and Express.js/Node.js), focusing on intuitive, visually engaging experience.
 
 ## Architecture
 
@@ -370,6 +395,42 @@ const scrollToTop = useCallback(() => {
 - Global state management through centralized `mindMapData`
 - **Timeline Integration**: VerticalTimeline component embedded within CaseModal's tabbed interface
 - **Modal Context**: Timeline operates within modal height constraints with fixed scroll containers
+
+---
+
+## 📝 Documentation & Version Requirements
+
+### CRITICAL: When Making Any Code Changes
+
+**YOU MUST update these files** (see `.github/AI_GUIDELINES.md` for details):
+
+1. **VERSION.md** - Add entry describing your changes
+2. **ROADMAP.md** - Mark completed tasks with [x]
+3. **/docs/development/[FEATURE]_IMPLEMENTATION.md** - Update progress checklists
+4. **package.json** - Increment version if releasing
+
+### Version System
+
+**Format:** `v[MAJOR].[MINOR].[PATCH]`
+- **PATCH** (x.x.X): Bug fixes, small improvements
+- **MINOR** (x.X.0): New features, enhancements
+- **MAJOR** (X.0.0): Architecture changes, breaking changes
+
+**Current Version:** v0.6.0 - "Visual Clarity" (Focus Mode development)
+
+### Documentation Structure
+
+```
+/VERSION.md          - Version history (UPDATE ALWAYS)
+/ROADMAP.md          - Current priorities
+/docs/
+  /development/      - Active implementation plans
+  /archive/          - Completed work logs
+  /features/         - Feature specifications
+  /testing/          - Test documentation
+```
+
+**Read `.github/AI_GUIDELINES.md` for complete workflow instructions.**
 
 ### API Configuration
 

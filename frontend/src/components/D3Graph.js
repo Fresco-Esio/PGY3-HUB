@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import * as d3 from 'd3';
+import EdgeContextMenu from './EdgeContextMenu';
+import EdgeLabelModal from './EdgeLabelModalSimple';
 
 const D3Graph = ({ 
   mindMapData, 
   activeFilter = 'all',
+  searchQuery = '',
   onNodeClick, 
   onNodeDoubleClick, 
   onDataChange, 
@@ -28,6 +31,11 @@ const D3Graph = ({
   // Connection mode state
   const [connectionStart, setConnectionStart] = useState(null);
   const [tempConnection, setTempConnection] = useState(null);
+  
+  // Edge context menu state
+  const [contextMenu, setContextMenu] = useState(null);
+  const [selectedEdge, setSelectedEdge] = useState(null);
+  const [edgeLabelModalOpen, setEdgeLabelModalOpen] = useState(false);
   
   const BASELINE_ALPHA = 0.015;
   
@@ -109,7 +117,8 @@ const D3Graph = ({
           source: conn.source,
           target: conn.target,
           id: conn.id || `edge-${conn.source}-${conn.target}`,
-          type: conn.type || 'related'
+          type: conn.type || 'related',
+          label: conn.label || ''
         });
       }
     });
@@ -335,6 +344,24 @@ const D3Graph = ({
               .attr('stroke-opacity', 0.7)
               .style('filter', 'drop-shadow(0 0 2px rgba(100, 116, 139, 0.3))');
           })
+          .on('contextmenu', function(event, d) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Close any existing modal first
+            setEdgeLabelModalOpen(false);
+            
+            // Get node labels for context menu display
+            const sourceNode = nodesRef.current.find(n => n.id === d.source.id || n.id === d.source);
+            const targetNode = nodesRef.current.find(n => n.id === d.target.id || n.id === d.target);
+            
+            setSelectedEdge({
+              ...d,
+              sourceLabel: sourceNode?.label || d.source,
+              targetLabel: targetNode?.label || d.target
+            });
+            setContextMenu({ x: event.pageX, y: event.pageY });
+          })
           .on('click', function(event, d) {
             event.stopPropagation();
             // Instant deletion with visual feedback - no confirmation needed
@@ -354,6 +381,26 @@ const D3Graph = ({
               });
           }),
         update => update,
+        exit => exit.remove()
+      );
+
+    // Data join for edge labels
+    const linkLabel = linkElementsRef.current
+      .selectAll('text.link-label')
+      .data(links.filter(d => d.label && d.label.trim()), d => d.id)
+      .join(
+        enter => enter.append('text')
+          .attr('class', 'link-label')
+          .attr('text-anchor', 'middle')
+          .attr('dy', -8)
+          .attr('fill', '#e2e8f0')
+          .attr('font-size', '11px')
+          .attr('font-weight', '600')
+          .style('pointer-events', 'none')
+          .style('text-shadow', '0 0 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6)')
+          .style('user-select', 'none')
+          .text(d => d.label),
+        update => update.text(d => d.label),
         exit => exit.remove()
       );
 
@@ -442,26 +489,78 @@ const D3Graph = ({
         return '#3b82f6';
       });
 
-    // Update node appearance for connection mode and filter
+    // Helper function to check if node matches search
+    const nodeMatchesSearch = (node, query) => {
+      if (!query || !query.trim()) return true;
+      const searchTerm = query.toLowerCase().trim();
+      
+      // Check label
+      if (node.label && node.label.toLowerCase().includes(searchTerm)) return true;
+      
+      // Check node type
+      if (node.type && node.type.toLowerCase().includes(searchTerm)) return true;
+      
+      // Check original data fields
+      if (node.originalData) {
+        const data = node.originalData;
+        if (data.primary_diagnosis && data.primary_diagnosis.toLowerCase().includes(searchTerm)) return true;
+        if (data.primaryDiagnosis && data.primaryDiagnosis.toLowerCase().includes(searchTerm)) return true;
+        if (data.title && data.title.toLowerCase().includes(searchTerm)) return true;
+        if (data.authors && data.authors.toLowerCase().includes(searchTerm)) return true;
+        if (data.category && data.category.toLowerCase().includes(searchTerm)) return true;
+      }
+      
+      return false;
+    };
+
+    // Update node appearance for connection mode, filter, and search
     node.select('.node-circle')
       .attr('stroke-width', d => {
         if (connectionMode && connectionStart && connectionStart.id === d.id) return 6;
+        if (searchQuery && nodeMatchesSearch(d, searchQuery)) return 6;
         return 4;
       })
       .attr('stroke', d => {
         if (connectionMode && connectionStart && connectionStart.id === d.id) return '#10b981';
+        if (searchQuery && nodeMatchesSearch(d, searchQuery)) return '#fbbf24';
         return '#fff';
       })
       .style('opacity', d => {
+        // Search takes precedence over filter
+        if (searchQuery) {
+          return nodeMatchesSearch(d, searchQuery) ? 1 : 0.15;
+        }
         if (activeFilter === 'all') return 1;
         return activeFilter === d.type ? 1 : 0.2;
       });
     
-    // Update text opacity based on filter
+    // Update glow for search matches
+    node.select('.node-glow')
+      .attr('opacity', d => {
+        if (searchQuery && nodeMatchesSearch(d, searchQuery)) return 0.5;
+        return 0.2;
+      })
+      .style('filter', d => {
+        if (searchQuery && nodeMatchesSearch(d, searchQuery)) {
+          return 'blur(12px) drop-shadow(0 0 20px rgba(251, 191, 36, 0.8))';
+        }
+        return 'blur(8px)';
+      });
+    
+    // Update text opacity based on filter and search
     node.select('text')
       .style('opacity', d => {
+        if (searchQuery) {
+          return nodeMatchesSearch(d, searchQuery) ? 1 : 0.2;
+        }
         if (activeFilter === 'all') return 1;
         return activeFilter === d.type ? 1 : 0.3;
+      })
+      .style('text-shadow', d => {
+        if (searchQuery && nodeMatchesSearch(d, searchQuery)) {
+          return '0 0 10px rgba(251, 191, 36, 0.8), 0 2px 4px rgba(0, 0, 0, 0.8)';
+        }
+        return '0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5)';
       });
 
     // Enhanced drag behavior with video-game tactile feedback
@@ -667,6 +766,11 @@ const D3Graph = ({
           .attr('y1', d => d.source?.y ?? 0)
           .attr('x2', d => d.target?.x ?? 0)
           .attr('y2', d => d.target?.y ?? 0);
+        
+        // Update edge label positions
+        linkElementsRef.current.selectAll('text.link-label')
+          .attr('x', d => ((d.source?.x ?? 0) + (d.target?.x ?? 0)) / 2)
+          .attr('y', d => ((d.source?.y ?? 0) + (d.target?.y ?? 0)) / 2);
       }
 
       if (nodeElementsRef.current) {
@@ -727,16 +831,110 @@ const D3Graph = ({
     };
   }, []);
 
+  // Edge context menu handlers
+  const handleEditLabel = useCallback((edge) => {
+    console.log('🏷️ [handleEditLabel] Called with edge:', edge);
+    console.log('🏷️ [handleEditLabel] Current state:', { 
+      hasContextMenu: !!contextMenu,
+      hasSelectedEdge: !!selectedEdge,
+      edgeLabelModalOpen 
+    });
+    
+    // Create a clean edge object without D3 circular references
+    const cleanEdge = {
+      id: edge.id,
+      source: typeof edge.source === 'object' ? edge.source.id : edge.source,
+      target: typeof edge.target === 'object' ? edge.target.id : edge.target,
+      label: edge.label || '',
+      type: edge.type,
+      sourceLabel: edge.sourceLabel,
+      targetLabel: edge.targetLabel
+    };
+    
+    console.log('🏷️ [handleEditLabel] Clean edge created:', cleanEdge);
+    
+    // Close context menu and update edge in one go
+    setContextMenu(null);
+    
+    // Use setTimeout to ensure state updates happen in correct order
+    setTimeout(() => {
+      setSelectedEdge(cleanEdge);
+      setEdgeLabelModalOpen(true);
+      console.log('🏷️ [handleEditLabel] State updates dispatched');
+    }, 0);
+  }, [contextMenu, selectedEdge, edgeLabelModalOpen]);
+
+  const handleDeleteEdge = useCallback((edge) => {
+    if (onDataChange) {
+      onDataChange({
+        type: 'deleteConnection',
+        connectionId: edge.id
+      });
+    }
+    setContextMenu(null);
+    setSelectedEdge(null);
+  }, [onDataChange]);
+
+  const handleSaveLabel = useCallback(async (edge, label) => {
+    // Update the connection label in mindMapData
+    const connections = mindMapData?.connections || [];
+    const updatedConnections = connections.map(conn => {
+      if (conn.id === edge.id) {
+        return { ...conn, label };
+      }
+      return conn;
+    });
+
+    if (onDataChange) {
+      onDataChange({
+        type: 'connections',
+        connections: updatedConnections
+      });
+    }
+  }, [mindMapData, onDataChange]);
+
   // Temp connection rendering moved to D3 layer for proper transform handling
 
   return (
-    <svg
-      ref={svgRef}
-      className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100"
-      style={{ width: '100%', height: '100%', minHeight: '600px' }}
-    >
-      {/* Temp connection rendering moved to D3 layer */}
-    </svg>
+    <>
+      <svg
+        ref={svgRef}
+        className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100"
+        style={{ width: '100%', height: '100%', minHeight: '600px' }}
+      >
+        {/* Temp connection rendering moved to D3 layer */}
+      </svg>
+
+      {/* Edge Context Menu */}
+      {contextMenu && selectedEdge && (
+        <EdgeContextMenu
+          position={contextMenu}
+          edge={selectedEdge}
+          onEditLabel={handleEditLabel}
+          onDelete={handleDeleteEdge}
+          onClose={() => {
+            setContextMenu(null);
+            setSelectedEdge(null);
+          }}
+        />
+      )}
+
+      {/* Edge Label Modal */}
+      {console.log('🏷️ [D3Graph render] Rendering EdgeLabelModal with:', { 
+        isOpen: edgeLabelModalOpen, 
+        hasEdge: !!selectedEdge,
+        edgeId: selectedEdge?.id 
+      })}
+      <EdgeLabelModal
+        isOpen={edgeLabelModalOpen}
+        edge={selectedEdge}
+        onSave={handleSaveLabel}
+        onClose={() => {
+          setEdgeLabelModalOpen(false);
+          setSelectedEdge(null);
+        }}
+      />
+    </>
   );
 };
 

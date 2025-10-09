@@ -1,4 +1,8 @@
 {
+  "name": "pgy3-hub-backend",
+  "version": "0.6.0",
+  "description": "PGY3-HUB Backend API Server",
+  "private": true,
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",

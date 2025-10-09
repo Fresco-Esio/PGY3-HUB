@@ -288,547 +288,11 @@ const localStorageUtils = {
   }
 };
 
-// Enhanced CSV export utilities
-const csvUtils = {
-  generatePatientCasesCSV: (cases, onProgress) => {
-    if (!cases || cases.length === 0) {
-      return '';
-    }
-
-    if (onProgress) onProgress(10, 'Preparing headers...');
-
-    // Enhanced CSV headers with more detailed information
-    const headers = [
-      'Case ID',
-      'Encounter Date',
-      'Primary Diagnosis',
-      'Secondary Diagnoses',
-      'Age',
-      'Gender',
-      'Chief Complaint',
-      'History of Present Illness',
-      'Medical History',
-      'Medications',
-      'Mental Status Exam',
-      'Assessment & Plan',
-      'Status',
-      'Notes',
-      'Created Date',
-      'Updated Date',
-      'Linked Topics Count',
-      'Last Modified By'
-    ];
-
-    if (onProgress) onProgress(30, 'Processing case data...');
-
-    // Convert cases to CSV rows with enhanced data
-    const rows = cases.map((caseItem, index) => {
-      if (onProgress) onProgress(30 + (index / cases.length) * 50, `Processing case ${index + 1}/${cases.length}...`);
-
-      return [
-        caseItem.case_id || '',
-        caseItem.encounter_date ? new Date(caseItem.encounter_date).toLocaleDateString() : '',
-        caseItem.primary_diagnosis || '',
-        Array.isArray(caseItem.secondary_diagnoses) ? caseItem.secondary_diagnoses.join('; ') : '',
-        caseItem.age || '',
-        caseItem.gender || '',
-        caseItem.chief_complaint || '',
-        caseItem.history_present_illness || '',
-        caseItem.medical_history || '',
-        Array.isArray(caseItem.medications) ? caseItem.medications.join('; ') : '',
-        caseItem.mental_status_exam || '',
-        caseItem.assessment_plan || '',
-        caseItem.status || '',
-        caseItem.notes || '',
-        caseItem.created_at ? new Date(caseItem.created_at).toLocaleDateString() : '',
-        caseItem.updated_at ? new Date(caseItem.updated_at).toLocaleDateString() : '',
-        Array.isArray(caseItem.linked_topics) ? caseItem.linked_topics.length : '0',
-        'PGY-3 System'
-      ];
-    });
-
-    if (onProgress) onProgress(85, 'Formatting CSV content...');
-
-    // Escape CSV values and join
-    const escapeCsvValue = (value) => {
-      const stringValue = String(value);
-      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      }
-      return stringValue;
-    };
-
-    const csvContent = [
-      headers.map(escapeCsvValue).join(','),
-      ...rows.map(row => row.map(escapeCsvValue).join(','))
-    ].join('\n');
-
-    if (onProgress) onProgress(100, 'CSV generation complete!');
-
-    return csvContent;
-  },
-
-  downloadCSV: (csvContent, filename = 'patient_cases.csv') => {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-  },
-
-  // Generate summary statistics
-  generateCasesSummary: (cases) => {
-    if (!cases || cases.length === 0) return null;
-
-    const diagnoses = {};
-    const statuses = {};
-    const ageGroups = { '18-30': 0, '31-50': 0, '51-70': 0, '70+': 0, 'Unknown': 0 };
-    const genders = {};
-
-    cases.forEach(caseItem => {
-      // Diagnoses
-      if (caseItem.primary_diagnosis) {
-        diagnoses[caseItem.primary_diagnosis] = (diagnoses[caseItem.primary_diagnosis] || 0) + 1;
-      }
-
-      // Status
-      if (caseItem.status) {
-        statuses[caseItem.status] = (statuses[caseItem.status] || 0) + 1;
-      }
-
-      // Age groups
-      if (caseItem.age) {
-        if (caseItem.age <= 30) ageGroups['18-30']++;
-        else if (caseItem.age <= 50) ageGroups['31-50']++;
-        else if (caseItem.age <= 70) ageGroups['51-70']++;
-        else ageGroups['70+']++;
-      } else {
-        ageGroups['Unknown']++;
-      }
-
-      // Gender
-      if (caseItem.gender) {
-        genders[caseItem.gender] = (genders[caseItem.gender] || 0) + 1;
-      }
-    });
-
-    return {
-      totalCases: cases.length,
-      diagnoses,
-      statuses,
-      ageGroups,
-      genders
-    };
-  }
-};
-
 // Enhanced Custom Node Components - extracted to separate files for better maintainability
 
+// EnhancedEditingForm has been removed - all editing now happens in specialized modals
 
-
-// Enhanced Dedicated Editing Form Component
-const EnhancedEditingForm = ({ type, data, onClose, onSave, onDelete }) => {
-  // Initialize formData with proper field structure based on node type
-  const getInitialFormData = (type, data) => {
-    const baseData = data || {};
-    
-    switch (type) {
-      case 'case':
-        return {
-          case_id: '',
-          age: '',
-          primary_diagnosis: '',
-          gender: '',
-          chiefComplaint: '',
-          initialPresentation: '',
-          currentPresentation: '',
-          medicationHistory: '',
-          therapyProgress: '',
-          defensePatterns: '',
-          clinicalReflection: '',
-          ...baseData // Existing data takes precedence
-        };
-      case 'topic':
-        return {
-          title: '',
-          category: '',
-          color: '#3B82F6',
-          description: '',
-          notes: '',
-          tags: [],
-          ...baseData
-        };
-      case 'task':
-        return {
-          title: '',
-          description: '',
-          status: 'pending',
-          priority: 'medium',
-          due_date: '',
-          ...baseData
-        };
-      case 'literature':
-        return {
-          title: '',
-          authors: '',
-          year: '',
-          doi: '',
-          abstract: '',
-          notes: '',
-          tags: [],
-          ...baseData
-        };
-      default:
-        return baseData;
-    }
-  };
-
-  const [formData, setFormData] = useState(() => getInitialFormData(type, data));
-  const [activeTab, setActiveTab] = useState('basic');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  // Update formData when data prop changes
-  useEffect(() => {
-    setFormData(getInitialFormData(type, data));
-  }, [type, data]);
-
-  const tabs = {
-    basic: 'Basic Info',
-    details: 'Details',
-    notes: 'Notes & Tags',
-    history: 'History'
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    switch (type) {
-      case 'topic':
-        if (!formData.title?.trim()) newErrors.title = 'Title is required';
-        if (!formData.category?.trim()) newErrors.category = 'Category is required';
-        break;
-      case 'case':
-        if (!formData.case_id?.trim()) newErrors.case_id = 'Case ID is required';
-        if (!formData.primary_diagnosis?.trim()) newErrors.primary_diagnosis = 'Primary diagnosis is required';
-        break;
-      case 'task':
-        if (!formData.title?.trim()) newErrors.title = 'Title is required';
-        break;
-      case 'literature':
-        if (!formData.title?.trim()) newErrors.title = 'Title is required';
-        if (!formData.authors?.trim()) newErrors.authors = 'Authors are required';
-        break;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
-    try {
-      await onSave(formData);
-    } catch (error) {
-      console.error('Error saving:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const updateFormData = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
-    }
-  };
-
-  const renderBasicTab = () => {
-    switch (type) {
-      case 'topic':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-              <input
-                type="text"
-                value={formData.title || ''}
-                onChange={(e) => updateFormData('title', e.target.value)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.title ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder="Enter topic title"
-              />
-              {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-              <select
-                value={formData.category || ''}
-                onChange={(e) => updateFormData('category', e.target.value)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.category ? 'border-red-500' : 'border-gray-300'
-                  }`}
-              >
-                <option value="">Select category</option>
-                <option value="Mood Disorders">Mood Disorders</option>
-                <option value="Anxiety Disorders">Anxiety Disorders</option>
-                <option value="Psychotic Disorders">Psychotic Disorders</option>
-                <option value="Personality Disorders">Personality Disorders</option>
-                <option value="Substance Use Disorders">Substance Use Disorders</option>
-                <option value="Other">Other</option>
-              </select>
-              {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Color Theme</label>
-              <div className="flex gap-2">
-                {['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'].map(color => (
-                  <button
-                    key={color}
-                    onClick={() => updateFormData('color', color)}
-                    className={`w-8 h-8 rounded-full border-2 ${formData.color === color ? 'border-gray-800' : 'border-gray-300'
-                      }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'case':
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Case ID *</label>
-                <input
-                  type="text"
-                  value={formData.case_id || ''}
-                  onChange={(e) => updateFormData('case_id', e.target.value)}
-                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.case_id ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="CASE-001"
-                />
-                {errors.case_id && <p className="text-red-500 text-xs mt-1">{errors.case_id}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                <input
-                  type="number"
-                  value={formData.age || ''}
-                  onChange={(e) => updateFormData('age', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  min="0"
-                  max="120"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Primary Diagnosis *</label>
-              <input
-                type="text"
-                value={formData.primary_diagnosis || ''}
-                onChange={(e) => updateFormData('primary_diagnosis', e.target.value)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.primary_diagnosis ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder="Enter primary diagnosis"
-              />
-              {errors.primary_diagnosis && <p className="text-red-500 text-xs mt-1">{errors.primary_diagnosis}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-              <select
-                value={formData.gender || ''}
-                onChange={(e) => updateFormData('gender', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Non-binary">Non-binary</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Chief Complaint</label>
-              <textarea
-                value={formData.chiefComplaint || ''}
-                onChange={(e) => updateFormData('chiefComplaint', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                rows={2}
-                placeholder="Describe the primary concern"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Initial Presentation</label>
-              <textarea
-                value={formData.initialPresentation || ''}
-                onChange={(e) => updateFormData('initialPresentation', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                rows={3}
-                placeholder="Symptoms and context at first visit"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Current Presentation</label>
-              <textarea
-                value={formData.currentPresentation || ''}
-                onChange={(e) => updateFormData('currentPresentation', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                rows={3}
-                placeholder="Describe how the case looks now"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Medication History</label>
-              <textarea
-                value={formData.medicationHistory || ''}
-                onChange={(e) => updateFormData('medicationHistory', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                rows={2}
-                placeholder="e.g. SSRI trials, mood stabilizers, etc."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Therapy Progress</label>
-              <textarea
-                value={formData.therapyProgress || ''}
-                onChange={(e) => updateFormData('therapyProgress', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                rows={2}
-                placeholder="How the patient has responded to therapy"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Defense Patterns</label>
-              <textarea
-                value={formData.defensePatterns || ''}
-                onChange={(e) => updateFormData('defensePatterns', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                rows={2}
-                placeholder="e.g. projection, denial, rationalization"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Clinical Reflection</label>
-              <textarea
-                value={formData.clinicalReflection || ''}
-                onChange={(e) => updateFormData('clinicalReflection', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                rows={3}
-                placeholder="Your thoughts or questions about the case"
-              />
-            </div>
-          </div>
-        );
-
-      default:
-        return <div>Basic form for {type}</div>;
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold capitalize flex items-center gap-2">
-              <Sparkles size={20} />
-              Enhanced {type} Editor
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors"
-            >
-              <X size={24} />
-            </button>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <div className="flex">
-            {Object.entries(tabs).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === key
-                    ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
-                    : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {activeTab === 'basic' && renderBasicTab()}
-          {activeTab === 'details' && <div>Details content for {type}</div>}
-          {activeTab === 'notes' && <div>Notes and tags content</div>}
-          {activeTab === 'history' && <div>History content</div>}
-        </div>
-
-        {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
-          <div className="flex gap-2">
-            {onDelete && (
-              <LoadingButton
-                onClick={onDelete}
-                icon={Trash2}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-              >
-                Delete
-              </LoadingButton>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Cancel
-            </button>
-            <LoadingButton
-              onClick={handleSubmit}
-              loading={isSubmitting}
-              icon={isSubmitting ? Loader2 : Save}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-            >
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
-            </LoadingButton>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+// NodeSelector Component - for creating new nodes
 const NodeSelector = ({ isOpen, onClose, onSelect }) => {
   const [selectedNodeType, setSelectedNodeType] = useState(null);
 
@@ -1042,7 +506,6 @@ const DashboardComponent = () => {
   const topicModalStableData = useRef(null);
   const taskModalStableData = useRef(null);
   const [hasAppliedInitialLayout, setHasAppliedInitialLayout] = useState(false);
-  const [isExportingCSV, setIsExportingCSV] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [edgeModal, setEdgeModal] = useState({ isOpen: false, edge: null });
@@ -1060,6 +523,7 @@ const DashboardComponent = () => {
   const [connectionManagerOpen, setConnectionManagerOpen] = useState(false);
   const [connectionMode, setConnectionMode] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
@@ -2135,10 +1599,38 @@ useEffect(() => {
         <div className="mb-8">
           <div className="text-3xl font-bold tracking-wide text-white">PGY-3 HQ</div>
           <div className="text-sm text-slate-300 mt-2">Psychiatry Resident Dashboard</div>
+          <div className="mt-2 text-xs text-slate-400 font-mono">v0.6.0 - Visual Clarity</div>
           <div className="mt-3 px-3 py-2 bg-amber-500/20 border border-amber-400/30 rounded-lg">
             <div className="text-xs font-semibold text-amber-300">⚠️ DEVELOPMENT MODE</div>
             <div className="text-xs text-amber-200 mt-1">Training data only</div>
           </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-4">
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search nodes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 py-2 bg-slate-700 text-white placeholder-slate-400 rounded-lg border border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none transition-all text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-xs text-slate-400 px-2">
+              Showing results for: <span className="text-blue-400 font-medium">"{searchQuery}"</span>
+            </div>
+          )}
         </div>
 
         {/* Home Button */}
@@ -2158,57 +1650,100 @@ useEffect(() => {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setActiveFilter('all')}
-              className={`px-3 py-2 rounded-lg text-xs transition-all ${
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between ${
                 activeFilter === 'all'
-                  ? 'bg-teal-600 text-white'
+                  ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/50'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
-              All
+              <span>All</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                activeFilter === 'all' 
+                  ? 'bg-teal-700 text-teal-100' 
+                  : 'bg-slate-600 text-slate-400'
+              }`}>
+                {mindMapData.topics.length + mindMapData.cases.length + mindMapData.tasks.length + mindMapData.literature.length}
+              </span>
             </button>
             <button
               onClick={() => setActiveFilter('topic')}
-              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between ${
                 activeFilter === 'topic'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/50'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
-              <Brain size={12} />
-              Topics
+              <div className="flex items-center gap-1">
+                <Brain size={12} />
+                <span>Topics</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                activeFilter === 'topic' 
+                  ? 'bg-blue-700 text-blue-100' 
+                  : 'bg-slate-600 text-slate-400'
+              }`}>
+                {mindMapData.topics.length}
+              </span>
             </button>
             <button
               onClick={() => setActiveFilter('case')}
-              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between ${
                 activeFilter === 'case'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/50'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
-              <Users size={12} />
-              Cases
+              <div className="flex items-center gap-1">
+                <Users size={12} />
+                <span>Cases</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                activeFilter === 'case' 
+                  ? 'bg-indigo-700 text-indigo-100' 
+                  : 'bg-slate-600 text-slate-400'
+              }`}>
+                {mindMapData.cases.length}
+              </span>
             </button>
             <button
               onClick={() => setActiveFilter('task')}
-              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between ${
                 activeFilter === 'task'
-                  ? 'bg-amber-600 text-white'
+                  ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/50'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
-              <CheckSquare size={12} />
-              Tasks
+              <div className="flex items-center gap-1">
+                <CheckSquare size={12} />
+                <span>Tasks</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                activeFilter === 'task' 
+                  ? 'bg-amber-700 text-amber-100' 
+                  : 'bg-slate-600 text-slate-400'
+              }`}>
+                {mindMapData.tasks.length}
+              </span>
             </button>
             <button
               onClick={() => setActiveFilter('literature')}
-              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1 ${
+              className={`px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between ${
                 activeFilter === 'literature'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
-              <BookOpen size={12} />
-              Literature
+              <div className="flex items-center gap-1">
+                <BookOpen size={12} />
+                <span>Literature</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                activeFilter === 'literature' 
+                  ? 'bg-purple-700 text-purple-100' 
+                  : 'bg-slate-600 text-slate-400'
+              }`}>
+                {mindMapData.literature.length}
+              </span>
             </button>
           </div>
         </div>
@@ -2399,6 +1934,7 @@ useEffect(() => {
         <D3Graph
           mindMapData={mindMapData}
           activeFilter={activeFilter}
+          searchQuery={searchQuery}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
           onDataChange={(change) => {
@@ -2506,6 +2042,8 @@ useEffect(() => {
               setIsAnimating(false);
               setModalAnimationStates(prev => ({ ...prev, case: false }));
             }}
+            allNodes={allNodesForModals}
+            connections={mindMapData.connections || []}
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
@@ -2531,6 +2069,8 @@ useEffect(() => {
               setIsAnimating(false);
               setModalAnimationStates(prev => ({ ...prev, topic: false }));
             }}
+            allNodes={allNodesForModals}
+            connections={mindMapData.connections || []}
             setMindMapData={setMindMapData}
             autoSaveMindMapData={autoSaveMindMapData}
             addToast={addToast}
