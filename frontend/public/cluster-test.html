@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cluster-Aware Force-Directed Graph Test</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #f8fafc, #e2e8f0);
+      overflow: hidden;
+    }
+    
+    #container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .node {
+      cursor: grab;
+    }
+    
+    .node:active {
+      cursor: grabbing;
+    }
+    
+    .node circle {
+      stroke: #fff;
+      stroke-width: 3px;
+    }
+    
+    .node text {
+      fill: white;
+      text-anchor: middle;
+      font-size: 12px;
+      font-weight: bold;
+      pointer-events: none;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    
+    .link {
+      stroke: #64748b;
+      stroke-opacity: 0.6;
+      stroke-width: 2px;
+    }
+    
+    #controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+    }
+    
+    #controls h3 {
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      color: #1e293b;
+    }
+    
+    #controls label {
+      display: block;
+      margin-bottom: 10px;
+      color: #475569;
+      font-size: 14px;
+    }
+    
+    #controls input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    
+    #info {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 14px;
+      color: #475569;
+      max-width: 300px;
+    }
+    
+    #info h4 {
+      margin: 0 0 10px 0;
+      color: #1e293b;
+      font-size: 14px;
+    }
+    
+    #info p {
+      margin: 5px 0;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <svg id="graph"></svg>
+  </div>
+  
+  <div id="controls">
+    <h3>⚙️ Physics Controls</h3>
+    <label>
+      <input type="radio" name="collision" value="cluster" checked>
+      Cluster-Aware Collision (isolated)
+    </label>
+    <label>
+      <input type="radio" name="collision" value="global">
+      Global Collision (all nodes)
+    </label>
+    <label>
+      <input type="radio" name="collision" value="none">
+      No Collision
+    </label>
+    <label style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+      <input type="checkbox" id="linkForce" checked>
+      Link Force
+    </label>
+    <label>
+      <input type="checkbox" id="showClusters">
+      Show Cluster Colors
+    </label>
+    <label style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+      <input type="checkbox" id="focusMode">
+      🎯 Focus Mode (click node to focus)
+    </label>
+  </div>
+  
+  <div id="info">
+    <h4>🧪 Test Configuration</h4>
+    <p><strong>Clusters:</strong> <span id="clusterCount">0</span></p>
+    <p><strong>Total Nodes:</strong> <span id="nodeCount">0</span></p>
+    <p><strong>Total Links:</strong> <span id="linkCount">0</span></p>
+    <p><strong>Focus Mode:</strong> <span id="focusStatus" style="color: #64748b;">Disabled</span></p>
+    <p style="margin-top: 10px; font-size: 11px; color: #64748b;">
+      Enable Focus Mode and click any node to see connections. Physics stay the same!
+    </p>
+  </div>
+
+  <script>
+    // Test data: Multiple disconnected clusters
+    const testData = {
+      nodes: [
+        // Cluster 1: Triangle (3 nodes)
+        { id: 'c1-n1', label: 'C1-A', cluster: 1 },
+        { id: 'c1-n2', label: 'C1-B', cluster: 1 },
+        { id: 'c1-n3', label: 'C1-C', cluster: 1 },
+        
+        // Cluster 2: Chain (4 nodes)
+        { id: 'c2-n1', label: 'C2-A', cluster: 2 },
+        { id: 'c2-n2', label: 'C2-B', cluster: 2 },
+        { id: 'c2-n3', label: 'C2-C', cluster: 2 },
+        { id: 'c2-n4', label: 'C2-D', cluster: 2 },
+        
+        // Cluster 3: Star (5 nodes)
+        { id: 'c3-n1', label: 'C3-Hub', cluster: 3 },
+        { id: 'c3-n2', label: 'C3-A', cluster: 3 },
+        { id: 'c3-n3', label: 'C3-B', cluster: 3 },
+        { id: 'c3-n4', label: 'C3-C', cluster: 3 },
+        { id: 'c3-n5', label: 'C3-D', cluster: 3 },
+        
+        // Cluster 4: Pair (2 nodes)
+        { id: 'c4-n1', label: 'C4-A', cluster: 4 },
+        { id: 'c4-n2', label: 'C4-B', cluster: 4 },
+        
+        // Cluster 5: Single nodes (isolated)
+        { id: 'c5-n1', label: 'Solo-1', cluster: 5 },
+        { id: 'c5-n2', label: 'Solo-2', cluster: 6 },
+        { id: 'c5-n3', label: 'Solo-3', cluster: 7 },
+      ],
+      links: [
+        // Cluster 1 links (triangle)
+        { source: 'c1-n1', target: 'c1-n2' },
+        { source: 'c1-n2', target: 'c1-n3' },
+        { source: 'c1-n3', target: 'c1-n1' },
+        
+        // Cluster 2 links (chain)
+        { source: 'c2-n1', target: 'c2-n2' },
+        { source: 'c2-n2', target: 'c2-n3' },
+        { source: 'c2-n3', target: 'c2-n4' },
+        
+        // Cluster 3 links (star)
+        { source: 'c3-n1', target: 'c3-n2' },
+        { source: 'c3-n1', target: 'c3-n3' },
+        { source: 'c3-n1', target: 'c3-n4' },
+        { source: 'c3-n1', target: 'c3-n5' },
+        
+        // Cluster 4 links (pair)
+        { source: 'c4-n1', target: 'c4-n2' },
+      ]
+    };
+    
+    const clusterColors = [
+      '#3b82f6', // blue
+      '#10b981', // green
+      '#f59e0b', // amber
+      '#ef4444', // red
+      '#8b5cf6', // purple
+      '#ec4899', // pink
+      '#06b6d4', // cyan
+    ];
+    
+    // Spread nodes out initially
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    testData.nodes.forEach((node, i) => {
+      node.x = (width / 4) + Math.random() * (width / 2);
+      node.y = (height / 4) + Math.random() * (height / 2);
+    });
+    
+    // Build cluster map using BFS
+    function buildClusterMap(nodes, links) {
+      const clusterMap = new Map();
+      const clusters = [];
+      
+      if (links.length > 0) {
+        const adjacency = new Map();
+        nodes.forEach(n => adjacency.set(n.id, new Set()));
+        links.forEach(link => {
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+          adjacency.get(sourceId).add(targetId);
+          adjacency.get(targetId).add(sourceId);
+        });
+        
+        const visited = new Set();
+        nodes.forEach(node => {
+          if (!visited.has(node.id)) {
+            const cluster = new Set();
+            const queue = [node.id];
+            visited.add(node.id);
+            
+            while (queue.length > 0) {
+              const current = queue.shift();
+              cluster.add(current);
+              
+              adjacency.get(current).forEach(neighbor => {
+                if (!visited.has(neighbor)) {
+                  visited.add(neighbor);
+                  queue.push(neighbor);
+                }
+              });
+            }
+            
+            const clusterId = clusters.length;
+            clusters.push(cluster);
+            cluster.forEach(nodeId => clusterMap.set(nodeId, clusterId));
+          }
+        });
+      } else {
+        nodes.forEach((node, i) => {
+          clusterMap.set(node.id, i);
+          clusters.push(new Set([node.id]));
+        });
+      }
+      
+      console.log('🔷 Found', clusters.length, 'clusters:', clusters);
+      return { clusterMap, clusters };
+    }
+    
+    const { clusterMap, clusters } = buildClusterMap(testData.nodes, testData.links);
+    
+    // Update info panel
+    document.getElementById('clusterCount').textContent = clusters.length;
+    document.getElementById('nodeCount').textContent = testData.nodes.length;
+    document.getElementById('linkCount').textContent = testData.links.length;
+    
+    // Create SVG and simulation
+    const svg = d3.select('#graph');
+    const g = svg.append('g');
+    
+    // Zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.2, 4])
+      .on('zoom', (event) => {
+        g.attr('transform', event.transform);
+      });
+    
+    svg.call(zoom);
+    
+    // Create simulation with cluster-aware collision
+    const simulation = d3.forceSimulation(testData.nodes)
+      .force('charge', null)
+      .force('collision', (alpha) => {
+        // Custom collision: only within same cluster
+        testData.nodes.forEach((nodeA) => {
+          const clusterA = clusterMap.get(nodeA.id);
+          
+          testData.nodes.forEach((nodeB) => {
+            if (nodeA.id === nodeB.id) return;
+            
+            const clusterB = clusterMap.get(nodeB.id);
+            
+            if (clusterA === clusterB) {
+              const dx = nodeB.x - nodeA.x;
+              const dy = nodeB.y - nodeA.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              const minDistance = 50 + 50 + 20; // radius + radius + padding
+              
+              if (distance < minDistance && distance > 0) {
+                const strength = alpha * 0.7;
+                const force = (minDistance - distance) / distance * strength;
+                const fx = dx * force;
+                const fy = dy * force;
+                
+                nodeB.vx += fx;
+                nodeB.vy += fy;
+                nodeA.vx -= fx;
+                nodeA.vy -= fy;
+              }
+            }
+          });
+        });
+      })
+      .force('link', d3.forceLink(testData.links)
+        .id(d => d.id)
+        .distance(120)
+        .strength(0.5))
+      .force('x', null)
+      .force('y', null)
+      .alpha(1)
+      .alphaDecay(0.0228)
+      .velocityDecay(0.4)
+      .alphaTarget(0);
+    
+    // Create links
+    const link = g.append('g')
+      .selectAll('line')
+      .data(testData.links)
+      .join('line')
+      .attr('class', 'link');
+    
+    // Create nodes
+    const node = g.append('g')
+      .selectAll('g')
+      .data(testData.nodes)
+      .join('g')
+      .attr('class', 'node')
+      .call(d3.drag()
+        .on('start', dragStarted)
+        .on('drag', dragged)
+        .on('end', dragEnded));
+    
+    node.append('circle')
+      .attr('r', 30)
+      .attr('fill', d => clusterColors[clusterMap.get(d.id) % clusterColors.length]);
+    
+    node.append('text')
+      .attr('dy', '0.35em')
+      .text(d => d.label);
+    
+    // Tick function
+    simulation.on('tick', () => {
+      link
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y);
+      
+      node.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+    
+    // Drag functions
+    function dragStarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+    
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+    
+    function dragEnded(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null; // Release node
+      d.fy = null;
+    }
+    
+    // Focus Mode state
+    let focusModeEnabled = false;
+    let focusedNode = null;
+    let focusSimulation = null;  // Separate simulation for localized physics
+    
+    // Focus Mode: Apply visual hierarchy AND localized physics
+    function applyFocusMode(targetNode) {
+      if (!targetNode) {
+        // Exit focus mode - restore all nodes
+        console.log('🎯 Exiting Focus Mode');
+        focusedNode = null;
+        
+        // Stop localized physics FIRST
+        stopLocalizedPhysics();
+        
+        node
+          .on('mouseenter', null)  // Remove all hover handlers
+          .on('mouseleave', null)  // Remove all hover handlers
+          .transition().duration(800)
+          .style('opacity', 1)
+          .style('pointer-events', 'all');
+        
+        node.select('circle')
+          .transition().duration(800)
+          .attr('r', 30)
+          .style('filter', null);
+        
+        link.transition().duration(800)
+          .style('opacity', 0.6)
+          .style('stroke-width', 2);
+        
+        return;
+      }
+      
+      console.log('🎯 Focusing on node:', targetNode.id);
+      focusedNode = targetNode;
+      
+      // Find connected nodes (1st degree connections)
+      const connectedIds = new Set();
+      testData.links.forEach(l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        
+        if (sourceId === targetNode.id) connectedIds.add(targetId);
+        if (targetId === targetNode.id) connectedIds.add(sourceId);
+      });
+      
+      console.log('🎯 Connected nodes:', Array.from(connectedIds));
+      
+      // Apply visual hierarchy to nodes
+      node.each(function(d) {
+        const nodeGroup = d3.select(this);
+        const isConnected = connectedIds.has(d.id);
+        const isFocused = d.id === targetNode.id;
+        
+        if (isFocused) {
+          // Focused node: Scale up, bright glow, REMOVE hover handlers
+          nodeGroup
+            .on('mouseenter', null)  // Remove hover handler
+            .on('mouseleave', null)  // Remove hover handler
+            .transition().duration(800)
+            .style('opacity', 1)
+            .style('pointer-events', 'all');
+          
+          nodeGroup.select('circle')
+            .transition().duration(800)
+            .attr('r', 36) // 1.2x scale
+            .style('filter', 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.8)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))');
+        } else if (isConnected) {
+          // Connected nodes: Normal appearance, REMOVE hover handlers
+          nodeGroup
+            .on('mouseenter', null)  // Remove hover handler
+            .on('mouseleave', null)  // Remove hover handler
+            .transition().duration(800)
+            .style('opacity', 1)
+            .style('pointer-events', 'all');
+          
+          nodeGroup.select('circle')
+            .transition().duration(800)
+            .attr('r', 30)
+            .style('filter', 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))');
+        } else {
+          // Unconnected nodes: Dimmed but still clickable
+          nodeGroup.transition().duration(800)
+            .style('opacity', 0.25)
+            .style('pointer-events', 'all');
+          
+          // Hover effect to show they're still interactive
+          nodeGroup
+            .on('mouseenter', function() {
+              if (focusModeEnabled && focusedNode) {
+                d3.select(this).transition().duration(200).style('opacity', 0.6);
+              }
+            })
+            .on('mouseleave', function() {
+              if (focusModeEnabled && focusedNode) {
+                d3.select(this).transition().duration(200).style('opacity', 0.25);
+              }
+            });
+          
+          nodeGroup.select('circle')
+            .transition().duration(800)
+            .attr('r', 30)
+            .style('filter', 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))');
+        }
+      });
+      
+      // Apply visual hierarchy to edges
+      link.each(function(d) {
+        const linkElem = d3.select(this);
+        const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+        const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+        
+        const isConnectedEdge = (sourceId === targetNode.id || targetId === targetNode.id) &&
+                                (connectedIds.has(sourceId) || connectedIds.has(targetId));
+        
+        if (isConnectedEdge) {
+          // Connected edges: Thicker, brighter
+          linkElem.transition().duration(800)
+            .style('stroke-width', 4)
+            .style('opacity', 1)
+            .style('stroke', '#94a3b8'); // Brighter slate
+        } else {
+          // Unconnected edges: Dimmed
+          linkElem.transition().duration(800)
+            .style('stroke-width', 2)
+            .style('opacity', 0.1)
+            .style('stroke', '#64748b');
+        }
+      });
+      
+      // Apply localized physics to spread connected nodes
+      applyLocalizedPhysics(targetNode);
+    }
+    
+    // Apply localized physics to focused cluster
+    function applyLocalizedPhysics(targetNode) {
+      console.log('🎯 Applying localized physics to:', targetNode.id);
+      
+      // Use BFS to find ALL nodes in the connected component (multi-level)
+      const connectedIds = new Set();
+      const queue = [targetNode.id];
+      connectedIds.add(targetNode.id);
+      
+      // Build adjacency map for BFS
+      const adjacency = new Map();
+      testData.links.forEach(l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        
+        if (!adjacency.has(sourceId)) adjacency.set(sourceId, []);
+        if (!adjacency.has(targetId)) adjacency.set(targetId, []);
+        
+        adjacency.get(sourceId).push(targetId);
+        adjacency.get(targetId).push(sourceId);
+      });
+      
+      // BFS to find entire connected component
+      while (queue.length > 0) {
+        const currentId = queue.shift();
+        const neighbors = adjacency.get(currentId) || [];
+        
+        neighbors.forEach(neighborId => {
+          if (!connectedIds.has(neighborId)) {
+            connectedIds.add(neighborId);
+            queue.push(neighborId);
+          }
+        });
+      }
+      
+      console.log(`📊 Found ${connectedIds.size} nodes in connected component (all levels)`);
+      
+      // FREEZE all unconnected nodes (nodes NOT in the component)
+      testData.nodes.forEach(node => {
+        if (!connectedIds.has(node.id)) {
+          node.fx = node.x;
+          node.fy = node.y;
+          node.vx = 0;
+          node.vy = 0;
+        }
+      });
+      
+      // PIN the focused node at its current position (anchor point)
+      targetNode.fx = targetNode.x;
+      targetNode.fy = targetNode.y;
+      targetNode.vx = 0;
+      targetNode.vy = 0;
+      
+      // RELEASE ALL other nodes in the component (allow them to move freely)
+      testData.nodes.forEach(node => {
+        if (connectedIds.has(node.id) && node.id !== targetNode.id) {
+          node.fx = null;
+          node.fy = null;
+        }
+      });
+      
+      // Get ALL links within the connected component
+      const focusLinks = testData.links.filter(l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        return connectedIds.has(sourceId) && connectedIds.has(targetId);
+      });
+      
+      console.log(`🔗 Using ${focusLinks.length} links for force layout`);
+      
+      // Stop the global simulation completely
+      simulation.stop();
+      console.log('🛑 Global simulation stopped');
+      
+      // Create a SEPARATE localized simulation for the focused cluster
+      focusSimulation = d3.forceSimulation(testData.nodes)
+        .force('link', d3.forceLink(focusLinks)
+          .id(d => d.id)
+          .distance(200)        // Target distance = more spread
+          .strength(0.3))       // Weak pull = allows spreading
+        .force('charge', d3.forceManyBody()
+          .strength(-500)       // Strong repulsion = nodes push apart
+          .distanceMax(400))    // Only affects nearby nodes
+        .force('collision', d3.forceCollide()
+          .radius(50)           // Collision radius
+          .strength(0.9))       // Strong collision avoidance
+        .alpha(1.0)             // Maximum energy for spreading
+        .alphaDecay(0.015)      // Slow cooling = longer animation
+        .velocityDecay(0.3)     // Low friction = more movement
+        .on('tick', () => {
+          // Update visual positions during animation
+          node.attr('transform', d => `translate(${d.x},${d.y})`);
+          
+          link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+        });
+      
+      console.log('✨ Localized physics simulation started - nodes should spread now');
+    }
+    
+    // Stop localized physics and restore global simulation
+    function stopLocalizedPhysics() {
+      console.log('🛑 Stopping localized physics');
+      
+      // Stop and remove the focus simulation
+      if (focusSimulation) {
+        focusSimulation.stop();
+        focusSimulation = null;
+        console.log('✅ Focus simulation stopped');
+      }
+      
+      // UNFREEZE all nodes (remove position locks)
+      testData.nodes.forEach(node => {
+        node.fx = null;
+        node.fy = null;
+      });
+      
+      console.log('🔓 All nodes unfrozen');
+      
+      // Restart the global simulation gently
+      simulation.alpha(0.3).restart();
+      console.log('🔄 Global simulation resumed');
+    }
+    
+    // Node click handler for Focus Mode
+    node.on('click', function(event, d) {
+      event.stopPropagation();
+      
+      if (focusModeEnabled) {
+        // Toggle focus: if clicking same node, exit focus mode
+        if (focusedNode && focusedNode.id === d.id) {
+          applyFocusMode(null);
+        } else {
+          applyFocusMode(d);
+        }
+      }
+    });
+    
+    // Background click to exit focus mode
+    svg.on('click', function() {
+      if (focusModeEnabled && focusedNode) {
+        applyFocusMode(null);
+      }
+    });
+    
+    // Focus Mode checkbox handler
+    document.getElementById('focusMode').addEventListener('change', (e) => {
+      focusModeEnabled = e.target.checked;
+      console.log('🎯 Focus Mode:', focusModeEnabled ? 'ENABLED' : 'DISABLED');
+      
+      // Update status display
+      const statusEl = document.getElementById('focusStatus');
+      if (focusModeEnabled) {
+        statusEl.textContent = 'Enabled - Click node to focus';
+        statusEl.style.color = '#3b82f6';
+      } else {
+        statusEl.textContent = 'Disabled';
+        statusEl.style.color = '#64748b';
+        // Exit focus mode when disabled
+        applyFocusMode(null);
+      }
+    });
+    
+    // Collision mode handlers
+    document.querySelectorAll('input[name="collision"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        console.log('🔄 Collision mode changed to:', mode);
+        
+        if (mode === 'cluster') {
+          // Cluster-aware collision: only nodes in same cluster
+          simulation.force('collision', (alpha) => {
+            testData.nodes.forEach((nodeA) => {
+              const clusterA = clusterMap.get(nodeA.id);
+              
+              testData.nodes.forEach((nodeB) => {
+                if (nodeA.id === nodeB.id) return;
+                const clusterB = clusterMap.get(nodeB.id);
+                
+                if (clusterA === clusterB) {
+                  const dx = nodeB.x - nodeA.x;
+                  const dy = nodeB.y - nodeA.y;
+                  const distance = Math.sqrt(dx * dx + dy * dy);
+                  const minDistance = 80;
+                  
+                  if (distance < minDistance && distance > 0) {
+                    const strength = alpha * 0.7;
+                    const force = (minDistance - distance) / distance * strength;
+                    const fx = dx * force;
+                    const fy = dy * force;
+                    
+                    nodeB.vx += fx;
+                    nodeB.vy += fy;
+                    nodeA.vx -= fx;
+                    nodeA.vy -= fy;
+                  }
+                }
+              });
+            });
+          });
+          console.log('✅ Cluster-aware collision active - only same-cluster nodes avoid overlap');
+          
+        } else if (mode === 'global') {
+          // Global collision: ALL nodes avoid overlapping
+          simulation.force('collision', d3.forceCollide()
+            .radius(40)
+            .strength(0.7));
+          console.log('✅ Global collision active - ALL nodes avoid overlap (may cause drift)');
+          
+        } else {
+          // No collision
+          simulation.force('collision', null);
+          console.log('✅ Collision disabled - nodes can overlap');
+        }
+        
+        simulation.alpha(0.3).restart();
+      });
+    });
+    
+    document.getElementById('linkForce').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        simulation.force('link', d3.forceLink(testData.links)
+          .id(d => d.id)
+          .distance(120)
+          .strength(0.5));
+      } else {
+        simulation.force('link', null);
+      }
+      simulation.alpha(0.3).restart();
+    });
+    
+    document.getElementById('showClusters').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        node.select('circle')
+          .transition()
+          .duration(300)
+          .attr('fill', d => clusterColors[clusterMap.get(d.id) % clusterColors.length]);
+      } else {
+        node.select('circle')
+          .transition()
+          .duration(300)
+          .attr('fill', '#6366f1');
+      }
+    });
+    
+    console.log('🧪 Test page loaded with', clusters.length, 'clusters');
+    console.log('📊 Cluster Map:', clusterMap);
+  </script>
+</body>
+</html>

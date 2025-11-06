@@ -1,7 +1,7 @@
 # PGY3-HUB - Mind Mapping Tool for Psychiatry Residents
 
-**Current Version:** v0.6.0 - "Visual Clarity"  
-**Last Updated:** October 8, 2025
+**Current Version:** v0.7.0 - "Focus Mode Complete"  
+**Last Updated:** October 17, 2025 (Advanced Focus Mode with Localized Physics)
 
 ---
 
@@ -87,6 +87,7 @@ The application features a modern React frontend with dual backend support (Fast
 - **TemplateManager.js**: Template creation and management interface
 - **CaseModal.js**: Patient case modal with tabbed interface including timeline integration
 - **VerticalTimeline.js**: Interactive timeline component with physics-based rope simulation and scroll navigation
+- **PhysicsControls.js**: Live physics parameter controls with settings persistence (localStorage)
 
 ### Timeline System
 
@@ -98,6 +99,39 @@ The application features a modern React frontend with dual backend support (Fast
 - **Visual Design**: Blue-purple gradient theme with dark slate backgrounds for cards (rgba(30, 41, 59, 0.85))
 - **Performance Optimized**: Memoized path calculations, optimized animations, and efficient scroll handling
 
+### Physics Controls System
+
+- **Live Parameter Adjustment**: 6 adjustable D3.js force simulation parameters
+- **Real-Time Updates**: Changes apply immediately without page refresh
+- **Settings Persistence**: localStorage saves user preferences across sessions
+- **Parameter Categories**:
+  - Collision Settings: radius (20-100), strength (0-1)
+  - Link Settings: distance (50-200), strength (0-1)
+  - Simulation Dynamics: alphaDecay (0.01-0.1), velocityDecay (0.1-0.9)
+- **User Experience**: Save/Reset buttons with visual feedback
+- **Auto-Load**: Saved settings automatically applied on app start
+- **Storage Key**: `pgy3hub_physics_settings`
+- **Implementation**: useRef pattern prevents state reset during re-renders
+
+### Focus Mode System (v0.7.0)
+
+- **Localized Physics**: Dual simulation architecture - separate D3.js simulation for focused cluster only
+- **Multi-Level Spreading**: BFS algorithm finds entire connected component, not just direct neighbors
+- **Smart Camera**: Auto-centers and zooms to fit cluster, saves position before entering, restores on exit
+- **Visual Hierarchy**: 
+  - Focused node: 1.2x scale, bright blue glow (20px drop-shadow)
+  - Connected nodes: Full opacity, subtle white glow (10px)
+  - Unconnected nodes: 20% opacity, dimmed
+  - Connected edges: 3px width, brightened colors
+  - Unconnected edges: 1.5px width, 10% opacity
+- **Frozen Nodes**: All unconnected nodes frozen using D3's fx/fy to prevent drift
+- **Smooth Animations**: 800-900ms transitions with tuned physics for UI-like feel
+- **Camera Memory**: savedTransformRef stores position before entering, restores exact view on exit
+- **Implementation Files**: 
+  - `App.js`: BFS algorithm, Focus Mode state management
+  - `D3Graph.js`: Dual simulations, camera system, visual hierarchy
+  - `cluster-test.html`: Prototype/test page for rapid physics tuning
+
 ### Performance Optimizations
 
 - Lazy loading of heavy dependencies (D3.js, components)
@@ -106,6 +140,7 @@ The application features a modern React frontend with dual backend support (Fast
 - Optimized re-rendering with React.memo and useCallback
 - Error boundaries for React Flow stability
 - Background auto-save with debounce (800ms)
+- Physics parameters preserved across simulation updates (useRef pattern)
 
 ## Data Flow & State Management
 
@@ -455,4 +490,5 @@ const scrollToTop = useCallback(() => {
 - **Literature Modal**: Dedicated interface for literature node interactions
 - **Timeline Integration**: Interactive vertical timeline within CaseModal with scroll navigation
 - **SVG-Based Timeline**: Elegant path-based connections with gradient styling and smooth animations
+- **Physics Controls**: Live adjustable physics parameters with persistent settings (gear icon, top-right)
 - **Auto-save Status**: Visual indicators for save state and last saved time

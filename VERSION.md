@@ -1,7 +1,7 @@
 # PGY3-HUB Version History
 
-**Current Version:** v0.6.0  
-**Last Updated:** October 8, 2025
+**Current Version:** v0.7.0  
+**Last Updated:** October 17, 2025
 
 ---
 
@@ -17,16 +17,68 @@
 
 ## Release History
 
-### v0.6.0 - "Visual Clarity" (Oct 8, 2025) - CURRENT
-**Status:** 🚧 In Development
+### v0.7.0 - "Focus Mode Complete" (Oct 17, 2025) - CURRENT
+**Status:** ✅ Complete  
+**Last Update:** October 17, 2025
+
+**Focus:** Advanced Focus Mode with localized physics and camera intelligence
+
+**Completed Features:**
+- [x] **Localized Physics for Focus Mode**
+  - Separate D3.js simulation for focused cluster only
+  - Multi-level spreading using BFS (entire connected component)
+  - Freezes unconnected nodes (no drift or movement)
+  - Dramatic force parameters for visual clarity
+  - Smooth UI-like animation with tuned damping
+  
+- [x] **Smart Camera System**
+  - Auto-centers and zooms to fit focused cluster
+  - Saves camera position before entering Focus Mode
+  - Restores previous view on exit (not fixed default)
+  - Smooth 900ms transitions
+  - Bounding box calculation with padding
+  
+- [x] **Visual Hierarchy Enhancements**
+  - Focused node: 1.2x scale, bright blue glow
+  - Connected nodes: Full opacity, subtle white glow
+  - Unconnected nodes: 20% opacity, dimmed
+  - Connected edges: Thicker (3px), brighter
+  - Unconnected edges: Thin (1.5px), 10% opacity
+  
+- [x] **Physics Parameter Tuning**
+  - Iteratively optimized for smooth spreading
+  - Increased link distance for dramatic expansion
+  - Tuned velocityDecay for gentle settling (no recoil)
+  - Test page and main app physics synchronized
+
+**Technical Achievements:**
+- Dual simulation architecture (main + focus)
+- BFS algorithm for connected component detection
+- D3 zoom behavior integration with transform persistence
+- Performance optimizations for large graphs
+- Clean separation of visual and physics systems
+
+**Design Philosophy:**
+- "Calm, focused digital studio" - smooth, intentional interactions
+- No jarring resets - preserves user's exploration context
+- Visual clarity through motion and hierarchy
+- Professional, UI-like animations (not chaotic physics)
+
+---
+
+### v0.6.0 - "Visual Clarity" (Oct 8-14, 2025)
+**Status:** ✅ Complete  
+**Last Update:** October 14, 2025 (Physics Controls with persistence added)
 
 **Focus:** Visual organization and connection clarity
 
-**Planned Features:**
-- [ ] Focus Mode (click node → radial web view)
-- [ ] Smart Layout Algorithm (fix realign button)
-- [ ] Enhanced visual hierarchy
-- [ ] Pattern discovery through visualization
+**Completed Features:**
+- [x] **Physics Controls Panel** - Live adjustable physics parameters
+  - Real-time collision, link, and simulation dynamics controls
+  - Settings persistence via localStorage
+  - Save/Reset functionality with visual feedback
+  - Fixed state reset bug with useRef pattern
+  - Auto-loads saved settings on app start
 
 **Changes:**
 - [x] Vision clarification: Visual thinking tool (not task manager)
@@ -34,7 +86,8 @@
 - [x] Documentation reorganization (cleaned up 40+ MD files → organized structure)
 - [x] Version system established (v[MAJOR].[MINOR].[PATCH])
 - [x] AI guidelines created for consistent documentation practices
-- [ ] Focus Mode implementation (in progress)
+- [x] Focus Mode design clarified (toggle-based)
+- [ ] Focus Mode implementation (ready to start)
 
 **Documentation:**
 - Created `/docs/` folder structure (development, testing, features, archive)

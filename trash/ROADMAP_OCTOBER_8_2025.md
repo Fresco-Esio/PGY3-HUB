@@ -1,7 +1,6 @@
 # PGY3-HUB Development Roadmap
-**Updated:** October 17, 2025 (Focus Mode Complete)  
-**Last Major Update:** October 17, 2025 (Advanced Focus Mode with Localized Physics)  
-**Status:** Phase 6 Complete ✅ - v0.7.0 Released
+**Updated:** October 8, 2025 (Evening - Post Edge Label Completion)  
+**Status:** Phase 5 Complete - Refocusing on Core Vision
 
 ---
 
@@ -20,7 +19,7 @@
 
 ## 📊 Progress Summary
 
-### Recent Accomplishments (Oct 6-17, 2025)
+### Recent Accomplishments (Oct 6-8, 2025)
 
 **Phase 1: Quick Wins & UI Polish** ✅ COMPLETE
 - Search Bar with real-time filtering
@@ -57,47 +56,10 @@
 - Delete connection option
 - Clean state management with proper D3 edge handling
 
-**Phase 5.5: Physics Controls** ✅ COMPLETE (Oct 14, 2025)
-- Live adjustable physics parameters (collision, link, simulation dynamics)
-- Real-time slider controls with 6 parameters
-- Settings persistence via localStorage
-- Save/Reset functionality with visual feedback
-- Fixed state reset bug with useRef pattern
-- Auto-loads saved settings on app start
-- No backend required - browser storage only
-
-**Phase 6: Advanced Focus Mode** ✅ COMPLETE (Oct 14-17, 2025)
-- **Localized Physics System**
-  - Separate D3.js simulation for focused cluster only
-  - Multi-level spreading using BFS (entire connected component)
-  - Freezes unconnected nodes (no drift or movement)
-  - Dramatic force parameters for visual clarity
-  - Smooth UI-like animation with tuned damping
-  
-- **Smart Camera System**
-  - Auto-centers and zooms to fit focused cluster
-  - Saves camera position before entering Focus Mode
-  - Restores previous view on exit (not fixed default)
-  - Smooth 900ms transitions with bounding box calculation
-  
-- **Visual Hierarchy**
-  - Focused node: 1.2x scale, bright blue glow
-  - Connected nodes: Full opacity, subtle white glow
-  - Unconnected nodes: 20% opacity, dimmed
-  - Connected edges: Thicker (3px), brighter colors
-  - Unconnected edges: Thin (1.5px), 10% opacity
-  
-- **Implementation Details**
-  - Test page prototyping (`cluster-test.html`)
-  - Iterative physics parameter tuning
-  - D3 zoom behavior integration
-  - Performance optimizations for large graphs
-  - Clean separation of visual and physics systems
-
-**Total Time Investment:** ~25-30 hours  
-**Lines Added:** ~4,500  
-**Lines Removed:** ~1,200  
-**Net:** +3,300 lines of production code
+**Total Time Investment:** ~12-15 hours  
+**Lines Added:** ~2,500  
+**Lines Removed:** ~800  
+**Net:** +1,700 lines of production code
 
 ---
 
@@ -106,11 +68,11 @@
 After clarifying the core purpose, we've identified the **real** priorities:
 
 ### What Matters for the Core Vision ✅
-1. **Visual organization** - Seeing connections clearly ✅ (Focus Mode complete)
-2. **Knowledge triangle** - Cases ↔ Topics ↔ Literature ✅ (Working well)
-3. **Clinical reflection** - Private notes and insights ✅ (Notes system complete)
-4. **Pattern discovery** - Understanding across cases ✅ (Focus Mode enables this)
-5. **Calm, focused experience** - No notifications, no urgency ✅ (Philosophy maintained)
+1. **Visual organization** - Seeing connections clearly
+2. **Knowledge triangle** - Cases ↔ Topics ↔ Literature
+3. **Clinical reflection** - Private notes and insights
+4. **Pattern discovery** - Understanding across cases
+5. **Calm, focused experience** - No notifications, no urgency
 
 ### What Doesn't Fit ❌
 1. **Task system with deadlines** - This isn't a productivity app
@@ -124,13 +86,11 @@ After clarifying the core purpose, we've identified the **real** priorities:
 ### What's Working Well ✅
 
 1. **Mind Map Visualization**
-   - D3.js force-directed graph with dual simulation architecture
+   - D3.js force-directed graph
    - Smooth animations and transitions
    - Node dragging and positioning
    - Connection creation via drag
    - Edge labels with right-click editing
-   - **Focus Mode with localized physics** ✨ NEW
-   - **Smart camera centering and zoom** ✨ NEW
 
 2. **Node Management**
    - 4 node types: Topic, Case, Task, Literature
@@ -141,43 +101,40 @@ After clarifying the core purpose, we've identified the **real** priorities:
 
 3. **UI/UX**
    - Consistent dark theme
-   - Beautiful animations (Framer Motion, GSAP)
+   - Beautiful animations (Framer Motion)
    - Responsive design
    - Keyboard shortcuts
    - Category filtering
-   - **Live physics controls** ✨ NEW
-   - **Visual hierarchy in Focus Mode** ✨ NEW
 
 4. **Data Persistence**
    - Auto-save (800ms debounce)
    - LocalStorage caching
    - Backend sync (FastAPI/Express)
    - JSON file storage
-   - **Physics settings persistence** ✨ NEW
 
 ### What Needs Work ⚠️
 
-1. **Task System** (Low Priority - doesn't fit core vision)
+1. **Task System**
    - ❌ No due date reminders/notifications
    - ❌ No task completion workflow (checkboxes)
    - ❌ No visual indicators for overdue tasks
    - ❌ No task status filtering
    - ⚠️ Basic task creation works, but limited features
 
-2. **Literature Management** (Medium Priority)
+2. **Literature Management**
    - ❌ No in-app PDF viewer
    - ❌ No citation export (APA, MLA, Chicago)
    - ❌ No DOI auto-fill
    - ⚠️ PDF upload works, but no viewer
    - ⚠️ Basic metadata only
 
-3. **Search & Discovery** (Medium Priority)
+3. **Search & Discovery**
    - ❌ No search results panel/list
    - ❌ No search history
    - ❌ No advanced search filters
    - ⚠️ Basic real-time filtering works
 
-4. **Connection Management** (Low Priority)
+4. **Connection Management**
    - ❌ No bulk connection operations
    - ❌ No connection filtering by type
    - ❌ No connection statistics
@@ -201,71 +158,22 @@ After clarifying the core purpose, we've identified the **real** priorities:
 
 **User Need:** "Being able to visually see the connected cases at once. Nodes should web out and branch in a way that is easy to see and not cluttered."
 
-### ✅ Priority 0: Physics Controls (COMPLETE - Oct 14, 2025) ⭐⭐⭐
-**Effort:** 3-4 hours  
-**Business Value:** HIGH - Essential for customizing visual layout  
-**Status:** ✅ COMPLETE
-
-**What Was Implemented:**
-- Live physics parameter controls (6 adjustable parameters)
-- Real-time updates to D3.js force simulation
-- Settings persistence via localStorage
-- Save/Reset functionality with visual feedback
-- Fixed state reset bug using useRef pattern
-- Auto-loads saved settings on application start
-
-**Technical Details:**
-- Collision settings: radius (20-100), strength (0-1)
-- Link settings: distance (50-200), strength (0-1)
-- Simulation dynamics: alphaDecay (0.01-0.1), velocityDecay (0.1-0.9)
-- Storage key: `pgy3hub_physics_settings`
-- No backend required - browser localStorage only
-
-**Files Modified:**
-- `D3Graph.js` - Added localStorage loading and physicsParamsRef
-- `PhysicsControls.js` - New component with Save/Reset functionality
-- Documentation: `docs/features/PHYSICS_CONTROLS_FEATURE.md`
-
-**User Experience:**
-1. Click gear icon in top-right corner
-2. Adjust sliders to find optimal settings
-3. Click "Save Settings" to persist preferences
-4. Settings automatically load on next visit
-5. Click "Reset" to restore defaults
-
----
-
 ### Priority A: Focus Mode (HIGH PRIORITY) ⭐⭐⭐
 **Effort:** 2-3 hours  
 **Business Value:** HIGH - Core to visual thinking workflow  
-**Status:** 🔴 NOT STARTED  
-**Design:** Toggle-based activation (updated Oct 13, 2025)
-
-**Interaction Pattern:** *(Updated Oct 13)*
-- User clicks "Focus Mode" toggle button in toolbar
-- When enabled, clicking any node enters focus view
-- When disabled (default), normal click/drag behavior
-- Clear visual indicator when Focus Mode is active
+**Status:** 🔴 NOT STARTED
 
 **What It Does:**
-- Toggle Focus Mode ON → click any node → beautiful radial web view
-- Selected node stays centered with blue glow
-- Connected nodes arrange in circle/web pattern around it
+- Click any node (especially Topic) → enter focus mode
+- Selected node stays centered
+- Connected nodes arrange in radial/web pattern around it
 - Unconnected nodes fade to 10% opacity
-- Smooth animated transitions (800ms)
-- Press ESC, click background, or toggle off to exit
+- Smooth animated transitions
+- Press ESC or click background to exit
 
 **Features to Implement:**
-1. **Focus Mode Toggle UI**
-   - [ ] Add "Focus Mode" button to toolbar (next to search/filters)
-   - [ ] Button shows clear ON/OFF state with icon (🎯)
-   - [ ] Active state: blue glow, pulsing animation
-   - [ ] Tooltip: "Enable Focus Mode, then click any node"
-
-2. **Focus Mode Activation** *(Only when toggle is ON)*
-   - [ ] Modify D3Graph click handler to check focusModeEnabled state
-   - [ ] If toggle OFF: normal click behavior (select/drag)
-   - [ ] If toggle ON + node clicked: enter focus mode
+1. **Focus Mode Activation**
+   - [ ] Click handler for all nodes
    - [ ] Calculate 1st-degree connected nodes
    - [ ] Detect connection types and relationships
    - [ ] Enter focus mode animation

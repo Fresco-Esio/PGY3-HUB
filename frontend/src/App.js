@@ -4,6 +4,7 @@ import '@xyflow/react/dist/style.css';
 import './App.css';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as d3 from 'd3'; // For Focus Mode force-directed layout
 
 // Import new components
 import HomeScreen from './components/HomeScreen';
@@ -524,6 +525,12 @@ const DashboardComponent = () => {
   const [connectionMode, setConnectionMode] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Focus Mode state
+  const [focusModeEnabled, setFocusModeEnabled] = useState(false); // Toggle on/off
+  const [focusedNode, setFocusedNode] = useState(null); // Currently focused node (null when not in focus view)
+  const [originalLayout, setOriginalLayout] = useState(null); // Store original positions before focus
+  
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now();
     const newToast = { id, message, type, duration };
@@ -841,10 +848,276 @@ useEffect(() => {
 
   // Cytoscape handles edge creation via right-click (see CytoscapeGraph component)
 
+  // Focus Mode Functions
+  const enterFocusMode = useCallback((d3Node) => {
+    console.log('🎯 Entering Focus Mode for node:', d3Node.id);
+    console.log('📊 Simulation status:', window.d3Simulation ? 'Available' : 'NOT AVAILABLE');
+    
+    // Store original positions from D3 simulation ONLY if not already stored
+    // This prevents overwriting the true original positions when switching between focused nodes
+    const sim = window.d3Simulation;
+    if (sim && !originalLayout) {
+      const nodes = sim.nodes();
+      console.log('💾 Storing original positions for', nodes.length, 'nodes');
+      const positions = {};
+      nodes.forEach(node => {
+        positions[node.id] = { x: node.x, y: node.y };
+      });
+      setOriginalLayout(positions);
+      console.log('💾 Stored original layout:', Object.keys(positions).length, 'nodes');
+    } else if (originalLayout) {
+      console.log('📋 Using existing original layout (switching focused nodes)');
+    }
+    
+    // Find ALL connected nodes in the component using BFS (multi-level)
+    const connections = mindMapData.connections || [];
+    const connectedNodeIds = new Set();
+    const queue = [d3Node.id];
+    connectedNodeIds.add(d3Node.id);
+    
+    // Build adjacency map for BFS
+    const adjacency = new Map();
+    connections.forEach(conn => {
+      if (!adjacency.has(conn.source)) adjacency.set(conn.source, []);
+      if (!adjacency.has(conn.target)) adjacency.set(conn.target, []);
+      
+      adjacency.get(conn.source).push(conn.target);
+      adjacency.get(conn.target).push(conn.source);
+    });
+    
+    // BFS to find entire connected component (all levels)
+    while (queue.length > 0) {
+      const currentId = queue.shift();
+      const neighbors = adjacency.get(currentId) || [];
+      
+      neighbors.forEach(neighborId => {
+        if (!connectedNodeIds.has(neighborId)) {
+          connectedNodeIds.add(neighborId);
+          queue.push(neighborId);
+        }
+      });
+    }
+    
+    console.log('🔗 Found', connectedNodeIds.size, 'nodes in connected component (all levels)');
+    
+    // Localized physics will be applied by D3Graph component
+    // (No manual positioning needed - physics handles the spreading)
+    console.log('🎯 Focus Mode enabled - localized physics will spread', connectedNodeIds.size, 'nodes');
+    
+    // Set focused node with connection info
+    setFocusedNode({
+      ...d3Node,
+      connectedNodeIds: Array.from(connectedNodeIds)
+    });
+    
+    addToast(`Focus Mode: ${d3Node.label || 'Node'} (${connectedNodeIds.size} connections)`, 'info', 2000);
+  }, [mindMapData.connections, addToast, originalLayout]);
+
+  const exitFocusMode = useCallback(() => {
+    console.log('🎯 Exiting Focus Mode');
+    
+    // Restore original layout
+    const sim = window.d3Simulation;
+    if (sim && originalLayout) {
+      const nodes = sim.nodes();
+      
+      console.log('🔄 Restoring original positions for', Object.keys(originalLayout).length, 'nodes');
+      
+      // Unfix all nodes and restore their original positions
+      nodes.forEach(node => {
+        if (originalLayout[node.id]) {
+          node.fx = originalLayout[node.id].x;
+          node.fy = originalLayout[node.id].y;
+        }
+      });
+      
+      // Remove all Focus Mode custom forces
+      sim.force('tautWeb', null);
+      sim.force('centerNode', null);
+      sim.force('freezeUnconnected', null);
+      
+      // Re-enable standard forces for natural movement
+      const collisionForce = sim.force('collision');
+      const chargeForce = sim.force('charge');
+      const linkForce = sim.force('link');
+      
+      if (collisionForce) collisionForce.strength(0.5);
+      if (chargeForce) chargeForce.strength(-100);
+      if (linkForce) linkForce.strength(0.5);
+      
+      // Restart simulation with smooth animation back to original
+      sim.alpha(1).alphaDecay(0.02).restart();
+      
+      // After animation, unfix all nodes to allow normal physics
+      setTimeout(() => {
+        nodes.forEach(node => {
+          node.fx = null;
+          node.fy = null;
+        });
+        sim.alpha(0.5).restart();
+        console.log('✨ Original layout restored, physics re-enabled');
+      }, 1500); // Longer duration for smooth restoration
+    }
+    
+    setFocusedNode(null);
+    setOriginalLayout(null);
+    addToast('Focus Mode exited', 'info', 2000);
+  }, [originalLayout, addToast]);
+
   const onNodeClick = useCallback((d3Node) => {
-    // D3 node object
+    // Check if Focus Mode is enabled
+    if (focusModeEnabled) {
+      // Enter focus mode for this node
+      enterFocusMode(d3Node);
+      return;
+    }
+    
+    // Normal behavior: just select the node
     setSelectedNode({ id: d3Node.id, data: d3Node.originalData });
-  }, []);
+  }, [focusModeEnabled, enterFocusMode]); // Include enterFocusMode in dependencies
+
+  // Apply radial layout when focusedNode changes
+  useEffect(() => {
+    if (!focusedNode || !focusModeEnabled) return;
+    
+    console.log('🎯 useEffect: Applying radial layout for focused node:', focusedNode.id);
+    
+    // Wait a tick for D3Graph to finish its update, then apply our layout
+    setTimeout(() => {
+      const sim = window.d3Simulation;
+      if (!sim) {
+        console.warn('⚠️ Simulation not available for radial layout');
+        return;
+      }
+      
+      const allNodes = sim.nodes();
+      console.log('📦 Got', allNodes.length, 'nodes from simulation');
+      
+      // Build multi-level connection graph (include 2nd degree connections)
+      const connectionLevels = new Map(); // nodeId -> level (0 = focused, 1 = direct, 2 = indirect)
+      connectionLevels.set(focusedNode.id, 0);
+      
+      // Level 1: Direct connections to focused node
+      const level1Nodes = new Set();
+      mindMapData.connections.forEach(conn => {
+        if (conn.source === focusedNode.id) level1Nodes.add(conn.target);
+        if (conn.target === focusedNode.id) level1Nodes.add(conn.source);
+      });
+      level1Nodes.delete(focusedNode.id);
+      level1Nodes.forEach(nodeId => connectionLevels.set(nodeId, 1));
+      
+      // Level 2: Nodes connected to level 1 nodes
+      const level2Nodes = new Set();
+      mindMapData.connections.forEach(conn => {
+        if (level1Nodes.has(conn.source)) level2Nodes.add(conn.target);
+        if (level1Nodes.has(conn.target)) level2Nodes.add(conn.source);
+      });
+      level2Nodes.delete(focusedNode.id);
+      level1Nodes.forEach(id => level2Nodes.delete(id)); // Don't duplicate level 1
+      level2Nodes.forEach(nodeId => connectionLevels.set(nodeId, 2));
+      
+      const allConnectedIds = new Set([...level1Nodes, ...level2Nodes]);
+      
+      if (allConnectedIds.size === 0) {
+        console.log('⚠️ No connected nodes found');
+        return;
+      }
+      
+      console.log('🔗 Found', level1Nodes.size, 'level 1 nodes,', level2Nodes.size, 'level 2 nodes');
+      
+      // Get viewport dimensions
+      const viewportWidth = window.innerWidth - 320;
+      const viewportHeight = window.innerHeight;
+      const centerX = viewportWidth / 2;
+      const centerY = viewportHeight / 2;
+      
+      console.log('📐 Setting up hierarchical tree layout');
+      
+      // Unfix all nodes first
+      allNodes.forEach(node => {
+        if (node.fx !== undefined || node.fy !== undefined) {
+          node.x = node.fx || node.x;
+          node.y = node.fy || node.y;
+          node.fx = null;
+          node.fy = null;
+        }
+      });
+      
+      // DON'T move the focused node - find its current position
+      const focusedD3Node = allNodes.find(n => n.id === focusedNode.id);
+      if (!focusedD3Node) return;
+      
+      // Pan viewport to center on the focused node (instead of moving the node)
+      // TODO: Implement viewport panning in D3Graph
+      console.log(`📍 Focused node at (${focusedD3Node.x}, ${focusedD3Node.y})`);
+      
+      // Build ALL links between connected nodes (all levels)
+      const focusLinks = [];
+      mindMapData.connections.forEach(conn => {
+        // Include link if both nodes are in the connected set
+        if (allConnectedIds.has(conn.source) && allConnectedIds.has(conn.target)) {
+          focusLinks.push({
+            source: conn.source,
+            target: conn.target
+          });
+        }
+        // Also include links to/from focused node
+        if (conn.source === focusedNode.id && allConnectedIds.has(conn.target)) {
+          focusLinks.push({ source: conn.source, target: conn.target });
+        }
+        if (conn.target === focusedNode.id && allConnectedIds.has(conn.source)) {
+          focusLinks.push({ source: conn.source, target: conn.target });
+        }
+      });
+      
+      console.log('🔗 Created', focusLinks.length, 'hierarchical links');
+      
+      // COMPLETELY REPLACE the simulation with hierarchical tree forces
+      // Remove ALL existing forces (including center pull)
+      sim.force('charge', null);
+      sim.force('collision', null);
+      sim.force('link', null);
+      sim.force('viewX', null); // Remove center pull
+      sim.force('viewY', null); // Remove center pull
+      sim.force('tautWeb', null);
+      sim.force('centerNode', null);
+      sim.force('freezeUnconnected', null);
+      
+      // Apply hierarchical tree forces
+      sim.force('link', d3.forceLink(focusLinks)
+        .id(d => d.id)
+        .distance(200) // Distance between connected nodes
+        .strength(0.7)); // Strong enough to maintain connections
+      
+      sim.force('charge', d3.forceManyBody()
+        .strength(-500) // Strong repulsion = more spread
+        .distanceMax(400)); // Limit range to prevent infinite spread
+      
+      sim.force('collision', d3.forceCollide()
+        .radius(60) // Prevent overlap
+        .strength(0.8));
+      
+      // Pin the focused node at its CURRENT position (don't move it)
+      focusedD3Node.fx = focusedD3Node.x;
+      focusedD3Node.fy = focusedD3Node.y;
+      
+      // Freeze unconnected nodes in place
+      allNodes.forEach(node => {
+        if (!allConnectedIds.has(node.id) && node.id !== focusedNode.id) {
+          node.fx = node.x;
+          node.fy = node.y;
+        }
+      });
+      
+      // Start simulation with high energy for spreading
+      console.log('🚀 Starting hierarchical tree layout');
+      sim.alpha(1.0).alphaDecay(0.01).velocityDecay(0.4).restart();
+      
+      console.log('✨ All connected levels will spread in tree pattern');
+      
+    }, 100); // Small delay to let D3Graph finish updating
+    
+  }, [focusedNode, focusModeEnabled, mindMapData.connections]);
 
   const onNodeDoubleClick = useCallback((d3Node) => {
     console.log('🔷 App.js onNodeDoubleClick called:', d3Node);
@@ -1405,7 +1678,13 @@ useEffect(() => {
       }
       
       if (event.key === 'Escape') {
-        // Exit connection mode first if active
+        // Exit Focus Mode first if active
+        if (focusedNode) {
+          exitFocusMode();
+          return;
+        }
+        
+        // Exit connection mode if active
         if (connectionMode) {
           setConnectionMode(false);
           return;
@@ -1429,7 +1708,7 @@ useEffect(() => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal, connectionMode]);
+  }, [applyForceLayout, caseModal, topicModal, taskModal, literatureModal, connectionMode, focusedNode, exitFocusMode]);
 
   useEffect(() => {
     // Layout handled by Cytoscape internally
@@ -1748,6 +2027,75 @@ useEffect(() => {
           </div>
         </div>
 
+        {/* --- Focus Mode Toggle --- */}
+        <div className="mb-4">
+          <motion.button
+            onClick={() => {
+              const newState = !focusModeEnabled;
+              setFocusModeEnabled(newState);
+              
+              // If turning off, clean up
+              if (focusModeEnabled) {
+                if (focusedNode) {
+                  exitFocusMode(); // Properly exit with restoration
+                } else {
+                  // Clean up Focus Mode forces even if no node was focused
+                  const sim = window.d3Simulation;
+                  if (sim) {
+                    sim.force('tautWeb', null);
+                    sim.force('centerNode', null);
+                    sim.force('freezeUnconnected', null);
+                    const collisionForce = sim.force('collision');
+                    const chargeForce = sim.force('charge');
+                    const linkForce = sim.force('link');
+                    if (collisionForce) collisionForce.strength(0.5);
+                    if (chargeForce) chargeForce.strength(-100);
+                    if (linkForce) linkForce.strength(0.5);
+                  }
+                  addToast('Focus Mode disabled', 'info', 2000);
+                }
+              } else {
+                addToast('Focus Mode enabled - Click any node to explore', 'info', 2000);
+              }
+            }}
+            className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-between group ${
+              focusedNode 
+                ? 'bg-blue-500/20 border-2 border-blue-400/60 text-blue-300 shadow-lg shadow-blue-500/30 animate-pulse'
+                : focusModeEnabled
+                ? 'bg-blue-500/15 border border-blue-500/50 text-blue-400 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30'
+                : 'bg-slate-700/50 border border-slate-600/30 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+            }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            title={
+              focusedNode 
+                ? `Viewing ${focusedNode.label || 'Node'} - Press ESC to exit`
+                : focusModeEnabled 
+                ? 'Focus Mode enabled - click a node to see its web'
+                : 'Click to enable Focus Mode, then click any node to explore connections'
+            }
+          >
+            <div className="flex items-center gap-2">
+              <Eye size={16} className={focusModeEnabled ? 'text-blue-400' : 'text-slate-400'} />
+              <span>
+                {focusedNode 
+                  ? 'Focus Mode: ACTIVE' 
+                  : focusModeEnabled 
+                  ? 'Focus Mode: ON' 
+                  : 'Focus Mode'}
+              </span>
+            </div>
+            {focusedNode && (
+              <div className="px-2 py-0.5 bg-blue-600/40 rounded text-[10px] font-bold text-blue-200">
+                ACTIVE
+              </div>
+            )}
+            {!focusedNode && focusModeEnabled && (
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+            )}
+          </motion.button>
+        </div>
+
         {/* --- Auto-save Status --- */}
         <div className="mb-4 p-3 bg-slate-700 bg-opacity-50 rounded-lg">
           <div className="flex items-center gap-2 text-xs">
@@ -1774,17 +2122,30 @@ useEffect(() => {
 
         {/* --- Controls --- */}
         <div className="space-y-3 mb-6">
-          <LoadingButton 
-            onClick={() => setPhysicsEnabled(!physicsEnabled)} 
-            icon={Zap} 
-            className={`w-full px-4 py-2 rounded-md text-sm ${
-              physicsEnabled 
-                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-gray-600 hover:bg-gray-700 text-white'
-            }`}
-          >
-            {physicsEnabled ? 'Physics: ON' : 'Physics: OFF'}
-          </LoadingButton>
+          <div className="relative group">
+            <LoadingButton 
+              onClick={() => {
+                if (focusModeEnabled && focusedNode) return; // Prevent changes during Focus Mode
+                setPhysicsEnabled(!physicsEnabled);
+              }} 
+              icon={Zap} 
+              disabled={focusModeEnabled && focusedNode}
+              className={`w-full px-4 py-2 rounded-md text-sm ${
+                focusModeEnabled && focusedNode
+                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-50'
+                  : physicsEnabled 
+                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                    : 'bg-gray-600 hover:bg-gray-700 text-white'
+              }`}
+            >
+              {physicsEnabled ? 'Physics: ON' : 'Physics: OFF'}
+            </LoadingButton>
+            {focusModeEnabled && focusedNode && (
+              <div className="hidden group-hover:block absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50">
+                Disabled during Focus Mode
+              </div>
+            )}
+          </div>
           <LoadingButton 
             onClick={() => setConnectionMode(!connectionMode)} 
             icon={Link2} 
@@ -1796,9 +2157,28 @@ useEffect(() => {
           >
             {connectionMode ? 'Connect: ON' : 'Connect: OFF'}
           </LoadingButton>
-          <LoadingButton onClick={applyForceLayout} icon={Shuffle} className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm">
-            Realign Nodes (Dagre)
-          </LoadingButton>
+          <div className="relative group">
+            <LoadingButton 
+              onClick={() => {
+                if (focusModeEnabled && focusedNode) return; // Prevent changes during Focus Mode
+                applyForceLayout();
+              }} 
+              icon={Shuffle} 
+              disabled={focusModeEnabled && focusedNode}
+              className={`w-full px-4 py-2 rounded-md text-sm ${
+                focusModeEnabled && focusedNode
+                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-50'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+              }`}
+            >
+              Realign Nodes (Dagre)
+            </LoadingButton>
+            {focusModeEnabled && focusedNode && (
+              <div className="hidden group-hover:block absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50">
+                Disabled during Focus Mode
+              </div>
+            )}
+          </div>
           <LoadingButton 
             onClick={() => populateSampleLiteratureData(setMindMapData, autoSaveMindMapData, addToast)} 
             icon={BookOpen} 
@@ -1937,6 +2317,9 @@ useEffect(() => {
           searchQuery={searchQuery}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
+          focusModeEnabled={focusModeEnabled}
+          focusedNode={focusedNode}
+          onBackgroundClick={exitFocusMode}
           onDataChange={(change) => {
             if (change.type === 'position') {
               // Single node position update (during drag)
@@ -1997,6 +2380,25 @@ useEffect(() => {
             <div>
               <div className="font-semibold">Connection Mode Active</div>
               <div className="text-xs text-emerald-100">Click two nodes to connect them • Click connections to delete • Press Esc to exit</div>
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Focus Mode Indicator */}
+        {focusedNode && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -20 }}
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 z-10 border-2 border-blue-400/50"
+          >
+            <Eye className="w-6 h-6 animate-pulse" />
+            <div>
+              <div className="font-bold text-lg">Focus Mode: {focusedNode.label || 'Node'}</div>
+              <div className="text-sm text-blue-100 flex items-center gap-4 mt-1">
+                <span>{focusedNode.connectedNodeIds?.length || 0} connections</span>
+                <span className="text-xs opacity-75">• Press ESC or click background to exit</span>
+              </div>
             </div>
           </motion.div>
         )}

@@ -1,6 +1,6 @@
 # AI Assistant Guidelines - PGY3-HUB
 
-**Last Updated:** October 8, 2025  
+**Last Updated:** October 14, 2025 (Physics Controls Complete)  
 **For:** Any AI assistant working on this codebase
 
 ---
@@ -77,6 +77,30 @@
 - Major refactors
 ```
 
+### 2. CHANGELOG.md (ALWAYS for significant changes)
+
+**Location:** `/CHANGELOG.md`
+
+**What to update:**
+```markdown
+## [X.X.X] - YYYY-MM-DD - "Version Name"
+
+### Added
+- New features, components, or capabilities
+
+### Changed
+- Modifications to existing features
+
+### Fixed
+- Bug fixes and corrections
+
+### Removed
+- Deprecated or removed features
+
+### Technical
+- Implementation details, file changes
+```
+
 **Example:**
 ```markdown
 ### v0.6.1 - "Visual Clarity" (Oct 8, 2025)
@@ -94,7 +118,7 @@
 
 ---
 
-### 2. ROADMAP.md (When Completing Tasks)
+### 3. ROADMAP.md (When Completing Tasks)
 
 **Location:** `/ROADMAP.md`
 

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react'
 import * as d3 from 'd3';
 import EdgeContextMenu from './EdgeContextMenu';
 import EdgeLabelModal from './EdgeLabelModalSimple';
+import PhysicsControls from './PhysicsControls';
 
 const D3Graph = ({ 
   mindMapData, 
@@ -12,7 +13,10 @@ const D3Graph = ({
   onDataChange, 
   physicsEnabled,
   connectionMode = false,
-  onConnectionCreate
+  onConnectionCreate,
+  focusModeEnabled = false,
+  focusedNode = null,
+  onBackgroundClick
 }) => {
   const svgRef = useRef(null);
   const simulationRef = useRef(null);
@@ -27,6 +31,7 @@ const D3Graph = ({
   const warmupTimeoutRef = useRef(null);
   const postDragWarmRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
+  const savedTransformRef = useRef(null); // Store camera transform before Focus Mode
   
   // Connection mode state
   const [connectionStart, setConnectionStart] = useState(null);
@@ -37,7 +42,37 @@ const D3Graph = ({
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [edgeLabelModalOpen, setEdgeLabelModalOpen] = useState(false);
   
-  const BASELINE_ALPHA = 0.015;
+  // Physics controls state
+  const [showPhysicsControls, setShowPhysicsControls] = useState(false);
+  
+  // Load saved physics settings from localStorage or use defaults
+  const loadPhysicsSettings = () => {
+    try {
+      const saved = localStorage.getItem('pgy3hub_physics_settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        console.log('💾 Loaded saved physics settings on init:', parsed);
+        return parsed;
+      }
+    } catch (err) {
+      console.error('Failed to load physics settings:', err);
+    }
+    
+    // Return defaults if no saved settings
+    return {
+      collisionRadius: 40,
+      collisionStrength: 0.7,
+      linkDistance: 120,
+      linkStrength: 0.5,
+      alphaDecay: 0.0228,
+      velocityDecay: 0.4
+    };
+  };
+  
+  const physicsParamsRef = useRef(loadPhysicsSettings());
+  const focusSimulationRef = useRef(null); // Separate simulation for Focus Mode
+  
+  const BASELINE_ALPHA = 0; // Set to 0 to let simulation sleep (no drift)
   
   // Node configuration
   const nodeConfig = {
@@ -203,6 +238,26 @@ const D3Graph = ({
       gRef.current = g;
     }
 
+    // Add background rect for click detection (exits focus mode)
+    let bgRect = svg.select('rect.background');
+    if (bgRect.empty()) {
+      bgRect = svg.insert('rect', ':first-child')
+        .attr('class', 'background')
+        .attr('fill', 'transparent')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .style('pointer-events', 'all');
+    }
+    
+    // Background click handler for exiting focus mode
+    bgRect.on('click', (event) => {
+      // Only exit focus mode if we're in it and clicked directly on background
+      if (focusedNode && onBackgroundClick) {
+        console.log('🎯 Background clicked - exiting focus mode');
+        onBackgroundClick();
+      }
+    });
+
     if (!zoomBehaviorRef.current) {
       zoomBehaviorRef.current = d3.zoom()
         .scaleExtent([0.2, 2])
@@ -223,59 +278,50 @@ const D3Graph = ({
     if (!simulationRef.current) {
       console.log('🔷 Creating new simulation');
       
+      const params = physicsParamsRef.current;
+      
       simulationRef.current = d3.forceSimulation(nodes)
-        .force('charge', d3.forceManyBody().strength(-500))
-        .force('collision', d3.forceCollide().radius(d => (d.radius || 28) + 30).strength(0.99))
-        .alpha(0.12)
-        .alphaDecay(0.08)
-        .velocityDecay(0.6);
+        .force('charge', null) // No global charge force
+        .force('collision', d3.forceCollide()
+          .radius(params.collisionRadius)
+          .strength(params.collisionStrength))
+        .force('link', links.length > 0 ? 
+          d3.forceLink(links).id(d => d.id).distance(params.linkDistance).strength(params.linkStrength) : null)
+        .force('x', null)
+        .force('y', null)
+        .alpha(1)
+        .alphaDecay(params.alphaDecay)
+        .velocityDecay(params.velocityDecay)
+        .alphaTarget(0);
 
-      if (links.length > 0) {
-        simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(220).strength(1.2).iterations(2));
-      }
-
-      const cx = width / 2;
-      const cy = height / 2;
-      simulationRef.current.force('viewX', d3.forceX(cx).strength(0.025));
-      simulationRef.current.force('viewY', d3.forceY(cy).strength(0.025));
-
-      simulationRef.current.alphaTarget(Math.max(0.03, BASELINE_ALPHA));
-      if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
-      warmupTimeoutRef.current = setTimeout(() => {
-        try {
-          if (simulationRef.current) {
-            simulationRef.current.alphaTarget(BASELINE_ALPHA);
-          }
-        } catch (e) {}
-      }, 800);
+      console.log('🔷 Simulation created with params:', params);
 
       isInitializedRef.current = true;
     } else {
-      console.log('🔷 Updating existing simulation');
+      console.log('🔷 Updating existing simulation (nodes/links only - preserving physics params)');
       
       simulationRef.current.nodes(nodes);
 
+      // Update links but DON'T reset collision force
+      // This preserves user-adjusted physics parameters
       if (links.length > 0) {
         const existingLinkForce = simulationRef.current.force('link');
         if (existingLinkForce) {
-          existingLinkForce.links(links).distance(220).strength(0.9).iterations(2);
+          existingLinkForce.links(links);
+          // Don't reset distance/strength - preserve user adjustments
         } else {
-          simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(220).strength(0.9).iterations(2));
+          // Only create new link force if it doesn't exist
+          const params = physicsParamsRef.current;
+          simulationRef.current.force('link', d3.forceLink(links).id(d => d.id).distance(params.linkDistance).strength(params.linkStrength));
         }
       } else {
         simulationRef.current.force('link', null);
       }
 
-      simulationRef.current.alpha(0.08).restart();
-      simulationRef.current.alphaTarget(Math.max(0.02, BASELINE_ALPHA));
-      if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
-      warmupTimeoutRef.current = setTimeout(() => {
-        try {
-          if (simulationRef.current) {
-            simulationRef.current.alphaTarget(BASELINE_ALPHA);
-          }
-        } catch (e) {}
-      }, 800);
+      // Gentle restart for updates
+      simulationRef.current.alpha(0.3).restart();
+      simulationRef.current.alphaTarget(0);
+      console.log('🔷 Simulation updated - physics params preserved');
     }
 
     // Ensure layer groups exist
@@ -594,7 +640,11 @@ const D3Graph = ({
           .attr('opacity', 0.4);
         
         if (simulationRef.current && physicsEnabled) {
-          simulationRef.current.alphaTarget(0.12).restart();
+          // CRITICAL: Only warm simulation if no other drag is active
+          // This prevents cascading simulation warming that causes all nodes to move
+          if (!event.active) {
+            simulationRef.current.alphaTarget(0.3).restart();
+          }
         }
         
         d.fx = d.x;
@@ -636,23 +686,21 @@ const D3Graph = ({
             .attr('opacity', 0.2);
           
           if (physicsEnabled) {
+            // Observable pattern: release the node to allow natural movement
             d.fx = null;
             d.fy = null;
           } else {
+            // Physics off: keep node fixed
             d.fx = d.x;
             d.fy = d.y;
           }
           
           if (simulationRef.current && physicsEnabled) {
-            simulationRef.current.alphaTarget(Math.max(0.02, BASELINE_ALPHA));
-            if (postDragWarmRef.current) clearTimeout(postDragWarmRef.current);
-            postDragWarmRef.current = setTimeout(() => {
-              try {
-                if (simulationRef.current) {
-                  simulationRef.current.alphaTarget(BASELINE_ALPHA);
-                }
-              } catch (e) {}
-            }, 600);
+            // CRITICAL: Only cool simulation if no other drag is active
+            // This prevents premature cooling when multiple nodes are being dragged
+            if (!event.active) {
+              simulationRef.current.alphaTarget(0);
+            }
           }
           
           if (onDataChange) {
@@ -810,8 +858,8 @@ const D3Graph = ({
           n.fx = null;
           n.fy = null;
         });
-        simulationRef.current.alpha(1).alphaTarget(BASELINE_ALPHA).restart();
-        console.log('🔷 Physics ON - nodes released');
+        simulationRef.current.alpha(1).alphaTarget(0).restart(); // Observable pattern
+        console.log('🔷 Physics ON - nodes released with natural forces');
       } else {
         nodesRef.current.forEach(n => {
           n.fx = n.x;
@@ -893,6 +941,291 @@ const D3Graph = ({
     }
   }, [mindMapData, onDataChange]);
 
+  // Apply localized physics to focused cluster
+  const applyLocalizedPhysics = useCallback((targetNode, connectedIds) => {
+    if (!simulationRef.current || !nodesRef.current || !linksRef.current) return;
+    
+    console.log('🎯 Applying localized physics to:', targetNode.id);
+    console.log(`📊 Found ${connectedIds.size} nodes in connected component`);
+    
+    // FREEZE all unconnected nodes (nodes NOT in the component)
+    nodesRef.current.forEach(node => {
+      if (!connectedIds.has(node.id)) {
+        node.fx = node.x;
+        node.fy = node.y;
+        node.vx = 0;
+        node.vy = 0;
+      }
+    });
+    
+    // PIN the focused node at its current position (anchor point)
+    const focusedNodeData = nodesRef.current.find(n => n.id === targetNode.id);
+    if (focusedNodeData) {
+      focusedNodeData.fx = focusedNodeData.x;
+      focusedNodeData.fy = focusedNodeData.y;
+      focusedNodeData.vx = 0;
+      focusedNodeData.vy = 0;
+    }
+    
+    // RELEASE ALL other nodes in the component (allow them to move freely)
+    nodesRef.current.forEach(node => {
+      if (connectedIds.has(node.id) && node.id !== targetNode.id) {
+        node.fx = null;
+        node.fy = null;
+      }
+    });
+    
+    // Get ALL links within the connected component
+    const focusLinks = linksRef.current.filter(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      return connectedIds.has(sourceId) && connectedIds.has(targetId);
+    });
+    
+    console.log(`🔗 Using ${focusLinks.length} links for force layout`);
+    
+    // Stop the global simulation completely
+    simulationRef.current.stop();
+    console.log('🛑 Global simulation stopped');
+    
+    // Create a SEPARATE localized simulation for the focused cluster
+    focusSimulationRef.current = d3.forceSimulation(nodesRef.current)
+      .force('link', d3.forceLink(focusLinks)
+        .id(d => d.id)
+        .distance(270)        // SMOOTHER: Less dramatic spread
+        .strength(0.25))      // SMOOTHER: Moderate pull for controlled spread
+      .force('charge', d3.forceManyBody()
+        .strength(-500)       // SMOOTHER: Softer repulsion
+        .distanceMax(400))    // SMOOTHER: Only affects nearby nodes
+      .force('collision', d3.forceCollide()
+        .radius(d => (d.radius || 30) + 24)  // SMOOTHER: Moderate spacing
+        .strength(0.92))      // SMOOTHER: Gentle collision avoidance
+      .alpha(0.7)             // SMOOTHER: Lower initial energy
+      .alphaDecay(0.02)       // SMOOTHER: Quicker settling
+      .velocityDecay(0.75)    // SMOOTHER: High friction for gentle movement
+      .on('tick', () => {
+        // Update visual positions during animation
+        if (nodeElementsRef.current) {
+          nodeElementsRef.current.selectAll('g.node')
+            .attr('transform', d => `translate(${d.x},${d.y})`);
+        }
+        
+        if (linkElementsRef.current) {
+          linkElementsRef.current.selectAll('line.link')
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+        }
+      });
+    
+    console.log('✨ Localized physics simulation started - nodes should spread now');
+  }, []);
+
+  // Stop localized physics and restore global simulation
+  const stopLocalizedPhysics = useCallback(() => {
+    if (!simulationRef.current || !nodesRef.current) return;
+    
+    console.log('🛑 Stopping localized physics');
+    
+    // Stop and remove the focus simulation
+    if (focusSimulationRef.current) {
+      focusSimulationRef.current.stop();
+      focusSimulationRef.current = null;
+      console.log('✅ Focus simulation stopped');
+    }
+    
+    // UNFREEZE all nodes (remove position locks)
+    nodesRef.current.forEach(node => {
+      node.fx = null;
+      node.fy = null;
+    });
+    
+    console.log('🔓 All nodes unfrozen');
+    
+    // Restart the global simulation gently
+    simulationRef.current.alpha(0.3).restart();
+    console.log('🔄 Global simulation resumed');
+  }, []);
+
+  // Focus Mode visual hierarchy effect
+  useEffect(() => {
+    if (!nodeElementsRef.current || !simulationRef.current) return;
+    
+    const nodes = nodeElementsRef.current.selectAll('g.node');
+    const links = linkElementsRef.current?.selectAll('line.link');
+    
+    if (focusedNode && focusedNode.connectedNodeIds) {
+      console.log('🎯 Applying Focus Mode visual hierarchy and localized physics');
+      const connectedIds = new Set(focusedNode.connectedNodeIds);
+      
+      // Apply localized physics FIRST
+      applyLocalizedPhysics(focusedNode, connectedIds);
+
+      // --- Camera Centering and Zoom ---
+      const clusterNodes = nodesRef.current.filter(n => connectedIds.has(n.id));
+      if (clusterNodes.length > 0 && svgRef.current && zoomBehaviorRef.current) {
+        // Save current transform before zooming in (only once per focus session)
+        if (!savedTransformRef.current) {
+          savedTransformRef.current = d3.zoomTransform(svgRef.current);
+          console.log('📸 Saved camera transform:', savedTransformRef.current);
+        }
+        
+        const minX = Math.min(...clusterNodes.map(n => n.x));
+        const maxX = Math.max(...clusterNodes.map(n => n.x));
+        const minY = Math.min(...clusterNodes.map(n => n.y));
+        const maxY = Math.max(...clusterNodes.map(n => n.y));
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const clusterWidth = maxX - minX + 80; // Add padding
+        const clusterHeight = maxY - minY + 80;
+        const svgWidth = svgRef.current.clientWidth || 800;
+        const svgHeight = svgRef.current.clientHeight || 600;
+        const scaleX = svgWidth / clusterWidth;
+        const scaleY = svgHeight / clusterHeight;
+        const targetScale = Math.min(scaleX, scaleY, 1.5); // Limit max zoom
+        const tx = svgWidth / 2 - centerX * targetScale;
+        const ty = svgHeight / 2 - centerY * targetScale;
+        d3.select(svgRef.current)
+          .transition()
+          .duration(900)
+          .call(zoomBehaviorRef.current.transform,
+            d3.zoomIdentity
+              .translate(tx, ty)
+              .scale(targetScale)
+          );
+      }
+      // --- End Camera Centering ---
+      // Apply visual hierarchy to nodes
+      nodes.each(function(d) {
+        const nodeGroup = d3.select(this);
+        const isConnected = connectedIds.has(d.id);
+        const isFocused = d.id === focusedNode.id;
+        
+        // Transition for smooth animation
+        const transition = nodeGroup.transition().duration(800);
+        
+        if (isFocused) {
+          // Focused node: Scale up, bright glow
+          transition.style('opacity', 1);
+          nodeGroup.select('.node-circle')
+            .transition().duration(800)
+            .attr('r', d => d.radius * 1.2)
+            .style('filter', 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.8)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))');
+          nodeGroup.select('.node-glow')
+            .transition().duration(800)
+            .attr('r', d => (d.radius * 1.2) + 10)
+            .attr('opacity', 0.5)
+            .attr('fill', '#3b82f6');
+        } else if (isConnected) {
+          // Connected nodes: Normal size, slight glow
+          transition.style('opacity', 1);
+          nodeGroup.select('.node-circle')
+            .transition().duration(800)
+            .attr('r', d => d.radius)
+            .style('filter', 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))');
+          nodeGroup.select('.node-glow')
+            .transition().duration(800)
+            .attr('opacity', 0.3);
+        } else {
+          // Unconnected nodes: Dimmed but still clickable to allow focus switching
+          transition.style('opacity', 0.25); // Slightly more visible than before
+          
+          // Add hover effect to the GROUP to show they're interactive
+          nodeGroup
+            .on('mouseenter', function() {
+              d3.select(this)
+                .transition().duration(200)
+                .style('opacity', 0.6); // Brighten the entire group
+            })
+            .on('mouseleave', function() {
+              d3.select(this)
+                .transition().duration(200)
+                .style('opacity', 0.25); // Back to dimmed
+            });
+          
+          nodeGroup.select('.node-circle')
+            .transition().duration(800)
+            .style('filter', 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))');
+          nodeGroup.select('.node-glow')
+            .transition().duration(800)
+            .attr('opacity', 0.08);
+        }
+      });
+      
+      // Apply visual hierarchy to edges
+      if (links) {
+        // First, reset ALL edges to a known state
+        links.each(function(d) {
+          const link = d3.select(this);
+          // Get the original color from the connection data
+          const originalColor = '#64748b'; // Default slate-500
+          
+          // Determine if this edge is connected to the focused node
+          const isConnectedEdge = (d.source.id === focusedNode.id || d.target.id === focusedNode.id) &&
+                                  (connectedIds.has(d.source.id) || connectedIds.has(d.target.id));
+          
+          if (isConnectedEdge) {
+            // Connected edges: Thicker, brighter, full opacity
+            link.transition().duration(800)
+              .style('stroke-width', 3)
+              .style('opacity', 1)
+              .style('stroke', () => {
+                // Brighten the original color
+                const color = d3.color(originalColor);
+                return color ? color.brighter(0.8) : originalColor;
+              });
+          } else {
+            // Unconnected edges: Dim, reset to default style
+            link.transition().duration(800)
+              .style('stroke-width', 1.5)
+              .style('opacity', 0.1)
+              .style('stroke', originalColor);
+          }
+        });
+      }
+      
+    } else {
+      // Not in focus mode: Restore all to normal
+      console.log('🎯 Restoring normal visual hierarchy and physics');
+      
+      // Stop localized physics FIRST
+      stopLocalizedPhysics();
+      // Smoothly restore camera to saved view
+      if (svgRef.current && zoomBehaviorRef.current && savedTransformRef.current) {
+        console.log('🔄 Restoring camera to saved transform:', savedTransformRef.current);
+        d3.select(svgRef.current)
+          .transition()
+          .duration(900)
+          .call(zoomBehaviorRef.current.transform, savedTransformRef.current);
+        // Clear saved transform after restoring
+        savedTransformRef.current = null;
+      }
+      
+      nodes.transition().duration(800)
+        .style('opacity', 1)
+        .style('pointer-events', 'all');
+      
+      nodes.select('.node-circle')
+        .transition().duration(800)
+        .attr('r', d => d.radius)
+        .style('filter', 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))');
+      
+      nodes.select('.node-glow')
+        .transition().duration(800)
+        .attr('r', d => d.radius + 6)
+        .attr('opacity', 0.2)
+        .attr('fill', d => d.color);
+      
+      if (links) {
+        links.transition().duration(800)
+          .style('stroke-width', 1.5)
+          .style('opacity', 0.6)
+          .style('stroke', '#64748b'); // Reset to default slate-500
+      }
+    }
+  }, [focusedNode]);
+
   // Temp connection rendering moved to D3 layer for proper transform handling
 
   return (
@@ -904,6 +1237,42 @@ const D3Graph = ({
       >
         {/* Temp connection rendering moved to D3 layer */}
       </svg>
+
+      {/* Physics Controls Toggle Button */}
+      <button
+        onClick={() => setShowPhysicsControls(!showPhysicsControls)}
+        className="fixed top-4 right-4 z-40 p-3 bg-white hover:bg-slate-50 rounded-lg shadow-lg border border-slate-200 transition-all hover:shadow-xl group"
+        title="Open Physics Controls"
+      >
+        <svg 
+          className="w-6 h-6 text-slate-600 group-hover:text-blue-600 transition-colors" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+          />
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+          />
+        </svg>
+      </button>
+
+      {/* Physics Controls Panel */}
+      {showPhysicsControls && (
+        <PhysicsControls
+          simulation={simulationRef.current}
+          physicsParamsRef={physicsParamsRef}
+          onClose={() => setShowPhysicsControls(false)}
+        />
+      )}
 
       {/* Edge Context Menu */}
       {contextMenu && selectedEdge && (
