@@ -514,7 +514,17 @@ const DashboardComponent = () => {
   const [literatureModal, setLiteratureModal] = useState({ isOpen: false, data: null });
   const [importModal, setImportModal] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
-  const [physicsEnabled, setPhysicsEnabled] = useState(true); // Control physics simulation
+  // Initialize physicsEnabled from localStorage or default to true
+  const [physicsEnabled, setPhysicsEnabled] = useState(() => {
+    const saved = localStorage.getItem('pgy3hub_physics_enabled');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  
+  // Persist physicsEnabled changes
+  useEffect(() => {
+    localStorage.setItem('pgy3hub_physics_enabled', JSON.stringify(physicsEnabled));
+  }, [physicsEnabled]);
+
   const [modalAnimationStates, setModalAnimationStates] = useState({
     case: false,
     topic: false,
@@ -1229,42 +1239,302 @@ useEffect(() => {
     addToast('Edge label updated successfully', 'success');
   }, [setMindMapData, autoSaveMindMapData, addToast]);
 
-  // Restart D3 force simulation for realignment
+  // Cluster Detection Algorithm - Find connected components and Topic centers
+  const detectClusters = useCallback(() => {
+    if (!window.d3Nodes || !window.d3Links) {
+      console.warn('D3 nodes/links not available for cluster detection');
+      return null;
+    }
+
+    const nodes = window.d3Nodes;
+    const links = window.d3Links;
+    
+    // Build adjacency list
+    const adjacency = new Map();
+    nodes.forEach(node => adjacency.set(node.id, []));
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      adjacency.get(sourceId)?.push(targetId);
+      adjacency.get(targetId)?.push(sourceId);
+    });
+
+    // Find connected components using BFS
+    const visited = new Set();
+    const clusters = [];
+    
+    nodes.forEach(node => {
+      if (visited.has(node.id)) return;
+      
+      const cluster = {
+        id: `cluster-${clusters.length}`,
+        nodes: [],
+        topics: [],
+        cases: [],
+        literature: [],
+        tasks: [],
+        center: null
+      };
+      
+      // BFS to find all connected nodes
+      const queue = [node.id];
+      visited.add(node.id);
+      
+      while (queue.length > 0) {
+        const currentId = queue.shift();
+        const currentNode = nodes.find(n => n.id === currentId);
+        
+        if (currentNode) {
+          cluster.nodes.push(currentNode);
+          
+          // Categorize by type
+          const nodeType = currentNode.id.split('-')[0];
+          if (nodeType === 'topic') cluster.topics.push(currentNode);
+          else if (nodeType === 'case') cluster.cases.push(currentNode);
+          else if (nodeType === 'literature') cluster.literature.push(currentNode);
+          else if (nodeType === 'task') cluster.tasks.push(currentNode);
+          
+          // Add unvisited neighbors to queue
+          const neighbors = adjacency.get(currentId) || [];
+          neighbors.forEach(neighborId => {
+            if (!visited.has(neighborId)) {
+              visited.add(neighborId);
+              queue.push(neighborId);
+            }
+          });
+        }
+      }
+      
+      // Determine cluster center (prefer topics)
+      if (cluster.topics.length > 0) {
+        // Use the most connected topic as center
+        cluster.center = cluster.topics.reduce((best, topic) => {
+          const topicConnections = (adjacency.get(topic.id) || []).length;
+          const bestConnections = (adjacency.get(best.id) || []).length;
+          return topicConnections > bestConnections ? topic : best;
+        });
+      } else if (cluster.nodes.length > 0) {
+        // No topics - use most connected node
+        cluster.center = cluster.nodes.reduce((best, node) => {
+          const nodeConnections = (adjacency.get(node.id) || []).length;
+          const bestConnections = (adjacency.get(best.id) || []).length;
+          return nodeConnections > bestConnections ? node : best;
+        });
+      }
+      
+      clusters.push(cluster);
+    });
+    
+    console.log('🎯 Detected clusters:', clusters.map(c => ({
+      id: c.id,
+      nodeCount: c.nodes.length,
+      topics: c.topics.length,
+      cases: c.cases.length,
+      center: c.center?.id
+    })));
+    
+    return clusters;
+  }, []);
+
+  // Restart D3 force simulation for realignment with smart clustering
   const forceLayout = useCallback(() => {
-    if (window.d3Simulation && window.d3Nodes) {
-      // Unfix all nodes so they can be repositioned
-      window.d3Nodes.forEach(node => {
-        node.fx = null;
-        node.fy = null;
+    const callTime = Date.now();
+    console.log(`🔄 [${callTime}] Realign: Starting hierarchical force layout`);
+    
+    // Prevent multiple simultaneous realignments
+    if (window.isCustomRealigning) {
+      console.log(`⚠️ [${callTime}] Realignment already in progress - ignoring duplicate call`);
+      return;
+    }
+    
+    if (!window.d3SimulationRef || !window.d3SimulationRef.current || !window.d3Nodes || window.d3Nodes.length === 0) {
+      addToast('Simulation not ready', 'warning');
+      return;
+    }
+
+    const allNodes = window.d3Nodes;
+    const allLinks = window.d3Links || [];
+    const sim = window.d3SimulationRef.current;
+    
+    // Set flag to prevent interference
+    window.isCustomRealigning = true;
+    
+    // Categorize nodes by type for hierarchical positioning
+    const nodesByType = {
+      topics: allNodes.filter(n => n.id.startsWith('topic-')),
+      cases: allNodes.filter(n => n.id.startsWith('case-')),
+      literature: allNodes.filter(n => n.id.startsWith('literature-')),
+      tasks: allNodes.filter(n => n.id.startsWith('task-'))
+    };
+    
+    console.log(`📊 Nodes: ${nodesByType.topics.length} topics, ${nodesByType.cases.length} cases, ${nodesByType.literature.length} literature, ${nodesByType.tasks.length} tasks`);
+    
+    // Release all nodes and reset velocities
+    allNodes.forEach(node => {
+      node.fx = null;
+      node.fy = null;
+      node.vx = 0;
+      node.vy = 0;
+    });
+    
+    // Create custom radial positioning force
+    const radialForce = (alpha) => {
+      allNodes.forEach(node => {
+        let targetRadius = 0;
+        
+        if (node.id.startsWith('topic-')) {
+          targetRadius = 0.2 * 600; // Topics near center
+        } else if (node.id.startsWith('case-') || node.id.startsWith('literature-')) {
+          targetRadius = 0.5 * 600; // Content in middle
+        } else if (node.id.startsWith('task-')) {
+          targetRadius = 0.8 * 600; // Tasks at edge
+        }
+        
+        // Gentle pull toward target radius
+        const dx = node.x || 0;
+        const dy = node.y || 0;
+        const currentRadius = Math.sqrt(dx * dx + dy * dy);
+        
+        if (currentRadius > 0) {
+          const pull = (targetRadius - currentRadius) * 0.1 * alpha;
+          const angle = Math.atan2(dy, dx);
+          node.vx += Math.cos(angle) * pull;
+          node.vy += Math.sin(angle) * pull;
+        }
+      });
+    };
+    
+    // Modify the EXISTING simulation's forces for realignment
+    sim.force('radial', radialForce);  // Add hierarchical positioning
+    
+    // Update existing forces with null checks - CONNECTION-AWARE SETTINGS
+    const chargeForce = sim.force('charge');
+    if (chargeForce) {
+      // Reduced repulsion to allow connected nodes to stay closer
+      chargeForce.strength(-300).distanceMax(500);
+    }
+    
+    const collisionForce = sim.force('collision');
+    if (collisionForce) {
+      // Smaller collision radius for tighter clustering
+      collisionForce.radius(d => (d.radius || 30) + 20).strength(0.8);
+    }
+    
+    const linkForce = sim.force('link');
+    if (linkForce) {
+      // STRONGER link force with SHORTER distance to keep connected nodes close
+      // This is the key: high strength pulls connected nodes together
+      linkForce.distance(120).strength(0.8);
+    }
+    
+    console.log('🔗 Connection-aware realignment: strong links, reduced repulsion');
+    
+    // Warm up the simulation with high energy to trigger realignment
+    sim.alpha(1).alphaTarget(0).restart();
+    console.log('🔥 Realignment forces applied to existing simulation');
+    
+    // Start camera animation immediately (while simulation runs)
+    setTimeout(() => {
+      const xCoords = allNodes.map(n => n.x || 0);
+      const yCoords = allNodes.map(n => n.y || 0);
+      const minX = Math.min(...xCoords);
+      const maxX = Math.max(...xCoords);
+      const minY = Math.min(...yCoords);
+      const maxY = Math.max(...yCoords);
+      const layoutWidth = maxX - minX + 400;
+      const layoutHeight = maxY - minY + 400;
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+      
+      const svgElement = window.d3SvgElement || document.querySelector('svg');
+      const zoomBehavior = window.d3ZoomBehavior;
+      
+      if (svgElement && zoomBehavior) {
+        const svgWidth = svgElement.clientWidth || 1200;
+        const svgHeight = svgElement.clientHeight || 800;
+        const scaleX = svgWidth / layoutWidth;
+        const scaleY = svgHeight / layoutHeight;
+        const targetScale = Math.max(0.3, Math.min(scaleX, scaleY, 1.0));
+        const tx = svgWidth / 2 - centerX * targetScale;
+        const ty = svgHeight / 2 - centerY * targetScale;
+        
+        console.log(`📷 Camera animating: scale=${targetScale.toFixed(2)}, bounds=${layoutWidth.toFixed(0)}x${layoutHeight.toFixed(0)}`);
+        
+        // Smooth camera animation synchronized with physics
+        d3.select(svgElement)
+          .transition()
+          .duration(2000)
+          .ease(d3.easeCubicInOut)
+          .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(targetScale));
+      }
+    }, 300);
+    
+    // Set up one-time completion handler
+    const onSimulationEnd = () => {
+      // Remove this listener immediately
+      sim.on('end', null);
+      
+      console.log('✅ Force layout settled - saving positions');
+      
+      // Remove the radial force now that layout is complete
+      sim.force('radial', null);
+      console.log('🔷 Removed radial force - nodes free to move');
+        
+      // Update prevPositionsRef
+      
+      // Remove the radial force now that layout is complete
+      sim.force('radial', null);
+      console.log('� Removed radial force - returning to normal physics');
+        
+      // Update prevPositionsRef
+      if (window.d3PrevPositions) {
+        allNodes.forEach(node => {
+          window.d3PrevPositions.current.set(node.id, { x: node.x, y: node.y });
+        });
+        console.log('💾 Updated prevPositionsRef');
+      }
+      
+      // Update mindMapData with final positions
+      setMindMapData(prevData => {
+        const updatedData = { ...prevData };
+        
+        console.log('📝 Updating mindMapData with final positions');
+        
+        // Update each node type's position data
+        ['topics', 'cases', 'tasks', 'literature'].forEach(key => {
+          if (updatedData[key]) {
+            updatedData[key] = updatedData[key].map(item => {
+              const d3Node = allNodes.find(n => n.id === `${key === 'literature' ? 'literature' : key.slice(0, -1)}-${item.id}`);
+              if (d3Node) {
+                return {
+                  ...item,
+                  position: { x: d3Node.x, y: d3Node.y }
+                };
+              }
+              return item;
+            });
+          }
+        });
+        
+        return updatedData;
       });
       
-      // Restart simulation with high alpha for dramatic realignment
-      window.d3Simulation.alpha(1).alphaTarget(0).restart();
-      addToast('Nodes realigning with force-directed layout...', 'success');
-      
-      // If physics is disabled, fix nodes after simulation settles
-      if (!physicsEnabled) {
-        setTimeout(() => {
-          if (window.d3Simulation && window.d3Nodes) {
-            // Let it run until alpha is low, then stop
-            const checkInterval = setInterval(() => {
-              if (window.d3Simulation.alpha() < 0.05) {
-                clearInterval(checkInterval);
-                window.d3Simulation.stop();
-                window.d3Nodes.forEach(node => {
-                  node.fx = node.x;
-                  node.fy = node.y;
-                });
-                addToast('Realignment complete', 'success');
-              }
-            }, 100);
-          }
-        }, 100);
-      }
-    } else {
-      addToast('Simulation not ready', 'warning');
-    }
-  }, [addToast, physicsEnabled]);
+      // Clear flags with a longer delay to prevent position update conflicts
+      // This ensures any in-flight drag operations complete before we allow position updates
+      // Also prevents D3Graph from restarting simulation and causing jitter
+      setTimeout(() => {
+        window.isCustomRealigning = false;
+        console.log('✅ Realignment complete - positions persisted, flags cleared');
+      }, 1000); // Extended to 1 second for stability
+    };
+    
+    // Attach the one-time callback to the existing simulation
+    sim.on('end', onSimulationEnd);
+    
+    addToast(`Realigning ${allNodes.length} nodes into hierarchical layout...`, 'success');
+    
+    console.log(`✨ [${callTime}] Force-directed hierarchical layout started`);
+  }, [addToast, setMindMapData]);
 
   // applyForceLayout wrapper function (defined after forceLayout)
   const applyForceLayout = useCallback(() => {
@@ -2321,6 +2591,12 @@ useEffect(() => {
           focusedNode={focusedNode}
           onBackgroundClick={exitFocusMode}
           onDataChange={(change) => {
+            // Skip position updates during custom realignment to prevent reset loops
+            if (window.isCustomRealigning && (change.type === 'position' || change.type === 'positions')) {
+              console.log('🔷 Skipping position update during realignment:', change.type);
+              return;
+            }
+            
             if (change.type === 'position') {
               // Single node position update (during drag)
               requestAnimationFrame(() => {

@@ -300,6 +300,12 @@ const D3Graph = ({
     } else {
       console.log('🔷 Updating existing simulation (nodes/links only - preserving physics params)');
       
+      // Skip update if custom realignment is in progress
+      if (window.isCustomRealigning) {
+        console.log('🔷 Skipping simulation update - custom realignment in progress');
+        return;
+      }
+      
       simulationRef.current.nodes(nodes);
 
       // Update links but DON'T reset collision force
@@ -613,7 +619,7 @@ const D3Graph = ({
     let dragStartX = 0;
     let dragStartY = 0;
     let hasMoved = false;
-    const dragThreshold = 5;
+    const dragThreshold = 2; // Reduced for more responsive dragging
 
     const dragBehavior = d3.drag()
       .on('start', function(event, d) {
@@ -829,7 +835,11 @@ const D3Graph = ({
       if (nodesRef.current) {
         nodesRef.current.forEach(n => {
           if (Number.isFinite(n.x) && Number.isFinite(n.y)) {
-            prevPositionsRef.current.set(n.id, { x: n.x, y: n.y });
+            // Don't overwrite prevPositionsRef during custom realignment
+            // This prevents the tick handler from overriding our realignment positions
+            if (!window.isCustomRealigning) {
+              prevPositionsRef.current.set(n.id, { x: n.x, y: n.y });
+            }
           }
         });
       }
@@ -837,6 +847,16 @@ const D3Graph = ({
 
     window.d3Simulation = simulationRef.current;
     window.d3Nodes = nodes;
+    window.d3Links = links;
+  window.d3SimulationRef = simulationRef; // Expose ref itself so it can be updated
+    window.d3PrevPositions = prevPositionsRef; // Expose prevPositions so App.js can update it
+    // Expose zoom behavior and svg element for external camera control
+    try {
+      window.d3ZoomBehavior = zoomBehaviorRef.current;
+      window.d3SvgElement = svgRef.current;
+    } catch (e) {
+      // ignore if refs not initialized
+    }
 
     return () => {
       if (warmupTimeoutRef.current) {
@@ -853,6 +873,12 @@ const D3Graph = ({
   // Physics toggle effect
   useEffect(() => {
     if (isInitializedRef.current && simulationRef.current && nodesRef.current) {
+      // Don't interfere if a custom realignment is in progress
+      if (window.isCustomRealigning) {
+        console.log('🔷 Physics toggle blocked - custom realignment in progress');
+        return;
+      }
+      
       if (physicsEnabled) {
         nodesRef.current.forEach(n => {
           n.fx = null;

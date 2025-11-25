@@ -1,6 +1,6 @@
 # AI Assistant Guidelines - PGY3-HUB
 
-**Last Updated:** October 14, 2025 (Physics Controls Complete)  
+**Last Updated:** November 23, 2025 (ROADMAP Documentation Requirements Added)  
 **For:** Any AI assistant working on this codebase
 
 ---
@@ -21,7 +21,7 @@
 
 ## 📊 Version System (CRITICAL)
 
-### Current Version: v0.6.0
+### Current Version: v0.7.0
 
 **Format:** `v[MAJOR].[MINOR].[PATCH]`
 - **MAJOR** (0.x.x): Architecture changes, complete overhauls
@@ -118,35 +118,75 @@
 
 ---
 
-### 3. ROADMAP.md (When Completing Tasks)
+### 3. ROADMAP.md (CRITICAL - When Working on ANY Feature)
 
 **Location:** `/ROADMAP.md`
 
+**IMPORTANT:** The ROADMAP is the master project tracker. Update it as you work, not just when you finish!
+
 **What to update:**
 
-Mark tasks as complete:
+#### A. Mark Individual Tasks Complete as You Go
 ```markdown
 ### Priority A: Focus Mode
 
 **Features to Implement:**
 1. **Focus Mode State Management**
-   - [x] Add `focusMode` state to App.js  ← Change [ ] to [x]
+   - [x] Add `focusMode` state to App.js  ← Change [ ] to [x] AS SOON AS DONE
    - [x] Add `focusedNode` state
    - [ ] Calculate connected nodes
 ```
 
-Update status:
+#### B. Update Feature Status Header
 ```markdown
 ### Priority A: Focus Mode (HIGH PRIORITY) ⭐⭐⭐
-**Status:** 🚧 In Progress ← Update this
-**Progress:** 2/6 steps complete ← Add this
+**Effort:** 2-3 hours  
+**Business Value:** HIGH
+**Status:** � NOT STARTED  ← Update to 🟡 In Progress or ✅ COMPLETE
 ```
+
+**Status Indicators:**
+- `🔴 NOT STARTED` - Haven't begun work yet
+- `🟡 In Progress` - Currently working on this
+- `✅ COMPLETE` - All tasks done, tested, and documented
+
+#### C. Update Phase Status When Complete
+When ALL features in a phase are complete:
+
+```markdown
+## ✅ Phase 6: Visual Organization (COMPLETE - Oct 17, 2025)
+```
+
+Add completion date and change emoji from 🚀 to ✅.
+
+#### D. Update Header Date
+At the top of ROADMAP.md:
+```markdown
+**Updated:** November 23, 2025 (Your change description)
+```
+
+#### E. Move to Next Phase
+When a phase completes, add a new "Phase X: [Next Focus]" section at the top showing what's next.
+
+**Example Update Sequence:**
+1. Start working on Focus Mode → Change status to `🟡 In Progress`
+2. Complete state management → Mark those checkboxes `[x]`
+3. Complete camera system → Mark those checkboxes `[x]`
+4. All Focus Mode tasks done → Change status to `✅ COMPLETE (Nov 23, 2025)`
+5. Phase 6 fully complete → Change header to `✅ Phase 6: ... (COMPLETE - Nov 23, 2025)`
+6. Add `## 🚀 Phase 7: [Next Features]` section
+
+**Why This Matters:**
+- ROADMAP is the single source of truth for project status
+- Other AIs need accurate status to know what's done
+- Prevents duplicate work or confusion about progress
+- Shows clear timeline of development
 
 ---
 
-### 3. Implementation Plan (Active Work Doc)
+### 4. Implementation Plan (Active Work Doc)
 
-**Location:** `/docs/development/FOCUS_MODE_IMPLEMENTATION.md` (or current feature doc)
+**Location:** `/docs/development/[FEATURE]_IMPLEMENTATION.md` (or current feature doc)
 
 **What to update:**
 
@@ -168,7 +208,7 @@ Update progress table:
 
 ---
 
-### 4. App UI Version Display (When Incrementing Version)
+### 5. App UI Version Display (When Incrementing Version)
 
 **Location:** `frontend/src/App.js` (around line 1602)
 
@@ -186,7 +226,7 @@ Change to new version and feature name:
 
 ---
 
-### 5. Session Documentation (Optional but Recommended)
+### 6. Session Documentation (Optional but Recommended)
 
 **Location:** `/docs/archive/SESSION_SUMMARY_[DATE].md`
 
@@ -230,11 +270,13 @@ Create at end of work session:
    - Document any decisions or issues
 
 3. **After Completing a Feature/Fix:**
-   - ✅ Mark checklist items in implementation plan
-   - ✅ Update progress in ROADMAP.md
+   - ✅ Mark checklist items in implementation plan (`docs/development/`)
+   - ✅ **Update ROADMAP.md immediately** (mark tasks [x], update status)
    - ✅ Add entry to VERSION.md
+   - ✅ Add entry to CHANGELOG.md (for significant changes)
    - ✅ Increment version number if appropriate
    - ✅ Update package.json version if releasing
+   - ✅ Update header dates in ROADMAP.md and VERSION.md
 
 4. **If Completing Multiple Small Tasks:**
    - Update docs after each logical unit
@@ -346,6 +388,8 @@ Before considering any work "complete":
 - ❌ Make changes without updating documentation
 - ❌ Skip version increments for features
 - ❌ Leave implementation plans outdated
+- ❌ **Leave ROADMAP.md outdated or with wrong status indicators**
+- ❌ **Mark features complete in code but leave ROADMAP showing "NOT STARTED"**
 - ❌ Create new markdown files in root (use /docs)
 - ❌ Delete archive files (they're historical record)
 - ❌ Break the core vision (visual thinking, not productivity)
@@ -353,6 +397,8 @@ Before considering any work "complete":
 
 **DO:**
 - ✅ Keep docs in sync with code
+- ✅ **Update ROADMAP.md status as you work, not just when done**
+- ✅ **Update phase completion dates when phases finish**
 - ✅ Update version system religiously
 - ✅ Follow the organizational structure
 - ✅ Test before documenting as complete
@@ -370,9 +416,10 @@ Before considering any work "complete":
 - `backend/server.py` - FastAPI backend
 - `backend/server.js` - Express backend
 
-### Documentation
+### Documentation (CRITICAL)
 - `/VERSION.md` - Version history (UPDATE ALWAYS)
-- `/ROADMAP.md` - Current priorities and tasks
+- **`/ROADMAP.md`** - **Current priorities and task status (UPDATE AS YOU WORK)**
+- `/CHANGELOG.md` - User-facing changelog (UPDATE for releases)
 - `/README.md` - Project overview
 - `/QUICK_START.md` - Setup instructions
 - `/docs/development/` - Active work plans
@@ -386,22 +433,25 @@ Before considering any work "complete":
 
 ---
 
-## 🎯 Current Work Context (v0.6.0)
+## 🎯 Current Work Context (v0.7.0)
 
-**Active Feature:** Focus Mode & Smart Layout
+**Latest Release:** Focus Mode Complete (Oct 17, 2025)
 
-**Goal:** Enable visual clarity by clicking nodes to see connection webs
+**Recently Completed:**
+- Advanced Focus Mode with localized physics ✅
+- Smart camera centering and zoom ✅
+- Multi-level spreading with BFS ✅
+- Visual hierarchy enhancements ✅
 
-**Status:** 🚧 Just started
-- State management ✅ Next
-- Click handler ⏭️ Pending
-- Radial layout ⏭️ Pending
-- Visual hierarchy ⏭️ Pending
+**Next Up (Phase 7):**
+- Smart Layout Algorithm (Priority B)
+- Literature Enhancement (Priority C)
+- Quick-Link Workflow (Priority D)
 
-**Docs to Update:**
-- `/docs/development/FOCUS_MODE_IMPLEMENTATION.md` (primary)
-- `/ROADMAP.md` (mark tasks complete)
-- `/VERSION.md` (add change entries)
+**Docs to Check First:**
+- `/ROADMAP.md` - See Phase 7 priorities
+- `/VERSION.md` - See v0.7.0 details
+- `/docs/archive/FOCUS_MODE_COMPLETE.md` - Latest completed feature
 
 ---
 

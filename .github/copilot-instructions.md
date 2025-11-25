@@ -132,6 +132,31 @@ The application features a modern React frontend with dual backend support (Fast
   - `D3Graph.js`: Dual simulations, camera system, visual hierarchy
   - `cluster-test.html`: Prototype/test page for rapid physics tuning
 
+### Smart Layout & Realignment System (v0.7.2)
+
+- **Always-On Simulation Architecture**: Single continuous D3.js simulation with dynamic force modification
+- **Connection-Aware Realignment**: Emphasizes relationships as much as hierarchy
+  - Stronger link force (0.8 strength) clusters connected nodes together
+  - Shorter link distance (120px) keeps related nodes visually close
+  - Reduced repulsion (-300 charge) allows tight grouping
+  - Smaller collision radius (20px) for compact clusters
+- **Hybrid Layout**: Combines hierarchical positioning (radial force) with connection clustering (link force)
+  - Topics positioned toward center (20% radius)
+  - Cases/Literature in middle (50% radius)
+  - Tasks at outer edge (80% radius)
+  - Connected nodes stay close within their hierarchical layer
+- **Temporary Force Application**: Radial force added during realignment, automatically removed when simulation settles
+- **Instant Response**: No stop/start overhead, realignment works even while nodes are moving
+- **Stability Guards**: 
+  - `window.isCustomRealigning` flag prevents update conflicts (1 second timeout)
+  - Blocks D3Graph simulation restart during realignment
+  - Prevents position update race conditions from drag events
+- **Drag Improvements**: 2px threshold for responsive clicking, no node locking after realignment
+- **Implementation**: 
+  - `App.js`: `forceLayout()` function with force modification approach
+  - One-time 'end' event listener with self-removal pattern
+  - Force parameter null checks for robustness
+
 ### Performance Optimizations
 
 - Lazy loading of heavy dependencies (D3.js, components)

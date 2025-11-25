@@ -1,7 +1,7 @@
 # PGY3-HUB Development Roadmap
-**Updated:** October 17, 2025 (Focus Mode Complete)  
-**Last Major Update:** October 17, 2025 (Advanced Focus Mode with Localized Physics)  
-**Status:** Phase 6 Complete ✅ - v0.7.0 Released
+**Updated:** November 24, 2025 (Connection-Aware Realignment Complete)  
+**Last Major Update:** November 24, 2025 (Smart Layout Algorithm - Connection-Aware Enhancement)  
+**Status:** Phase 7 Complete - Smart Layout & Connection-Aware Realignment ✅
 
 ---
 
@@ -66,7 +66,16 @@
 - Auto-loads saved settings on app start
 - No backend required - browser storage only
 
-**Phase 6: Advanced Focus Mode** ✅ COMPLETE (Oct 14-17, 2025)
+**Phase 7: Smart Layout & Connection-Aware Realignment** ✅ COMPLETE (Nov 23-24, 2025)
+- Cluster Detection with BFS algorithm
+- Hierarchical layout system (Topics center, Tasks outer)
+- Smart Realign button implementation
+- **Connection-Aware Force Layout** ✨ NEW (Nov 24)
+- **Always-On Simulation Architecture** ✨ NEW (Nov 24)
+- **Drag Behavior Improvements** ✨ NEW (Nov 24)
+- **Stability & Anti-Jitter Guards** ✨ NEW (Nov 24)
+
+**Total Time Investment:** ~30-35 hours  
 - **Localized Physics System**
   - Separate D3.js simulation for focused cluster only
   - Multi-level spreading using BFS (entire connected component)
@@ -197,12 +206,131 @@ After clarifying the core purpose, we've identified the **real** priorities:
 
 ---
 
-## 🚀 Phase 6: Visual Organization & Connection Clarity (CURRENT FOCUS)
+## 🚀 Phase 7: Smart Layout & Connection-Aware Realignment (COMPLETE - Nov 24, 2025)
+
+**Status:** ✅ COMPLETE - Both hierarchical layout AND connection awareness implemented
+
+### ✅ Priority B: Smart Layout Algorithm (COMPLETE - Nov 23-24, 2025) ⭐⭐
+**Effort:** 8-10 hours (Actual: ~10 hours)  
+**Business Value:** HIGH - Makes realignment actually useful  
+**Status:** ✅ COMPLETE with Connection-Aware Enhancement
+
+**What Was Implemented:**
+
+**Day 1 (Nov 23): Hierarchical Cluster Detection**
+- [x] BFS-based cluster detection algorithm
+- [x] Topics identified as cluster centers
+- [x] Hierarchical positioning (Topics center, Cases/Literature middle, Tasks outer)
+- [x] Circular arrangement with 400px cluster separation
+- [x] Fixed "Realign Nodes" button to use intelligent clustering
+- [x] Toast feedback showing cluster count
+
+**Day 2 (Nov 24): Connection-Aware Enhancement** ✨
+- [x] **Always-On Simulation Architecture**
+  - Eliminated stop/start conflicts
+  - Single continuous simulation with dynamic force modification
+  - Instant response (no waiting for simulation to stop)
+  - Temporary radial force, automatically removed when settled
+
+- [x] **Connection-Aware Force Parameters**
+  - Stronger link force (0.8 strength) clusters connected nodes
+  - Shorter link distance (120px) keeps related nodes close
+  - Reduced repulsion (-300 charge) allows tighter grouping
+  - Smaller collision radius (20px) for compact clusters
+
+- [x] **Hybrid Hierarchical + Connection Layout**
+  - Radial force positions by node type (Topics center → Tasks outer)
+  - Link force keeps connected nodes together within layers
+  - Best of both: organized by TYPE and RELATIONSHIPS
+
+- [x] **Drag Behavior Fixes**
+  - Reduced drag threshold (5px → 2px) for responsive clicking
+  - Fixed node locking issues after realignment
+  - Removed 1-second freeze period
+  - Smooth drag without snap-back
+
+- [x] **Stability & Anti-Jitter System**
+  - Extended guard period (1 second) prevents position conflicts
+  - Blocks mindMapData updates during realignment
+  - Prevents D3Graph restart immediately after realignment
+  - Eliminates visual jitter when dragging post-realignment
+
+**Bug Fixes (Nov 24):**
+- Fixed infinite loop (realignment triggering repeatedly)
+- Fixed position revert after drag
+- Fixed inability to drag nodes after realignment
+- Fixed simulation restart causing jitter
+- Fixed TypeError from undefined force properties
+- Fixed nodes snapping back on first drag after realignment
+
+**Technical Details:**
+- Modified existing simulation instead of creating new ones
+- One-time 'end' event listener with self-removal
+- Guard flag `window.isCustomRealigning` with extended timeout
+- Force parameter null checks for robustness
+- Connection-aware parameters: link 0.8/120px, charge -300, collision 20px
+
+**Files Modified:**
+- `App.js` - Complete rewrite of `forceLayout()` function
+  - Removed old cluster detection algorithm
+  - Implemented always-on simulation modification approach
+  - Added connection-aware force parameters
+  - Extended guard timeouts for stability
+- `D3Graph.js` - Fixed drag threshold, removed post-realignment locks
+
+**User Experience:**
+1. Click "Realign Nodes" anytime (instant response)
+2. Nodes spread hierarchically (Topics center, Tasks outer)
+3. Connected nodes cluster together for easy scanning
+4. Smooth animation with auto camera framing
+5. Immediately draggable when settled (no freeze)
+6. Stable behavior, no jitter or position resets
+
+**Why It Matters:**
+- Realignment emphasizes RELATIONSHIPS not just hierarchy
+- Connected nodes cluster = easy to see what's linked
+- Stable, professional UX without confusion
+- Always-responsive = feels fluid and intentional
+- Supports "show me what's connected" visual thinking
+
+---
+
+## 🚀 Phase 8: Next Priorities (UPCOMING)
+
+**Status:** Planning phase - Smart Layout complete, selecting next features
+
+Based on the core vision and user needs, the following priorities are recommended:
+
+### Recommended Next Steps:
+
+1. **Priority C: Literature Enhancement** (MEDIUM PRIORITY) ⭐⭐
+   - In-app PDF viewer integration
+   - Citation export (APA, MLA, Chicago)
+   - DOI auto-fill functionality
+   - **Effort:** 3-4 hours | **Value:** Medium-High
+
+2. **Priority D: Quick-Link Workflow** (MEDIUM PRIORITY) ⭐⭐
+   - Right-click "Connect to..." menu
+   - Smart connection suggestions
+   - Improved drag-to-connect
+   - **Effort:** 2-3 hours | **Value:** Medium
+
+3. **Priority E: Pattern Discovery** (LOW PRIORITY) ⭐
+   - Topic dashboard with connected cases
+   - Tag co-occurrence analysis
+   - Visual analytics
+   - **Effort:** 2-3 hours | **Value:** Medium
+
+See detailed specifications for each priority below.
+
+---
+
+## ✅ Phase 6: Visual Organization & Connection Clarity (COMPLETE - Oct 17, 2025)
 
 **User Need:** "Being able to visually see the connected cases at once. Nodes should web out and branch in a way that is easy to see and not cluttered."
 
 ### ✅ Priority 0: Physics Controls (COMPLETE - Oct 14, 2025) ⭐⭐⭐
-**Effort:** 3-4 hours  
+**Effort:** 3-4 hours (Actual: ~4 hours)  
 **Business Value:** HIGH - Essential for customizing visual layout  
 **Status:** ✅ COMPLETE
 
@@ -235,108 +363,101 @@ After clarifying the core purpose, we've identified the **real** priorities:
 
 ---
 
-### Priority A: Focus Mode (HIGH PRIORITY) ⭐⭐⭐
-**Effort:** 2-3 hours  
+### ✅ Priority A: Advanced Focus Mode (COMPLETE - Oct 17, 2025) ⭐⭐⭐
+**Effort:** 6-8 hours (Actual: ~8 hours)  
 **Business Value:** HIGH - Core to visual thinking workflow  
-**Status:** 🔴 NOT STARTED  
-**Design:** Toggle-based activation (updated Oct 13, 2025)
+**Status:** ✅ COMPLETE
 
-**Interaction Pattern:** *(Updated Oct 13)*
-- User clicks "Focus Mode" toggle button in toolbar
-- When enabled, clicking any node enters focus view
-- When disabled (default), normal click/drag behavior
-- Clear visual indicator when Focus Mode is active
+**What Was Implemented:**
 
-**What It Does:**
-- Toggle Focus Mode ON → click any node → beautiful radial web view
-- Selected node stays centered with blue glow
-- Connected nodes arrange in circle/web pattern around it
-- Unconnected nodes fade to 10% opacity
-- Smooth animated transitions (800ms)
-- Press ESC, click background, or toggle off to exit
+**Localized Physics System:**
+- [x] Separate D3.js simulation for focused cluster only
+- [x] Multi-level spreading using BFS algorithm (entire connected component)
+- [x] Frozen unconnected nodes using D3's fx/fy (no drift)
+- [x] Dramatic force parameters for visual clarity
+- [x] Smooth UI-like animation with tuned damping
 
-**Features to Implement:**
-1. **Focus Mode Toggle UI**
-   - [ ] Add "Focus Mode" button to toolbar (next to search/filters)
-   - [ ] Button shows clear ON/OFF state with icon (🎯)
-   - [ ] Active state: blue glow, pulsing animation
-   - [ ] Tooltip: "Enable Focus Mode, then click any node"
+**Smart Camera System:**
+- [x] Auto-centers and zooms to fit focused cluster
+- [x] Saves camera position before entering Focus Mode
+- [x] Restores previous view on exit (not fixed default)
+- [x] Smooth 900ms transitions with bounding box calculation
+- [x] D3 zoom behavior integration with transform persistence
 
-2. **Focus Mode Activation** *(Only when toggle is ON)*
-   - [ ] Modify D3Graph click handler to check focusModeEnabled state
-   - [ ] If toggle OFF: normal click behavior (select/drag)
-   - [ ] If toggle ON + node clicked: enter focus mode
-   - [ ] Calculate 1st-degree connected nodes
-   - [ ] Detect connection types and relationships
-   - [ ] Enter focus mode animation
+**Visual Hierarchy:**
+- [x] Focused node: 1.2x scale, bright blue glow (20px drop-shadow)
+- [x] Connected nodes: Full opacity, subtle white glow (10px)
+- [x] Unconnected nodes: 20% opacity, dimmed
+- [x] Connected edges: Thicker (3px), brightened colors
+- [x] Unconnected edges: Thin (1.5px), 10% opacity
 
-2. **Radial Layout Algorithm**
-   - [ ] Position selected node at center
-   - [ ] Arrange connected nodes in circle/web pattern
-   - [ ] Calculate optimal spacing based on node count
-   - [ ] Smooth animated repositioning
+**Implementation Details:**
+- [x] Focus Mode toggle UI in toolbar
+- [x] BFS algorithm for connected component detection
+- [x] Dual simulation architecture (main + focus)
+- [x] Test page prototyping (`cluster-test.html`)
+- [x] Iterative physics parameter tuning
+- [x] Performance optimizations for large graphs (100+ nodes)
+- [x] Clean separation of visual and physics systems
 
-3. **Visual Hierarchy**
-   - [ ] Selected node: 1.2x scale, bright glow
-   - [ ] Connected nodes: Normal size, highlighted
-   - [ ] Connection edges: Thicker, brighter
-   - [ ] Unconnected nodes: 0.1 opacity, no interaction
-
-4. **Exit Mechanism**
-   - [ ] ESC key to exit
-   - [ ] Click background to exit
-   - [ ] Animate back to previous layout
-   - [ ] Restore all node opacities
+**Files Modified:**
+- `App.js` - BFS algorithm, Focus Mode state management
+- `D3Graph.js` - Dual simulations, camera system, visual hierarchy
+- `cluster-test.html` - Prototype/test page for rapid physics tuning
+- Documentation: `docs/archive/FOCUS_MODE_COMPLETE.md`
 
 **Why This Matters:**
-- **Directly addresses user need** for visual clarity
-- Makes the "knowledge triangle" (Case-Topic-Literature) visible
-- Enables pattern discovery across connected nodes
-- Supports clinical reflection workflow
+- ✅ **Directly addresses user need** for visual clarity
+- ✅ Makes the "knowledge triangle" (Case-Topic-Literature) visible
+- ✅ Enables pattern discovery across connected nodes
+- ✅ Supports clinical reflection workflow
+- ✅ Preserves "calm, focused" philosophy with smooth animations
 
 ---
 
-### Priority B: Smart Layout Algorithm (HIGH PRIORITY) ⭐⭐
-**Effort:** 1-2 hours  
+### ✅ Priority B: Smart Layout Algorithm (COMPLETE - Nov 23, 2025) ⭐⭐
+**Effort:** 1-2 hours (Actual: ~1 hour)
 **Business Value:** HIGH - Fixes broken realign button  
-**Status:** 🔴 NOT STARTED
+**Status:** ✅ COMPLETE
 
-**What It Does:**
-- Fix the current "Realign Nodes" button to actually work well
-- Detect node clusters (groups of connected nodes)
-- Arrange clusters intelligently with clear separation
-- Topics act as cluster centers with cases/literature orbiting
+**What Was Implemented:**
 
-**Features to Implement:**
-1. **Cluster Detection**
-   - [ ] Identify connected components in graph
-   - [ ] Detect Topic nodes as cluster centers
-   - [ ] Group Cases/Literature by their primary Topic connection
-   - [ ] Handle orphaned nodes (no connections)
+1. **Cluster Detection** ✅
+   - [x] Identify connected components in graph using BFS algorithm
+   - [x] Detect Topic nodes as cluster centers
+   - [x] Group Cases/Literature by their primary Topic connection
+   - [x] Handle orphaned nodes (no connections)
 
-2. **Hierarchical Layout**
-   - [ ] Topics positioned as cluster centers
-   - [ ] Cases arrange around their primary topic
-   - [ ] Literature nodes connect to relevant cases/topics
-   - [ ] Maintain clear visual separation between clusters
+2. **Hierarchical Layout** ✅
+   - [x] Topics positioned as cluster centers in circular arrangement
+   - [x] Cases/Literature arranged in orbit around their topic centers
+   - [x] Clear visual separation between clusters (400px between centers)
+   - [x] Orphaned nodes handled appropriately
 
-3. **Enhanced Force Simulation**
-   - [ ] Clustering force (pull connected nodes together)
-   - [ ] Separation force (push clusters apart)
-   - [ ] Collision detection (prevent overlap)
-   - [ ] Optimize force parameters for clarity
+3. **Enhanced Force Simulation** ✅
+   - [x] Existing link forces pull connected nodes together (clustering)
+   - [x] Spatial separation between clusters via initial positioning
+   - [x] Collision detection prevents overlap
+   - [x] Smooth animations during realignment
 
-4. **Realign Button Integration**
-   - [ ] Fix current implementation
-   - [ ] Apply smart layout algorithm
-   - [ ] Smooth animation during realignment
-   - [ ] Toast feedback for user
+4. **Realign Button Integration** ✅
+   - [x] Fixed current "Realign Nodes" button implementation
+   - [x] Applied smart cluster detection algorithm
+   - [x] Smooth animation during realignment
+   - [x] Toast feedback showing number of clusters detected
+
+**Implementation Details:**
+- `detectClusters()` function in App.js (lines ~1230-1320)
+- `forceLayout()` updated with hierarchical positioning (lines ~1323-1390)
+- BFS algorithm for connected component detection
+- Cluster centers determined by most-connected Topic node
+- Circular layout with configurable cluster radius (400px) and orbit radius (150px)
 
 **Why This Matters:**
-- Current realign button doesn't work well
-- Default layout is cluttered and confusing
-- Intelligent clustering matches mental model
-- Reduces need for manual node positioning
+- ✅ Current realign button now works intelligently
+- ✅ Default layout is intelligible and organized
+- ✅ Intelligent clustering matches mental model (Topic → Cases/Literature)
+- ✅ Reduces need for manual node positioning
 
 ---
 

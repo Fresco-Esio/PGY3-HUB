@@ -1,7 +1,7 @@
 # PGY3-HUB Version History
 
-**Current Version:** v0.7.0  
-**Last Updated:** October 17, 2025
+**Current Version:** v0.7.2  
+**Last Updated:** November 24, 2025
 
 ---
 
@@ -17,7 +17,114 @@
 
 ## Release History
 
-### v0.7.0 - "Focus Mode Complete" (Oct 17, 2025) - CURRENT
+### v0.7.2 - "Connection-Aware Realignment" (Nov 24, 2025) - CURRENT
+**Status:** ✅ Complete  
+**Last Update:** November 24, 2025
+
+**Focus:** Enhanced realignment algorithm with connection awareness and stability improvements
+
+**Completed Features:**
+- [x] **Always-On Simulation Architecture**
+  - Eliminated stop/start simulation conflicts
+  - Single continuous simulation with dynamic force modification
+  - Instant realignment response (no waiting for simulation to stop)
+  - Temporary radial force applied during realignment, removed when settled
+  
+- [x] **Connection-Aware Force Layout**
+  - Stronger link force (0.8 strength) to cluster connected nodes
+  - Shorter link distance (120px) keeps related nodes close together
+  - Reduced repulsion (-300 charge) allows tighter grouping
+  - Connected nodes form readable clusters for easy relationship scanning
+  
+- [x] **Hierarchical + Connection Hybrid**
+  - Radial force positions node types hierarchically (Topics center, Tasks outer)
+  - Link force keeps connected nodes together within their hierarchical layer
+  - Best of both worlds: organized by type AND by relationships
+  
+- [x] **Drag Behavior Improvements**
+  - Reduced drag threshold (5px → 2px) for more responsive clicking
+  - Fixed node locking issues after realignment
+  - Removed 1-second freeze period that blocked dragging
+  - Smooth drag-to-position without snap-back behavior
+  
+- [x] **Stability & Anti-Jitter Guards**
+  - Extended guard period (1 second) after realignment to prevent position conflicts
+  - Blocks mindMapData updates during realignment window
+  - Prevents D3Graph from restarting simulation immediately after realignment
+  - Eliminates visual jitter when dragging nodes post-realignment
+
+**Technical Implementation:**
+- Modified existing simulation forces instead of creating new simulation
+- Radial force automatically removed when simulation settles (alpha → 0)
+- One-time 'end' event listener with self-removal pattern
+- Guard flag `window.isCustomRealigning` with extended timeout
+- Force parameter null checks for robustness
+- Connection-aware force parameters: link 0.8/120px, charge -300, collision 20px radius
+
+**Bug Fixes:**
+- Fixed infinite loop where realignment triggered repeatedly
+- Fixed nodes reverting to old positions after drag
+- Fixed inability to drag nodes immediately after realignment
+- Fixed simulation restart causing jitter during post-realignment drags
+- Fixed TypeError from undefined force properties
+
+**Performance:**
+- No simulation stop/start overhead
+- Instant response to realignment clicks
+- Smooth transitions without conflicts
+- Minimal re-renders after realignment
+
+**Why This Matters:**
+- Realignment now emphasizes RELATIONSHIPS as much as hierarchy
+- Connected nodes cluster together = easy to see what's linked
+- Stable behavior = professional UX, no confusion
+- Always-responsive = feels fluid and intentional
+- Supports visual thinking: "show me what's connected"
+
+---
+
+### v0.7.1 - "Smart Layout" (Nov 23, 2025)
+**Status:** ✅ Complete  
+**Last Update:** November 23, 2025
+
+**Focus:** Intelligent cluster detection and hierarchical layout
+
+**Completed Features:**
+- [x] **Cluster Detection Algorithm**
+  - BFS-based connected component detection
+  - Identifies Topic nodes as cluster centers
+  - Groups Cases/Literature by primary Topic connection
+  - Handles orphaned nodes intelligently
+  
+- [x] **Hierarchical Layout System**
+  - Topics positioned as cluster centers in circular arrangement
+  - Cases/Literature orbit around their topic centers
+  - Clear visual separation between clusters (400px)
+  - Configurable orbit radius (150px) for node spacing
+  
+- [x] **Smart Realign Button**
+  - Fixed "Realign Nodes" button to use intelligent clustering
+  - Toast feedback showing number of clusters detected
+  - Smooth animations during realignment
+  - Respects physics enabled/disabled state
+
+**Technical Implementation:**
+- `detectClusters()` function with BFS algorithm
+- Adjacency list for efficient graph traversal
+- Circular cluster positioning with angle-based layout
+- Integration with existing D3.js force simulation
+- Preserved user-adjusted physics parameters
+
+**Why This Matters:**
+- Default layout is now organized and intelligible
+- Realign button actually works intelligently
+- Matches mental model: Topics → Cases/Literature
+- Reduces manual node positioning effort
+- Supports "visual thinking" core purpose
+
+---
+
+### v0.7.0 - "Focus Mode Complete" (Oct 17, 2025)
 **Status:** ✅ Complete  
 **Last Update:** October 17, 2025
 
