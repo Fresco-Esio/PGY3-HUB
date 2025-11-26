@@ -1708,6 +1708,12 @@ useEffect(() => {
         
         // Background sync with backend without blocking UI
         setTimeout(async () => {
+          // Don't sync if realignment is in progress or just finished
+          if (window.isCustomRealigning) {
+            console.log('⚠️ Skipping background sync - realignment in progress');
+            return;
+          }
+          
           try {
             const response = await axios.get(`${API}/mindmap-data`);
             if (JSON.stringify(response.data) !== JSON.stringify(local)) {
@@ -1893,6 +1899,60 @@ useEffect(() => {
     
     addToast('Connection deleted', 'info');
   }, [autoSaveMindMapData, addToast]);
+
+  // Memoized data change handler for D3Graph
+  const handleD3DataChange = useCallback((change) => {
+    // Skip position updates during custom realignment to prevent reset loops
+    if (window.isCustomRealigning && (change.type === 'position' || change.type === 'positions')) {
+      console.log('🔷 Skipping position update during realignment:', change.type);
+      return;
+    }
+    
+    if (change.type === 'position') {
+      // Single node position update (during drag)
+      requestAnimationFrame(() => {
+        setMindMapData(currentData => {
+          const updatedData = { ...currentData };
+          const key = change.nodeType === 'literature' ? 'literature' : `${change.nodeType}s`;
+          const item = updatedData[key]?.find(i => String(i.id) === change.nodeId);
+          if (item) {
+            item.position = change.position;
+          }
+          // Don't save to localStorage during realignment - prevents race conditions
+          if (!window.isCustomRealigning) {
+            localStorageUtils.save(updatedData);
+          }
+          return updatedData;
+        });
+      });
+    } else if (change.type === 'positions') {
+      // Batch position update
+      setMindMapData(currentData => {
+        const updatedData = { ...currentData };
+        Object.entries(change.positions).forEach(([nodeId, position]) => {
+          const [type, ...idParts] = nodeId.split('-');
+          const id = idParts.join('-');
+          const key = type === 'literature' ? 'literature' : `${type}s`;
+          const item = updatedData[key]?.find(i => String(i.id) === id);
+          if (item) {
+            item.position = position;
+          }
+        });
+        autoSaveMindMapData(updatedData);
+        return updatedData;
+      });
+    } else if (change.type === 'connections') {
+      // Update connections in mindMapData
+      setMindMapData(currentData => {
+        const updatedData = { ...currentData, connections: change.connections };
+        autoSaveMindMapData(updatedData);
+        return updatedData;
+      });
+    } else if (change.type === 'deleteConnection') {
+      // Delete connection
+      handleDeleteConnection(change.connectionId);
+    }
+  }, [setMindMapData, autoSaveMindMapData, handleDeleteConnection]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -2567,6 +2627,7 @@ useEffect(() => {
       {/* --- Main Mind Map Workspace --- */}
       <div className="flex-1 relative">
         <D3Graph
+          key="d3-graph-main"
           mindMapData={mindMapData}
           activeFilter={activeFilter}
           searchQuery={searchQuery}
@@ -2575,55 +2636,7 @@ useEffect(() => {
           focusModeEnabled={focusModeEnabled}
           focusedNode={focusedNode}
           onBackgroundClick={exitFocusMode}
-          onDataChange={(change) => {
-            // Skip position updates during custom realignment to prevent reset loops
-            if (window.isCustomRealigning && (change.type === 'position' || change.type === 'positions')) {
-              console.log('🔷 Skipping position update during realignment:', change.type);
-              return;
-            }
-            
-            if (change.type === 'position') {
-              // Single node position update (during drag)
-              requestAnimationFrame(() => {
-                setMindMapData(currentData => {
-                  const updatedData = { ...currentData };
-                  const key = change.nodeType === 'literature' ? 'literature' : `${change.nodeType}s`;
-                  const item = updatedData[key]?.find(i => String(i.id) === change.nodeId);
-                  if (item) {
-                    item.position = change.position;
-                  }
-                  localStorageUtils.save(updatedData);
-                  return updatedData;
-                });
-              });
-            } else if (change.type === 'positions') {
-              // Batch position update
-              setMindMapData(currentData => {
-                const updatedData = { ...currentData };
-                Object.entries(change.positions).forEach(([nodeId, position]) => {
-                  const [type, ...idParts] = nodeId.split('-');
-                  const id = idParts.join('-');
-                  const key = type === 'literature' ? 'literature' : `${type}s`;
-                  const item = updatedData[key]?.find(i => String(i.id) === id);
-                  if (item) {
-                    item.position = position;
-                  }
-                });
-                autoSaveMindMapData(updatedData);
-                return updatedData;
-              });
-            } else if (change.type === 'connections') {
-              // Update connections in mindMapData
-              setMindMapData(currentData => {
-                const updatedData = { ...currentData, connections: change.connections };
-                autoSaveMindMapData(updatedData);
-                return updatedData;
-              });
-            } else if (change.type === 'deleteConnection') {
-              // Delete connection
-              handleDeleteConnection(change.connectionId);
-            }
-          }}
+          onDataChange={handleD3DataChange}
           physicsEnabled={physicsEnabled}
           connectionMode={connectionMode}
           onConnectionCreate={handleCreateConnection}

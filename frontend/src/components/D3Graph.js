@@ -33,6 +33,24 @@ const D3Graph = ({
   const zoomBehaviorRef = useRef(null);
   const savedTransformRef = useRef(null); // Store camera transform before Focus Mode
   
+  // Store callbacks in refs to avoid recreating visualization when they change
+  const onNodeClickRef = useRef(onNodeClick);
+  const onNodeDoubleClickRef = useRef(onNodeDoubleClick);
+  const onDataChangeRef = useRef(onDataChange);
+  
+  // Update refs when callbacks change
+  useEffect(() => {
+    onNodeClickRef.current = onNodeClick;
+  }, [onNodeClick]);
+  
+  useEffect(() => {
+    onNodeDoubleClickRef.current = onNodeDoubleClick;
+  }, [onNodeDoubleClick]);
+  
+  useEffect(() => {
+    onDataChangeRef.current = onDataChange;
+  }, [onDataChange]);
+  
   // Connection mode state
   const [connectionStart, setConnectionStart] = useState(null);
   const [tempConnection, setTempConnection] = useState(null);
@@ -51,7 +69,6 @@ const D3Graph = ({
       const saved = localStorage.getItem('pgy3hub_physics_settings');
       if (saved) {
         const parsed = JSON.parse(saved);
-        console.log('💾 Loaded saved physics settings on init:', parsed);
         return parsed;
       }
     } catch (err) {
@@ -280,6 +297,10 @@ const D3Graph = ({
       
       const params = physicsParamsRef.current;
       
+      // Check if nodes already have positions (from data or cache)
+      const hasPositions = nodes.every(n => n.x !== undefined && n.y !== undefined);
+      const initialAlpha = hasPositions ? 0 : 1; // Zero alpha if positions exist, full if new layout
+      
       simulationRef.current = d3.forceSimulation(nodes)
         .force('charge', null) // No global charge force
         .force('collision', d3.forceCollide()
@@ -289,22 +310,22 @@ const D3Graph = ({
           d3.forceLink(links).id(d => d.id).distance(params.linkDistance).strength(params.linkStrength) : null)
         .force('x', null)
         .force('y', null)
-        .alpha(1)
+        .alpha(initialAlpha)
         .alphaDecay(params.alphaDecay)
         .velocityDecay(params.velocityDecay)
         .alphaTarget(0);
 
-      console.log('🔷 Simulation created with params:', params);
+      console.log('🔷 Simulation created with params:', params, 'initialAlpha:', initialAlpha);
+      
+      // If positions exist and physics is disabled, stop simulation immediately
+      if (hasPositions && !physicsEnabled) {
+        simulationRef.current.stop();
+        console.log('🔷 Simulation stopped - using saved positions');
+      }
 
       isInitializedRef.current = true;
     } else {
-      console.log('🔷 Updating existing simulation (nodes/links only - preserving physics params)');
-      
-      // Skip update if custom realignment is in progress
-      if (window.isCustomRealigning) {
-        console.log('🔷 Skipping simulation update - custom realignment in progress');
-        return;
-      }
+      console.log('🔷 Updating existing simulation');
       
       simulationRef.current.nodes(nodes);
 
@@ -324,10 +345,16 @@ const D3Graph = ({
         simulationRef.current.force('link', null);
       }
 
-      // Gentle restart for updates
-      simulationRef.current.alpha(0.3).restart();
-      simulationRef.current.alphaTarget(0);
-      console.log('🔷 Simulation updated - physics params preserved');
+      // CRITICAL: Don't restart simulation during drag - prevents excessive movement
+      // The drag behavior already manages alpha via alphaTarget
+      if (!isDraggingRef.current) {
+        // Gentle restart for updates
+        simulationRef.current.alpha(0.3).restart();
+        simulationRef.current.alphaTarget(0);
+        console.log('🔷 Simulation updated');
+      } else {
+        console.log('🔷 Simulation data updated (no restart during drag)');
+      }
     }
 
     // Ensure layer groups exist
@@ -424,8 +451,8 @@ const D3Graph = ({
               .attr('stroke-opacity', 0)
               .style('filter', 'drop-shadow(0 0 20px rgba(239, 68, 68, 1))')
               .on('end', function() {
-                if (onDataChange) {
-                  onDataChange({
+                if (onDataChangeRef.current) {
+                  onDataChangeRef.current({
                     type: 'deleteConnection',
                     connectionId: d.id
                   });
@@ -625,7 +652,8 @@ const D3Graph = ({
       .on('start', function(event, d) {
         if (connectionMode) return; // Disable drag in connection mode
         
-        isDraggingRef.current = false;
+        // Set dragging flag immediately to prevent simulation restart
+        isDraggingRef.current = true;
         hasMoved = false;
         dragStartX = event.x;
         dragStartY = event.y;
@@ -656,16 +684,19 @@ const D3Graph = ({
           .duration(100)
           .attr('opacity', 0.4);
         
+        d.fx = d.x;
+        d.fy = d.y;
+
+        // Warm up simulation during drag
         if (simulationRef.current && physicsEnabled) {
-          // CRITICAL: Only warm simulation if no other drag is active
-          // This prevents cascading simulation warming that causes all nodes to move
           if (!event.active) {
             simulationRef.current.alphaTarget(0.3).restart();
           }
         }
-        
-        d.fx = d.x;
-        d.fy = d.y;
+
+        // Update position immediately
+        const node = svg.select(`#node-${d.id}`);
+        node.attr('transform', `translate(${d.x}, ${d.y})`);
       })
       .on('drag', function(event, d) {
         if (connectionMode) return;
@@ -720,10 +751,10 @@ const D3Graph = ({
             }
           }
           
-          if (onDataChange) {
+          if (onDataChangeRef.current) {
             const [type, ...idParts] = d.id.split('-');
             const entityId = idParts.join('-');
-            onDataChange({ 
+            onDataChangeRef.current({ 
               type: 'position', 
               nodeType: type,
               nodeId: entityId,
@@ -804,8 +835,8 @@ const D3Graph = ({
           .duration(100)
           .attr('r', d.radius);
         
-        if (onNodeClick) {
-          onNodeClick(d);
+        if (onNodeClickRef.current) {
+          onNodeClickRef.current(d);
         }
       }
     });
@@ -816,9 +847,9 @@ const D3Graph = ({
       if (!hasMoved && !isDraggingRef.current) {
         event.stopPropagation();
         event.preventDefault();
-        if (onNodeDoubleClick) {
+        if (onNodeDoubleClickRef.current) {
           console.log('🔷 Double-click:', d.id);
-          onNodeDoubleClick(d);
+          onNodeDoubleClickRef.current(d);
         }
       }
     });
@@ -879,23 +910,18 @@ const D3Graph = ({
         postDragWarmRef.current = null;
       }
     };
-  }, [structuralKey, physicsEnabled, onNodeClick, onNodeDoubleClick, onDataChange, convertToD3Format, connectionMode, handleConnectionClick, connectionStart, tempConnection]);
+  }, [structuralKey, physicsEnabled, connectionMode, connectionStart, tempConnection, convertToD3Format, handleConnectionClick]);
+  // Callbacks stored in refs to prevent recreation when they change
 
   // Physics toggle effect
   useEffect(() => {
     if (isInitializedRef.current && simulationRef.current && nodesRef.current) {
-      // Don't interfere if a custom realignment is in progress
-      if (window.isCustomRealigning) {
-        console.log('🔷 Physics toggle blocked - custom realignment in progress');
-        return;
-      }
-      
       if (physicsEnabled) {
         nodesRef.current.forEach(n => {
           n.fx = null;
           n.fy = null;
         });
-        simulationRef.current.alpha(1).alphaTarget(0).restart(); // Observable pattern
+        simulationRef.current.alpha(1).alphaTarget(0).restart();
         console.log('🔷 Physics ON - nodes released with natural forces');
       } else {
         nodesRef.current.forEach(n => {
@@ -970,13 +996,13 @@ const D3Graph = ({
       return conn;
     });
 
-    if (onDataChange) {
-      onDataChange({
+    if (onDataChangeRef.current) {
+      onDataChangeRef.current({
         type: 'connections',
         connections: updatedConnections
       });
     }
-  }, [mindMapData, onDataChange]);
+  }, [mindMapData]);
 
   // Apply localized physics to focused cluster
   const applyLocalizedPhysics = useCallback((targetNode, connectedIds) => {
