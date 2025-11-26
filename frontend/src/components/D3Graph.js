@@ -630,6 +630,17 @@ const D3Graph = ({
         dragStartX = event.x;
         dragStartY = event.y;
         
+        // Check if this drag started during a realignment operation
+        if (window.realignmentStartTime && !window.dragStartedDuringRealign) {
+          const timeSinceRealign = Date.now() - window.realignmentStartTime;
+          // If realignment started within last 3 seconds, mark drag as conflicting
+          if (timeSinceRealign < 3000) {
+            window.dragStartedDuringRealign = true;
+            console.log('⚠️ User started dragging during realignment (', 
+                       timeSinceRealign, 'ms after start) - will prevent snap-back');
+          }
+        }
+        
         svg.on('.zoom', null);
         
         // Visual feedback on grab

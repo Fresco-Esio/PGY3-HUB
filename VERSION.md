@@ -1,7 +1,7 @@
 # PGY3-HUB Version History
 
-**Current Version:** v0.7.2  
-**Last Updated:** November 24, 2025
+**Current Version:** v0.7.3  
+**Last Updated:** November 25, 2025
 
 ---
 
@@ -17,7 +17,44 @@
 
 ## Release History
 
-### v0.7.2 - "Connection-Aware Realignment" (Nov 24, 2025) - CURRENT
+### v0.7.3 - "Realignment Stability Fix" (Nov 25, 2025) - CURRENT
+**Status:** ✅ Complete  
+**Last Update:** November 25, 2025
+
+**Focus:** Fixed critical re-render and flicker issues during realignment
+
+**Bug Fixes:**
+- [x] **Removed setMindMapData from realignment completion**
+  - Eliminated React state updates during D3 simulation settlement
+  - Prevented D3Graph re-initialization and physics settings reload
+  - Positions now persist naturally through auto-save mechanism (800ms debounce)
+  - No more "Loaded saved physics settings" messages after realignment
+  
+- [x] **Fixed dependency array in forceLayout callback**
+  - Removed unused `setMindMapData` from dependency array
+  - Prevents function recreation on every mindMapData change
+  - Eliminates re-render cascades during node movement
+  
+- [x] **Cleaned up duplicate code blocks**
+  - Removed duplicate radial force removal logic
+  - Streamlined onSimulationEnd callback
+  - Single clear execution path without redundant operations
+  
+- [x] **Improved toast notification accuracy**
+  - Changed "hierarchical layout" to "organizing by connections and type"
+  - Accurately describes connection-aware clustering behavior
+  - Users understand what the realignment actually does
+
+**Technical Details:**
+- Realignment now operates purely in D3's simulation layer
+- D3Graph's prevPositionsRef tracks positions without triggering React updates
+- Auto-save handles persistence asynchronously
+- Zero React state changes during active realignment
+- Result: Smooth, flicker-free node repositioning
+
+---
+
+### v0.7.2 - "Connection-Aware Realignment" (Nov 24, 2025)
 **Status:** ✅ Complete  
 **Last Update:** November 24, 2025
 

@@ -1358,6 +1358,8 @@ useEffect(() => {
     
     // Set flag to prevent interference
     window.isCustomRealigning = true;
+    // Add timestamp to track when realignment started
+    window.realignmentStartTime = Date.now();
     
     // Categorize nodes by type for hierarchical positioning
     const nodesByType = {
@@ -1474,67 +1476,50 @@ useEffect(() => {
       // Remove this listener immediately
       sim.on('end', null);
       
-      console.log('✅ Force layout settled - saving positions');
+      // Check if user started dragging during realignment
+      // If so, skip the position update to avoid snap-back
+      const dragDuringRealign = window.dragStartedDuringRealign;
+      if (dragDuringRealign) {
+        console.log('⚠️ User dragged during realignment - skipping position update to prevent snap-back');
+        
+        // Still remove the radial force and clear flags
+        sim.force('radial', null);
+        window.isCustomRealigning = false;
+        window.dragStartedDuringRealign = false;
+        window.realignmentStartTime = null;
+        
+        console.log('✅ Realignment cancelled due to user interaction');
+        return; // Exit early without updating positions
+      }
+      
+      console.log('✅ Realignment settling - finalizing positions');
       
       // Remove the radial force now that layout is complete
       sim.force('radial', null);
-      console.log('🔷 Removed radial force - nodes free to move');
-        
-      // Update prevPositionsRef
       
-      // Remove the radial force now that layout is complete
-      sim.force('radial', null);
-      console.log('� Removed radial force - returning to normal physics');
-        
-      // Update prevPositionsRef
+      // Update D3's position tracking
       if (window.d3PrevPositions) {
         allNodes.forEach(node => {
           window.d3PrevPositions.current.set(node.id, { x: node.x, y: node.y });
         });
-        console.log('💾 Updated prevPositionsRef');
+        console.log('💾 D3 position tracking updated');
       }
       
-      // Update mindMapData with final positions
-      setMindMapData(prevData => {
-        const updatedData = { ...prevData };
-        
-        console.log('📝 Updating mindMapData with final positions');
-        
-        // Update each node type's position data
-        ['topics', 'cases', 'tasks', 'literature'].forEach(key => {
-          if (updatedData[key]) {
-            updatedData[key] = updatedData[key].map(item => {
-              const d3Node = allNodes.find(n => n.id === `${key === 'literature' ? 'literature' : key.slice(0, -1)}-${item.id}`);
-              if (d3Node) {
-                return {
-                  ...item,
-                  position: { x: d3Node.x, y: d3Node.y }
-                };
-              }
-              return item;
-            });
-          }
-        });
-        
-        return updatedData;
-      });
+      // Clear flags immediately - no React state update needed
+      window.isCustomRealigning = false;
+      window.dragStartedDuringRealign = false;
+      window.realignmentStartTime = null;
       
-      // Clear flags with a longer delay to prevent position update conflicts
-      // This ensures any in-flight drag operations complete before we allow position updates
-      // Also prevents D3Graph from restarting simulation and causing jitter
-      setTimeout(() => {
-        window.isCustomRealigning = false;
-        console.log('✅ Realignment complete - positions persisted, flags cleared');
-      }, 1000); // Extended to 1 second for stability
+      console.log('✅ Realignment complete - nodes stabilized');
     };
     
     // Attach the one-time callback to the existing simulation
     sim.on('end', onSimulationEnd);
     
-    addToast(`Realigning ${allNodes.length} nodes into hierarchical layout...`, 'success');
+    addToast(`Organizing ${allNodes.length} nodes by connections and type...`, 'success');
     
-    console.log(`✨ [${callTime}] Force-directed hierarchical layout started`);
-  }, [addToast, setMindMapData]);
+    console.log(`✨ [${callTime}] Connection-aware layout started`);
+  }, [addToast]);
 
   // applyForceLayout wrapper function (defined after forceLayout)
   const applyForceLayout = useCallback(() => {
